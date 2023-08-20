@@ -203,21 +203,6 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   }
 }
 
-class ExecPaneItem extends PaneItem {
-  String program;
-
-  ExecPaneItem({
-    required super.icon,
-    required this.program,
-  }) : super(
-          title: Text(program.split('\\').last.split('.').first),
-          body: Text(program),
-          onTap: () {
-            runProgram(program);
-          },
-        );
-}
-
 class FolderPaneItem extends PaneItem {
   String folder;
 
