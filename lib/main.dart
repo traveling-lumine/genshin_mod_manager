@@ -75,9 +75,13 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     subFolders = [];
     selected = null;
 
-    getAllChildrenFolder(targetDir!).forEach((element) {
-      subFolders.add(FolderPaneItem(folder: element));
-    });
+    try {
+      getAllChildrenFolder(targetDir!).forEach((element) {
+        subFolders.add(FolderPaneItem(folder: element));
+      });
+    } on PathNotFoundException {
+      print('Path not found: $targetDir');
+    }
     watcher = watchDir.watch().listen((event) {
       setState(() {
         final NavigationPaneItem? prevSelItem;
