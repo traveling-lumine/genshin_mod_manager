@@ -27,7 +27,7 @@ List<String> getActiveiniFiles(String dir) {
 void runProgram(String program) {
   Process.run(
     'start',
-    ['/b', '/d', File(program).parent.path, '', program],
+    ['/d', File(program).parent.path, '', program],
     runInShell: true,
   );
 }
