@@ -2,29 +2,27 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/io/fsops.dart';
+import 'package:genshin_mod_manager/new_impl/min_extent_delegate.dart';
+import 'package:genshin_mod_manager/provider/app_state.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
-import '../app_state.dart';
-import '../fsops.dart';
-import '../new_impl/min_extent_delegate.dart';
-
 class FolderPage extends StatefulWidget {
   final Directory dir;
 
-  const FolderPage({
-    super.key,
+  FolderPage({
     required this.dir,
-  });
+  }) : super(key: ValueKey(dir.path));
 
   @override
   State<FolderPage> createState() => _FolderPageState();
 }
 
 class _FolderPageState extends State<FolderPage> {
-  late List<Directory> allChildrenFolder;
   late StreamSubscription<FileSystemEvent> watcher;
+  late List<Directory> allChildrenFolder;
 
   @override
   void initState() {
