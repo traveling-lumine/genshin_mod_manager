@@ -57,7 +57,7 @@ class _HomeWindowState extends State<HomeWindow> with WindowListener {
   Widget build(BuildContext context) {
     return NavigationView(
       transitionBuilder: (child, animation) {
-        return FadeTransition(opacity: animation, child: child);
+        return SuppressPageTransition(child: child);
       },
       appBar: buildNavigationAppBar(),
       pane: buildNavigationPane(context),
@@ -116,7 +116,7 @@ class _HomeWindowState extends State<HomeWindow> with WindowListener {
           body: Center(child: Image.asset('images/app_icon.ico')),
           onTap: () {
             final tDir = context.read<AppState>().targetDir;
-            final path = p.join(tDir.path, '3DMigoto Loader.exe');
+            final path = p.join(tDir, '3DMigoto Loader.exe');
             final file = File(path);
             runProgram(file);
             HomeWindow.logger.i('Ran 3d migoto $file');
@@ -128,7 +128,7 @@ class _HomeWindowState extends State<HomeWindow> with WindowListener {
           body: Center(child: Image.asset('images/app_icon.ico')),
           onTap: () {
             final launcher = context.read<AppState>().launcherFile;
-            runProgram(launcher);
+            runProgram(File(launcher));
             HomeWindow.logger.i('Ran launcher $launcher');
           },
         ),
@@ -150,6 +150,12 @@ class _HomeWindowState extends State<HomeWindow> with WindowListener {
   }
 
   void updateFolder(Directory dir) {
+    // get currently selected folder's path
+    final sel_ = selected;
+    Key? selectedFolder;
+    if (sel_ != null && sel_ < subFolders.length) {
+      selectedFolder = subFolders[sel_].key;
+    }
     subFolders = [];
     final List<Directory> allFolder;
     try {
@@ -161,6 +167,10 @@ class _HomeWindowState extends State<HomeWindow> with WindowListener {
     for (var element in allFolder) {
       subFolders.add(FolderPaneItem(dir: element));
     }
+    if (selectedFolder == null) return;
+    final index = subFolders.indexWhere((e) => e.key == selectedFolder);
+    if (index == -1) return;
+    selected = index;
   }
 }
 

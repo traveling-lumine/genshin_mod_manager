@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
       home: FutureBuilder(
         future: getAppState().timeout(
           const Duration(seconds: 1),
-          onTimeout: () => AppState(Directory('.'), File('.')),
+          onTimeout: () => AppState('.', '.'),
         ),
         builder: (context, snapshot) {
           logger.i('App FutureBuilder snapshot status: $snapshot');
@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
       value: data,
       builder: (context, child) {
         final dir = context.select<AppState, Directory>(
-            (value) => Directory(p.join(value.targetDir.path, "Mods")));
+            (value) => Directory(p.join(value.targetDir, "Mods")));
         return HomeWindow(dir);
       },
     );
@@ -79,8 +79,8 @@ class MyApp extends StatelessWidget {
   Future<AppState> getAppState() async {
     final instance = await SharedPreferences.getInstance();
     final String targetDir = instance.getString('targetDir') ?? '.';
-    final String launcherDir = instance.getString('launcherDir') ?? '.';
-    final appState = AppState(Directory(targetDir), File(launcherDir));
+    final String launcherFile = instance.getString('launcherDir') ?? '.';
+    final appState = AppState(targetDir, launcherFile);
     return appState;
   }
 }

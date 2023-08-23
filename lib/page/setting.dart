@@ -22,28 +22,28 @@ class SettingPage extends StatelessWidget {
           title: 'Select 3D Migoto folder',
           icon: FluentIcons.folder_open,
           path:
-              context.select<AppState, String>((value) => value.targetDir.path),
+              context.select<AppState, String>((value) => value.targetDir),
           onPressed: () {
             final dir = DirectoryPicker().getDirectory();
             if (dir == null) return;
             SharedPreferences.getInstance().then((instance) {
               instance.setString('targetDir', dir.path);
             });
-            context.read<AppState>().targetDir = dir;
+            context.read<AppState>().targetDir = dir.path;
           },
         ),
         SettingItem(
           title: 'Select launcher',
           icon: FluentIcons.document_management,
           path: context
-              .select<AppState, String>((value) => value.launcherFile.path),
+              .select<AppState, String>((value) => value.launcherFile),
           onPressed: () {
             final file = OpenNoDereferenceFilePicker().getFile();
             if (file == null) return;
             SharedPreferences.getInstance().then((instance) {
               instance.setString('launcherDir', file.path);
             });
-            context.read<AppState>().launcherFile = file;
+            context.read<AppState>().launcherFile = file.path;
           },
         ),
       ],
@@ -87,9 +87,11 @@ class SettingItem extends StatelessWidget {
               ],
             ),
           ),
-          Button(
-            onPressed: onPressed,
-            child: Icon(icon),
+          RepaintBoundary(
+            child: Button(
+              onPressed: onPressed,
+              child: Icon(icon),
+            ),
           )
         ],
       ),

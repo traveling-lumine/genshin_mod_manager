@@ -3,19 +3,19 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 
 class AppState with ChangeNotifier {
-  Directory _targetDir;
-  File _launcherFile;
+  String _targetDir;
+  String _launcherFile;
 
-  Directory get targetDir => _targetDir;
+  String get targetDir => _targetDir;
 
-  set targetDir(Directory value) {
+  set targetDir(String value) {
     _targetDir = value;
     notifyListeners();
   }
 
-  File get launcherFile => _launcherFile;
+  String get launcherFile => _launcherFile;
 
-  set launcherFile(File value) {
+  set launcherFile(String value) {
     _launcherFile = value;
     notifyListeners();
   }
