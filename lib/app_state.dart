@@ -19,4 +19,9 @@ class AppState with ChangeNotifier {
   }
 
   AppState(this._targetDir, this._launcherDir);
+
+  @override
+  String toString() {
+    return 'AppState{_targetDir: $_targetDir, _launcherDir: $_launcherDir}';
+  }
 }

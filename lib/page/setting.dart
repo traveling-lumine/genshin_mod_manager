@@ -3,7 +3,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../state.dart';
+import '../new_impl/no_deref_file_opener.dart';
+import '../app_state.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({
@@ -17,49 +18,79 @@ class SettingPage extends StatelessWidget {
         title: Text('Settings'),
       ),
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              const Expanded(
-                child: Text('Select 3D Migoto folder'),
-              ),
-              Button(
-                child: const Icon(FluentIcons.folder_open),
-                onPressed: () {
-                  final dir = DirectoryPicker().getDirectory();
-                  if (dir == null) return;
-                  SharedPreferences.getInstance().then((instance) {
-                    instance.setString('targetDir', dir.path);
-                  });
-                  context.read<AppState>().targetDir = dir.path;
-                },
-              )
-            ],
-          ),
+        SettingItem(
+          title: 'Select 3D Migoto folder',
+          icon: FluentIcons.folder_open,
+          path: context.select<AppState, String>((value) => value.targetDir),
+          onPressed: () {
+            final dir = DirectoryPicker().getDirectory();
+            if (dir == null) return;
+            SharedPreferences.getInstance().then((instance) {
+              instance.setString('targetDir', dir.path);
+            });
+            context.read<AppState>().targetDir = dir.path;
+          },
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              const Expanded(
-                child: Text('Select launcher'),
-              ),
-              Button(
-                child: const Icon(FluentIcons.folder_open),
-                onPressed: () {
-                  final dir = OpenFilePicker().getFile();
-                  if (dir == null) return;
-                  SharedPreferences.getInstance().then((instance) {
-                    instance.setString('launcherDir', dir.path);
-                  });
-                  context.read<AppState>().launcherDir = dir.path;
-                },
-              )
-            ],
-          ),
+        SettingItem(
+          title: 'Select launcher',
+          icon: FluentIcons.document_management,
+          path: context.select<AppState, String>((value) => value.launcherDir),
+          onPressed: () {
+            final dir = OpenNoDereferenceFilePicker().getFile();
+            if (dir == null) return;
+            SharedPreferences.getInstance().then((instance) {
+              instance.setString('launcherDir', dir.path);
+            });
+            context.read<AppState>().launcherDir = dir.path;
+          },
         ),
       ],
+    );
+  }
+}
+
+class SettingItem extends StatelessWidget {
+  final String title;
+  final String path;
+  final IconData icon;
+  final VoidCallback? onPressed;
+
+  const SettingItem({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.path,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: FluentTheme.of(context).typography.bodyLarge,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  path,
+                  style: FluentTheme.of(context).typography.caption,
+                ),
+              ],
+            ),
+          ),
+          Button(
+            onPressed: onPressed,
+            child: Icon(icon),
+          )
+        ],
+      ),
     );
   }
 }
