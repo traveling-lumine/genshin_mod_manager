@@ -1,0 +1,22 @@
+name: Build
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - run: flutter build windows
+      - run: move build\windows\runner\Release GenshinModManager
+      - run: tar -acf GenshinModManager.zip GenshinModManager
+      - run: echo ${{ hashFiles('/GenshinModManager.zip') }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Release binary
+          path: GenshinModManager.zip
