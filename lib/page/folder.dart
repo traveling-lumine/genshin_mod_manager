@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:logging/logging.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 import '../fsops.dart';
-import '../state.dart';
+import '../new_impl/min_extent_delegate.dart';
+import '../app_state.dart';
 
 class FolderPage extends StatefulWidget {
   final String folder;
@@ -73,12 +74,14 @@ class _FolderPageState extends State<FolderPage> {
           ],
         ),
       ),
-      content: GridView.extent(
+      content: GridView(
         padding: const EdgeInsets.all(8),
-        maxCrossAxisExtent: 450,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-        childAspectRatio: 14 / 10,
+        gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
+          minCrossAxisExtent: 350,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          mainAxisExtent: 420,
+        ),
         children: allChildrenFolder.map((e) => FolderCard(e)).toList(),
       ),
     );
@@ -87,7 +90,7 @@ class _FolderPageState extends State<FolderPage> {
 
 class FolderCard extends StatelessWidget {
   final String e;
-  final logger = Logger('FolderCard');
+  final logger = Logger();
 
   FolderCard(
     this.e, {
@@ -118,7 +121,7 @@ class FolderCard extends StatelessWidget {
             }
           });
         } catch (e) {
-          logger.info(e);
+          logger.i(e);
         }
 
         final shaderFixDir =
@@ -135,7 +138,7 @@ class FolderCard extends StatelessWidget {
               copyShaders(shaderFixDir, shaderFilenames);
             }
           } on FileSystemException catch (e) {
-            logger.warning(e);
+            logger.w(e);
             showUnableCopy(context, e.path!);
             return;
           }
@@ -150,7 +153,7 @@ class FolderCard extends StatelessWidget {
               deleteShaders(shaderFixDir, shaderFilenames);
             }
           } catch (e) {
-            logger.warning(e);
+            logger.w(e);
             showUnableDelete(context);
             return;
           }
@@ -180,9 +183,11 @@ class FolderCard extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 4),
             Expanded(
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   buildDesc(folderName, context),
                   const Padding(
@@ -263,44 +268,39 @@ class FolderCard extends StatelessWidget {
   }
 
   Widget buildDesc(String folderName, BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          const SizedBox(height: 8),
-          Expanded(
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: () {
-                late final FileSystemEntity preview;
-                try {
-                  var listSync = Directory(e).listSync();
-                  preview = listSync.firstWhere((element) {
-                    final lowerCase =
-                        element.path.split('\\').last.toLowerCase();
-                    return lowerCase == 'preview.png' ||
-                        lowerCase == 'preview.jpg' ||
-                        lowerCase == 'preview.jpeg';
-                  });
-                } on StateError {
-                  return const Center(child: Icon(FluentIcons.unknown));
-                } on PathNotFoundException {
-                  return const Center(child: Icon(FluentIcons.error));
-                }
-                try {
-                  return Image.file(
-                    preview as File,
-                    filterQuality: FilterQuality.medium,
-                  );
-                } on TypeError {
-                  return const Center(
-                      child: Text("Invalid preview file entry"));
-                }
-              }(),
-            ),
+    return () {
+      late final FileSystemEntity preview;
+      try {
+        var listSync = Directory(e).listSync();
+        preview = listSync.firstWhere((element) {
+          final lowerCase = element.path.split('\\').last.toLowerCase();
+          return lowerCase == 'preview.png' ||
+              lowerCase == 'preview.jpg' ||
+              lowerCase == 'preview.jpeg';
+        });
+      } on StateError {
+        return const Expanded(child: Center(child: Icon(FluentIcons.unknown)));
+      } on PathNotFoundException {
+        return const Expanded(child: Center(child: Icon(FluentIcons.error)));
+      }
+      final File previewFile;
+      try {
+        previewFile = preview as File;
+      } on TypeError {
+        return const Expanded(
+          child: Center(
+            child: Text("Invalid preview file entry"),
           ),
-        ],
-      ),
-    );
+        );
+      }
+      return ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 250),
+        child: Image.file(
+          previewFile,
+          filterQuality: FilterQuality.medium,
+        ),
+      );
+    }();
   }
 
   Widget buildIni() {
@@ -357,17 +357,18 @@ class _IniListState extends State<IniList> {
   @override
   Widget build(BuildContext context) {
     final alliniFile = allFilesToWidget(getActiveiniFiles(widget.folder));
-    return Expanded(
+    return Flexible(
       child: alliniFile.isNotEmpty
           ? Card(
               backgroundColor: Colors.white.withOpacity(0.4),
-              margin: const EdgeInsetsDirectional.fromSTEB(0, 6, 0, 0),
               padding: const EdgeInsets.all(4),
               child: ListView(
                 children: alliniFile,
               ),
             )
-          : const SizedBox.shrink(),
+          : const Center(
+              child: Text('No ini files found'),
+            ),
     );
   }
 }
@@ -375,13 +376,18 @@ class _IniListState extends State<IniList> {
 List<Widget> allFilesToWidget(List<String> allFiles) {
   List<Widget> alliniFile = [];
   for (var i = 0; i < allFiles.length; i++) {
+    final folderName = allFiles[i].split('\\').last;
     alliniFile.add(Row(
       children: [
         Expanded(
-          child: Text(
-            allFiles[i].split('\\').last,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
+          child: Tooltip(
+            message: folderName,
+            child: Text(
+              folderName,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
@@ -434,12 +440,9 @@ List<Widget> allFilesToWidget(List<String> allFiles) {
             )
           ],
         ));
-      }
-      else if (e.startsWith('\$') && metSection) {
+      } else if (e.startsWith('\$') && metSection) {
         final cycles = ','.allMatches(e.split(';').first).length + 1;
-        alliniFile.add(
-          Text('Cycles: $cycles')
-        );
+        alliniFile.add(Text('Cycles: $cycles'));
       }
     });
   }
