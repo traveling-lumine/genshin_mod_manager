@@ -1,27 +1,29 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
 
 class AppState with ChangeNotifier {
-  String _targetDir;
-  String _launcherDir;
+  Directory _targetDir;
+  File _launcherFile;
 
-  String get launcherDir => _launcherDir;
+  Directory get targetDir => _targetDir;
 
-  set launcherDir(String value) {
-    _launcherDir = value;
-    notifyListeners();
-  }
-
-  String get targetDir => _targetDir;
-
-  set targetDir(String value) {
+  set targetDir(Directory value) {
     _targetDir = value;
     notifyListeners();
   }
 
-  AppState(this._targetDir, this._launcherDir);
+  File get launcherFile => _launcherFile;
+
+  set launcherFile(File value) {
+    _launcherFile = value;
+    notifyListeners();
+  }
+
+  AppState(this._targetDir, this._launcherFile);
 
   @override
   String toString() {
-    return 'AppState{_targetDir: $_targetDir, _launcherDir: $_launcherDir}';
+    return 'AppState{_targetDir: $_targetDir, _launcherDir: $_launcherFile}';
   }
 }

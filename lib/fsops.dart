@@ -1,41 +1,43 @@
 import 'dart:io';
 
-List<String> getAllChildrenFolder(String dir) {
-  List<String> a = [];
-  Directory(dir).listSync().forEach((element) {
+import 'package:path/path.dart' as p;
+
+List<Directory> getAllChildrenFolder(Directory dir) {
+  List<Directory> a = [];
+  dir.listSync().forEach((element) {
     if (element is Directory) {
-      a.add(element.path);
+      a.add(element);
     }
   });
   return a;
 }
 
-List<String> getActiveiniFiles(String dir) {
-  List<String> a = [];
-  Directory(dir).listSync().forEach((element) {
+List<File> getActiveiniFiles(Directory dir) {
+  List<File> a = [];
+  dir.listSync().forEach((element) {
     var path = element.path;
     final filename = path.split('\\').last;
     if (element is File &&
         path.endsWith('.ini') &&
         !filename.contains('DISABLED')) {
-      a.add(path);
+      a.add(element);
     }
   });
   return a;
 }
 
-void runProgram(String program) {
+void runProgram(File program) {
   Process.run(
     'start',
-    ['/d', File(program).parent.path, '', program],
+    ['/b', '/d', program.parent.path, '', p.basename(program.path)],
     runInShell: true,
   );
 }
 
-void openFolder(String dir) {
+void openFolder(Directory dir) {
   Process.start(
     'explorer',
-    [dir],
+    [dir.path],
     runInShell: true,
   );
 }

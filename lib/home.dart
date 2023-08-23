@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:logger/logger.dart';
+import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -10,101 +12,55 @@ import 'fsops.dart';
 import 'page/folder.dart';
 import 'page/setting.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class HomeWindow extends StatefulWidget {
+  static Logger logger = Logger();
+  final Directory dir;
+
+  const HomeWindow(this.dir, {super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomeWindow> createState() => _HomeWindowState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with WindowListener {
-  late Directory watchDir;
+class _HomeWindowState extends State<HomeWindow> with WindowListener {
+  late StreamSubscription<List<Directory>> subscription;
   late List<NavigationPaneItem> subFolders;
-  StreamSubscription<FileSystemEvent>? watcher;
-  String? targetDir;
+
   int? selected;
 
   @override
   void initState() {
-    windowManager.addListener(this);
     super.initState();
+    windowManager.addListener(this);
+    onDirChange(widget.dir);
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeWindow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldDir = oldWidget.dir;
+    final newDir = widget.dir;
+    if (oldDir == newDir) return;
+    HomeWindow.logger.i('Directory changed from $oldDir to $newDir');
+    subscription.cancel();
+    onDirChange(newDir);
   }
 
   @override
   void dispose() {
-    watcher?.cancel();
+    subscription.cancel();
     windowManager.removeListener(this);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    var targetDir2 =
-        '${context.select<AppState, String>((value) => value.targetDir)}\\Mods';
-    if (targetDir == null) {
-      targetDir = targetDir2;
-      updateFolder(targetDir!);
-    } else if (targetDir != targetDir2) {
-      updateFolder(targetDir2);
-    }
     return NavigationView(
-      transitionBuilder: (child, animation) =>
-          FadeTransition(opacity: animation, child: child),
+      transitionBuilder: (child, animation) {
+        return FadeTransition(opacity: animation, child: child);
+      },
       appBar: buildNavigationAppBar(),
       pane: buildNavigationPane(context),
-    );
-  }
-
-  NavigationPane buildNavigationPane(BuildContext context) {
-    return NavigationPane(
-      selected: selected,
-      onChanged: (i) => setState(() => selected = i),
-      displayMode: PaneDisplayMode.auto,
-      size: const NavigationPaneSize(openWidth: 300),
-      autoSuggestBox: AutoSuggestBox(
-        items: subFolders
-            .map((e) => AutoSuggestBoxItem(
-                  value: e.key,
-                  label: (e as FolderPaneItem).folder.split('\\').last,
-                ))
-            .toList(),
-        trailingIcon: const Icon(FluentIcons.search),
-        onSelected: (item) {
-          setState(() {
-            selected =
-                subFolders.indexWhere((element) => element.key == item.value);
-          });
-        },
-      ),
-      autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-      items: subFolders,
-      footerItems: [
-        PaneItemSeparator(),
-        PaneItem(
-          icon: const Icon(FluentIcons.user_window),
-          title: const Text('3d migoto'),
-          body: Center(child: Image.asset('images/app_icon.ico')),
-          onTap: () {
-            final path =
-                '${context.read<AppState>().targetDir}\\3DMigoto Loader.exe';
-            runProgram(path);
-            print('run!');
-          },
-        ),
-        PaneItem(
-          icon: const Icon(FluentIcons.user_window),
-          title: const Text('Launcher'),
-          body: Center(child: Image.asset('images/app_icon.ico')),
-          onTap: () {
-            runProgram(context.read<AppState>().launcherDir);
-          },
-        ),
-        PaneItem(
-          icon: const Icon(FluentIcons.settings),
-          title: const Text('Settings'),
-          body: const SettingPage(),
-        ),
-      ],
     );
   }
 
@@ -121,56 +77,103 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     );
   }
 
-  void updateFolder(String tDir) {
-    targetDir = tDir;
-    watchDir = Directory(targetDir!);
-    watcher?.cancel();
-    subFolders = [];
-    selected = null;
-
-    try {
-      getAllChildrenFolder(targetDir!).forEach((element) {
-        subFolders.add(FolderPaneItem(folder: element));
-      });
-    } on PathNotFoundException {
-      print('Path not found: $targetDir');
-    }
-    watcher = watchDir.watch().listen((event) {
-      setState(() {
-        final NavigationPaneItem? prevSelItem;
-        if (selected != null) {
-          prevSelItem = subFolders[selected!];
-        } else {
-          prevSelItem = null;
+  NavigationPane buildNavigationPane(BuildContext context) {
+    final List<AutoSuggestBoxItem<Key>> autoSuggestBoxItems = subFolders
+        .map((e) => AutoSuggestBoxItem(
+              value: e.key,
+              label: p.basename((e as FolderPaneItem).dir.path),
+            ))
+        .toList();
+    return NavigationPane(
+      selected: selected,
+      onChanged: (i) {
+        final length = subFolders.length;
+        HomeWindow.logger.i('Selected $i. Length: $length');
+        if (i == length || i == length + 1) {
+          HomeWindow.logger.i('Selected program runners. Ignoring change.');
+          return;
         }
-        subFolders = [];
-        getAllChildrenFolder(targetDir!).forEach((element) {
-          subFolders.add(FolderPaneItem(folder: element));
-        });
-        if (prevSelItem != null) {
-          // find the index of prevSelItem using key
-          final index = subFolders.indexWhere((element) {
-            return element.key == prevSelItem!.key;
+        setState(() => selected = i);
+      },
+      displayMode: PaneDisplayMode.auto,
+      size: const NavigationPaneSize(openWidth: 300),
+      autoSuggestBox: AutoSuggestBox(
+        items: autoSuggestBoxItems,
+        trailingIcon: const Icon(FluentIcons.search),
+        onSelected: (item) {
+          setState(() {
+            selected = subFolders.indexWhere((e) => e.key == item.value);
           });
-          if (index != -1) {
-            selected = index;
-          }
-        }
-      });
-    });
+        },
+      ),
+      autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+      items: subFolders,
+      footerItems: [
+        PaneItemSeparator(),
+        PaneItem(
+          icon: const Icon(FluentIcons.user_window),
+          title: const Text('3d migoto'),
+          body: Center(child: Image.asset('images/app_icon.ico')),
+          onTap: () {
+            final tDir = context.read<AppState>().targetDir;
+            final path = p.join(tDir.path, '3DMigoto Loader.exe');
+            final file = File(path);
+            runProgram(file);
+            HomeWindow.logger.i('Ran 3d migoto $file');
+          },
+        ),
+        PaneItem(
+          icon: const Icon(FluentIcons.user_window),
+          title: const Text('Launcher'),
+          body: Center(child: Image.asset('images/app_icon.ico')),
+          onTap: () {
+            final launcher = context.read<AppState>().launcherFile;
+            runProgram(launcher);
+            HomeWindow.logger.i('Ran launcher $launcher');
+          },
+        ),
+        PaneItem(
+          icon: const Icon(FluentIcons.settings),
+          title: const Text('Settings'),
+          body: const SettingPage(),
+        ),
+      ],
+    );
+  }
+
+  void onDirChange(Directory newDir) {
+    updateFolder(newDir);
+    subscription = newDir
+        .watch()
+        .map((dir) => getAllChildrenFolder(newDir))
+        .listen((event) => setState(() => updateFolder(newDir)));
+  }
+
+  void updateFolder(Directory dir) {
+    subFolders = [];
+    final List<Directory> allFolder;
+    try {
+      allFolder = getAllChildrenFolder(dir);
+    } on PathNotFoundException {
+      HomeWindow.logger.e('Path not found: $dir');
+      return;
+    }
+    for (var element in allFolder) {
+      subFolders.add(FolderPaneItem(dir: element));
+    }
   }
 }
 
 class FolderPaneItem extends PaneItem {
-  String folder;
+  Directory dir;
 
   FolderPaneItem({
-    required this.folder,
+    required this.dir,
   }) : super(
-          title: Text(folder.split('\\').last),
+          title: Text(p.basename(dir.path)),
           icon: Image.asset('images/app_icon.ico'),
-          body: FolderPage(folder: folder),
-          key: ValueKey(folder),
+          body: FolderPage(dir: dir),
+          key: ValueKey(dir.path),
         );
 }
 

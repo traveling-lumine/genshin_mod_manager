@@ -3,8 +3,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../new_impl/no_deref_file_opener.dart';
 import '../app_state.dart';
+import '../new_impl/no_deref_file_opener.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({
@@ -21,27 +21,29 @@ class SettingPage extends StatelessWidget {
         SettingItem(
           title: 'Select 3D Migoto folder',
           icon: FluentIcons.folder_open,
-          path: context.select<AppState, String>((value) => value.targetDir),
+          path:
+              context.select<AppState, String>((value) => value.targetDir.path),
           onPressed: () {
             final dir = DirectoryPicker().getDirectory();
             if (dir == null) return;
             SharedPreferences.getInstance().then((instance) {
               instance.setString('targetDir', dir.path);
             });
-            context.read<AppState>().targetDir = dir.path;
+            context.read<AppState>().targetDir = dir;
           },
         ),
         SettingItem(
           title: 'Select launcher',
           icon: FluentIcons.document_management,
-          path: context.select<AppState, String>((value) => value.launcherDir),
+          path: context
+              .select<AppState, String>((value) => value.launcherFile.path),
           onPressed: () {
-            final dir = OpenNoDereferenceFilePicker().getFile();
-            if (dir == null) return;
+            final file = OpenNoDereferenceFilePicker().getFile();
+            if (file == null) return;
             SharedPreferences.getInstance().then((instance) {
-              instance.setString('launcherDir', dir.path);
+              instance.setString('launcherDir', file.path);
             });
-            context.read<AppState>().launcherDir = dir.path;
+            context.read<AppState>().launcherFile = file;
           },
         ),
       ],
