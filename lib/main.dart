@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/state.dart';
-import 'package:logging/logging.dart';
+import 'package:genshin_mod_manager/app_state.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
@@ -13,11 +12,28 @@ import 'page/folder.dart';
 import 'page/setting.dart';
 
 void main() async {
-  Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen((record) {
-    print('${record.level.name}: ${record.time}: ${record.message}');
-  });
+  fallBackApp();
+  await initialize();
+  AppState appState = await getAppState();
+  runApp(MyApp(appState));
+}
 
+void fallBackApp() {
+  runApp(
+    const Center(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text(
+          'Loading settings.'
+          ' If this screen persists,'
+          ' please report the problem to developer.',
+        ),
+      ),
+    ),
+  );
+}
+
+Future<void> initialize() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await windowManager.ensureInitialized();
@@ -25,26 +41,27 @@ void main() async {
     await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
     await windowManager.setMinimumSize(const Size(600, 600));
   });
+}
 
+Future<AppState> getAppState() async {
   final instance = await SharedPreferences.getInstance();
   final String targetDir = instance.getString('targetDir') ?? '.';
   final String launcherDir = instance.getString('launcherDir') ?? '.';
-
-  runApp(MyApp(targetDir, launcherDir));
+  final appState = AppState(targetDir, launcherDir);
+  return appState;
 }
 
 class MyApp extends StatelessWidget {
-  final String targetDir;
-  final String launcherDir;
+  final AppState appState;
 
-  const MyApp(this.targetDir, this.launcherDir, {super.key});
+  const MyApp(this.appState, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return FluentApp(
       title: 'Genshin Mod Manager',
-      home: ChangeNotifierProvider(
-        create: (BuildContext context) => AppState(targetDir, launcherDir),
+      home: ChangeNotifierProvider.value(
+        value: appState,
         builder: (context, child) {
           return const MyHomePage();
         },
@@ -122,83 +139,81 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppState>(
-      builder: (BuildContext context, AppState value, Widget? child) {
-        var targetDir2 = '${value.targetDir}\\Mods';
-        if (targetDir == null) {
-          targetDir = targetDir2;
-          updateFolder(targetDir!);
-        } else if (targetDir != targetDir2) {
-          updateFolder(targetDir2);
-        }
-        return NavigationView(
-          transitionBuilder: (child, animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
-          appBar: const NavigationAppBar(
-            title: DragToMoveArea(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Genshin Mod Manager'),
-              ),
-            ),
-            automaticallyImplyLeading: false,
-            actions: WindowButtons(),
-          ),
-          pane: NavigationPane(
-            selected: selected,
-            onChanged: (i) => setState(() => selected = i),
-            displayMode: PaneDisplayMode.auto,
-            size: const NavigationPaneSize(openWidth: 250),
-            autoSuggestBox: AutoSuggestBox(
-              items: subFolders
-                  .map((e) => AutoSuggestBoxItem(
-                        value: e.key,
-                        label: (e as FolderPaneItem).folder.split('\\').last,
-                      ))
-                  .toList(),
-              trailingIcon: const Icon(FluentIcons.search),
-              onSelected: (item) {
-                setState(() {
-                  selected = subFolders
-                      .indexWhere((element) => element.key == item.value);
-                });
-              },
-            ),
-            autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-            items: subFolders,
-            footerItems: [
-              PaneItemSeparator(),
-              PaneItem(
-                icon: const Icon(FluentIcons.user_window),
-                title: const Text('3d migoto'),
-                body: Center(child: Image.asset('images/app_icon.ico')),
-                onTap: () {
-                  final path =
-                      '${context.read<AppState>().targetDir}\\3DMigoto Loader.exe';
-                  runProgram(path);
-                },
-              ),
-              PaneItem(
-                icon: const Icon(FluentIcons.user_window),
-                title: const Text('Launcher'),
-                body: Center(child: Image.asset('images/app_icon.ico')),
-                onTap: () {
-                  runProgram(context.read<AppState>().launcherDir);
-                },
-              ),
-              PaneItem(
-                icon: const Icon(FluentIcons.settings),
-                title: const Text('Settings'),
-                body: const SettingPage(),
-              ),
-            ],
-          ),
+    var targetDir2 =
+        '${context.select<AppState, String>((value) => value.targetDir)}\\Mods';
+    if (targetDir == null) {
+      targetDir = targetDir2;
+      updateFolder(targetDir!);
+    } else if (targetDir != targetDir2) {
+      updateFolder(targetDir2);
+    }
+    return NavigationView(
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
         );
       },
+      appBar: const NavigationAppBar(
+        title: DragToMoveArea(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text('Genshin Mod Manager'),
+          ),
+        ),
+        automaticallyImplyLeading: false,
+        actions: WindowButtons(),
+      ),
+      pane: NavigationPane(
+        selected: selected,
+        onChanged: (i) => setState(() => selected = i),
+        displayMode: PaneDisplayMode.auto,
+        size: const NavigationPaneSize(openWidth: 300),
+        autoSuggestBox: AutoSuggestBox(
+          items: subFolders
+              .map((e) => AutoSuggestBoxItem(
+                    value: e.key,
+                    label: (e as FolderPaneItem).folder.split('\\').last,
+                  ))
+              .toList(),
+          trailingIcon: const Icon(FluentIcons.search),
+          onSelected: (item) {
+            setState(() {
+              selected =
+                  subFolders.indexWhere((element) => element.key == item.value);
+            });
+          },
+        ),
+        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+        items: subFolders,
+        footerItems: [
+          PaneItemSeparator(),
+          PaneItem(
+            icon: const Icon(FluentIcons.user_window),
+            title: const Text('3d migoto'),
+            body: Center(child: Image.asset('images/app_icon.ico')),
+            onTap: () {
+              final path =
+                  '${context.read<AppState>().targetDir}\\3DMigoto Loader.exe';
+              runProgram(path);
+              print('run!');
+            },
+          ),
+          PaneItem(
+            icon: const Icon(FluentIcons.user_window),
+            title: const Text('Launcher'),
+            body: Center(child: Image.asset('images/app_icon.ico')),
+            onTap: () {
+              runProgram(context.read<AppState>().launcherDir);
+            },
+          ),
+          PaneItem(
+            icon: const Icon(FluentIcons.settings),
+            title: const Text('Settings'),
+            body: const SettingPage(),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -210,7 +225,7 @@ class FolderPaneItem extends PaneItem {
     required this.folder,
   }) : super(
           title: Text(folder.split('\\').last),
-          icon: const Icon(FluentIcons.folder_open),
+          icon: Image.asset('images/app_icon.ico'),
           body: FolderPage(folder: folder),
           key: ValueKey(folder),
         );
