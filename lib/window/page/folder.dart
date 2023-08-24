@@ -21,37 +21,31 @@ class FolderPage extends StatefulWidget {
 }
 
 class _FolderPageState extends State<FolderPage> {
-  late StreamSubscription<FileSystemEvent> watcher;
+  static final Logger logger = Logger();
+  late StreamSubscription<FileSystemEvent> subscription;
   late List<Directory> allChildrenFolder;
 
   @override
   void initState() {
-    allChildrenFolder = getAllChildrenFolder(widget.dir)
-      ..sort((a, b) {
-        var aName = p.basename(a.path);
-        var bName = p.basename(b.path);
-        aName = aName.startsWith('DISABLED ') ? aName.substring(9) : aName;
-        bName = bName.startsWith('DISABLED ') ? bName.substring(9) : bName;
-        return aName.toLowerCase().compareTo(bName.toLowerCase());
-      });
-    watcher = widget.dir.watch().listen((event) {
-      setState(() {
-        allChildrenFolder = getAllChildrenFolder(widget.dir)
-          ..sort((a, b) {
-            var aName = p.basename(a.path);
-            var bName = p.basename(b.path);
-            aName = aName.startsWith('DISABLED ') ? aName.substring(9) : aName;
-            bName = bName.startsWith('DISABLED ') ? bName.substring(9) : bName;
-            return aName.toLowerCase().compareTo(bName.toLowerCase());
-          });
-      });
-    });
     super.initState();
+    final dir = widget.dir;
+    onDirChange(dir);
+  }
+
+  @override
+  void didUpdateWidget(covariant FolderPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldDir = oldWidget.dir;
+    final newDir = widget.dir;
+    if (oldDir == newDir) return;
+    logger.i('Directory changed from $oldDir to $newDir');
+    subscription.cancel();
+    onDirChange(newDir);
   }
 
   @override
   void dispose() {
-    watcher.cancel();
+    subscription.cancel();
     super.dispose();
   }
 
@@ -84,13 +78,37 @@ class _FolderPageState extends State<FolderPage> {
       ),
     );
   }
+
+  void onDirChange(Directory newDir) {
+    updateFolder(newDir);
+    subscription =
+        newDir.watch().listen((event) {
+          if (event is FileSystemModifyEvent && event.contentChanged) {
+            logger.i('Ignoring content change event: $event');
+            return;
+          }
+          setState(() => updateFolder(newDir));
+        });
+  }
+
+  void updateFolder(Directory dir) {
+    allChildrenFolder = getAllChildrenFolder(dir)..sort(folderSorter);
+  }
+
+  int folderSorter(a, b) {
+    var aName = p.basename(a.path);
+    var bName = p.basename(b.path);
+    aName = aName.startsWith('DISABLED ') ? aName.substring(9) : aName;
+    bName = bName.startsWith('DISABLED ') ? bName.substring(9) : bName;
+    return aName.toLowerCase().compareTo(bName.toLowerCase());
+  }
 }
 
 class FolderCard extends StatelessWidget {
+  static final Logger logger = Logger();
   final Directory e;
-  final logger = Logger();
 
-  FolderCard(
+  const FolderCard(
     this.e, {
     super.key,
   });
@@ -340,10 +358,10 @@ class _IniListState extends State<IniList> {
 
   @override
   void initState() {
+    super.initState();
     watcher = widget.folder.watch().listen((event) {
       setState(() {});
     });
-    super.initState();
   }
 
   @override
@@ -448,8 +466,7 @@ List<Widget> allFilesToWidget(List<File> allFiles) {
 }
 
 class EditorText extends StatelessWidget {
-  final focusNode2 = FocusNode();
-
+  final focusNode = FocusNode();
   final String section;
   final String line;
   final File file;
@@ -466,7 +483,12 @@ class EditorText extends StatelessWidget {
     final String text = line.split('=').last.trim();
     final textEditingController = TextEditingController(text: text);
     return Focus(
-      focusNode: focusNode2,
+      focusNode: focusNode,
+      onFocusChange: (event) {
+        if (event) return;
+        textEditingController.text = text;
+        focusNode.unfocus();
+      },
       child: TextBox(
         controller: textEditingController,
         onSubmitted: (value) {
@@ -486,10 +508,6 @@ class EditorText extends StatelessWidget {
             }
           });
           file.writeAsStringSync(allLines.join('\n'));
-        },
-        onTapOutside: (event) {
-          textEditingController.text = text;
-          focusNode2.unfocus();
         },
       ),
     );

@@ -26,7 +26,7 @@ Future<void> initialize() async {
 }
 
 class MyApp extends StatelessWidget {
-  static Logger logger = Logger();
+  static final Logger logger = Logger();
 
   const MyApp({super.key});
 

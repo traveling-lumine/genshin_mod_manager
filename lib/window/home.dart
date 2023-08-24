@@ -11,9 +11,7 @@ import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-
 class HomeWindow extends StatefulWidget {
-  static Logger logger = Logger();
   final Directory dir;
 
   const HomeWindow(this.dir, {super.key});
@@ -23,7 +21,8 @@ class HomeWindow extends StatefulWidget {
 }
 
 class _HomeWindowState extends State<HomeWindow> with WindowListener {
-  late StreamSubscription<List<Directory>> subscription;
+  static final Logger logger = Logger();
+  late StreamSubscription<FileSystemEvent> subscription;
   late List<NavigationPaneItem> subFolders;
 
   int? selected;
@@ -41,7 +40,7 @@ class _HomeWindowState extends State<HomeWindow> with WindowListener {
     final oldDir = oldWidget.dir;
     final newDir = widget.dir;
     if (oldDir == newDir) return;
-    HomeWindow.logger.i('Directory changed from $oldDir to $newDir');
+    logger.i('Directory changed from $oldDir to $newDir');
     subscription.cancel();
     onDirChange(newDir);
   }
@@ -88,9 +87,9 @@ class _HomeWindowState extends State<HomeWindow> with WindowListener {
       selected: selected,
       onChanged: (i) {
         final length = subFolders.length;
-        HomeWindow.logger.i('Selected $i. Length: $length');
+        logger.i('Selected $i. Length: $length');
         if (i == length || i == length + 1) {
-          HomeWindow.logger.i('Selected program runners. Ignoring change.');
+          logger.i('Selected program runners. Ignoring change.');
           return;
         }
         setState(() => selected = i);
@@ -119,7 +118,7 @@ class _HomeWindowState extends State<HomeWindow> with WindowListener {
             final path = p.join(tDir, '3DMigoto Loader.exe');
             final file = File(path);
             runProgram(file);
-            HomeWindow.logger.i('Ran 3d migoto $file');
+            logger.i('Ran 3d migoto $file');
           },
         ),
         PaneItem(
@@ -129,7 +128,7 @@ class _HomeWindowState extends State<HomeWindow> with WindowListener {
           onTap: () {
             final launcher = context.read<AppState>().launcherFile;
             runProgram(File(launcher));
-            HomeWindow.logger.i('Ran launcher $launcher');
+            logger.i('Ran launcher $launcher');
           },
         ),
         PaneItem(
@@ -143,10 +142,15 @@ class _HomeWindowState extends State<HomeWindow> with WindowListener {
 
   void onDirChange(Directory newDir) {
     updateFolder(newDir);
-    subscription = newDir
-        .watch()
-        .map((dir) => getAllChildrenFolder(newDir))
-        .listen((event) => setState(() => updateFolder(newDir)));
+    subscription =
+        newDir.watch().listen((event) {
+          if (event is FileSystemModifyEvent && event.contentChanged) {
+            logger.i('Ignoring content change event: $event');
+            return;
+          }
+          logger.i('Home FSEvent: $event');
+          setState(() => updateFolder(newDir));
+        });
   }
 
   void updateFolder(Directory dir) {
@@ -161,12 +165,13 @@ class _HomeWindowState extends State<HomeWindow> with WindowListener {
     try {
       allFolder = getAllChildrenFolder(dir);
     } on PathNotFoundException {
-      HomeWindow.logger.e('Path not found: $dir');
+      logger.e('Path not found: $dir');
       return;
     }
     for (var element in allFolder) {
       subFolders.add(FolderPaneItem(dir: element));
     }
+    logger.i('Home subfolders: $subFolders');
     if (selectedFolder == null) return;
     final index = subFolders.indexWhere((e) => e.key == selectedFolder);
     if (index == -1) return;
