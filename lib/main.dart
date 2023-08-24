@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/provider/app_state.dart';
@@ -36,11 +35,14 @@ class MyApp extends StatelessWidget {
       title: 'Genshin Mod Manager',
       home: FutureBuilder(
         future: getAppState().timeout(
-          const Duration(seconds: 1),
-          onTimeout: () => AppState('.', '.'),
+          const Duration(seconds: 5),
+          onTimeout: () {
+            logger.e('Unable to obtain SharedPreference settings');
+            return AppState('.', '.');
+          },
         ),
         builder: (context, snapshot) {
-          logger.i('App FutureBuilder snapshot status: $snapshot');
+          logger.d('App FutureBuilder snapshot status: $snapshot');
           if (!snapshot.hasData) {
             return buildLoadingScreen();
           }
@@ -54,9 +56,9 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: data,
       builder: (context, child) {
-        final dir = context.select<AppState, Directory>(
-            (value) => Directory(p.join(value.targetDir, "Mods")));
-        return HomeWindow(dir);
+        final dirPath = context.select<AppState, String>(
+            (value) => p.join(value.targetDir, "Mods"));
+        return HomeWindow(dirPath: dirPath);
       },
     );
   }
