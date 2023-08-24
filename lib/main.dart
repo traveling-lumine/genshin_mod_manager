@@ -1,13 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/app_state.dart';
+import 'package:genshin_mod_manager/provider/app_state.dart';
+import 'package:genshin_mod_manager/window/home.dart';
 import 'package:logger/logger.dart';
+import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
-
-import 'home.dart';
 
 void main() async {
   await initialize();
@@ -25,7 +26,7 @@ Future<void> initialize() async {
 }
 
 class MyApp extends StatelessWidget {
-  static Logger logger = Logger();
+  static final Logger logger = Logger();
 
   const MyApp({super.key});
 
@@ -36,26 +37,26 @@ class MyApp extends StatelessWidget {
       home: FutureBuilder(
         future: getAppState().timeout(
           const Duration(seconds: 1),
-          onTimeout: () {
-            return AppState('.', '.');
-          },
+          onTimeout: () => AppState('.', '.'),
         ),
         builder: (context, snapshot) {
           logger.i('App FutureBuilder snapshot status: $snapshot');
           if (!snapshot.hasData) {
             return buildLoadingScreen();
           }
-          return buildMain(snapshot);
+          return buildMain(snapshot.data!);
         },
       ),
     );
   }
 
-  Widget buildMain(AsyncSnapshot<AppState> snapshot) {
+  Widget buildMain(AppState data) {
     return ChangeNotifierProvider.value(
-      value: snapshot.data,
+      value: data,
       builder: (context, child) {
-        return const MyHomePage();
+        final dir = context.select<AppState, Directory>(
+            (value) => Directory(p.join(value.targetDir, "Mods")));
+        return HomeWindow(dir);
       },
     );
   }
@@ -77,8 +78,8 @@ class MyApp extends StatelessWidget {
   Future<AppState> getAppState() async {
     final instance = await SharedPreferences.getInstance();
     final String targetDir = instance.getString('targetDir') ?? '.';
-    final String launcherDir = instance.getString('launcherDir') ?? '.';
-    final appState = AppState(targetDir, launcherDir);
+    final String launcherFile = instance.getString('launcherDir') ?? '.';
+    final appState = AppState(targetDir, launcherFile);
     return appState;
   }
 }

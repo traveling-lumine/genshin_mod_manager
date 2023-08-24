@@ -1,10 +1,9 @@
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/new_impl/no_deref_file_opener.dart';
+import 'package:genshin_mod_manager/provider/app_state.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../new_impl/no_deref_file_opener.dart';
-import '../app_state.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({
@@ -21,7 +20,8 @@ class SettingPage extends StatelessWidget {
         SettingItem(
           title: 'Select 3D Migoto folder',
           icon: FluentIcons.folder_open,
-          path: context.select<AppState, String>((value) => value.targetDir),
+          path:
+              context.select<AppState, String>((value) => value.targetDir),
           onPressed: () {
             final dir = DirectoryPicker().getDirectory();
             if (dir == null) return;
@@ -34,14 +34,15 @@ class SettingPage extends StatelessWidget {
         SettingItem(
           title: 'Select launcher',
           icon: FluentIcons.document_management,
-          path: context.select<AppState, String>((value) => value.launcherDir),
+          path: context
+              .select<AppState, String>((value) => value.launcherFile),
           onPressed: () {
-            final dir = OpenNoDereferenceFilePicker().getFile();
-            if (dir == null) return;
+            final file = OpenNoDereferenceFilePicker().getFile();
+            if (file == null) return;
             SharedPreferences.getInstance().then((instance) {
-              instance.setString('launcherDir', dir.path);
+              instance.setString('launcherDir', file.path);
             });
-            context.read<AppState>().launcherDir = dir.path;
+            context.read<AppState>().launcherFile = file.path;
           },
         ),
       ],
@@ -85,9 +86,11 @@ class SettingItem extends StatelessWidget {
               ],
             ),
           ),
-          Button(
-            onPressed: onPressed,
-            child: Icon(icon),
+          RepaintBoundary(
+            child: Button(
+              onPressed: onPressed,
+              child: Icon(icon),
+            ),
           )
         ],
       ),

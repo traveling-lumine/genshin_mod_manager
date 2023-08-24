@@ -2,58 +2,50 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/io/fsops.dart';
+import 'package:genshin_mod_manager/new_impl/min_extent_delegate.dart';
+import 'package:genshin_mod_manager/provider/app_state.dart';
 import 'package:logger/logger.dart';
+import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
-import '../fsops.dart';
-import '../new_impl/min_extent_delegate.dart';
-import '../app_state.dart';
-
 class FolderPage extends StatefulWidget {
-  final String folder;
-  late final Directory watcher = Directory(folder);
+  final Directory dir;
 
   FolderPage({
-    super.key,
-    required this.folder,
-  });
+    required this.dir,
+  }) : super(key: ValueKey(dir.path));
 
   @override
   State<FolderPage> createState() => _FolderPageState();
 }
 
 class _FolderPageState extends State<FolderPage> {
-  late List<String> allChildrenFolder;
-  late StreamSubscription<FileSystemEvent> watcher;
+  static final Logger logger = Logger();
+  late StreamSubscription<FileSystemEvent> subscription;
+  late List<Directory> allChildrenFolder;
 
   @override
   void initState() {
-    allChildrenFolder = getAllChildrenFolder(widget.folder)
-      ..sort((a, b) {
-        var aName = a.split('\\').last;
-        var bName = b.split('\\').last;
-        aName = aName.startsWith('DISABLED ') ? aName.substring(9) : aName;
-        bName = bName.startsWith('DISABLED ') ? bName.substring(9) : bName;
-        return aName.toLowerCase().compareTo(bName.toLowerCase());
-      });
-    watcher = widget.watcher.watch().listen((event) {
-      setState(() {
-        allChildrenFolder = getAllChildrenFolder(widget.folder)
-          ..sort((a, b) {
-            var aName = a.split('\\').last;
-            var bName = b.split('\\').last;
-            aName = aName.startsWith('DISABLED ') ? aName.substring(9) : aName;
-            bName = bName.startsWith('DISABLED ') ? bName.substring(9) : bName;
-            return aName.toLowerCase().compareTo(bName.toLowerCase());
-          });
-      });
-    });
     super.initState();
+    final dir = widget.dir;
+    onDirChange(dir);
+  }
+
+  @override
+  void didUpdateWidget(covariant FolderPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldDir = oldWidget.dir;
+    final newDir = widget.dir;
+    if (oldDir == newDir) return;
+    logger.i('Directory changed from $oldDir to $newDir');
+    subscription.cancel();
+    onDirChange(newDir);
   }
 
   @override
   void dispose() {
-    watcher.cancel();
+    subscription.cancel();
     super.dispose();
   }
 
@@ -61,14 +53,14 @@ class _FolderPageState extends State<FolderPage> {
   Widget build(BuildContext context) {
     return ScaffoldPage(
       header: PageHeader(
-        title: Text(widget.folder.split('\\').last),
+        title: Text(p.basename(widget.dir.path)),
         commandBar: CommandBar(
           mainAxisAlignment: MainAxisAlignment.end,
           primaryItems: [
             CommandBarButton(
               icon: const Icon(FluentIcons.folder_open),
               onPressed: () {
-                openFolder(widget.folder);
+                openFolder(widget.dir);
               },
             ),
           ],
@@ -86,20 +78,44 @@ class _FolderPageState extends State<FolderPage> {
       ),
     );
   }
+
+  void onDirChange(Directory newDir) {
+    updateFolder(newDir);
+    subscription =
+        newDir.watch().listen((event) {
+          if (event is FileSystemModifyEvent && event.contentChanged) {
+            logger.i('Ignoring content change event: $event');
+            return;
+          }
+          setState(() => updateFolder(newDir));
+        });
+  }
+
+  void updateFolder(Directory dir) {
+    allChildrenFolder = getAllChildrenFolder(dir)..sort(folderSorter);
+  }
+
+  int folderSorter(a, b) {
+    var aName = p.basename(a.path);
+    var bName = p.basename(b.path);
+    aName = aName.startsWith('DISABLED ') ? aName.substring(9) : aName;
+    bName = bName.startsWith('DISABLED ') ? bName.substring(9) : bName;
+    return aName.toLowerCase().compareTo(bName.toLowerCase());
+  }
 }
 
 class FolderCard extends StatelessWidget {
-  final String e;
-  final logger = Logger();
+  static final Logger logger = Logger();
+  final Directory e;
 
-  FolderCard(
+  const FolderCard(
     this.e, {
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    String folderName = e.split('\\').last;
+    String folderName = p.basename(e.path);
     final isDisabled = folderName.startsWith('DISABLED ');
     final color = isDisabled
         ? Colors.red.lightest.withOpacity(0.5)
@@ -128,7 +144,7 @@ class FolderCard extends StatelessWidget {
             '${context.read<AppState>().targetDir}\\ShaderFixes';
 
         if (isDisabled) {
-          renameTarget = '${Directory(e).parent.path}\\$folderName';
+          renameTarget = '${e.parent.path}\\$folderName';
           if (Directory(renameTarget).existsSync()) {
             showDirectoryExists(context, renameTarget);
             return;
@@ -143,7 +159,7 @@ class FolderCard extends StatelessWidget {
             return;
           }
         } else {
-          renameTarget = '${Directory(e).parent.path}\\DISABLED $folderName';
+          renameTarget = '${e.parent.path}\\DISABLED $folderName';
           if (Directory(renameTarget).existsSync()) {
             showDirectoryExists(context, renameTarget);
             return;
@@ -159,7 +175,7 @@ class FolderCard extends StatelessWidget {
           }
         }
 
-        Directory(e).renameSync(renameTarget);
+        e.renameSync(renameTarget);
       },
       child: Card(
         backgroundColor: color,
@@ -271,7 +287,7 @@ class FolderCard extends StatelessWidget {
     return () {
       late final FileSystemEntity preview;
       try {
-        var listSync = Directory(e).listSync();
+        var listSync = e.listSync();
         preview = listSync.firstWhere((element) {
           final lowerCase = element.path.split('\\').last.toLowerCase();
           return lowerCase == 'preview.png' ||
@@ -326,7 +342,7 @@ class FolderCard extends StatelessWidget {
 }
 
 class IniList extends StatefulWidget {
-  final String folder;
+  final Directory folder;
 
   const IniList(
     this.folder, {
@@ -342,10 +358,10 @@ class _IniListState extends State<IniList> {
 
   @override
   void initState() {
-    watcher = Directory(widget.folder).watch().listen((event) {
+    super.initState();
+    watcher = widget.folder.watch().listen((event) {
       setState(() {});
     });
-    super.initState();
   }
 
   @override
@@ -373,10 +389,10 @@ class _IniListState extends State<IniList> {
   }
 }
 
-List<Widget> allFilesToWidget(List<String> allFiles) {
+List<Widget> allFilesToWidget(List<File> allFiles) {
   List<Widget> alliniFile = [];
   for (var i = 0; i < allFiles.length; i++) {
-    final folderName = allFiles[i].split('\\').last;
+    final folderName = p.basename(allFiles[i].path);
     alliniFile.add(Row(
       children: [
         Expanded(
@@ -399,7 +415,7 @@ List<Widget> allFilesToWidget(List<String> allFiles) {
     ));
     late String lastSection;
     bool metSection = false;
-    File(allFiles[i]).readAsLinesSync().forEach((e) {
+    allFiles[i].readAsLinesSync().forEach((e) {
       if (e.startsWith('[')) {
         metSection = false;
       }
@@ -420,7 +436,7 @@ List<Widget> allFilesToWidget(List<String> allFiles) {
               child: EditorText(
                 section: lastSection,
                 line: e,
-                file: File(allFiles[i]),
+                file: allFiles[i],
               ),
             )
           ],
@@ -435,7 +451,7 @@ List<Widget> allFilesToWidget(List<String> allFiles) {
               child: EditorText(
                 section: lastSection,
                 line: e,
-                file: File(allFiles[i]),
+                file: allFiles[i],
               ),
             )
           ],
@@ -450,8 +466,7 @@ List<Widget> allFilesToWidget(List<String> allFiles) {
 }
 
 class EditorText extends StatelessWidget {
-  final focusNode2 = FocusNode();
-
+  final focusNode = FocusNode();
   final String section;
   final String line;
   final File file;
@@ -468,7 +483,12 @@ class EditorText extends StatelessWidget {
     final String text = line.split('=').last.trim();
     final textEditingController = TextEditingController(text: text);
     return Focus(
-      focusNode: focusNode2,
+      focusNode: focusNode,
+      onFocusChange: (event) {
+        if (event) return;
+        textEditingController.text = text;
+        focusNode.unfocus();
+      },
       child: TextBox(
         controller: textEditingController,
         onSubmitted: (value) {
@@ -488,10 +508,6 @@ class EditorText extends StatelessWidget {
             }
           });
           file.writeAsStringSync(allLines.join('\n'));
-        },
-        onTapOutside: (event) {
-          textEditingController.text = text;
-          focusNode2.unfocus();
         },
       ),
     );
