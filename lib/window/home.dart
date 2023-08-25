@@ -135,7 +135,7 @@ class _HomeWindowState extends DWState<HomeWindow> with WindowListener {
     updateFolder(newDir);
     subscription = newDir.watch().listen((event) {
       if (event is FileSystemModifyEvent && event.contentChanged) {
-        logger.i('Ignoring content change event: $event');
+        logger.d('Ignoring content change event: $event');
         return;
       }
       logger.i('Home FSEvent: $event');

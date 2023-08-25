@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/provider/app_state.dart';
-import 'package:genshin_mod_manager/window/page/folder.dart';
+import 'package:genshin_mod_manager/window/widget/editor_text.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
@@ -13,9 +14,9 @@ class FolderCard extends StatelessWidget {
   final Directory e;
 
   const FolderCard(
-      this.e, {
-        super.key,
-      });
+    this.e, {
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -124,38 +125,6 @@ class FolderCard extends StatelessWidget {
     );
   }
 
-  void showUnableDelete(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => ContentDialog(
-        title: const Text('Error'),
-        content: const Text('Failed to delete files in ShaderFixes'),
-        actions: [
-          FilledButton(
-            child: const Text('OK'),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void showUnableCopy(BuildContext context, String filename) {
-    showDialog(
-      context: context,
-      builder: (context) => ContentDialog(
-        title: const Text('Error'),
-        content: Text('$filename already exists!'),
-        actions: [
-          FilledButton(
-            child: const Text('OK'),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
-  }
-
   void copyShaders(String targetDir, List<File> shaderFilenames) {
     // check for existence first
     Directory(targetDir).listSync().forEach((e) {
@@ -227,20 +196,156 @@ class FolderCard extends StatelessWidget {
     return IniList(e);
   }
 
+  void showUnableDelete(BuildContext context) {
+    errorDialog(context, 'Failed to delete files in ShaderFixes');
+  }
+
+  void showUnableCopy(BuildContext context, String filename) {
+    errorDialog(context, '$filename already exists!');
+  }
+
   void showDirectoryExists(BuildContext context, String renameTarget) {
-    renameTarget = renameTarget.split('\\').last;
+    renameTarget = p.basename(renameTarget);
+    errorDialog(context, '$renameTarget already exists!');
+  }
+
+  void errorDialog(BuildContext context, String text) {
     showDialog(
       context: context,
       builder: (context) => ContentDialog(
         title: const Text('Error'),
-        content: Text('$renameTarget already exists!'),
+        content: Text(text),
         actions: [
           FilledButton(
-            child: const Text('OK'),
+            child: const Text('Ok'),
             onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
     );
   }
+}
+
+class IniList extends StatefulWidget {
+  final Directory folder;
+
+  const IniList(
+    this.folder, {
+    super.key,
+  });
+
+  @override
+  State<IniList> createState() => _IniListState();
+}
+
+class _IniListState extends State<IniList> {
+  late StreamSubscription<FileSystemEvent> watcher;
+
+  @override
+  void initState() {
+    super.initState();
+    watcher = widget.folder.watch().listen((event) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    watcher.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final alliniFile = allFilesToWidget(getActiveiniFiles(widget.folder));
+    return Flexible(
+      child: alliniFile.isNotEmpty
+          ? Card(
+              backgroundColor: Colors.white.withOpacity(0.4),
+              padding: const EdgeInsets.all(4),
+              child: ListView(
+                children: alliniFile,
+              ),
+            )
+          : const Center(
+              child: Text('No ini files found'),
+            ),
+    );
+  }
+}
+
+List<Widget> allFilesToWidget(List<File> allFiles) {
+  List<Widget> alliniFile = [];
+  for (var i = 0; i < allFiles.length; i++) {
+    final folderName = p.basename(allFiles[i].path);
+    alliniFile.add(Row(
+      children: [
+        Expanded(
+          child: Tooltip(
+            message: folderName,
+            child: Text(
+              folderName,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+        Button(
+          child: const Icon(FluentIcons.document_management),
+          onPressed: () => runProgram(allFiles[i]),
+        ),
+      ],
+    ));
+    late String lastSection;
+    bool metSection = false;
+    allFiles[i].readAsLinesSync().forEach((e) {
+      if (e.startsWith('[')) {
+        metSection = false;
+      }
+      final regExp = RegExp(r'\[Key.*?\]');
+      final match = regExp.firstMatch(e)?.group(0)!;
+      if (match != null) {
+        alliniFile.add(Text(match));
+        lastSection = match;
+        metSection = true;
+      }
+      if (e.toLowerCase().startsWith('key')) {
+        alliniFile.add(Row(
+          children: [
+            const Text(
+              'key:',
+            ),
+            Expanded(
+              child: EditorText(
+                section: lastSection,
+                line: e,
+                file: allFiles[i],
+              ),
+            )
+          ],
+        ));
+      } else if (e.toLowerCase().startsWith('back')) {
+        alliniFile.add(Row(
+          children: [
+            const Text(
+              'back:',
+            ),
+            Expanded(
+              child: EditorText(
+                section: lastSection,
+                line: e,
+                file: allFiles[i],
+              ),
+            )
+          ],
+        ));
+      } else if (e.startsWith('\$') && metSection) {
+        final cycles = ','.allMatches(e.split(';').first).length + 1;
+        alliniFile.add(Text('Cycles: $cycles'));
+      }
+    });
+  }
+  return alliniFile;
 }
