@@ -1,16 +1,12 @@
 # genshin_mod_manager
 
-A new Flutter project.
+## Manage mods easily
 
-## Getting Started
+### How to use
 
-This project is a starting point for a Flutter application.
+Under construction...
 
-A few resources to get you started if this is your first Flutter project:
+### Disclaimer
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+NO PARTY ASSUMES LIABILITY FOR ANY CONSEQUENCES ARISING FROM THE USE OF THIS PROGRAM.
+USERS ACCEPT AND ASSUME ALL RISKS, DAMAGES, LOSSES, AND OTHER CONSEQUENCES RESULTING FROM ITS USE.

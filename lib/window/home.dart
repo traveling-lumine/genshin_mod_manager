@@ -66,12 +66,7 @@ class _HomeWindowState extends DWState<HomeWindow> with WindowListener {
     return NavigationPane(
       selected: selected,
       onChanged: (i) {
-        final length = subFolders.length;
-        logger.i('Selected $i. Length: $length');
-        if (i == length || i == length + 1) {
-          logger.i('Selected program runners. Ignoring change.');
-          return;
-        }
+        logger.d('Selected $i th PaneItem');
         setState(() => selected = i);
       },
       displayMode: PaneDisplayMode.auto,
@@ -81,26 +76,23 @@ class _HomeWindowState extends DWState<HomeWindow> with WindowListener {
       items: subFolders,
       footerItems: [
         PaneItemSeparator(),
-        PaneItem(
+        PaneItemAction(
           icon: const Icon(FluentIcons.user_window),
           title: const Text('3d migoto'),
-          body: Center(child: Image.asset('images/app_icon.ico')),
           onTap: () {
             final tDir = context.read<AppState>().targetDir;
             final path = p.join(tDir, '3DMigoto Loader.exe');
-            final file = File(path);
-            runProgram(file);
-            logger.i('Ran 3d migoto $file');
+            runProgram(File(path));
+            logger.t('Ran 3d migoto $path');
           },
         ),
-        PaneItem(
+        PaneItemAction(
           icon: const Icon(FluentIcons.user_window),
           title: const Text('Launcher'),
-          body: Center(child: Image.asset('images/app_icon.ico')),
           onTap: () {
             final launcher = context.read<AppState>().launcherFile;
             runProgram(File(launcher));
-            logger.i('Ran launcher $launcher');
+            logger.t('Ran launcher $launcher');
           },
         ),
         PaneItem(
@@ -169,6 +161,7 @@ class _HomeWindowState extends DWState<HomeWindow> with WindowListener {
 }
 
 class FolderPaneItem extends PaneItem {
+  final logger = Logger();
   String dirPath;
 
   FolderPaneItem({
@@ -179,6 +172,11 @@ class FolderPaneItem extends PaneItem {
           body: FolderPage(dirPath: dirPath),
           key: ValueKey(dirPath),
         );
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return '${super.toString(minLevel: minLevel)}($dirPath)';
+  }
 }
 
 class WindowButtons extends StatelessWidget {
