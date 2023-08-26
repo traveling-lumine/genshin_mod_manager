@@ -81,7 +81,8 @@ class _FolderPageState extends DWState<FolderPage> {
   }
 }
 
-void dropFinishHandler(BuildContext context, DropDoneDetails details, Logger logger, String dirPath) {
+void dropFinishHandler(BuildContext context, DropDoneDetails details,
+    Logger logger, String dirPath) {
   final moveInsteadOfCopy = context.read<AppState>().moveOnDrag;
   for (final xFile in details.files) {
     final path = xFile.path;

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
@@ -196,8 +197,8 @@ class _FolderCardState extends DWState<FolderCard> {
       errorDialog(
           context,
           'Failed to rename folder.'
-              ' Check if the ShaderFixes folder is open in explorer,'
-              ' and close it if it is.');
+          ' Check if the ShaderFixes folder is open in explorer,'
+          ' and close it if it is.');
       copyShaders(tgt, shaderFilenames);
     }
   }
@@ -276,7 +277,9 @@ List<Widget> allFilesToWidget(List<File> allFiles) {
     alliniFile.add(buildIniHeader(cur));
     late String lastSection;
     bool metSection = false;
-    cur.readAsLinesSync().forEach((line) {
+    cur
+        .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true))
+        .forEach((line) {
       if (line.startsWith('[')) {
         metSection = false;
       }
