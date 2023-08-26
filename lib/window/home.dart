@@ -181,9 +181,18 @@ class FolderPaneItem extends PaneItem {
 
   FolderPaneItem({
     required this.dirPath,
+    File? imageFile,
   }) : super(
           title: Text(p.basename(dirPath)),
-          icon: Image.asset('images/app_icon.ico'),
+          icon: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(120, 120)),
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: imageFile != null
+                  ? Image.file(imageFile)
+                  : Image.asset('images/app_icon.ico'),
+            ),
+          ),
           body: FolderPage(dirPath: dirPath),
           key: ValueKey(dirPath),
         );
