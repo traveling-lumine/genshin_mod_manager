@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
@@ -175,7 +176,7 @@ class _HomeWindowState extends DWState<HomeWindow> with WindowListener {
 }
 
 class FolderPaneItem extends PaneItem {
-  final logger = Logger();
+  static final logger = Logger();
   String dirPath;
 
   FolderPaneItem({
@@ -193,14 +194,19 @@ class FolderPaneItem extends PaneItem {
       bool showTextOnTop = true,
       int? itemIndex,
       bool? autofocus}) {
-    return super.build(
-      context,
-      selected,
-      onPressed,
-      displayMode: displayMode,
-      showTextOnTop: showTextOnTop,
-      itemIndex: itemIndex,
-      autofocus: autofocus,
+    return DropTarget(
+      onDragDone: (details) {
+        dropFinishHandler(context, details, logger, dirPath);
+      },
+      child: super.build(
+        context,
+        selected,
+        onPressed,
+        displayMode: displayMode,
+        showTextOnTop: showTextOnTop,
+        itemIndex: itemIndex,
+        autofocus: autofocus,
+      ),
     );
   }
 

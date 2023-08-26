@@ -45,6 +45,7 @@ dependencies:
   win32: ^5.0.6
   logger: ^2.0.1
   path: ^1.8.3
+  desktop_drop: ^0.4.3
 
 dev_dependencies:
   flutter_test:

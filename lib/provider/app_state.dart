@@ -4,6 +4,7 @@ class AppState with ChangeNotifier {
   String _targetDir;
   String _launcherFile;
   bool _runTogether;
+  bool _moveOnDrag;
 
   String get targetDir => _targetDir;
 
@@ -26,7 +27,19 @@ class AppState with ChangeNotifier {
     notifyListeners();
   }
 
-  AppState(this._targetDir, this._launcherFile, this._runTogether);
+  bool get moveOnDrag => _moveOnDrag;
+
+  set moveOnDrag(bool value) {
+    _moveOnDrag = value;
+    notifyListeners();
+  }
+
+  AppState(
+    this._targetDir,
+    this._launcherFile,
+    this._runTogether,
+    this._moveOnDrag,
+  );
 
   @override
   String toString() {
@@ -34,6 +47,7 @@ class AppState with ChangeNotifier {
         '_targetDir: $_targetDir'
         ', _launcherDir: $_launcherFile'
         ', _runTogether: $_runTogether'
+        ', _moveOnDrag: $_moveOnDrag'
         ')';
   }
 }

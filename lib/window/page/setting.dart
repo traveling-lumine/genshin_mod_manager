@@ -17,7 +17,7 @@ class SettingPage extends StatelessWidget {
         title: Text('Settings'),
       ),
       children: [
-        SettingItem(
+        SelectItem(
           title: 'Select 3D Migoto folder',
           icon: FluentIcons.folder_open,
           path: context.select<AppState, String>((value) => value.targetDir),
@@ -30,7 +30,7 @@ class SettingPage extends StatelessWidget {
             context.read<AppState>().targetDir = dir.path;
           },
         ),
-        SettingItem(
+        SelectItem(
           title: 'Select launcher',
           icon: FluentIcons.document_management,
           path: context.select<AppState, String>((value) => value.launcherFile),
@@ -43,43 +43,76 @@ class SettingPage extends StatelessWidget {
             context.read<AppState>().launcherFile = file.path;
           },
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Run 3d migoto and launcher using one button',
-                  style: FluentTheme.of(context).typography.bodyLarge,
-                ),
-              ),
-              RepaintBoundary(
-                child: ToggleSwitch(
-                  checked: context
-                      .select<AppState, bool>((value) => value.runTogether),
-                  onChanged: (bool value) {
-                    SharedPreferences.getInstance().then((instance) {
-                      instance.setBool('runTogether', value);
-                    });
-                    context.read<AppState>().runTogether = value;
-                  },
-                ),
-              )
-            ],
-          ),
+        SwitchItem(
+          text: 'Run 3d migoto and launcher using one button',
+          checked: context.select<AppState, bool>((value) => value.runTogether),
+          onChanged: (value) {
+            SharedPreferences.getInstance().then((instance) {
+              instance.setBool('runTogether', value);
+            });
+            context.read<AppState>().runTogether = value;
+          },
+        ),
+        SwitchItem(
+          text: 'Move folder instead of copying for mod folder drag-and-drop',
+          checked: context.select<AppState, bool>((value) => value.moveOnDrag),
+          onChanged: (value) {
+            SharedPreferences.getInstance().then((instance) {
+              instance.setBool('moveOnDrag', value);
+            });
+            context.read<AppState>().moveOnDrag = value;
+          },
         ),
       ],
     );
   }
 }
 
-class SettingItem extends StatelessWidget {
+const itemPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 16);
+
+class SwitchItem extends StatelessWidget {
+  final String text;
+  final bool checked;
+  final void Function(bool) onChanged;
+
+  const SwitchItem({
+    super.key,
+    required this.text,
+    required this.checked,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: itemPadding,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              text,
+              style: FluentTheme.of(context).typography.bodyLarge,
+            ),
+          ),
+          RepaintBoundary(
+            child: ToggleSwitch(
+              checked: checked,
+              onChanged: onChanged,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class SelectItem extends StatelessWidget {
   final String title;
   final String path;
   final IconData icon;
   final VoidCallback? onPressed;
 
-  const SettingItem({
+  const SelectItem({
     super.key,
     required this.title,
     required this.icon,
@@ -90,7 +123,7 @@ class SettingItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: itemPadding,
       child: Row(
         children: [
           Expanded(
