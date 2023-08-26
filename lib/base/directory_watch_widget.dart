@@ -6,6 +6,7 @@ import 'package:logger/logger.dart';
 
 abstract class DirectoryWatchWidget extends StatefulWidget {
   final String dirPath;
+
   Directory get dir => Directory(dirPath);
 
   const DirectoryWatchWidget({super.key, required this.dirPath});
@@ -22,7 +23,7 @@ abstract class DWState<T extends DirectoryWatchWidget>
   @override
   void initState() {
     super.initState();
-    onUpdate();
+    _onUpdate();
   }
 
   @override
@@ -33,7 +34,7 @@ abstract class DWState<T extends DirectoryWatchWidget>
     if (oldDir == newDir) return;
     logger.t('Directory path changed from $oldDir to $newDir');
     subscription?.cancel();
-    onUpdate();
+    _onUpdate();
   }
 
   @override
@@ -43,5 +44,17 @@ abstract class DWState<T extends DirectoryWatchWidget>
     super.dispose();
   }
 
-  void onUpdate(){}
+  void _onUpdate() {
+    updateFolder();
+    subscription = widget.dir.watch().listen((event) {
+      if (shouldUpdate(event)) {
+        logger.d('DWW update: $event');
+        setState(() => updateFolder());
+      }
+    });
+  }
+
+  bool shouldUpdate(FileSystemEvent event);
+
+  void updateFolder();
 }

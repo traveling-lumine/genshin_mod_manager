@@ -5,7 +5,6 @@ import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
 import 'package:genshin_mod_manager/window/widget/folder_card.dart';
-import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 
 class FolderPage extends DirectoryWatchWidget {
@@ -19,7 +18,6 @@ class FolderPage extends DirectoryWatchWidget {
 }
 
 class _FolderPageState extends DWState<FolderPage> {
-  static final Logger logger = Logger();
   late List<Directory> allChildrenFolder;
 
   @override
@@ -42,10 +40,10 @@ class _FolderPageState extends DWState<FolderPage> {
       content: GridView(
         padding: const EdgeInsets.all(8),
         gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
-          minCrossAxisExtent: 350,
+          minCrossAxisExtent: 420,
           crossAxisSpacing: 8,
           mainAxisSpacing: 8,
-          mainAxisExtent: 420,
+          mainAxisExtent: 350,
         ),
         children: allChildrenFolder.map((e) => FolderCard(e)).toList(),
       ),
@@ -53,20 +51,12 @@ class _FolderPageState extends DWState<FolderPage> {
   }
 
   @override
-  void onUpdate() {
-    final newDir = widget.dir;
-    updateFolder(newDir);
-    subscription = newDir.watch().listen((event) {
-      if (event is FileSystemModifyEvent && event.contentChanged) {
-        logger.d('Ignoring content change event: $event');
-        return;
-      }
-      setState(() => updateFolder(newDir));
-    });
-  }
+  bool shouldUpdate(FileSystemEvent event) =>
+      !(event is FileSystemModifyEvent && event.contentChanged);
 
-  void updateFolder(Directory dir) {
-    allChildrenFolder = getAllChildrenFolder(dir)
+  @override
+  void updateFolder() {
+    allChildrenFolder = getAllChildrenFolder(widget.dir)
       ..sort(
         (a, b) {
           var aName = p.basename(a.path);

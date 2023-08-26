@@ -63,6 +63,46 @@ class _HomeWindowState extends DWState<HomeWindow> with WindowListener {
   }
 
   NavigationPane buildNavigationPane(BuildContext context) {
+    final List<PaneItemAction> paneItemActions;
+    if (context.select<AppState, bool>((value) => value.runTogether)) {
+      paneItemActions = [
+        PaneItemAction(
+          icon: const Icon(FluentIcons.user_window),
+          title: const Text('Run 3d migoto & launcher'),
+          onTap: () {
+            final tDir = context.read<AppState>().targetDir;
+            final launcher = context.read<AppState>().launcherFile;
+            final path = p.join(tDir, '3DMigoto Loader.exe');
+            runProgram(File(path));
+            logger.t('Ran 3d migoto $path');
+            runProgram(File(launcher));
+            logger.t('Ran launcher $launcher');
+          },
+        ),
+      ];
+    } else {
+      paneItemActions = [
+        PaneItemAction(
+          icon: const Icon(FluentIcons.user_window),
+          title: const Text('Run 3d migoto'),
+          onTap: () {
+            final tDir = context.read<AppState>().targetDir;
+            final path = p.join(tDir, '3DMigoto Loader.exe');
+            runProgram(File(path));
+            logger.t('Ran 3d migoto $path');
+          },
+        ),
+        PaneItemAction(
+          icon: const Icon(FluentIcons.user_window),
+          title: const Text('Run launcher'),
+          onTap: () {
+            final launcher = context.read<AppState>().launcherFile;
+            runProgram(File(launcher));
+            logger.t('Ran launcher $launcher');
+          },
+        ),
+      ];
+    }
     return NavigationPane(
       selected: selected,
       onChanged: (i) {
@@ -76,25 +116,7 @@ class _HomeWindowState extends DWState<HomeWindow> with WindowListener {
       items: subFolders,
       footerItems: [
         PaneItemSeparator(),
-        PaneItemAction(
-          icon: const Icon(FluentIcons.user_window),
-          title: const Text('3d migoto'),
-          onTap: () {
-            final tDir = context.read<AppState>().targetDir;
-            final path = p.join(tDir, '3DMigoto Loader.exe');
-            runProgram(File(path));
-            logger.t('Ran 3d migoto $path');
-          },
-        ),
-        PaneItemAction(
-          icon: const Icon(FluentIcons.user_window),
-          title: const Text('Launcher'),
-          onTap: () {
-            final launcher = context.read<AppState>().launcherFile;
-            runProgram(File(launcher));
-            logger.t('Ran launcher $launcher');
-          },
-        ),
+        ...paneItemActions,
         PaneItem(
           icon: const Icon(FluentIcons.settings),
           title: const Text('Settings'),
@@ -122,20 +144,12 @@ class _HomeWindowState extends DWState<HomeWindow> with WindowListener {
   }
 
   @override
-  void onUpdate() {
-    final Directory newDir = widget.dir;
-    updateFolder(newDir);
-    subscription = newDir.watch().listen((event) {
-      if (event is FileSystemModifyEvent && event.contentChanged) {
-        logger.d('Ignoring content change event: $event');
-        return;
-      }
-      logger.i('Home FSEvent: $event');
-      setState(() => updateFolder(newDir));
-    });
-  }
+  bool shouldUpdate(FileSystemEvent event) =>
+      !(event is FileSystemModifyEvent && event.contentChanged);
 
-  void updateFolder(Directory dir) {
+  @override
+  void updateFolder() {
+    final dir = widget.dir;
     final sel_ = selected;
     Key? selectedFolder;
     if (sel_ != null && sel_ < subFolders.length) {

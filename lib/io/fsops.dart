@@ -26,6 +26,19 @@ List<File> getActiveiniFiles(Directory dir) {
   return a;
 }
 
+File? findPreviewFile(Directory dir) {
+  for (var element in dir.listSync()) {
+    if (element is! File) continue;
+    final filename = p.basenameWithoutExtension(element.path);
+    if (filename.toLowerCase() != 'preview') continue;
+    final ext = p.extension(element.path).toLowerCase();
+    if (ext == '.png' || ext == '.jpg' || ext == '.jpeg') {
+      return element;
+    }
+  }
+  return null;
+}
+
 void runProgram(File program) {
   Process.run(
     'start',
