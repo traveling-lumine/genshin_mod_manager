@@ -13,6 +13,11 @@ abstract class DirectoryWatchWidget extends StatefulWidget {
 
   @override
   DWState createState();
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return '${super.toString(minLevel: minLevel)}($dirPath)';
+  }
 }
 
 abstract class DWState<T extends DirectoryWatchWidget>
@@ -39,7 +44,7 @@ abstract class DWState<T extends DirectoryWatchWidget>
 
   @override
   void dispose() {
-    logger.t('$DirectoryWatchWidget bids you a goodbye');
+    logger.t('$this bids you a goodbye');
     subscription?.cancel();
     super.dispose();
   }
@@ -47,9 +52,12 @@ abstract class DWState<T extends DirectoryWatchWidget>
   void _onUpdate() {
     updateFolder();
     subscription = widget.dir.watch().listen((event) {
+      logger.d('$this update: $event');
       if (shouldUpdate(event)) {
-        logger.d('DWW update: $event');
+        logger.d('$this update accepted');
         setState(() => updateFolder());
+      } else {
+        logger.d('$this update rejected');
       }
     });
   }
@@ -57,4 +65,9 @@ abstract class DWState<T extends DirectoryWatchWidget>
   bool shouldUpdate(FileSystemEvent event);
 
   void updateFolder();
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return '${super.toString(minLevel: minLevel)}($widget)';
+  }
 }
