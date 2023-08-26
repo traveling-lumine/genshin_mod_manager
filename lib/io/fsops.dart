@@ -36,6 +36,18 @@ List<File> getAllChildrenFiles(Directory dir) {
   return a;
 }
 
+void copyDirectorySync(Directory dir, String dest) {
+  final newDir = Directory(dest)..createSync(recursive: true);
+  dir.listSync().forEach((element) {
+    final newName = p.join(newDir.path, p.basename(element.path));
+    if (element is File) {
+      element.copySync(newName);
+    } else if (element is Directory) {
+      copyDirectorySync(element, newName);
+    }
+  });
+}
+
 File? findPreviewFile(Directory dir) {
   for (var element in dir.listSync()) {
     if (element is! File) continue;

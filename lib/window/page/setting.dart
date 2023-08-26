@@ -68,6 +68,31 @@ class SettingPage extends StatelessWidget {
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Move folder instead of copying for mod folder drag-and-drop',
+                  style: FluentTheme.of(context).typography.bodyLarge,
+                ),
+              ),
+              RepaintBoundary(
+                child: ToggleSwitch(
+                  checked: context
+                      .select<AppState, bool>((value) => value.moveOnDrag),
+                  onChanged: (bool value) {
+                    SharedPreferences.getInstance().then((instance) {
+                      instance.setBool('moveOnDrag', value);
+                    });
+                    context.read<AppState>().moveOnDrag = value;
+                  },
+                ),
+              )
+            ],
+          ),
+        ),
       ],
     );
   }

@@ -176,7 +176,7 @@ class _HomeWindowState extends DWState<HomeWindow> with WindowListener {
 }
 
 class FolderPaneItem extends PaneItem {
-  final logger = Logger();
+  static final logger = Logger();
   String dirPath;
 
   FolderPaneItem({
@@ -195,10 +195,48 @@ class FolderPaneItem extends PaneItem {
       int? itemIndex,
       bool? autofocus}) {
     return DropTarget(
-      enable: true,
       onDragDone: (details) {
-        logger.i(this);
-        logger.i(details);
+        final moveInsteadOfCopy = context.read<AppState>().moveOnDrag;
+        for (final xFile in details.files) {
+          final path = xFile.path;
+          if (!FileSystemEntity.isDirectorySync(path)) continue;
+          logger.d('Dragged $path');
+          final dir = Directory(path);
+          final newPath = p.join(dirPath, p.basename(path));
+          if (moveInsteadOfCopy) {
+            try {
+              dir.renameSync(newPath);
+              logger.d('Moved $path to $newPath');
+            } on PathExistsException {
+              displayInfoBar(
+                context,
+                builder: (context, close) {
+                  return InfoBar(
+                    title: const Text('Folder already exists'),
+                    severity: InfoBarSeverity.warning,
+                    onClose: close,
+                  );
+                },
+              );
+            }
+          } else {
+            try {
+              copyDirectorySync(dir, newPath);
+              logger.d('Copied $path to $newPath');
+            } on PathExistsException {
+              displayInfoBar(
+                context,
+                builder: (context, close) {
+                  return InfoBar(
+                    title: const Text('Folder already exists'),
+                    severity: InfoBarSeverity.warning,
+                    onClose: close,
+                  );
+                },
+              );
+            }
+          }
+        }
       },
       child: super.build(
         context,
