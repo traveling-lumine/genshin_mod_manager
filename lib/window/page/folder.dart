@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
 import 'package:genshin_mod_manager/window/widget/folder_card.dart';
+import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 
 class FolderPage extends DirectoryWatchWidget {
@@ -18,35 +20,43 @@ class FolderPage extends DirectoryWatchWidget {
 }
 
 class _FolderPageState extends DWState<FolderPage> {
+  static final Logger logger = Logger();
   late List<Directory> allChildrenFolder;
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldPage(
-      header: PageHeader(
-        title: Text(p.basename(widget.dir.path)),
-        commandBar: CommandBar(
-          mainAxisAlignment: MainAxisAlignment.end,
-          primaryItems: [
-            CommandBarButton(
-              icon: const Icon(FluentIcons.folder_open),
-              onPressed: () {
-                openFolder(widget.dir);
-              },
-            ),
-          ],
+    return DropTarget(
+      onDragDone: (details) {
+        logger.i(this);
+        logger.i(details);
+
+      },
+      child: ScaffoldPage(
+        header: PageHeader(
+          title: Text(p.basename(widget.dir.path)),
+          commandBar: CommandBar(
+            mainAxisAlignment: MainAxisAlignment.end,
+            primaryItems: [
+              CommandBarButton(
+                icon: const Icon(FluentIcons.folder_open),
+                onPressed: () {
+                  openFolder(widget.dir);
+                },
+              ),
+            ],
+          ),
         ),
-      ),
-      content: GridView(
-        padding: const EdgeInsets.all(8),
-        gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
-          minCrossAxisExtent: 420,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-          mainAxisExtent: 350,
+        content: GridView(
+          padding: const EdgeInsets.all(8),
+          gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
+            minCrossAxisExtent: 420,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            mainAxisExtent: 350,
+          ),
+          children:
+              allChildrenFolder.map((e) => FolderCard(dirPath: e.path)).toList(),
         ),
-        children:
-            allChildrenFolder.map((e) => FolderCard(dirPath: e.path)).toList(),
       ),
     );
   }
