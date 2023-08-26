@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 List<Directory> getAllChildrenFolder(Directory dir) {
-  List<Directory> a = [];
+  final List<Directory> a = [];
   dir.listSync().forEach((element) {
     if (element is Directory) {
       a.add(element);
@@ -13,13 +13,23 @@ List<Directory> getAllChildrenFolder(Directory dir) {
 }
 
 List<File> getActiveiniFiles(Directory dir) {
-  List<File> a = [];
+  final List<File> a = [];
   dir.listSync().forEach((element) {
     var path = element.path;
     final filename = path.split('\\').last;
     if (element is File &&
         path.endsWith('.ini') &&
         !filename.contains('DISABLED')) {
+      a.add(element);
+    }
+  });
+  return a;
+}
+
+List<File> getAllChildrenFiles(Directory dir) {
+  final List<File> a = [];
+  dir.listSync().forEach((element) {
+    if (element is File) {
       a.add(element);
     }
   });

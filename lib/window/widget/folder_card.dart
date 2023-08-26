@@ -135,17 +135,11 @@ class _FolderCardState extends DWState<FolderCard> {
 
   void toggleEnable(BuildContext context, String displayName) {
     final List<File> shaderFilenames = [];
+    final modShaderDir = Directory(p.join(widget.dirPath, 'ShaderFixes'));
     try {
-      Directory(p.join(widget.dirPath, 'ShaderFixes'))
-          .listSync()
-          .forEach((element) {
-        if (element is File) {
-          shaderFilenames.add(element);
-        }
-      });
+      shaderFilenames.addAll(getAllChildrenFiles(modShaderDir));
     } on PathNotFoundException catch (e) {
       logger.i(e);
-      return;
     }
 
     final String renameTarget = p.join(widget.dir.parent.path, displayName);
@@ -153,92 +147,94 @@ class _FolderCardState extends DWState<FolderCard> {
       showDirectoryExists(context, renameTarget);
       return;
     }
+    final tgt = p.join(context.read<AppState>().targetDir, 'ShaderFixes');
     try {
-      if (shaderFilenames.isNotEmpty) {
-        final tgt = p.join(context.read<AppState>().targetDir, 'ShaderFixes');
-        copyShaders(tgt, shaderFilenames);
-      }
+      copyShaders(tgt, shaderFilenames);
     } on FileSystemException catch (e) {
       logger.w(e);
-      showUnableCopy(context, e.path!);
+      errorDialog(context, '${e.path} already exists!');
       return;
     }
-    widget.dir.renameSync(renameTarget);
-    return;
+    try {
+      widget.dir.renameSync(renameTarget);
+    } on PathAccessException {
+      errorDialog(
+          context,
+          'Failed to rename folder.'
+          ' Check if the ShaderFixes folder is open in explorer,'
+          ' and close it if it is.');
+      deleteShaders(tgt, shaderFilenames);
+    }
   }
 
   void toggleDisable(BuildContext context, String displayName) {
-    final String renameTarget;
-
-    // list all files in the folder
-    List<File> shaderFilenames = [];
+    final List<File> shaderFilenames = [];
+    final modShaderDir = Directory(p.join(widget.dirPath, 'ShaderFixes'));
     try {
-      Directory('${widget.dir}\\ShaderFixes').listSync().forEach((element) {
-        if (element is File) {
-          shaderFilenames.add(element);
-        }
-      });
-    } catch (e) {
+      shaderFilenames.addAll(getAllChildrenFiles(modShaderDir));
+    } on PathNotFoundException catch (e) {
       logger.i(e);
     }
 
-    final shaderFixDir = '${context.read<AppState>().targetDir}\\ShaderFixes';
-
-    renameTarget = '${widget.dir.parent.path}\\DISABLED $displayName';
+    final String renameTarget =
+        p.join(widget.dir.parent.path, 'DISABLED $displayName');
     if (Directory(renameTarget).existsSync()) {
       showDirectoryExists(context, renameTarget);
       return;
     }
+    final tgt = p.join(context.read<AppState>().targetDir, 'ShaderFixes');
     try {
-      if (shaderFilenames.isNotEmpty) {
-        deleteShaders(shaderFixDir, shaderFilenames);
-      }
+      deleteShaders(tgt, shaderFilenames);
     } catch (e) {
       logger.w(e);
-      showUnableDelete(context);
+      errorDialog(context, 'Failed to delete files in ShaderFixes');
       return;
     }
-    widget.dir.renameSync(renameTarget);
-    return;
+    try {
+      widget.dir.renameSync(renameTarget);
+    } on PathAccessException {
+      errorDialog(
+          context,
+          'Failed to rename folder.'
+              ' Check if the ShaderFixes folder is open in explorer,'
+              ' and close it if it is.');
+      copyShaders(tgt, shaderFilenames);
+    }
   }
 
   void copyShaders(String targetDir, List<File> shaderFiles) {
     // check for existence first
-    Directory(targetDir).listSync().forEach((e) {
-      for (var e2 in shaderFiles) {
-        final last2 = e.path.split('\\').last;
-        if (last2 == e2.path.split('\\').last) {
+    final targetDirFileList = getAllChildrenFiles(Directory(targetDir));
+    for (final em in shaderFiles) {
+      final modFilename = p.basename(em.path);
+      for (final et in targetDirFileList) {
+        final tgtFilename = p.basename(et.path);
+        if (tgtFilename == modFilename) {
           throw FileSystemException(
             'Target directory is not empty',
-            last2,
+            tgtFilename,
           );
         }
       }
-    });
-    for (final element in shaderFiles) {
-      element.copySync('$targetDir\\${element.path.split('\\').last}');
+    }
+    for (final em in shaderFiles) {
+      final modFilename = p.basename(em.path);
+      final moveName = p.join(targetDir, modFilename);
+      em.copySync(moveName);
     }
   }
 
   void deleteShaders(String targetDir, List<File> shaderFilenames) {
-    Directory(targetDir).listSync().forEach((e) {
-      if (e is File) {
-        final any = shaderFilenames.any((e2) {
-          return e.path.split('\\').last == e2.path.split('\\').last;
-        });
-        if (any) {
-          e.deleteSync();
+    final targetDirFileList = getAllChildrenFiles(Directory(targetDir));
+    for (final em in shaderFilenames) {
+      final modFilename = p.basename(em.path);
+      for (final et in targetDirFileList) {
+        final tgtFilename = p.basename(et.path);
+        if (tgtFilename == modFilename) {
+          et.deleteSync();
         }
       }
-    });
-  }
-
-  void showUnableDelete(BuildContext context) {
-    errorDialog(context, 'Failed to delete files in ShaderFixes');
-  }
-
-  void showUnableCopy(BuildContext context, String filename) {
-    errorDialog(context, '$filename already exists!');
+    }
   }
 
   void showDirectoryExists(BuildContext context, String renameTarget) {
@@ -274,7 +270,7 @@ class _FolderCardState extends DWState<FolderCard> {
 }
 
 List<Widget> allFilesToWidget(List<File> allFiles) {
-  List<Widget> alliniFile = [];
+  final List<Widget> alliniFile = [];
   for (var i = 0; i < allFiles.length; i++) {
     final cur = allFiles[i];
     alliniFile.add(buildIniHeader(cur));

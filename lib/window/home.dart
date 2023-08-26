@@ -188,6 +188,23 @@ class FolderPaneItem extends PaneItem {
         );
 
   @override
+  Widget build(BuildContext context, bool selected, VoidCallback? onPressed,
+      {PaneDisplayMode? displayMode,
+      bool showTextOnTop = true,
+      int? itemIndex,
+      bool? autofocus}) {
+    return super.build(
+      context,
+      selected,
+      onPressed,
+      displayMode: displayMode,
+      showTextOnTop: showTextOnTop,
+      itemIndex: itemIndex,
+      autofocus: autofocus,
+    );
+  }
+
+  @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return '${super.toString(minLevel: minLevel)}($dirPath)';
   }
