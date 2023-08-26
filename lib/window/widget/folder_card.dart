@@ -1,7 +1,7 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/provider/app_state.dart';
 import 'package:genshin_mod_manager/window/widget/editor_text.dart';
@@ -9,126 +9,203 @@ import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
-class FolderCard extends StatelessWidget {
-  static final Logger logger = Logger();
-  final Directory e;
+class FolderCard extends DirectoryWatchWidget {
+  FolderCard({required super.dirPath}) : super(key: ValueKey(dirPath));
 
-  const FolderCard(
-    this.e, {
-    super.key,
-  });
+  @override
+  DWState<FolderCard> createState() => _FolderCardState();
+}
+
+class _FolderCardState extends DWState<FolderCard> {
+  static final Logger logger = Logger();
 
   @override
   Widget build(BuildContext context) {
-    String folderName = p.basename(e.path);
-    final isDisabled = folderName.startsWith('DISABLED ');
+    String displayName = p.basename(widget.dir.path);
+    final isDisabled = displayName.startsWith('DISABLED ');
     final color = isDisabled
         ? Colors.red.lightest.withOpacity(0.5)
         : Colors.green.lightest;
     if (isDisabled) {
-      folderName = folderName.substring(9);
+      displayName = displayName.substring(9);
     }
 
     return GestureDetector(
       onTap: () {
-        final String renameTarget;
-
-        // list all files in the folder
-        List<File> shaderFilenames = [];
-        try {
-          Directory('$e\\ShaderFixes').listSync().forEach((element) {
-            if (element is File) {
-              shaderFilenames.add(element);
-            }
-          });
-        } catch (e) {
-          logger.i(e);
-        }
-
-        final shaderFixDir =
-            '${context.read<AppState>().targetDir}\\ShaderFixes';
-
         if (isDisabled) {
-          renameTarget = '${e.parent.path}\\$folderName';
-          if (Directory(renameTarget).existsSync()) {
-            showDirectoryExists(context, renameTarget);
-            return;
-          }
-          try {
-            if (shaderFilenames.isNotEmpty) {
-              copyShaders(shaderFixDir, shaderFilenames);
-            }
-          } on FileSystemException catch (e) {
-            logger.w(e);
-            showUnableCopy(context, e.path!);
-            return;
-          }
+          toggleEnable(context, displayName);
         } else {
-          renameTarget = '${e.parent.path}\\DISABLED $folderName';
-          if (Directory(renameTarget).existsSync()) {
-            showDirectoryExists(context, renameTarget);
-            return;
-          }
-          try {
-            if (shaderFilenames.isNotEmpty) {
-              deleteShaders(shaderFixDir, shaderFilenames);
-            }
-          } catch (e) {
-            logger.w(e);
-            showUnableDelete(context);
-            return;
-          }
+          toggleDisable(context, displayName);
         }
-
-        e.renameSync(renameTarget);
       },
       child: Card(
         backgroundColor: color,
         padding: const EdgeInsets.all(6),
         child: Column(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    folderName,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: FluentTheme.of(context).typography.bodyStrong,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Button(
-                  child: const Icon(FluentIcons.folder_open),
-                  onPressed: () => openFolder(e),
-                ),
-              ],
-            ),
+            buildFolderHeader(context, displayName),
             const SizedBox(height: 4),
-            Expanded(
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  buildDesc(folderName, context),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Divider(direction: Axis.vertical),
-                  ),
-                  buildIni(),
-                ],
-              ),
-            ),
+            buildFolderContent(context, displayName),
           ],
         ),
       ),
     );
   }
 
-  void copyShaders(String targetDir, List<File> shaderFilenames) {
+  Widget buildFolderHeader(BuildContext context, String displayName) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            displayName,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: FluentTheme.of(context).typography.bodyStrong,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Button(
+          child: const Icon(FluentIcons.folder_open),
+          onPressed: () => openFolder(widget.dir),
+        ),
+      ],
+    );
+  }
+
+  Widget buildFolderContent(BuildContext context, String displayName) {
+    return Expanded(
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              buildDesc(context, displayName, constraints),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Divider(direction: Axis.vertical),
+              ),
+              buildIni(),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget buildDesc(
+      BuildContext context, String folderName, BoxConstraints constraints) {
+    final previewFile = findPreviewFile(widget.dir);
+    if (previewFile == null) {
+      return const Expanded(child: Center(child: Icon(FluentIcons.unknown)));
+    }
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: constraints.maxWidth - 150,
+      ),
+      child: Image.file(
+        previewFile,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.medium,
+      ),
+    );
+  }
+
+  Widget buildIni() {
+    final alliniFile = allFilesToWidget(getActiveiniFiles(widget.dir));
+    return Expanded(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minWidth: 80,
+        ),
+        child: alliniFile.isNotEmpty
+            ? Card(
+                backgroundColor: Colors.white.withOpacity(0.4),
+                padding: const EdgeInsets.all(4),
+                child: ListView(
+                  children: alliniFile,
+                ),
+              )
+            : const Center(
+                child: Text('No ini files found'),
+              ),
+      ),
+    );
+  }
+
+  void toggleEnable(BuildContext context, String displayName) {
+    final List<File> shaderFilenames = [];
+    try {
+      Directory(p.join(widget.dirPath, 'ShaderFixes'))
+          .listSync()
+          .forEach((element) {
+        if (element is File) {
+          shaderFilenames.add(element);
+        }
+      });
+    } on PathNotFoundException catch (e) {
+      logger.i(e);
+      return;
+    }
+
+    final String renameTarget = p.join(widget.dir.parent.path, displayName);
+    if (Directory(renameTarget).existsSync()) {
+      showDirectoryExists(context, renameTarget);
+      return;
+    }
+    try {
+      if (shaderFilenames.isNotEmpty) {
+        final tgt = p.join(context.read<AppState>().targetDir, 'ShaderFixes');
+        copyShaders(tgt, shaderFilenames);
+      }
+    } on FileSystemException catch (e) {
+      logger.w(e);
+      showUnableCopy(context, e.path!);
+      return;
+    }
+    widget.dir.renameSync(renameTarget);
+    return;
+  }
+
+  void toggleDisable(BuildContext context, String displayName) {
+    final String renameTarget;
+
+    // list all files in the folder
+    List<File> shaderFilenames = [];
+    try {
+      Directory('${widget.dir}\\ShaderFixes').listSync().forEach((element) {
+        if (element is File) {
+          shaderFilenames.add(element);
+        }
+      });
+    } catch (e) {
+      logger.i(e);
+    }
+
+    final shaderFixDir = '${context.read<AppState>().targetDir}\\ShaderFixes';
+
+    renameTarget = '${widget.dir.parent.path}\\DISABLED $displayName';
+    if (Directory(renameTarget).existsSync()) {
+      showDirectoryExists(context, renameTarget);
+      return;
+    }
+    try {
+      if (shaderFilenames.isNotEmpty) {
+        deleteShaders(shaderFixDir, shaderFilenames);
+      }
+    } catch (e) {
+      logger.w(e);
+      showUnableDelete(context);
+      return;
+    }
+    widget.dir.renameSync(renameTarget);
+    return;
+  }
+
+  void copyShaders(String targetDir, List<File> shaderFiles) {
     // check for existence first
     Directory(targetDir).listSync().forEach((e) {
-      for (var e2 in shaderFilenames) {
+      for (var e2 in shaderFiles) {
         final last2 = e.path.split('\\').last;
         if (last2 == e2.path.split('\\').last) {
           throw FileSystemException(
@@ -138,7 +215,7 @@ class FolderCard extends StatelessWidget {
         }
       }
     });
-    for (final element in shaderFilenames) {
+    for (final element in shaderFiles) {
       element.copySync('$targetDir\\${element.path.split('\\').last}');
     }
   }
@@ -154,46 +231,6 @@ class FolderCard extends StatelessWidget {
         }
       }
     });
-  }
-
-  Widget buildDesc(String folderName, BuildContext context) {
-    return () {
-      late final FileSystemEntity preview;
-      try {
-        var listSync = e.listSync();
-        preview = listSync.firstWhere((element) {
-          final lowerCase = element.path.split('\\').last.toLowerCase();
-          return lowerCase == 'preview.png' ||
-              lowerCase == 'preview.jpg' ||
-              lowerCase == 'preview.jpeg';
-        });
-      } on StateError {
-        return const Expanded(child: Center(child: Icon(FluentIcons.unknown)));
-      } on PathNotFoundException {
-        return const Expanded(child: Center(child: Icon(FluentIcons.error)));
-      }
-      final File previewFile;
-      try {
-        previewFile = preview as File;
-      } on TypeError {
-        return const Expanded(
-          child: Center(
-            child: Text("Invalid preview file entry"),
-          ),
-        );
-      }
-      return ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 250),
-        child: Image.file(
-          previewFile,
-          filterQuality: FilterQuality.medium,
-        ),
-      );
-    }();
-  }
-
-  Widget buildIni() {
-    return IniList(e);
   }
 
   void showUnableDelete(BuildContext context) {
@@ -224,128 +261,86 @@ class FolderCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class IniList extends StatefulWidget {
-  final Directory folder;
-
-  const IniList(
-    this.folder, {
-    super.key,
-  });
 
   @override
-  State<IniList> createState() => _IniListState();
-}
-
-class _IniListState extends State<IniList> {
-  late StreamSubscription<FileSystemEvent> watcher;
-
-  @override
-  void initState() {
-    super.initState();
-    watcher = widget.folder.watch().listen((event) {
-      setState(() {});
-    });
+  bool shouldUpdate(FileSystemEvent event) {
+    return true;
   }
 
   @override
-  void dispose() {
-    watcher.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final alliniFile = allFilesToWidget(getActiveiniFiles(widget.folder));
-    return Flexible(
-      child: alliniFile.isNotEmpty
-          ? Card(
-              backgroundColor: Colors.white.withOpacity(0.4),
-              padding: const EdgeInsets.all(4),
-              child: ListView(
-                children: alliniFile,
-              ),
-            )
-          : const Center(
-              child: Text('No ini files found'),
-            ),
-    );
+  void updateFolder() {
+    setState(() {});
   }
 }
 
 List<Widget> allFilesToWidget(List<File> allFiles) {
   List<Widget> alliniFile = [];
   for (var i = 0; i < allFiles.length; i++) {
-    final folderName = p.basename(allFiles[i].path);
-    alliniFile.add(Row(
-      children: [
-        Expanded(
-          child: Tooltip(
-            message: folderName,
-            child: Text(
-              folderName,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-        Button(
-          child: const Icon(FluentIcons.document_management),
-          onPressed: () => runProgram(allFiles[i]),
-        ),
-      ],
-    ));
+    final cur = allFiles[i];
+    alliniFile.add(buildIniHeader(cur));
     late String lastSection;
     bool metSection = false;
-    allFiles[i].readAsLinesSync().forEach((e) {
-      if (e.startsWith('[')) {
+    cur.readAsLinesSync().forEach((line) {
+      if (line.startsWith('[')) {
         metSection = false;
       }
       final regExp = RegExp(r'\[Key.*?\]');
-      final match = regExp.firstMatch(e)?.group(0)!;
+      final match = regExp.firstMatch(line)?.group(0)!;
       if (match != null) {
         alliniFile.add(Text(match));
         lastSection = match;
         metSection = true;
       }
-      if (e.toLowerCase().startsWith('key')) {
-        alliniFile.add(Row(
-          children: [
-            const Text(
-              'key:',
-            ),
-            Expanded(
-              child: EditorText(
-                section: lastSection,
-                line: e,
-                file: allFiles[i],
-              ),
-            )
-          ],
-        ));
-      } else if (e.toLowerCase().startsWith('back')) {
-        alliniFile.add(Row(
-          children: [
-            const Text(
-              'back:',
-            ),
-            Expanded(
-              child: EditorText(
-                section: lastSection,
-                line: e,
-                file: allFiles[i],
-              ),
-            )
-          ],
-        ));
-      } else if (e.startsWith('\$') && metSection) {
-        final cycles = ','.allMatches(e.split(';').first).length + 1;
+      final lineLower = line.toLowerCase();
+      if (lineLower.startsWith('key')) {
+        alliniFile.add(buildIniFieldEditor('key:', lastSection, line, cur));
+      } else if (lineLower.startsWith('back')) {
+        alliniFile.add(buildIniFieldEditor('back:', lastSection, line, cur));
+      } else if (line.startsWith('\$') && metSection) {
+        final cycles = ','.allMatches(line.split(';').first).length + 1;
         alliniFile.add(Text('Cycles: $cycles'));
       }
     });
   }
   return alliniFile;
+}
+
+Widget buildIniHeader(File iniFile) {
+  final iniName = p.basename(iniFile.path);
+  return Row(
+    children: [
+      Expanded(
+        child: Tooltip(
+          message: iniName,
+          child: Text(
+            iniName,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ),
+      Button(
+        child: const Icon(FluentIcons.document_management),
+        onPressed: () => runProgram(iniFile),
+      ),
+    ],
+  );
+}
+
+Widget buildIniFieldEditor(
+    String data, String section, String line, File file) {
+  return Row(
+    children: [
+      Text(data),
+      Expanded(
+        child: EditorText(
+          section: section,
+          line: line,
+          file: file,
+        ),
+      ),
+    ],
+  );
 }

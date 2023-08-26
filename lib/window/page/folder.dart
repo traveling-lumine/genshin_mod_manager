@@ -45,7 +45,8 @@ class _FolderPageState extends DWState<FolderPage> {
           mainAxisSpacing: 8,
           mainAxisExtent: 350,
         ),
-        children: allChildrenFolder.map((e) => FolderCard(e)).toList(),
+        children:
+            allChildrenFolder.map((e) => FolderCard(dirPath: e.path)).toList(),
       ),
     );
   }

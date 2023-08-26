@@ -29,8 +29,8 @@ List<File> getActiveiniFiles(Directory dir) {
 File? findPreviewFile(Directory dir) {
   for (var element in dir.listSync()) {
     if (element is! File) continue;
-    final filename = p.basenameWithoutExtension(element.path);
-    if (filename.toLowerCase() != 'preview') continue;
+    final filename = p.basenameWithoutExtension(element.path).toLowerCase();
+    if (filename != 'preview') continue;
     final ext = p.extension(element.path).toLowerCase();
     if (ext == '.png' || ext == '.jpg' || ext == '.jpeg') {
       return element;
