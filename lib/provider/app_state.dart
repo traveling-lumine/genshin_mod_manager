@@ -3,6 +3,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 class AppState with ChangeNotifier {
   String _targetDir;
   String _launcherFile;
+  bool _runTogether;
 
   String get targetDir => _targetDir;
 
@@ -18,10 +19,17 @@ class AppState with ChangeNotifier {
     notifyListeners();
   }
 
-  AppState(this._targetDir, this._launcherFile);
+  bool get runTogether => _runTogether;
+
+  set runTogether(bool value) {
+    _runTogether = value;
+    notifyListeners();
+  }
+
+  AppState(this._targetDir, this._launcherFile, this._runTogether);
 
   @override
   String toString() {
-    return 'AppState{_targetDir: $_targetDir, _launcherDir: $_launcherFile}';
+    return 'AppState(_targetDir: $_targetDir, _launcherDir: $_launcherFile)';
   }
 }

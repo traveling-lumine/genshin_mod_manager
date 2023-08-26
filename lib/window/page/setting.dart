@@ -1,7 +1,7 @@
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/new_impl/no_deref_file_opener.dart';
 import 'package:genshin_mod_manager/provider/app_state.dart';
+import 'package:genshin_mod_manager/third_party/no_deref_file_opener.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,8 +20,7 @@ class SettingPage extends StatelessWidget {
         SettingItem(
           title: 'Select 3D Migoto folder',
           icon: FluentIcons.folder_open,
-          path:
-              context.select<AppState, String>((value) => value.targetDir),
+          path: context.select<AppState, String>((value) => value.targetDir),
           onPressed: () {
             final dir = DirectoryPicker().getDirectory();
             if (dir == null) return;
@@ -34,8 +33,7 @@ class SettingPage extends StatelessWidget {
         SettingItem(
           title: 'Select launcher',
           icon: FluentIcons.document_management,
-          path: context
-              .select<AppState, String>((value) => value.launcherFile),
+          path: context.select<AppState, String>((value) => value.launcherFile),
           onPressed: () {
             final file = OpenNoDereferenceFilePicker().getFile();
             if (file == null) return;
@@ -44,6 +42,31 @@ class SettingPage extends StatelessWidget {
             });
             context.read<AppState>().launcherFile = file.path;
           },
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Run 3d migoto and launcher using one button',
+                  style: FluentTheme.of(context).typography.bodyLarge,
+                ),
+              ),
+              RepaintBoundary(
+                child: ToggleSwitch(
+                  checked: context
+                      .select<AppState, bool>((value) => value.runTogether),
+                  onChanged: (bool value) {
+                    SharedPreferences.getInstance().then((instance) {
+                      instance.setBool('runTogether', value);
+                    });
+                    context.read<AppState>().runTogether = value;
+                  },
+                ),
+              )
+            ],
+          ),
         ),
       ],
     );
