@@ -46,10 +46,12 @@ dependencies:
   logger: ^2.0.1
   path: ^1.8.3
   desktop_drop: ^0.4.3
+  url_launcher: ^6.1.12
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_oss_licenses: ^2.0.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
