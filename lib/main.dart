@@ -62,6 +62,7 @@ class MyApp extends StatelessWidget {
         final curExePath = Platform.resolvedExecutable;
         final curExeParentDir = p.dirname(curExePath);
         final modResourcePath = p.join(curExeParentDir, "Resources");
+        Directory(modResourcePath).createSync();
         return HomeWindow(dirPaths: [dirPath, modResourcePath]);
       },
     );
