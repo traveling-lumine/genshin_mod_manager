@@ -3,6 +3,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/provider/app_state.dart';
 import 'package:genshin_mod_manager/third_party/no_deref_file_opener.dart';
 import 'package:genshin_mod_manager/window/page/license.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -94,6 +95,22 @@ class SettingPage extends StatelessWidget {
                 ),
               )
             ],
+          ),
+        ),
+        Padding(
+          padding: itemPadding,
+          child: FutureBuilder(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Text('Loading...');
+              }
+              final packageInfo = snapshot.data as PackageInfo;
+              return Text(
+                'Version: ${packageInfo.version}+${packageInfo.buildNumber}',
+                style: FluentTheme.of(context).typography.caption,
+              );
+            },
           ),
         ),
       ],
