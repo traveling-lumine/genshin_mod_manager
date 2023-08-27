@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
           const Duration(seconds: 5),
           onTimeout: () {
             logger.e('Unable to obtain SharedPreference settings');
-            return AppState('.', '.', false, false);
+            return AppState('.', '.', false, false, true);
           },
         ),
         builder: (context, snapshot) {
@@ -83,7 +83,9 @@ class MyApp extends StatelessWidget {
     final String launcherFile = instance.getString('launcherDir') ?? '.';
     final bool runTogether = instance.getBool('runTogether') ?? false;
     final bool moveOnDrag = instance.getBool('moveOnDrag') ?? false;
-    final appState = AppState(targetDir, launcherFile, runTogether, moveOnDrag);
+    final bool showFolderIcon = instance.getBool('showFolderIcon') ?? false;
+    final appState = AppState(
+        targetDir, launcherFile, runTogether, moveOnDrag, showFolderIcon);
     return appState;
   }
 }

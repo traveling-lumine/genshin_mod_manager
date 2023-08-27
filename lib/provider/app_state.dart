@@ -5,6 +5,7 @@ class AppState with ChangeNotifier {
   String _launcherFile;
   bool _runTogether;
   bool _moveOnDrag;
+  bool _showFolderIcon;
 
   String get targetDir => _targetDir;
 
@@ -34,11 +35,19 @@ class AppState with ChangeNotifier {
     notifyListeners();
   }
 
+  bool get showFolderIcon => _showFolderIcon;
+
+  set showFolderIcon(bool value) {
+    _showFolderIcon = value;
+    notifyListeners();
+  }
+
   AppState(
     this._targetDir,
     this._launcherFile,
     this._runTogether,
     this._moveOnDrag,
+    this._showFolderIcon,
   );
 
   @override
@@ -48,6 +57,7 @@ class AppState with ChangeNotifier {
         ', _launcherDir: $_launcherFile'
         ', _runTogether: $_runTogether'
         ', _moveOnDrag: $_moveOnDrag'
+        ', _showFolderIcon: $_showFolderIcon'
         ')';
   }
 }

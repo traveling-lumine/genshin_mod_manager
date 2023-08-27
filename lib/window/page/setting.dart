@@ -63,6 +63,17 @@ class SettingPage extends StatelessWidget {
             context.read<AppState>().moveOnDrag = value;
           },
         ),
+        SwitchItem(
+          text: 'Show folder icon images',
+          checked:
+              context.select<AppState, bool>((value) => value.showFolderIcon),
+          onChanged: (value) {
+            SharedPreferences.getInstance().then((instance) {
+              instance.setBool('showFolderIcon', value);
+            });
+            context.read<AppState>().showFolderIcon = value;
+          },
+        ),
       ],
     );
   }
