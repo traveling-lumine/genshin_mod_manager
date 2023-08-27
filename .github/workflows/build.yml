@@ -16,7 +16,7 @@ jobs:
       - run: move build\windows\runner\Release GenshinModManager
       - run: mkdir GenshinModManager\Resources
       - run: tar -acf GenshinModManager.zip GenshinModManager
-      - run: echo ${{ hashFiles('/GenshinModManager.zip') }}
+      - run: certutil -hashfile .\GenshinModManager.zip SHA256
       - uses: actions/upload-artifact@v2
         with:
           name: Release binary
