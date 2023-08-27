@@ -48,11 +48,11 @@ void copyDirectorySync(Directory dir, String dest) {
   });
 }
 
-File? findPreviewFile(Directory dir) {
+File? findPreviewFile(Directory dir, {String name = 'preview'}) {
   for (var element in dir.listSync()) {
     if (element is! File) continue;
     final filename = p.basenameWithoutExtension(element.path).toLowerCase();
-    if (filename != 'preview') continue;
+    if (filename != name) continue;
     final ext = p.extension(element.path).toLowerCase();
     if (ext == '.png' || ext == '.jpg' || ext == '.jpeg') {
       return element;

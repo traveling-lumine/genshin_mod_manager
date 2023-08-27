@@ -16,7 +16,8 @@ abstract class DirectoryWatchWidget extends StatefulWidget {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return '${super.toString(minLevel: minLevel)}($dirPath)';
+    final string = super.toString(minLevel: minLevel);
+    return '$string($dirPath)';
   }
 }
 
@@ -131,26 +132,27 @@ abstract class MDWState<T extends MultiDirectoryWatchWidget>
   }
 
   void _onUpdate(List<int>? updates) {
-    updateFolder(updates);
+    updateFolder(-1);
     if (updates == null) {
-      subscriptions = widget.dirPaths
-          .map((e) => Directory(e).watch().listen((event) {
-                logger.d('$this update: $event');
-                if (shouldUpdate(event)) {
-                  logger.d('$this update accepted');
-                  setState(() => updateFolder(updates));
-                } else {
-                  logger.d('$this update rejected');
-                }
-              }))
-          .toList(growable: false);
+      subscriptions = [];
+      for (var index = 0; index < widget.dirPaths.length; index++) {
+        subscriptions.add(widget.dir(index).watch().listen((event) {
+          logger.d('$this update: $event');
+          if (shouldUpdate(index, event)) {
+            logger.d('$this update accepted');
+            setState(() => updateFolder(index));
+          } else {
+            logger.d('$this update rejected');
+          }
+        }));
+      }
     } else {
       for (final index in updates) {
         subscriptions[index] = widget.dir(index).watch().listen((event) {
           logger.d('$this update: $event');
-          if (shouldUpdate(event)) {
+          if (shouldUpdate(index, event)) {
             logger.d('$this update accepted');
-            setState(() => updateFolder(updates));
+            setState(() => updateFolder(index));
           } else {
             logger.d('$this update rejected');
           }
@@ -159,9 +161,9 @@ abstract class MDWState<T extends MultiDirectoryWatchWidget>
     }
   }
 
-  bool shouldUpdate(FileSystemEvent event);
+  bool shouldUpdate(int index, FileSystemEvent event);
 
-  void updateFolder(List<int>? updates);
+  void updateFolder(int index);
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {

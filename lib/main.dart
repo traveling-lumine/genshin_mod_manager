@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/provider/app_state.dart';
@@ -58,7 +59,10 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         final dirPath = context.select<AppState, String>(
             (value) => p.join(value.targetDir, "Mods"));
-        return HomeWindow(dirPath: dirPath);
+        final curExePath = Platform.resolvedExecutable;
+        final curExeParentDir = p.dirname(curExePath);
+        final modResourcePath = p.join(curExeParentDir, "Resources");
+        return HomeWindow(dirPaths: [dirPath, modResourcePath]);
       },
     );
   }
