@@ -222,18 +222,28 @@ class FolderPaneItem extends PaneItem {
             p.basename(dirPath),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          icon: ConstrainedBox(
-            constraints: BoxConstraints.loose(const Size(100, 100)),
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: imageFile != null
-                  ? Image.file(
-                      imageFile,
-                      fit: BoxFit.cover,
-                      filterQuality: FilterQuality.medium,
-                    )
-                  : Image.asset('images/app_icon.ico'),
-            ),
+          icon: Selector<AppState, bool>(
+            selector: (_, appState) => appState.showFolderIcon,
+            builder: (context, value, child) {
+              if (value) {
+                const size = 80.0;
+                return ConstrainedBox(
+                  constraints: BoxConstraints.loose(const Size(size, size)),
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: imageFile != null
+                        ? Image.file(
+                            imageFile,
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.medium,
+                          )
+                        : Image.asset('images/app_icon.ico'),
+                  ),
+                );
+              } else {
+                return const Icon(FluentIcons.folder_open);
+              }
+            },
           ),
           body: FolderPage(dirPath: dirPath),
           key: ValueKey(dirPath),

@@ -12,10 +12,9 @@ import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
 class FolderPage extends DirectoryWatchWidget {
-  const FolderPage({
-    super.key,
+  FolderPage({
     required super.dirPath,
-  });
+  }) : super(key: ValueKey(dirPath));
 
   @override
   DWState<FolderPage> createState() => _FolderPageState();

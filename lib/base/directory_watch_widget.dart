@@ -13,12 +13,6 @@ abstract class DirectoryWatchWidget extends StatefulWidget {
 
   @override
   DWState createState();
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    final string = super.toString(minLevel: minLevel);
-    return '$string($dirPath)';
-  }
 }
 
 abstract class DWState<T extends DirectoryWatchWidget>
