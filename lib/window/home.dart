@@ -12,17 +12,17 @@ import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-class HomeWindow extends DirectoryWatchWidget {
+class HomeWindow extends MultiDirectoryWatchWidget {
   const HomeWindow({
     super.key,
-    required super.dirPath,
+    required super.dirPaths,
   });
 
   @override
-  DWState<HomeWindow> createState() => _HomeWindowState();
+  MDWState<HomeWindow> createState() => _HomeWindowState();
 }
 
-class _HomeWindowState extends DWState<HomeWindow> with WindowListener {
+class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
   static final Logger logger = Logger();
   late List<NavigationPaneItem> subFolders;
   int? selected;
@@ -145,33 +145,68 @@ class _HomeWindowState extends DWState<HomeWindow> with WindowListener {
   }
 
   @override
-  bool shouldUpdate(FileSystemEvent event) =>
-      !(event is FileSystemModifyEvent && event.contentChanged);
+  bool shouldUpdate(int index, FileSystemEvent event) {
+    logger.d('$this update: $index, $event');
+    if (index == -1 || index == 0) {
+      return !(event is FileSystemModifyEvent && event.contentChanged);
+    } else if (index == -1 || index == 1) {
+      return true;
+    }
+    return false;
+  }
 
   @override
-  void updateFolder() {
-    final dir = widget.dir;
-    final sel_ = selected;
-    Key? selectedFolder;
-    if (sel_ != null && sel_ < subFolders.length) {
-      selectedFolder = subFolders[sel_].key;
+  void updateFolder(int updateIndex) {
+    logger.d('$this updateFolder: $updateIndex');
+    if (updateIndex == -1 || updateIndex == 0) {
+      final dir = widget.dir(0);
+      final sel_ = selected;
+      Key? selectedFolder;
+      if (sel_ != null && sel_ < subFolders.length) {
+        selectedFolder = subFolders[sel_].key;
+      }
+      subFolders = [];
+      final List<Directory> allFolder;
+      try {
+        allFolder = getAllChildrenFolder(dir);
+      } on PathNotFoundException {
+        logger.e('Path not found: $dir');
+        return;
+      }
+      for (final element in allFolder) {
+        final folderName = p.basename(element.path).toLowerCase();
+        final previewFile = findPreviewFile(widget.dir(1), name: folderName);
+        if (previewFile != null) {
+          logger.d('Preview file for $folderName: $previewFile');
+        }
+        subFolders.add(FolderPaneItem(
+          dirPath: element.path,
+          imageFile: previewFile,
+        ));
+      }
+      logger.d('Home subfolders: $subFolders');
+      if (selectedFolder == null) return;
+      final index = subFolders.indexWhere((e) => e.key == selectedFolder);
+      if (index == -1) return;
+      selected = index;
+    } else if (updateIndex == -1 || updateIndex == 1) {
+      final List<NavigationPaneItem> updateFolder = [];
+      for (final element in subFolders) {
+        final fpelem = element as FolderPaneItem;
+        final folderName = p.basename(fpelem.dirPath).toLowerCase();
+        final previewFile = findPreviewFile(widget.dir(1), name: folderName);
+        if (previewFile != null) {
+          logger.d('Preview file for $folderName: $previewFile');
+        }
+        updateFolder.add(
+          FolderPaneItem(
+            dirPath: fpelem.dirPath,
+            imageFile: previewFile,
+          ),
+        );
+      }
+      subFolders = updateFolder;
     }
-    subFolders = [];
-    final List<Directory> allFolder;
-    try {
-      allFolder = getAllChildrenFolder(dir);
-    } on PathNotFoundException {
-      logger.e('Path not found: $dir');
-      return;
-    }
-    for (var element in allFolder) {
-      subFolders.add(FolderPaneItem(dirPath: element.path));
-    }
-    logger.i('Home subfolders: $subFolders');
-    if (selectedFolder == null) return;
-    final index = subFolders.indexWhere((e) => e.key == selectedFolder);
-    if (index == -1) return;
-    selected = index;
   }
 }
 
@@ -181,9 +216,35 @@ class FolderPaneItem extends PaneItem {
 
   FolderPaneItem({
     required this.dirPath,
+    File? imageFile,
   }) : super(
-          title: Text(p.basename(dirPath)),
-          icon: Image.asset('images/app_icon.ico'),
+          title: Text(
+            p.basename(dirPath),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          icon: Selector<AppState, bool>(
+            selector: (_, appState) => appState.showFolderIcon,
+            builder: (context, value, child) {
+              if (value) {
+                const size = 80.0;
+                return ConstrainedBox(
+                  constraints: BoxConstraints.loose(const Size(size, size)),
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: imageFile != null
+                        ? Image.file(
+                            imageFile,
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.medium,
+                          )
+                        : Image.asset('images/app_icon.ico'),
+                  ),
+                );
+              } else {
+                return const Icon(FluentIcons.folder_open);
+              }
+            },
+          ),
           body: FolderPage(dirPath: dirPath),
           key: ValueKey(dirPath),
         );

@@ -12,10 +12,9 @@ import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
 class FolderPage extends DirectoryWatchWidget {
-  const FolderPage({
-    super.key,
+  FolderPage({
     required super.dirPath,
-  });
+  }) : super(key: ValueKey(dirPath));
 
   @override
   DWState<FolderPage> createState() => _FolderPageState();
@@ -81,7 +80,8 @@ class _FolderPageState extends DWState<FolderPage> {
   }
 }
 
-void dropFinishHandler(BuildContext context, DropDoneDetails details, Logger logger, String dirPath) {
+void dropFinishHandler(BuildContext context, DropDoneDetails details,
+    Logger logger, String dirPath) {
   final moveInsteadOfCopy = context.read<AppState>().moveOnDrag;
   for (final xFile in details.files) {
     final path = xFile.path;

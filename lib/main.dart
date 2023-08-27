@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/provider/app_state.dart';
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
           const Duration(seconds: 5),
           onTimeout: () {
             logger.e('Unable to obtain SharedPreference settings');
-            return AppState('.', '.', false, false);
+            return AppState('.', '.', false, false, true);
           },
         ),
         builder: (context, snapshot) {
@@ -58,7 +59,10 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         final dirPath = context.select<AppState, String>(
             (value) => p.join(value.targetDir, "Mods"));
-        return HomeWindow(dirPath: dirPath);
+        final curExePath = Platform.resolvedExecutable;
+        final curExeParentDir = p.dirname(curExePath);
+        final modResourcePath = p.join(curExeParentDir, "Resources");
+        return HomeWindow(dirPaths: [dirPath, modResourcePath]);
       },
     );
   }
@@ -83,7 +87,9 @@ class MyApp extends StatelessWidget {
     final String launcherFile = instance.getString('launcherDir') ?? '.';
     final bool runTogether = instance.getBool('runTogether') ?? false;
     final bool moveOnDrag = instance.getBool('moveOnDrag') ?? false;
-    final appState = AppState(targetDir, launcherFile, runTogether, moveOnDrag);
+    final bool showFolderIcon = instance.getBool('showFolderIcon') ?? false;
+    final appState = AppState(
+        targetDir, launcherFile, runTogether, moveOnDrag, showFolderIcon);
     return appState;
   }
 }
