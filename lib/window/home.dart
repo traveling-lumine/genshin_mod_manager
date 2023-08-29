@@ -23,6 +23,7 @@ class HomeWindow extends MultiDirectoryWatchWidget {
 }
 
 class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
+  static const navigationPaneOpenWidth = 270.0;
   static const PathString exeName = PathString('3DMigoto Loader.exe');
   static final Logger logger = Logger();
 
@@ -73,7 +74,7 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
         setState(() => selected = i);
       },
       displayMode: PaneDisplayMode.auto,
-      size: const NavigationPaneSize(openWidth: 300),
+      size: const NavigationPaneSize(openWidth: navigationPaneOpenWidth),
       autoSuggestBox: buildAutoSuggestBox(),
       autoSuggestBoxReplacement: const Icon(FluentIcons.search),
       items: subFolders,
@@ -223,21 +224,26 @@ class FolderPaneItem extends PaneItem {
       selector: (_, appState) => appState.showFolderIcon,
       builder: (context, value, child) {
         if (!value) return const Icon(FluentIcons.folder_open);
-        return ConstrainedBox(
-          constraints:
-              BoxConstraints.loose(const Size(maxIconSize, maxIconSize)),
-          child: buildImage(imageFile),
-        );
+        return buildImage(imageFile);
       },
     );
   }
 
-  static Image buildImage(File? imageFile) {
-    if (imageFile == null) return Image.asset('images/app_icon.ico');
-    return Image.file(
-      imageFile,
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.medium,
+  static Widget buildImage(File? imageFile) {
+    final Image image;
+    if (imageFile == null) {
+      image = Image.asset('images/app_icon.ico');
+    } else{
+      image = Image.file(
+        imageFile,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.medium,
+      );
+    }
+    return SizedBox(
+      width: maxIconSize,
+      height: maxIconSize,
+      child: image,
     );
   }
 

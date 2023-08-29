@@ -18,6 +18,9 @@ class FolderPage extends DirectoryWatchWidget {
 }
 
 class _FolderPageState extends DWState<FolderPage> {
+  static const minCrossAxisExtent = 400.0;
+  static const mainAxisExtent = 380.0;
+
   late List<Directory> allChildrenFolder;
 
   @override
@@ -42,10 +45,10 @@ class _FolderPageState extends DWState<FolderPage> {
         content: GridView(
           padding: const EdgeInsets.all(8),
           gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
-            minCrossAxisExtent: 420,
+            minCrossAxisExtent: minCrossAxisExtent,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
-            mainAxisExtent: 350,
+            mainAxisExtent: mainAxisExtent,
           ),
           children: allChildrenFolder
               .map((e) => FolderCard(dirPath: e.pathString))
