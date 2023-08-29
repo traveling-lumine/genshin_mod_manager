@@ -1,17 +1,14 @@
 import 'dart:io';
 
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
-import 'package:provider/provider.dart';
 
 import '../../base/directory_watch_widget.dart';
-import '../../extension/copy_directory.dart';
 import '../../io/fsops.dart';
-import '../../provider/app_state.dart';
 import '../../third_party/min_extent_delegate.dart';
-import '../widget/folder_card.dart';
+import '../../widget/folder_card.dart';
 
 class FolderPage extends DirectoryWatchWidget {
   FolderPage({
@@ -28,10 +25,8 @@ class _FolderPageState extends DWState<FolderPage> {
 
   @override
   Widget build(BuildContext context) {
-    return DropTarget(
-      onDragDone: (details) {
-        dropFinishHandler(context, details, logger, widget.dirPath);
-      },
+    return FolderDropTarget(
+      dirPath: widget.dirPath,
       child: ScaffoldPage(
         header: PageHeader(
           title: Text(p.basename(widget.dir.path)),
@@ -79,37 +74,5 @@ class _FolderPageState extends DWState<FolderPage> {
           return aName.toLowerCase().compareTo(bName.toLowerCase());
         },
       );
-  }
-}
-
-void dropFinishHandler(BuildContext context, DropDoneDetails details,
-    Logger logger, String dirPath) {
-  final moveInsteadOfCopy = context.read<AppState>().moveOnDrag;
-  for (final xFile in details.files) {
-    final path = xFile.path;
-    if (!FileSystemEntity.isDirectorySync(path)) continue;
-    logger.d('Dragged $path');
-    final dir = Directory(path);
-    final newPath = p.join(dirPath, p.basename(path));
-    try {
-      if (moveInsteadOfCopy) {
-        dir.renameSync(newPath);
-        logger.d('Moved $path to $newPath');
-      } else {
-        dir.copyTo(newPath);
-        logger.d('Copied $path to $newPath');
-      }
-    } on PathExistsException {
-      displayInfoBar(
-        context,
-        builder: (context, close) {
-          return InfoBar(
-            title: const Text('Folder already exists'),
-            severity: InfoBarSeverity.warning,
-            onClose: close,
-          );
-        },
-      );
-    }
   }
 }

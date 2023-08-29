@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
@@ -10,6 +9,7 @@ import 'package:window_manager/window_manager.dart';
 import '../base/directory_watch_widget.dart';
 import '../io/fsops.dart';
 import '../provider/app_state.dart';
+import '../widget/folder_drop_target.dart';
 import 'page/folder.dart';
 import 'page/setting.dart';
 
@@ -260,10 +260,8 @@ class FolderPaneItem extends PaneItem {
       bool showTextOnTop = true,
       int? itemIndex,
       bool? autofocus}) {
-    return DropTarget(
-      onDragDone: (details) {
-        dropFinishHandler(context, details, logger, dirPath);
-      },
+    return FolderDropTarget(
+      dirPath: dirPath,
       child: super.build(
         context,
         selected,

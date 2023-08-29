@@ -6,9 +6,9 @@ import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
-import '../../base/directory_watch_widget.dart';
-import '../../io/fsops.dart';
-import '../../provider/app_state.dart';
+import '../base/directory_watch_widget.dart';
+import '../io/fsops.dart';
+import '../provider/app_state.dart';
 import 'editor_text.dart';
 
 class FolderCard extends DirectoryWatchWidget {
