@@ -139,7 +139,7 @@ class _FolderCardState extends DWState<FolderCard> {
     final List<File> shaderFilenames = [];
     final modShaderDir = Directory(p.join(widget.dirPath, 'ShaderFixes'));
     try {
-      shaderFilenames.addAll(getAllChildrenFiles(modShaderDir));
+      shaderFilenames.addAll(getFilesUnder(modShaderDir));
     } on PathNotFoundException catch (e) {
       logger.i(e);
     }
@@ -173,7 +173,7 @@ class _FolderCardState extends DWState<FolderCard> {
     final List<File> shaderFilenames = [];
     final modShaderDir = Directory(p.join(widget.dirPath, 'ShaderFixes'));
     try {
-      shaderFilenames.addAll(getAllChildrenFiles(modShaderDir));
+      shaderFilenames.addAll(getFilesUnder(modShaderDir));
     } on PathNotFoundException catch (e) {
       logger.i(e);
     }
@@ -206,7 +206,7 @@ class _FolderCardState extends DWState<FolderCard> {
 
   void copyShaders(String targetDir, List<File> shaderFiles) {
     // check for existence first
-    final targetDirFileList = getAllChildrenFiles(Directory(targetDir));
+    final targetDirFileList = getFilesUnder(Directory(targetDir));
     for (final em in shaderFiles) {
       final modFilename = p.basename(em.path);
       for (final et in targetDirFileList) {
@@ -227,7 +227,7 @@ class _FolderCardState extends DWState<FolderCard> {
   }
 
   void deleteShaders(String targetDir, List<File> shaderFilenames) {
-    final targetDirFileList = getAllChildrenFiles(Directory(targetDir));
+    final targetDirFileList = getFilesUnder(Directory(targetDir));
     for (final em in shaderFilenames) {
       final modFilename = p.basename(em.path);
       for (final et in targetDirFileList) {

@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/extension/default_shared_preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../extension/default_shared_preferences.dart';
 
 class AppState with ChangeNotifier {
   static const String targetDirKey = 'targetDir';

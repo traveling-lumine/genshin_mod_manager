@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
 import '../../base/directory_watch_widget.dart';
+import '../../extension/copy_directory.dart';
 import '../../io/fsops.dart';
 import '../../provider/app_state.dart';
 import '../../third_party/min_extent_delegate.dart';
@@ -68,7 +69,7 @@ class _FolderPageState extends DWState<FolderPage> {
 
   @override
   void updateFolder() {
-    allChildrenFolder = getAllChildrenFolder(widget.dir)
+    allChildrenFolder = getFoldersUnder(widget.dir)
       ..sort(
         (a, b) {
           var aName = p.basename(a.path);
@@ -90,38 +91,25 @@ void dropFinishHandler(BuildContext context, DropDoneDetails details,
     logger.d('Dragged $path');
     final dir = Directory(path);
     final newPath = p.join(dirPath, p.basename(path));
-    if (moveInsteadOfCopy) {
-      try {
+    try {
+      if (moveInsteadOfCopy) {
         dir.renameSync(newPath);
         logger.d('Moved $path to $newPath');
-      } on PathExistsException {
-        displayInfoBar(
-          context,
-          builder: (context, close) {
-            return InfoBar(
-              title: const Text('Folder already exists'),
-              severity: InfoBarSeverity.warning,
-              onClose: close,
-            );
-          },
-        );
-      }
-    } else {
-      try {
-        copyDirectorySync(dir, newPath);
+      } else {
+        dir.copyTo(newPath);
         logger.d('Copied $path to $newPath');
-      } on PathExistsException {
-        displayInfoBar(
-          context,
-          builder: (context, close) {
-            return InfoBar(
-              title: const Text('Folder already exists'),
-              severity: InfoBarSeverity.warning,
-              onClose: close,
-            );
-          },
-        );
       }
+    } on PathExistsException {
+      displayInfoBar(
+        context,
+        builder: (context, close) {
+          return InfoBar(
+            title: const Text('Folder already exists'),
+            severity: InfoBarSeverity.warning,
+            onClose: close,
+          );
+        },
+      );
     }
   }
 }

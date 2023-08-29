@@ -169,7 +169,7 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
       subFolders = [];
       final List<Directory> allFolder;
       try {
-        allFolder = getAllChildrenFolder(dir);
+        allFolder = getFoldersUnder(dir);
       } on PathNotFoundException {
         logger.e('Path not found: $dir');
         return;
