@@ -2,13 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/provider/app_state.dart';
+import 'package:genshin_mod_manager/window/home.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
-
-import 'provider/app_state.dart';
-import 'window/home.dart';
 
 const _minWindowSize = Size(600, 600);
 

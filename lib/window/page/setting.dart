@@ -1,12 +1,12 @@
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/provider/app_state.dart';
+import 'package:genshin_mod_manager/third_party/no_deref_file_opener.dart';
+import 'package:genshin_mod_manager/window/page/license.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../provider/app_state.dart';
-import '../../third_party/no_deref_file_opener.dart';
-import 'license.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({

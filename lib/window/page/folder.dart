@@ -1,14 +1,12 @@
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
+import 'package:genshin_mod_manager/io/fsops.dart';
+import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
+import 'package:genshin_mod_manager/widget/folder_card.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
-import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
-
-import '../../base/directory_watch_widget.dart';
-import '../../io/fsops.dart';
-import '../../third_party/min_extent_delegate.dart';
-import '../../widget/folder_card.dart';
 
 class FolderPage extends DirectoryWatchWidget {
   FolderPage({
@@ -20,7 +18,6 @@ class FolderPage extends DirectoryWatchWidget {
 }
 
 class _FolderPageState extends DWState<FolderPage> {
-  static final Logger logger = Logger();
   late List<Directory> allChildrenFolder;
 
   @override

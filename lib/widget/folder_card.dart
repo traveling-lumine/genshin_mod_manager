@@ -2,14 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
+import 'package:genshin_mod_manager/io/fsops.dart';
+import 'package:genshin_mod_manager/provider/app_state.dart';
+import 'package:genshin_mod_manager/widget/editor_text.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
-import '../base/directory_watch_widget.dart';
-import '../io/fsops.dart';
-import '../provider/app_state.dart';
-import 'editor_text.dart';
 
 class FolderCard extends DirectoryWatchWidget {
   FolderCard({required super.dirPath}) : super(key: ValueKey(dirPath));
