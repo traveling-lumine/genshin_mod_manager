@@ -5,10 +5,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
-import 'package:genshin_mod_manager/provider/app_state.dart';
 import 'package:genshin_mod_manager/widget/editor_text.dart';
-import 'package:logger/logger.dart';
-import 'package:provider/provider.dart';
+import 'package:genshin_mod_manager/widget/folder_toggle.dart';
 
 class FolderCard extends DirectoryWatchWidget {
   FolderCard({required super.dirPath}) : super(key: ValueKey(dirPath));
@@ -18,46 +16,40 @@ class FolderCard extends DirectoryWatchWidget {
 }
 
 class _FolderCardState extends DWState<FolderCard> {
-  static const shaderFixes = PathString('ShaderFixes');
-  static final Logger logger = Logger();
+  static const minIniSectionWidth = 150;
 
   @override
   Widget build(BuildContext context) {
-    PathString basename = widget.dirPath.basename;
+    final dirPath = widget.dirPath;
+    final basename = dirPath.basename;
     final isEnabled = basename.isEnabled;
-    String displayName = basename.enabledForm.asString;
     final color = isEnabled
         ? Colors.green.lightest
         : Colors.red.lightest.withOpacity(0.5);
 
-    return GestureDetector(
-      onTap: () {
-        if (isEnabled) {
-          disable(context);
-        } else {
-          enable(context);
-        }
-      },
+    return FolderToggle(
+      dirPath: dirPath,
       child: Card(
         backgroundColor: color,
         padding: const EdgeInsets.all(6),
         child: Column(
           children: [
-            buildFolderHeader(context, displayName),
+            buildFolderHeader(context),
             const SizedBox(height: 4),
-            buildFolderContent(context, displayName),
+            buildFolderContent(context),
           ],
         ),
       ),
     );
   }
 
-  Widget buildFolderHeader(BuildContext context, String displayName) {
+  Widget buildFolderHeader(BuildContext context) {
+    final dirPath = widget.dirPath;
     return Row(
       children: [
         Expanded(
           child: Text(
-            displayName,
+            dirPath.basename.enabledForm.asString,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: FluentTheme.of(context).typography.bodyStrong,
@@ -66,13 +58,13 @@ class _FolderCardState extends DWState<FolderCard> {
         const SizedBox(width: 4),
         Button(
           child: const Icon(FluentIcons.folder_open),
-          onPressed: () => openFolder(widget.dirPath.toDirectory),
+          onPressed: () => openFolder(dirPath.toDirectory),
         ),
       ],
     );
   }
 
-  Widget buildFolderContent(BuildContext context, String displayName) {
+  Widget buildFolderContent(BuildContext context) {
     return Expanded(
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -100,7 +92,7 @@ class _FolderCardState extends DWState<FolderCard> {
     }
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxWidth: constraints.maxWidth - 150,
+        maxWidth: constraints.maxWidth - minIniSectionWidth,
       ),
       child: Image.file(
         previewFile,
@@ -111,36 +103,30 @@ class _FolderCardState extends DWState<FolderCard> {
   }
 
   Widget buildIni() {
-    final alliniFile =
-        allFilesToWidget(getActiveiniFiles(widget.dirPath.toDirectory));
+    final alliniFile = allFilesToWidget();
     return Expanded(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minWidth: 80,
-        ),
-        child: alliniFile.isNotEmpty
-            ? Card(
-                backgroundColor: Colors.white.withOpacity(0.4),
-                padding: const EdgeInsets.all(4),
-                child: ListView(
-                  children: alliniFile,
-                ),
-              )
-            : const Center(
-                child: Text('No ini files found'),
+      child: alliniFile.isNotEmpty
+          ? Card(
+              backgroundColor: Colors.white.withOpacity(0.4),
+              padding: const EdgeInsets.all(4),
+              child: ListView(
+                children: alliniFile,
               ),
-      ),
+            )
+          : const Center(
+              child: Text('No ini files found'),
+            ),
     );
   }
 
-  List<Widget> allFilesToWidget(List<File> allFiles) {
+  List<Widget> allFilesToWidget() {
+    final allFiles = getActiveiniFiles(widget.dirPath.toDirectory);
     final List<Widget> alliniFile = [];
-    for (var i = 0; i < allFiles.length; i++) {
-      final cur = allFiles[i];
-      alliniFile.add(buildIniHeader(cur));
+    for (final file in allFiles) {
+      alliniFile.add(buildIniHeader(file));
       late String lastSection;
       bool metSection = false;
-      cur
+      file
           .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true))
           .forEach((line) {
         if (line.startsWith('[')) {
@@ -155,9 +141,9 @@ class _FolderCardState extends DWState<FolderCard> {
         }
         final lineLower = line.toLowerCase();
         if (lineLower.startsWith('key')) {
-          alliniFile.add(buildIniFieldEditor('key:', lastSection, line, cur));
+          alliniFile.add(buildIniFieldEditor('key:', lastSection, line, file));
         } else if (lineLower.startsWith('back')) {
-          alliniFile.add(buildIniFieldEditor('back:', lastSection, line, cur));
+          alliniFile.add(buildIniFieldEditor('back:', lastSection, line, file));
         } else if (line.startsWith('\$') && metSection) {
           final cycles = ','.allMatches(line.split(';').first).length + 1;
           alliniFile.add(Text('Cycles: $cycles'));
@@ -168,14 +154,14 @@ class _FolderCardState extends DWState<FolderCard> {
   }
 
   Widget buildIniHeader(File iniFile) {
-    final iniName = iniFile.basename;
+    final basenameString = iniFile.basename.asString;
     return Row(
       children: [
         Expanded(
           child: Tooltip(
-            message: iniName.asString,
+            message: basenameString,
             child: Text(
-              iniName.asString,
+              basenameString,
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
               ),
@@ -207,145 +193,9 @@ class _FolderCardState extends DWState<FolderCard> {
     );
   }
 
-  void enable(BuildContext context) {
-    final List<File> shaderFilenames = [];
-    final dirPath = widget.dirPath;
-    final dir = dirPath.toDirectory;
-    final modShaderDir = dirPath.join(shaderFixes).toDirectory;
-    try {
-      shaderFilenames.addAll(getFilesUnder(modShaderDir));
-    } on PathNotFoundException catch (e) {
-      logger.i(e);
-    }
-
-    final PathString renameTarget =
-        dir.parent.join(dirPath.basename.enabledForm);
-    if (renameTarget.toDirectory.existsSync()) {
-      showDirectoryExists(context, renameTarget);
-      return;
-    }
-    final tgt =
-        context.read<AppState>().targetDir.join(shaderFixes).toDirectory;
-    try {
-      copyShaders(tgt, shaderFilenames);
-    } on FileSystemException catch (e) {
-      logger.w(e);
-      errorDialog(context, '${e.path} already exists!');
-      return;
-    }
-    try {
-      dir.renameSyncPath(renameTarget);
-    } on PathAccessException {
-      errorDialog(
-          context,
-          'Failed to rename folder.'
-          ' Check if the ShaderFixes folder is open in explorer,'
-          ' and close it if it is.');
-      deleteShaders(tgt, shaderFilenames);
-    }
-  }
-
-  void disable(BuildContext context) {
-    final List<File> shaderFilenames = [];
-    final dirPath = widget.dirPath;
-    final dir = dirPath.toDirectory;
-    final modShaderDir = dirPath.join(shaderFixes).toDirectory;
-    try {
-      shaderFilenames.addAll(getFilesUnder(modShaderDir));
-    } on PathNotFoundException catch (e) {
-      logger.i(e);
-    }
-
-    final PathString renameTarget =
-        dir.parent.join(dirPath.basename.disabledForm);
-    if (renameTarget.toDirectory.existsSync()) {
-      showDirectoryExists(context, renameTarget);
-      return;
-    }
-    final tgt =
-        context.read<AppState>().targetDir.join(shaderFixes).toDirectory;
-    try {
-      deleteShaders(tgt, shaderFilenames);
-    } catch (e) {
-      logger.w(e);
-      errorDialog(context, 'Failed to delete files in ShaderFixes');
-      return;
-    }
-    try {
-      dir.renameSyncPath(renameTarget);
-    } on PathAccessException {
-      errorDialog(
-          context,
-          'Failed to rename folder.'
-          ' Check if the ShaderFixes folder is open in explorer,'
-          ' and close it if it is.');
-      copyShaders(tgt, shaderFilenames);
-    }
-  }
-
-  void copyShaders(Directory targetDir, List<File> shaderFiles) {
-    // check for existence first
-    final targetDirFileList = getFilesUnder(targetDir);
-    for (final em in shaderFiles) {
-      final modFilename = em.basename;
-      for (final et in targetDirFileList) {
-        final tgtFilename = et.basename;
-        if (tgtFilename == modFilename) {
-          throw FileSystemException(
-            'Target directory is not empty',
-            tgtFilename.asString,
-          );
-        }
-      }
-    }
-    for (final em in shaderFiles) {
-      final modFilename = em.basename;
-      final moveName = targetDir.join(modFilename);
-      em.copySyncPath(moveName);
-    }
-  }
-
-  void deleteShaders(Directory targetDir, List<File> shaderFilenames) {
-    final targetDirFileList = getFilesUnder(targetDir);
-    for (final em in shaderFilenames) {
-      final modFilename = em.basename;
-      for (final et in targetDirFileList) {
-        final tgtFilename = et.basename;
-        if (tgtFilename == modFilename) {
-          et.deleteSync();
-        }
-      }
-    }
-  }
-
-  void showDirectoryExists(BuildContext context, PathString renameTarget) {
-    renameTarget = renameTarget.basename;
-    errorDialog(context, '$renameTarget directory already exists!');
-  }
-
-  void errorDialog(BuildContext context, String text) {
-    showDialog(
-      context: context,
-      builder: (context) => ContentDialog(
-        title: const Text('Error'),
-        content: Text(text),
-        actions: [
-          FilledButton(
-            child: const Text('Ok'),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
-  }
+  @override
+  bool shouldUpdate(FileSystemEvent event) => true;
 
   @override
-  bool shouldUpdate(FileSystemEvent event) {
-    return true;
-  }
-
-  @override
-  void updateFolder() {
-    setState(() {});
-  }
+  void updateFolder() => setState(() {});
 }
