@@ -10,6 +10,8 @@ import 'package:window_manager/window_manager.dart';
 import 'provider/app_state.dart';
 import 'window/home.dart';
 
+const _minWindowSize = Size(600, 600);
+
 void main() async {
   await initialize();
   runApp(const MyApp());
@@ -21,11 +23,14 @@ Future<void> initialize() async {
   await windowManager.ensureInitialized();
   windowManager.waitUntilReadyToShow().then((_) async {
     await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
-    await windowManager.setMinimumSize(const Size(600, 600));
+    await windowManager.setMinimumSize(_minWindowSize);
   });
 }
 
 class MyApp extends StatelessWidget {
+  static const resourceDir = 'Resources';
+  static const modDir = 'Mods';
+  static const sharedPreferencesAwaitTime = Duration(seconds: 5);
   static final Logger logger = Logger();
 
   const MyApp({super.key});
@@ -36,10 +41,10 @@ class MyApp extends StatelessWidget {
       title: 'Genshin Mod Manager',
       home: FutureBuilder(
         future: getAppState().timeout(
-          const Duration(seconds: 5),
+          sharedPreferencesAwaitTime,
           onTimeout: () {
             logger.e('Unable to obtain SharedPreference settings');
-            return AppState('.', '.', false, false, true);
+            return AppState.defaultState();
           },
         ),
         builder: (context, snapshot) {
@@ -58,10 +63,10 @@ class MyApp extends StatelessWidget {
       value: data,
       builder: (context, child) {
         final dirPath = context.select<AppState, String>(
-            (value) => p.join(value.targetDir, 'Mods'));
+            (value) => p.join(value.targetDir, modDir));
         final curExePath = Platform.resolvedExecutable;
         final curExeParentDir = p.dirname(curExePath);
-        final modResourcePath = p.join(curExeParentDir, 'Resources');
+        final modResourcePath = p.join(curExeParentDir, resourceDir);
         Directory(modResourcePath).createSync();
         return HomeWindow(dirPaths: [dirPath, modResourcePath]);
       },

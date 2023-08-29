@@ -62,6 +62,15 @@ class AppState with ChangeNotifier {
     this._showFolderIcon,
   );
 
+  AppState.defaultState()
+      : this(
+          '.',
+          '.',
+          false,
+          false,
+          true,
+        );
+
   @override
   String toString() {
     return 'AppState('

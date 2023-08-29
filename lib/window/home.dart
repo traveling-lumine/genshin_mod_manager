@@ -24,6 +24,7 @@ class HomeWindow extends MultiDirectoryWatchWidget {
 }
 
 class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
+  static const String exeName = '3DMigoto Loader.exe';
   static final Logger logger = Logger();
   late List<NavigationPaneItem> subFolders;
   int? selected;
@@ -65,46 +66,6 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
   }
 
   NavigationPane buildNavigationPane(BuildContext context) {
-    final List<PaneItemAction> paneItemActions;
-    if (context.select<AppState, bool>((value) => value.runTogether)) {
-      paneItemActions = [
-        PaneItemAction(
-          icon: const Icon(FluentIcons.user_window),
-          title: const Text('Run 3d migoto & launcher'),
-          onTap: () {
-            final tDir = context.read<AppState>().targetDir;
-            final launcher = context.read<AppState>().launcherFile;
-            final path = p.join(tDir, '3DMigoto Loader.exe');
-            runProgram(File(path));
-            logger.t('Ran 3d migoto $path');
-            runProgram(File(launcher));
-            logger.t('Ran launcher $launcher');
-          },
-        ),
-      ];
-    } else {
-      paneItemActions = [
-        PaneItemAction(
-          icon: const Icon(FluentIcons.user_window),
-          title: const Text('Run 3d migoto'),
-          onTap: () {
-            final tDir = context.read<AppState>().targetDir;
-            final path = p.join(tDir, '3DMigoto Loader.exe');
-            runProgram(File(path));
-            logger.t('Ran 3d migoto $path');
-          },
-        ),
-        PaneItemAction(
-          icon: const Icon(FluentIcons.user_window),
-          title: const Text('Run launcher'),
-          onTap: () {
-            final launcher = context.read<AppState>().launcherFile;
-            runProgram(File(launcher));
-            logger.t('Ran launcher $launcher');
-          },
-        ),
-      ];
-    }
     return NavigationPane(
       selected: selected,
       onChanged: (i) {
@@ -118,7 +79,7 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
       items: subFolders,
       footerItems: [
         PaneItemSeparator(),
-        ...paneItemActions,
+        ...buildPaneItemActions(context),
         PaneItem(
           icon: const Icon(FluentIcons.settings),
           title: const Text('Settings'),
@@ -126,6 +87,33 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
         ),
       ],
     );
+  }
+
+  List<PaneItemAction> buildPaneItemActions(BuildContext context) {
+    const icon = Icon(FluentIcons.user_window);
+    return context.select<AppState, bool>((value) => value.runTogether)
+        ? [
+            PaneItemAction(
+              icon: icon,
+              title: const Text('Run 3d migoto & launcher'),
+              onTap: () {
+                runMigoto(context);
+                runLauncher(context);
+              },
+            ),
+          ]
+        : [
+            PaneItemAction(
+              icon: icon,
+              title: const Text('Run 3d migoto'),
+              onTap: () => runMigoto(context),
+            ),
+            PaneItemAction(
+              icon: icon,
+              title: const Text('Run launcher'),
+              onTap: () => runLauncher(context),
+            ),
+          ];
   }
 
   AutoSuggestBox<Key> buildAutoSuggestBox() {
@@ -209,10 +197,48 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
       subFolders = updateFolder;
     }
   }
+
+  void runMigoto(BuildContext context) {
+    final tDir = context.read<AppState>().targetDir;
+    final path = p.join(tDir, exeName);
+    runProgram(File(path));
+    logger.t('Ran 3d migoto $path');
+  }
+
+  void runLauncher(BuildContext context) {
+    final launcher = context.read<AppState>().launcherFile;
+    runProgram(File(launcher));
+    logger.t('Ran launcher $launcher');
+  }
 }
 
 class FolderPaneItem extends PaneItem {
+  static const maxIconSize = 80.0;
   static final logger = Logger();
+
+  static Selector<AppState, bool> _getIcon(File? imageFile) {
+    return Selector<AppState, bool>(
+      selector: (_, appState) => appState.showFolderIcon,
+      builder: (context, value, child) {
+        if (!value) return const Icon(FluentIcons.folder_open);
+        return ConstrainedBox(
+          constraints:
+              BoxConstraints.loose(const Size(maxIconSize, maxIconSize)),
+          child: buildImage(imageFile),
+        );
+      },
+    );
+  }
+
+  static Image buildImage(File? imageFile) {
+    if (imageFile == null) return Image.asset('images/app_icon.ico');
+    return Image.file(
+      imageFile,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.medium,
+    );
+  }
+
   String dirPath;
 
   FolderPaneItem({
@@ -223,29 +249,7 @@ class FolderPaneItem extends PaneItem {
             p.basename(dirPath),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          icon: Selector<AppState, bool>(
-            selector: (_, appState) => appState.showFolderIcon,
-            builder: (context, value, child) {
-              if (value) {
-                const size = 80.0;
-                return ConstrainedBox(
-                  constraints: BoxConstraints.loose(const Size(size, size)),
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: imageFile != null
-                        ? Image.file(
-                            imageFile,
-                            fit: BoxFit.cover,
-                            filterQuality: FilterQuality.medium,
-                          )
-                        : Image.asset('images/app_icon.ico'),
-                  ),
-                );
-              } else {
-                return const Icon(FluentIcons.folder_open);
-              }
-            },
-          ),
+          icon: _getIcon(imageFile),
           body: FolderPage(dirPath: dirPath),
           key: ValueKey(dirPath),
         );
