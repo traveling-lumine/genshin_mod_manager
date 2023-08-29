@@ -59,10 +59,10 @@ class MyApp extends StatelessWidget {
       value: data,
       builder: (context, child) {
         final dirPath = context.select<AppState, String>(
-            (value) => p.join(value.targetDir, "Mods"));
+            (value) => p.join(value.targetDir, 'Mods'));
         final curExePath = Platform.resolvedExecutable;
         final curExeParentDir = p.dirname(curExePath);
-        final modResourcePath = p.join(curExeParentDir, "Resources");
+        final modResourcePath = p.join(curExeParentDir, 'Resources');
         Directory(modResourcePath).createSync();
         return HomeWindow(dirPaths: [dirPath, modResourcePath]);
       },
@@ -81,17 +81,5 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<AppState> getAppState() async {
-    final instance = await SharedPreferences.getInstance();
-    final String targetDir = instance.getString('targetDir') ?? '.';
-    final String launcherFile = instance.getString('launcherDir') ?? '.';
-    final bool runTogether = instance.getBool('runTogether') ?? false;
-    final bool moveOnDrag = instance.getBool('moveOnDrag') ?? false;
-    final bool showFolderIcon = instance.getBool('showFolderIcon') ?? false;
-    final appState = AppState(
-        targetDir, launcherFile, runTogether, moveOnDrag, showFolderIcon);
-    return appState;
   }
 }

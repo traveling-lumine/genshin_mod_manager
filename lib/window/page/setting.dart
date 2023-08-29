@@ -28,7 +28,7 @@ class SettingPage extends StatelessWidget {
             final dir = DirectoryPicker().getDirectory();
             if (dir == null) return;
             SharedPreferences.getInstance().then((instance) {
-              instance.setString('targetDir', dir.path);
+              instance.setString(AppState.targetDirKey, dir.path);
             });
             context.read<AppState>().targetDir = dir.path;
           },
@@ -41,7 +41,7 @@ class SettingPage extends StatelessWidget {
             final file = OpenNoDereferenceFilePicker().getFile();
             if (file == null) return;
             SharedPreferences.getInstance().then((instance) {
-              instance.setString('launcherDir', file.path);
+              instance.setString(AppState.launcherFileKey, file.path);
             });
             context.read<AppState>().launcherFile = file.path;
           },
@@ -51,7 +51,7 @@ class SettingPage extends StatelessWidget {
           checked: context.select<AppState, bool>((value) => value.runTogether),
           onChanged: (value) {
             SharedPreferences.getInstance().then((instance) {
-              instance.setBool('runTogether', value);
+              instance.setBool(AppState.runTogetherKey, value);
             });
             context.read<AppState>().runTogether = value;
           },
@@ -61,7 +61,7 @@ class SettingPage extends StatelessWidget {
           checked: context.select<AppState, bool>((value) => value.moveOnDrag),
           onChanged: (value) {
             SharedPreferences.getInstance().then((instance) {
-              instance.setBool('moveOnDrag', value);
+              instance.setBool(AppState.moveOnDragKey, value);
             });
             context.read<AppState>().moveOnDrag = value;
           },
@@ -72,7 +72,7 @@ class SettingPage extends StatelessWidget {
               context.select<AppState, bool>((value) => value.showFolderIcon),
           onChanged: (value) {
             SharedPreferences.getInstance().then((instance) {
-              instance.setBool('showFolderIcon', value);
+              instance.setBool(AppState.showFolderIconKey, value);
             });
             context.read<AppState>().showFolderIcon = value;
           },
