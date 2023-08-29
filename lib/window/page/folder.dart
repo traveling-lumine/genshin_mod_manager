@@ -1,15 +1,12 @@
 import 'dart:io';
 
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
+import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
-import 'package:genshin_mod_manager/provider/app_state.dart';
 import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
-import 'package:genshin_mod_manager/window/widget/folder_card.dart';
-import 'package:logger/logger.dart';
-import 'package:path/path.dart' as p;
-import 'package:provider/provider.dart';
+import 'package:genshin_mod_manager/widget/folder_card.dart';
+import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
 
 class FolderPage extends DirectoryWatchWidget {
   FolderPage({
@@ -21,25 +18,25 @@ class FolderPage extends DirectoryWatchWidget {
 }
 
 class _FolderPageState extends DWState<FolderPage> {
-  static final Logger logger = Logger();
+  static const minCrossAxisExtent = 400.0;
+  static const mainAxisExtent = 380.0;
+
   late List<Directory> allChildrenFolder;
 
   @override
   Widget build(BuildContext context) {
-    return DropTarget(
-      onDragDone: (details) {
-        dropFinishHandler(context, details, logger, widget.dirPath);
-      },
+    return FolderDropTarget(
+      dirPath: widget.dirPath,
       child: ScaffoldPage(
         header: PageHeader(
-          title: Text(p.basename(widget.dir.path)),
+          title: Text(widget.dirPath.basename.asString),
           commandBar: CommandBar(
             mainAxisAlignment: MainAxisAlignment.end,
             primaryItems: [
               CommandBarButton(
                 icon: const Icon(FluentIcons.folder_open),
                 onPressed: () {
-                  openFolder(widget.dir);
+                  openFolder(widget.dirPath.toDirectory);
                 },
               ),
             ],
@@ -48,13 +45,13 @@ class _FolderPageState extends DWState<FolderPage> {
         content: GridView(
           padding: const EdgeInsets.all(8),
           gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
-            minCrossAxisExtent: 420,
+            minCrossAxisExtent: minCrossAxisExtent,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
-            mainAxisExtent: 350,
+            mainAxisExtent: mainAxisExtent,
           ),
           children: allChildrenFolder
-              .map((e) => FolderCard(dirPath: e.path))
+              .map((e) => FolderCard(dirPath: e.pathString))
               .toList(),
         ),
       ),
@@ -67,60 +64,14 @@ class _FolderPageState extends DWState<FolderPage> {
 
   @override
   void updateFolder() {
-    allChildrenFolder = getAllChildrenFolder(widget.dir)
+    allChildrenFolder = getFoldersUnder(widget.dirPath.toDirectory)
       ..sort(
         (a, b) {
-          var aName = p.basename(a.path);
-          var bName = p.basename(b.path);
-          aName = aName.startsWith('DISABLED ') ? aName.substring(9) : aName;
-          bName = bName.startsWith('DISABLED ') ? bName.substring(9) : bName;
-          return aName.toLowerCase().compareTo(bName.toLowerCase());
+          final a2 = a.basename.enabledForm.asString;
+          final b2 = b.basename.enabledForm.asString;
+          var compareTo = a2.toLowerCase().compareTo(b2.toLowerCase());
+          return compareTo;
         },
       );
-  }
-}
-
-void dropFinishHandler(BuildContext context, DropDoneDetails details,
-    Logger logger, String dirPath) {
-  final moveInsteadOfCopy = context.read<AppState>().moveOnDrag;
-  for (final xFile in details.files) {
-    final path = xFile.path;
-    if (!FileSystemEntity.isDirectorySync(path)) continue;
-    logger.d('Dragged $path');
-    final dir = Directory(path);
-    final newPath = p.join(dirPath, p.basename(path));
-    if (moveInsteadOfCopy) {
-      try {
-        dir.renameSync(newPath);
-        logger.d('Moved $path to $newPath');
-      } on PathExistsException {
-        displayInfoBar(
-          context,
-          builder: (context, close) {
-            return InfoBar(
-              title: const Text('Folder already exists'),
-              severity: InfoBarSeverity.warning,
-              onClose: close,
-            );
-          },
-        );
-      }
-    } else {
-      try {
-        copyDirectorySync(dir, newPath);
-        logger.d('Copied $path to $newPath');
-      } on PathExistsException {
-        displayInfoBar(
-          context,
-          builder: (context, close) {
-            return InfoBar(
-              title: const Text('Folder already exists'),
-              severity: InfoBarSeverity.warning,
-              onClose: close,
-            );
-          },
-        );
-      }
-    }
   }
 }

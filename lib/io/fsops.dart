@@ -1,60 +1,34 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
+import 'package:genshin_mod_manager/extension/pathops.dart';
 
-List<Directory> getAllChildrenFolder(Directory dir) {
-  final List<Directory> a = [];
-  dir.listSync().forEach((element) {
-    if (element is Directory) {
-      a.add(element);
-    }
-  });
-  return a;
+List<Directory> getFoldersUnder(Directory dir) {
+  return dir.listSync().whereType<Directory>().toList(growable: false);
+}
+
+List<File> getFilesUnder(Directory dir) {
+  return dir.listSync().whereType<File>().toList(growable: false);
 }
 
 List<File> getActiveiniFiles(Directory dir) {
-  final List<File> a = [];
-  dir.listSync().forEach((element) {
-    var path = element.path;
-    final filename = path.split('\\').last;
-    if (element is File &&
-        path.endsWith('.ini') &&
-        !filename.contains('DISABLED')) {
-      a.add(element);
-    }
-  });
-  return a;
+  return getFilesUnder(dir).where((element) {
+    final path = element.pathString;
+    final extension = path.extension;
+    if (extension != const PathString('.ini')) return false;
+    final filename = path.basenameWithoutExtension;
+    return filename.isEnabled;
+  }).toList(growable: false);
 }
 
-List<File> getAllChildrenFiles(Directory dir) {
-  final List<File> a = [];
-  dir.listSync().forEach((element) {
-    if (element is File) {
-      a.add(element);
-    }
-  });
-  return a;
-}
-
-void copyDirectorySync(Directory dir, String dest) {
-  final newDir = Directory(dest)..createSync(recursive: true);
-  dir.listSync().forEach((element) {
-    final newName = p.join(newDir.path, p.basename(element.path));
-    if (element is File) {
-      element.copySync(newName);
-    } else if (element is Directory) {
-      copyDirectorySync(element, newName);
-    }
-  });
-}
-
-File? findPreviewFile(Directory dir, {String name = 'preview'}) {
-  for (var element in dir.listSync()) {
-    if (element is! File) continue;
-    final filename = p.basenameWithoutExtension(element.path).toLowerCase();
+File? findPreviewFile(Directory dir,
+    {PathString name = const PathString('preview')}) {
+  for (final element in getFilesUnder(dir)) {
+    final filename = element.basenameWithoutExtension;
     if (filename != name) continue;
-    final ext = p.extension(element.path).toLowerCase();
-    if (ext == '.png' || ext == '.jpg' || ext == '.jpeg') {
+    final ext = element.extension;
+    if (ext == const PathString('.png') ||
+        ext == const PathString('.jpg') ||
+        ext == const PathString('.jpeg')) {
       return element;
     }
   }
@@ -64,7 +38,7 @@ File? findPreviewFile(Directory dir, {String name = 'preview'}) {
 void runProgram(File program) {
   Process.run(
     'start',
-    ['/b', '/d', program.parent.path, '', p.basename(program.path)],
+    ['/b', '/d', program.parent.path, '', program.basename.asString],
     runInShell: true,
   );
 }
