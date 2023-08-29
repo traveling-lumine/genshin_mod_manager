@@ -26,6 +26,7 @@ class HomeWindow extends MultiDirectoryWatchWidget {
 class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
   static const String exeName = '3DMigoto Loader.exe';
   static final Logger logger = Logger();
+
   late List<NavigationPaneItem> subFolders;
   int? selected;
 
