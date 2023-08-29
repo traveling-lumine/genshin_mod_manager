@@ -1,7 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/oss_licenses.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../oss_licenses.dart';
 
 class OssLicensesPage extends StatelessWidget {
   const OssLicensesPage({super.key});
