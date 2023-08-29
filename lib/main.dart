@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/provider/app_state.dart';
 import 'package:genshin_mod_manager/window/home.dart';
 import 'package:logger/logger.dart';
-import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -27,8 +27,8 @@ Future<void> initialize() async {
 }
 
 class MyApp extends StatelessWidget {
-  static const resourceDir = 'Resources';
-  static const modDir = 'Mods';
+  static const resourceDir = PathString('Resources');
+  static const modDir = PathString('Mods');
   static const sharedPreferencesAwaitTime = Duration(seconds: 5);
   static final Logger logger = Logger();
 
@@ -61,12 +61,12 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: data,
       builder: (context, child) {
-        final dirPath = context.select<AppState, String>(
-            (value) => p.join(value.targetDir, modDir));
-        final curExePath = Platform.resolvedExecutable;
-        final curExeParentDir = p.dirname(curExePath);
-        final modResourcePath = p.join(curExeParentDir, resourceDir);
-        Directory(modResourcePath).createSync();
+        final dirPath = context.select<AppState, PathString>(
+            (value) => value.targetDir.join(modDir));
+        final curExePath = PathString(Platform.resolvedExecutable);
+        final curExeParentDir = curExePath.dirname;
+        final modResourcePath = curExeParentDir.join(resourceDir);
+        modResourcePath.toDirectory.createSync();
         return HomeWindow(dirPaths: [dirPath, modResourcePath]);
       },
     );

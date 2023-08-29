@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
+import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/provider/app_state.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
 import 'package:genshin_mod_manager/window/page/folder.dart';
 import 'package:genshin_mod_manager/window/page/setting.dart';
 import 'package:logger/logger.dart';
-import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -23,7 +23,7 @@ class HomeWindow extends MultiDirectoryWatchWidget {
 }
 
 class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
-  static const String exeName = '3DMigoto Loader.exe';
+  static const PathString exeName = PathString('3DMigoto Loader.exe');
   static final Logger logger = Logger();
 
   late List<NavigationPaneItem> subFolders;
@@ -121,7 +121,7 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
       items: subFolders
           .map((e) => AutoSuggestBoxItem(
                 value: e.key,
-                label: p.basename((e as FolderPaneItem).dirPath),
+                label: (e as FolderPaneItem).dirPath.basename.asString,
               ))
           .toList(),
       trailingIcon: const Icon(FluentIcons.search),
@@ -163,13 +163,13 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
         return;
       }
       for (final element in allFolder) {
-        final folderName = p.basename(element.path).toLowerCase();
+        final folderName = element.basename;
         final previewFile = findPreviewFile(widget.dir(1), name: folderName);
         if (previewFile != null) {
           logger.d('Preview file for $folderName: $previewFile');
         }
         subFolders.add(FolderPaneItem(
-          dirPath: element.path,
+          dirPath: element.pathString,
           imageFile: previewFile,
         ));
       }
@@ -182,7 +182,7 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
       final List<NavigationPaneItem> updateFolder = [];
       for (final element in subFolders) {
         final fpelem = element as FolderPaneItem;
-        final folderName = p.basename(fpelem.dirPath).toLowerCase();
+        final folderName = fpelem.dirPath.basename;
         final previewFile = findPreviewFile(widget.dir(1), name: folderName);
         if (previewFile != null) {
           logger.d('Preview file for $folderName: $previewFile');
@@ -200,14 +200,14 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
 
   void runMigoto(BuildContext context) {
     final tDir = context.read<AppState>().targetDir;
-    final path = p.join(tDir, exeName);
-    runProgram(File(path));
+    final path = tDir.join(exeName);
+    runProgram(path.toFile);
     logger.t('Ran 3d migoto $path');
   }
 
   void runLauncher(BuildContext context) {
     final launcher = context.read<AppState>().launcherFile;
-    runProgram(File(launcher));
+    runProgram(launcher.toFile);
     logger.t('Ran launcher $launcher');
   }
 }
@@ -239,14 +239,14 @@ class FolderPaneItem extends PaneItem {
     );
   }
 
-  String dirPath;
+  PathString dirPath;
 
   FolderPaneItem({
     required this.dirPath,
     File? imageFile,
   }) : super(
           title: Text(
-            p.basename(dirPath),
+            dirPath.basename.asString,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           icon: _getIcon(imageFile),

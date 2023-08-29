@@ -3,13 +3,12 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
+import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/provider/app_state.dart';
 import 'package:genshin_mod_manager/widget/editor_text.dart';
 import 'package:logger/logger.dart';
-import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
-
 
 class FolderCard extends DirectoryWatchWidget {
   FolderCard({required super.dirPath}) : super(key: ValueKey(dirPath));
@@ -19,12 +18,14 @@ class FolderCard extends DirectoryWatchWidget {
 }
 
 class _FolderCardState extends DWState<FolderCard> {
+  static const shaderFixes = PathString('ShaderFixes');
   static final Logger logger = Logger();
 
   @override
   Widget build(BuildContext context) {
-    String displayName = p.basename(widget.dir.path);
-    final isDisabled = displayName.startsWith('DISABLED ');
+    PathString basename = widget.dir.basename;
+    final isDisabled = basename.startsWith('DISABLED ');
+    String displayName = basename.asString;
     final color = isDisabled
         ? Colors.red.lightest.withOpacity(0.5)
         : Colors.green.lightest;
@@ -82,7 +83,7 @@ class _FolderCardState extends DWState<FolderCard> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              buildDesc(context, displayName, constraints),
+              buildDesc(context, constraints),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Divider(direction: Axis.vertical),
@@ -95,8 +96,7 @@ class _FolderCardState extends DWState<FolderCard> {
     );
   }
 
-  Widget buildDesc(
-      BuildContext context, String folderName, BoxConstraints constraints) {
+  Widget buildDesc(BuildContext context, BoxConstraints constraints) {
     final previewFile = findPreviewFile(widget.dir);
     if (previewFile == null) {
       return const Expanded(child: Center(child: Icon(FluentIcons.unknown)));
@@ -137,19 +137,21 @@ class _FolderCardState extends DWState<FolderCard> {
 
   void toggleEnable(BuildContext context, String displayName) {
     final List<File> shaderFilenames = [];
-    final modShaderDir = Directory(p.join(widget.dirPath, 'ShaderFixes'));
+    final modShaderDir = widget.dirPath.join(shaderFixes).toDirectory;
     try {
       shaderFilenames.addAll(getFilesUnder(modShaderDir));
     } on PathNotFoundException catch (e) {
       logger.i(e);
     }
 
-    final String renameTarget = p.join(widget.dir.parent.path, displayName);
-    if (Directory(renameTarget).existsSync()) {
+    final PathString renameTarget =
+        widget.dir.parent.join(PathString(displayName));
+    if (renameTarget.toDirectory.existsSync()) {
       showDirectoryExists(context, renameTarget);
       return;
     }
-    final tgt = p.join(context.read<AppState>().targetDir, 'ShaderFixes');
+    final tgt =
+        context.read<AppState>().targetDir.join(shaderFixes).toDirectory;
     try {
       copyShaders(tgt, shaderFilenames);
     } on FileSystemException catch (e) {
@@ -158,7 +160,7 @@ class _FolderCardState extends DWState<FolderCard> {
       return;
     }
     try {
-      widget.dir.renameSync(renameTarget);
+      widget.dir.renameSyncPath(renameTarget);
     } on PathAccessException {
       errorDialog(
           context,
@@ -171,20 +173,21 @@ class _FolderCardState extends DWState<FolderCard> {
 
   void toggleDisable(BuildContext context, String displayName) {
     final List<File> shaderFilenames = [];
-    final modShaderDir = Directory(p.join(widget.dirPath, 'ShaderFixes'));
+    final modShaderDir = widget.dirPath.join(shaderFixes).toDirectory;
     try {
       shaderFilenames.addAll(getFilesUnder(modShaderDir));
     } on PathNotFoundException catch (e) {
       logger.i(e);
     }
 
-    final String renameTarget =
-        p.join(widget.dir.parent.path, 'DISABLED $displayName');
-    if (Directory(renameTarget).existsSync()) {
+    final PathString renameTarget =
+        widget.dir.parent.join(PathString('DISABLED $displayName'));
+    if (renameTarget.toDirectory.existsSync()) {
       showDirectoryExists(context, renameTarget);
       return;
     }
-    final tgt = p.join(context.read<AppState>().targetDir, 'ShaderFixes');
+    final tgt =
+        context.read<AppState>().targetDir.join(shaderFixes).toDirectory;
     try {
       deleteShaders(tgt, shaderFilenames);
     } catch (e) {
@@ -193,7 +196,7 @@ class _FolderCardState extends DWState<FolderCard> {
       return;
     }
     try {
-      widget.dir.renameSync(renameTarget);
+      widget.dir.renameSyncPath(renameTarget);
     } on PathAccessException {
       errorDialog(
           context,
@@ -204,34 +207,34 @@ class _FolderCardState extends DWState<FolderCard> {
     }
   }
 
-  void copyShaders(String targetDir, List<File> shaderFiles) {
+  void copyShaders(Directory targetDir, List<File> shaderFiles) {
     // check for existence first
-    final targetDirFileList = getFilesUnder(Directory(targetDir));
+    final targetDirFileList = getFilesUnder(targetDir);
     for (final em in shaderFiles) {
-      final modFilename = p.basename(em.path);
+      final modFilename = em.basename;
       for (final et in targetDirFileList) {
-        final tgtFilename = p.basename(et.path);
+        final tgtFilename = et.basename;
         if (tgtFilename == modFilename) {
           throw FileSystemException(
             'Target directory is not empty',
-            tgtFilename,
+            tgtFilename.asString,
           );
         }
       }
     }
     for (final em in shaderFiles) {
-      final modFilename = p.basename(em.path);
-      final moveName = p.join(targetDir, modFilename);
-      em.copySync(moveName);
+      final modFilename = em.basename;
+      final moveName = targetDir.join(modFilename);
+      em.copySyncPath(moveName);
     }
   }
 
-  void deleteShaders(String targetDir, List<File> shaderFilenames) {
-    final targetDirFileList = getFilesUnder(Directory(targetDir));
+  void deleteShaders(Directory targetDir, List<File> shaderFilenames) {
+    final targetDirFileList = getFilesUnder(targetDir);
     for (final em in shaderFilenames) {
-      final modFilename = p.basename(em.path);
+      final modFilename = em.basename;
       for (final et in targetDirFileList) {
-        final tgtFilename = p.basename(et.path);
+        final tgtFilename = et.basename;
         if (tgtFilename == modFilename) {
           et.deleteSync();
         }
@@ -239,8 +242,8 @@ class _FolderCardState extends DWState<FolderCard> {
     }
   }
 
-  void showDirectoryExists(BuildContext context, String renameTarget) {
-    renameTarget = p.basename(renameTarget);
+  void showDirectoryExists(BuildContext context, PathString renameTarget) {
+    renameTarget = renameTarget.basename;
     errorDialog(context, '$renameTarget already exists!');
   }
 
@@ -306,14 +309,14 @@ List<Widget> allFilesToWidget(List<File> allFiles) {
 }
 
 Widget buildIniHeader(File iniFile) {
-  final iniName = p.basename(iniFile.path);
+  final iniName = iniFile.basename;
   return Row(
     children: [
       Expanded(
         child: Tooltip(
-          message: iniName,
+          message: iniName.asString,
           child: Text(
-            iniName,
+            iniName.asString,
             style: const TextStyle(
               fontWeight: FontWeight.w600,
             ),

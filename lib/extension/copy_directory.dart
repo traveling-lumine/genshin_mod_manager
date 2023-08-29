@@ -1,19 +1,19 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
+import 'package:genshin_mod_manager/extension/pathops.dart';
 
 extension CopyDirectory on Directory {
-  void copyTo(String dest) {
+  void copyToPath(PathString dest) {
     _copyDirectorySync(this, dest);
   }
 }
 
-void _copyDirectorySync(Directory dir, String dest) {
-  final newDir = Directory(dest)..createSync(recursive: true);
+void _copyDirectorySync(Directory dir, PathString dest) {
+  final newDir = dest.toDirectory..createSync(recursive: true);
   dir.listSync().forEach((element) {
-    final newName = p.join(newDir.path, p.basename(element.path));
+    final newName = newDir.join(element.basename);
     if (element is File) {
-      element.copySync(newName);
+      element.copySyncPath(newName);
     } else if (element is Directory) {
       _copyDirectorySync(element, newName);
     }

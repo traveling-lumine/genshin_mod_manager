@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
+import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
 import 'package:genshin_mod_manager/widget/folder_card.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
-import 'package:path/path.dart' as p;
 
 class FolderPage extends DirectoryWatchWidget {
   FolderPage({
@@ -26,7 +26,7 @@ class _FolderPageState extends DWState<FolderPage> {
       dirPath: widget.dirPath,
       child: ScaffoldPage(
         header: PageHeader(
-          title: Text(p.basename(widget.dir.path)),
+          title: Text(widget.dir.basename.asString),
           commandBar: CommandBar(
             mainAxisAlignment: MainAxisAlignment.end,
             primaryItems: [
@@ -48,7 +48,7 @@ class _FolderPageState extends DWState<FolderPage> {
             mainAxisExtent: 350,
           ),
           children: allChildrenFolder
-              .map((e) => FolderCard(dirPath: e.path))
+              .map((e) => FolderCard(dirPath: e.pathString))
               .toList(),
         ),
       ),
@@ -64,11 +64,19 @@ class _FolderPageState extends DWState<FolderPage> {
     allChildrenFolder = getFoldersUnder(widget.dir)
       ..sort(
         (a, b) {
-          var aName = p.basename(a.path);
-          var bName = p.basename(b.path);
-          aName = aName.startsWith('DISABLED ') ? aName.substring(9) : aName;
-          bName = bName.startsWith('DISABLED ') ? bName.substring(9) : bName;
-          return aName.toLowerCase().compareTo(bName.toLowerCase());
+          final aBasename = a.basename;
+          final bBasename = b.basename;
+          final aString = aBasename.asString;
+          final bString = bBasename.asString;
+          final aName = aBasename.startsWith('DISABLED ')
+              ? aString.substring(9)
+              : aString;
+          final bName = bBasename.startsWith('DISABLED ')
+              ? bString.substring(9)
+              : bString;
+          var compareTo = aName.toLowerCase().compareTo(bName.toLowerCase());
+          print('a: $aName, b: $bName, compareTo: $compareTo');
+          return compareTo;
         },
       );
   }

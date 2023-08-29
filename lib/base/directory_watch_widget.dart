@@ -2,12 +2,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:logger/logger.dart';
 
 abstract class DirectoryWatchWidget extends StatefulWidget {
-  final String dirPath;
+  final PathString dirPath;
 
-  Directory get dir => Directory(dirPath);
+  Directory get dir => dirPath.toDirectory;
 
   const DirectoryWatchWidget({super.key, required this.dirPath});
 
@@ -68,9 +69,9 @@ abstract class DWState<T extends DirectoryWatchWidget>
 }
 
 abstract class MultiDirectoryWatchWidget extends StatefulWidget {
-  final List<String> dirPaths;
+  final List<PathString> dirPaths;
 
-  Directory dir(index) => Directory(dirPaths[index]);
+  Directory dir(index) => dirPaths[index].toDirectory;
 
   const MultiDirectoryWatchWidget({super.key, required this.dirPaths});
 

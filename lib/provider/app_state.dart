@@ -1,25 +1,25 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/default_shared_preferences.dart';
+import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 class AppState with ChangeNotifier {
   static const String targetDirKey = 'targetDir';
-  String _targetDir;
+  PathString _targetDir;
 
-  String get targetDir => _targetDir;
+  PathString get targetDir => _targetDir;
 
-  set targetDir(String value) {
+  set targetDir(PathString value) {
     _targetDir = value;
     notifyListeners();
   }
 
   static const String launcherFileKey = 'launcherDir';
-  String _launcherFile;
+  PathString _launcherFile;
 
-  String get launcherFile => _launcherFile;
+  PathString get launcherFile => _launcherFile;
 
-  set launcherFile(String value) {
+  set launcherFile(PathString value) {
     _launcherFile = value;
     notifyListeners();
   }
@@ -64,8 +64,8 @@ class AppState with ChangeNotifier {
 
   AppState.defaultState()
       : this(
-          '.',
-          '.',
+          const PathString('.'),
+          const PathString('.'),
           false,
           false,
           true,
@@ -86,8 +86,8 @@ class AppState with ChangeNotifier {
 Future<AppState> getAppState() async {
   final instance = await SharedPreferences.getInstance();
   return AppState(
-    instance.getStringOrDot(AppState.targetDirKey),
-    instance.getStringOrDot(AppState.launcherFileKey),
+    PathString(instance.getStringOrDot(AppState.targetDirKey)),
+    PathString(instance.getStringOrDot(AppState.launcherFileKey)),
     instance.getBoolOrFalse(AppState.runTogetherKey),
     instance.getBoolOrFalse(AppState.moveOnDragKey),
     instance.getBoolOrTrue(AppState.showFolderIconKey),
