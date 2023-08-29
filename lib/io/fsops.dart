@@ -16,7 +16,7 @@ List<File> getActiveiniFiles(Directory dir) {
     final extension = path.extension;
     if (extension != const PathString('.ini')) return false;
     final filename = path.basenameWithoutExtension;
-    return !filename.startsWith('DISABLED');
+    return filename.isEnabled;
   }).toList(growable: false);
 }
 

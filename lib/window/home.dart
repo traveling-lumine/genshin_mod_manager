@@ -148,7 +148,7 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
   void updateFolder(int updateIndex) {
     logger.d('$this updateFolder: $updateIndex');
     if (updateIndex == -1 || updateIndex == 0) {
-      final dir = widget.dir(0);
+      final dir = widget.dirPaths[0].toDirectory;
       final sel_ = selected;
       Key? selectedFolder;
       if (sel_ != null && sel_ < subFolders.length) {
@@ -164,7 +164,8 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
       }
       for (final element in allFolder) {
         final folderName = element.basename;
-        final previewFile = findPreviewFile(widget.dir(1), name: folderName);
+        final previewFile =
+            findPreviewFile(widget.dirPaths[1].toDirectory, name: folderName);
         if (previewFile != null) {
           logger.d('Preview file for $folderName: $previewFile');
         }
@@ -183,7 +184,8 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
       for (final element in subFolders) {
         final fpelem = element as FolderPaneItem;
         final folderName = fpelem.dirPath.basename;
-        final previewFile = findPreviewFile(widget.dir(1), name: folderName);
+        final previewFile =
+            findPreviewFile(widget.dirPaths[1].toDirectory, name: folderName);
         if (previewFile != null) {
           logger.d('Preview file for $folderName: $previewFile');
         }

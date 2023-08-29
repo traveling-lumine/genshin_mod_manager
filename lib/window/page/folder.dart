@@ -26,14 +26,14 @@ class _FolderPageState extends DWState<FolderPage> {
       dirPath: widget.dirPath,
       child: ScaffoldPage(
         header: PageHeader(
-          title: Text(widget.dir.basename.asString),
+          title: Text(widget.dirPath.basename.asString),
           commandBar: CommandBar(
             mainAxisAlignment: MainAxisAlignment.end,
             primaryItems: [
               CommandBarButton(
                 icon: const Icon(FluentIcons.folder_open),
                 onPressed: () {
-                  openFolder(widget.dir);
+                  openFolder(widget.dirPath.toDirectory);
                 },
               ),
             ],
@@ -61,21 +61,12 @@ class _FolderPageState extends DWState<FolderPage> {
 
   @override
   void updateFolder() {
-    allChildrenFolder = getFoldersUnder(widget.dir)
+    allChildrenFolder = getFoldersUnder(widget.dirPath.toDirectory)
       ..sort(
         (a, b) {
-          final aBasename = a.basename;
-          final bBasename = b.basename;
-          final aString = aBasename.asString;
-          final bString = bBasename.asString;
-          final aName = aBasename.startsWith('DISABLED ')
-              ? aString.substring(9)
-              : aString;
-          final bName = bBasename.startsWith('DISABLED ')
-              ? bString.substring(9)
-              : bString;
-          var compareTo = aName.toLowerCase().compareTo(bName.toLowerCase());
-          print('a: $aName, b: $bName, compareTo: $compareTo');
+          final a2 = a.basename.enabledForm.asString;
+          final b2 = b.basename.enabledForm.asString;
+          var compareTo = a2.toLowerCase().compareTo(b2.toLowerCase());
           return compareTo;
         },
       );

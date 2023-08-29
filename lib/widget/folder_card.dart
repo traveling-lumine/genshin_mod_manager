@@ -23,22 +23,19 @@ class _FolderCardState extends DWState<FolderCard> {
 
   @override
   Widget build(BuildContext context) {
-    PathString basename = widget.dir.basename;
-    final isDisabled = basename.startsWith('DISABLED ');
-    String displayName = basename.asString;
-    final color = isDisabled
-        ? Colors.red.lightest.withOpacity(0.5)
-        : Colors.green.lightest;
-    if (isDisabled) {
-      displayName = displayName.substring(9);
-    }
+    PathString basename = widget.dirPath.basename;
+    final isEnabled = basename.isEnabled;
+    String displayName = basename.enabledForm.asString;
+    final color = isEnabled
+        ? Colors.green.lightest
+        : Colors.red.lightest.withOpacity(0.5);
 
     return GestureDetector(
       onTap: () {
-        if (isDisabled) {
-          toggleEnable(context, displayName);
+        if (isEnabled) {
+          disable(context);
         } else {
-          toggleDisable(context, displayName);
+          enable(context);
         }
       },
       child: Card(
@@ -69,7 +66,7 @@ class _FolderCardState extends DWState<FolderCard> {
         const SizedBox(width: 4),
         Button(
           child: const Icon(FluentIcons.folder_open),
-          onPressed: () => openFolder(widget.dir),
+          onPressed: () => openFolder(widget.dirPath.toDirectory),
         ),
       ],
     );
@@ -97,7 +94,7 @@ class _FolderCardState extends DWState<FolderCard> {
   }
 
   Widget buildDesc(BuildContext context, BoxConstraints constraints) {
-    final previewFile = findPreviewFile(widget.dir);
+    final previewFile = findPreviewFile(widget.dirPath.toDirectory);
     if (previewFile == null) {
       return const Expanded(child: Center(child: Icon(FluentIcons.unknown)));
     }
@@ -114,7 +111,8 @@ class _FolderCardState extends DWState<FolderCard> {
   }
 
   Widget buildIni() {
-    final alliniFile = allFilesToWidget(getActiveiniFiles(widget.dir));
+    final alliniFile =
+        allFilesToWidget(getActiveiniFiles(widget.dirPath.toDirectory));
     return Expanded(
       child: ConstrainedBox(
         constraints: const BoxConstraints(
@@ -135,9 +133,85 @@ class _FolderCardState extends DWState<FolderCard> {
     );
   }
 
-  void toggleEnable(BuildContext context, String displayName) {
+  List<Widget> allFilesToWidget(List<File> allFiles) {
+    final List<Widget> alliniFile = [];
+    for (var i = 0; i < allFiles.length; i++) {
+      final cur = allFiles[i];
+      alliniFile.add(buildIniHeader(cur));
+      late String lastSection;
+      bool metSection = false;
+      cur
+          .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true))
+          .forEach((line) {
+        if (line.startsWith('[')) {
+          metSection = false;
+        }
+        final regExp = RegExp(r'\[Key.*?\]');
+        final match = regExp.firstMatch(line)?.group(0)!;
+        if (match != null) {
+          alliniFile.add(Text(match));
+          lastSection = match;
+          metSection = true;
+        }
+        final lineLower = line.toLowerCase();
+        if (lineLower.startsWith('key')) {
+          alliniFile.add(buildIniFieldEditor('key:', lastSection, line, cur));
+        } else if (lineLower.startsWith('back')) {
+          alliniFile.add(buildIniFieldEditor('back:', lastSection, line, cur));
+        } else if (line.startsWith('\$') && metSection) {
+          final cycles = ','.allMatches(line.split(';').first).length + 1;
+          alliniFile.add(Text('Cycles: $cycles'));
+        }
+      });
+    }
+    return alliniFile;
+  }
+
+  Widget buildIniHeader(File iniFile) {
+    final iniName = iniFile.basename;
+    return Row(
+      children: [
+        Expanded(
+          child: Tooltip(
+            message: iniName.asString,
+            child: Text(
+              iniName.asString,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+        Button(
+          child: const Icon(FluentIcons.document_management),
+          onPressed: () => runProgram(iniFile),
+        ),
+      ],
+    );
+  }
+
+  Widget buildIniFieldEditor(
+      String data, String section, String line, File file) {
+    return Row(
+      children: [
+        Text(data),
+        Expanded(
+          child: EditorText(
+            section: section,
+            line: line,
+            file: file,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void enable(BuildContext context) {
     final List<File> shaderFilenames = [];
-    final modShaderDir = widget.dirPath.join(shaderFixes).toDirectory;
+    final dirPath = widget.dirPath;
+    final dir = dirPath.toDirectory;
+    final modShaderDir = dirPath.join(shaderFixes).toDirectory;
     try {
       shaderFilenames.addAll(getFilesUnder(modShaderDir));
     } on PathNotFoundException catch (e) {
@@ -145,7 +219,7 @@ class _FolderCardState extends DWState<FolderCard> {
     }
 
     final PathString renameTarget =
-        widget.dir.parent.join(PathString(displayName));
+        dir.parent.join(dirPath.basename.enabledForm);
     if (renameTarget.toDirectory.existsSync()) {
       showDirectoryExists(context, renameTarget);
       return;
@@ -160,7 +234,7 @@ class _FolderCardState extends DWState<FolderCard> {
       return;
     }
     try {
-      widget.dir.renameSyncPath(renameTarget);
+      dir.renameSyncPath(renameTarget);
     } on PathAccessException {
       errorDialog(
           context,
@@ -171,9 +245,11 @@ class _FolderCardState extends DWState<FolderCard> {
     }
   }
 
-  void toggleDisable(BuildContext context, String displayName) {
+  void disable(BuildContext context) {
     final List<File> shaderFilenames = [];
-    final modShaderDir = widget.dirPath.join(shaderFixes).toDirectory;
+    final dirPath = widget.dirPath;
+    final dir = dirPath.toDirectory;
+    final modShaderDir = dirPath.join(shaderFixes).toDirectory;
     try {
       shaderFilenames.addAll(getFilesUnder(modShaderDir));
     } on PathNotFoundException catch (e) {
@@ -181,7 +257,7 @@ class _FolderCardState extends DWState<FolderCard> {
     }
 
     final PathString renameTarget =
-        widget.dir.parent.join(PathString('DISABLED $displayName'));
+        dir.parent.join(dirPath.basename.disabledForm);
     if (renameTarget.toDirectory.existsSync()) {
       showDirectoryExists(context, renameTarget);
       return;
@@ -196,7 +272,7 @@ class _FolderCardState extends DWState<FolderCard> {
       return;
     }
     try {
-      widget.dir.renameSyncPath(renameTarget);
+      dir.renameSyncPath(renameTarget);
     } on PathAccessException {
       errorDialog(
           context,
@@ -244,7 +320,7 @@ class _FolderCardState extends DWState<FolderCard> {
 
   void showDirectoryExists(BuildContext context, PathString renameTarget) {
     renameTarget = renameTarget.basename;
-    errorDialog(context, '$renameTarget already exists!');
+    errorDialog(context, '$renameTarget directory already exists!');
   }
 
   void errorDialog(BuildContext context, String text) {
@@ -272,78 +348,4 @@ class _FolderCardState extends DWState<FolderCard> {
   void updateFolder() {
     setState(() {});
   }
-}
-
-List<Widget> allFilesToWidget(List<File> allFiles) {
-  final List<Widget> alliniFile = [];
-  for (var i = 0; i < allFiles.length; i++) {
-    final cur = allFiles[i];
-    alliniFile.add(buildIniHeader(cur));
-    late String lastSection;
-    bool metSection = false;
-    cur
-        .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true))
-        .forEach((line) {
-      if (line.startsWith('[')) {
-        metSection = false;
-      }
-      final regExp = RegExp(r'\[Key.*?\]');
-      final match = regExp.firstMatch(line)?.group(0)!;
-      if (match != null) {
-        alliniFile.add(Text(match));
-        lastSection = match;
-        metSection = true;
-      }
-      final lineLower = line.toLowerCase();
-      if (lineLower.startsWith('key')) {
-        alliniFile.add(buildIniFieldEditor('key:', lastSection, line, cur));
-      } else if (lineLower.startsWith('back')) {
-        alliniFile.add(buildIniFieldEditor('back:', lastSection, line, cur));
-      } else if (line.startsWith('\$') && metSection) {
-        final cycles = ','.allMatches(line.split(';').first).length + 1;
-        alliniFile.add(Text('Cycles: $cycles'));
-      }
-    });
-  }
-  return alliniFile;
-}
-
-Widget buildIniHeader(File iniFile) {
-  final iniName = iniFile.basename;
-  return Row(
-    children: [
-      Expanded(
-        child: Tooltip(
-          message: iniName.asString,
-          child: Text(
-            iniName.asString,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
-      Button(
-        child: const Icon(FluentIcons.document_management),
-        onPressed: () => runProgram(iniFile),
-      ),
-    ],
-  );
-}
-
-Widget buildIniFieldEditor(
-    String data, String section, String line, File file) {
-  return Row(
-    children: [
-      Text(data),
-      Expanded(
-        child: EditorText(
-          section: section,
-          line: line,
-          file: file,
-        ),
-      ),
-    ],
-  );
 }

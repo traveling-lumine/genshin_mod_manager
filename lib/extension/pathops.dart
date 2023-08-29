@@ -45,6 +45,18 @@ class PathString {
 
   bool get isDirectorySync => FileSystemEntity.isDirectorySync(asString);
 
+  bool get isEnabled => !startsWith('DISABLED');
+
+  PathString get enabledForm {
+    if (!isEnabled) return PathString(asString.substring(8).trimLeft());
+    return this;
+  }
+
+  PathString get disabledForm {
+    if (isEnabled) return PathString('DISABLED ${asString.trimLeft()}');
+    return this;
+  }
+
   PathString join(PathString str) => PathString(p.join(asString, str.asString));
 
   bool startsWith(String s) {

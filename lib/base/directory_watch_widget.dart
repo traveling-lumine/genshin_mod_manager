@@ -8,8 +8,6 @@ import 'package:logger/logger.dart';
 abstract class DirectoryWatchWidget extends StatefulWidget {
   final PathString dirPath;
 
-  Directory get dir => dirPath.toDirectory;
-
   const DirectoryWatchWidget({super.key, required this.dirPath});
 
   @override
@@ -47,7 +45,7 @@ abstract class DWState<T extends DirectoryWatchWidget>
 
   void _onUpdate() {
     updateFolder();
-    subscription = widget.dir.watch().listen((event) {
+    subscription = widget.dirPath.toDirectory.watch().listen((event) {
       logger.d('$this update: $event');
       if (shouldUpdate(event)) {
         logger.d('$this update accepted');
@@ -70,8 +68,6 @@ abstract class DWState<T extends DirectoryWatchWidget>
 
 abstract class MultiDirectoryWatchWidget extends StatefulWidget {
   final List<PathString> dirPaths;
-
-  Directory dir(index) => dirPaths[index].toDirectory;
 
   const MultiDirectoryWatchWidget({super.key, required this.dirPaths});
 
@@ -131,7 +127,8 @@ abstract class MDWState<T extends MultiDirectoryWatchWidget>
     if (updates == null) {
       subscriptions = [];
       for (var index = 0; index < widget.dirPaths.length; index++) {
-        subscriptions.add(widget.dir(index).watch().listen((event) {
+        subscriptions
+            .add(widget.dirPaths[index].toDirectory.watch().listen((event) {
           logger.d('$this update: $event');
           if (shouldUpdate(index, event)) {
             logger.d('$this update accepted');
@@ -143,7 +140,8 @@ abstract class MDWState<T extends MultiDirectoryWatchWidget>
       }
     } else {
       for (final index in updates) {
-        subscriptions[index] = widget.dir(index).watch().listen((event) {
+        subscriptions[index] =
+            widget.dirPaths[index].toDirectory.watch().listen((event) {
           logger.d('$this update: $event');
           if (shouldUpdate(index, event)) {
             logger.d('$this update accepted');
