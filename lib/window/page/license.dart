@@ -40,19 +40,19 @@ class OssLicensesPage extends StatelessWidget {
         lp.addAll(l.paragraphs.map((p) => p.text));
       }
     }
-    final licenses = ossLicenses.toList();
-    for (var key in lm.keys) {
-      licenses.add(Package(
-        name: key,
-        description: '',
-        authors: [],
-        version: '',
-        license: lm[key]!.join('\n\n'),
-        isMarkdown: false,
-        isSdk: false,
-        isDirectDependency: false,
-      ));
-    }
+    final licenses = ossLicenses.where((e) => e.isDirectDependency).toList();
+    // for (var key in lm.keys) {
+    //   licenses.add(Package(
+    //     name: key,
+    //     description: '',
+    //     authors: [],
+    //     version: '',
+    //     license: lm[key]!.join('\n\n'),
+    //     isMarkdown: false,
+    //     isSdk: false,
+    //     isDirectDependency: false,
+    //   ));
+    // }
     return licenses..sort((a, b) => a.name.compareTo(b.name));
   }
 

@@ -7,6 +7,8 @@ import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/widget/editor_text.dart';
 import 'package:genshin_mod_manager/widget/folder_toggle.dart';
+import 'package:logger/logger.dart';
+import 'package:pasteboard/pasteboard.dart';
 
 class FolderCard extends DirectoryWatchWidget {
   FolderCard({required super.dirPath}) : super(key: ValueKey(dirPath));
@@ -17,6 +19,7 @@ class FolderCard extends DirectoryWatchWidget {
 
 class _FolderCardState extends DWState<FolderCard> {
   static const minIniSectionWidth = 150;
+  static final logger = Logger();
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +91,30 @@ class _FolderCardState extends DWState<FolderCard> {
   Widget buildDesc(BuildContext context, BoxConstraints constraints) {
     final previewFile = findPreviewFile(widget.dirPath.toDirectory);
     if (previewFile == null) {
-      return const Expanded(child: Center(child: Icon(FluentIcons.unknown)));
+      return Expanded(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(FluentIcons.unknown),
+            const SizedBox(height: 4),
+            Button(
+              onPressed: () async {
+                final image = await Pasteboard.image;
+                if (image != null) {
+                  final file = widget.dirPath
+                      .join(const PathString('preview.png'))
+                      .toFile;
+                  await file.writeAsBytes(image);
+                  logger.d('Image pasted to ${file.path}');
+                } else {
+                  logger.d('No image found in clipboard');
+                }
+              },
+              child: const Text('Paste'),
+            )
+          ],
+        ),
+      );
     }
     return ConstrainedBox(
       constraints: BoxConstraints(
