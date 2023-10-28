@@ -2,12 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:logger/logger.dart';
 
 abstract class DirectoryWatchWidget extends StatefulWidget {
-  final String dirPath;
-
-  Directory get dir => Directory(dirPath);
+  final PathString dirPath;
 
   const DirectoryWatchWidget({super.key, required this.dirPath});
 
@@ -46,7 +45,7 @@ abstract class DWState<T extends DirectoryWatchWidget>
 
   void _onUpdate() {
     updateFolder();
-    subscription = widget.dir.watch().listen((event) {
+    subscription = widget.dirPath.toDirectory.watch().listen((event) {
       logger.d('$this update: $event');
       if (shouldUpdate(event)) {
         logger.d('$this update accepted');
@@ -68,9 +67,7 @@ abstract class DWState<T extends DirectoryWatchWidget>
 }
 
 abstract class MultiDirectoryWatchWidget extends StatefulWidget {
-  final List<String> dirPaths;
-
-  Directory dir(index) => Directory(dirPaths[index]);
+  final List<PathString> dirPaths;
 
   const MultiDirectoryWatchWidget({super.key, required this.dirPaths});
 
@@ -130,7 +127,8 @@ abstract class MDWState<T extends MultiDirectoryWatchWidget>
     if (updates == null) {
       subscriptions = [];
       for (var index = 0; index < widget.dirPaths.length; index++) {
-        subscriptions.add(widget.dir(index).watch().listen((event) {
+        subscriptions
+            .add(widget.dirPaths[index].toDirectory.watch().listen((event) {
           logger.d('$this update: $event');
           if (shouldUpdate(index, event)) {
             logger.d('$this update accepted');
@@ -142,7 +140,8 @@ abstract class MDWState<T extends MultiDirectoryWatchWidget>
       }
     } else {
       for (final index in updates) {
-        subscriptions[index] = widget.dir(index).watch().listen((event) {
+        subscriptions[index] =
+            widget.dirPaths[index].toDirectory.watch().listen((event) {
           logger.d('$this update: $event');
           if (shouldUpdate(index, event)) {
             logger.d('$this update accepted');

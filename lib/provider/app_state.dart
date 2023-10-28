@@ -1,25 +1,31 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/extension/default_shared_preferences.dart';
+import 'package:genshin_mod_manager/extension/pathops.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppState with ChangeNotifier {
-  String _targetDir;
-  String _launcherFile;
-  bool _runTogether;
-  bool _moveOnDrag;
-  bool _showFolderIcon;
+  static const String targetDirKey = 'targetDir';
+  PathString _targetDir;
 
-  String get targetDir => _targetDir;
+  PathString get targetDir => _targetDir;
 
-  set targetDir(String value) {
+  set targetDir(PathString value) {
     _targetDir = value;
     notifyListeners();
   }
 
-  String get launcherFile => _launcherFile;
+  static const String launcherFileKey = 'launcherDir';
+  PathString _launcherFile;
 
-  set launcherFile(String value) {
+  PathString get launcherFile => _launcherFile;
+
+  set launcherFile(PathString value) {
     _launcherFile = value;
     notifyListeners();
   }
+
+  static const String runTogetherKey = 'runTogether';
+  bool _runTogether;
 
   bool get runTogether => _runTogether;
 
@@ -28,12 +34,18 @@ class AppState with ChangeNotifier {
     notifyListeners();
   }
 
+  static const String moveOnDragKey = 'moveOnDrag';
+  bool _moveOnDrag;
+
   bool get moveOnDrag => _moveOnDrag;
 
   set moveOnDrag(bool value) {
     _moveOnDrag = value;
     notifyListeners();
   }
+
+  static const String showFolderIconKey = 'showFolderIcon';
+  bool _showFolderIcon;
 
   bool get showFolderIcon => _showFolderIcon;
 
@@ -50,14 +62,34 @@ class AppState with ChangeNotifier {
     this._showFolderIcon,
   );
 
+  AppState.defaultState()
+      : this(
+          const PathString('.'),
+          const PathString('.'),
+          false,
+          false,
+          true,
+        );
+
   @override
   String toString() {
     return 'AppState('
         '_targetDir: $_targetDir'
-        ', _launcherDir: $_launcherFile'
+        ', _launcherFile: $_launcherFile'
         ', _runTogether: $_runTogether'
         ', _moveOnDrag: $_moveOnDrag'
         ', _showFolderIcon: $_showFolderIcon'
         ')';
   }
+}
+
+Future<AppState> getAppState() async {
+  final instance = await SharedPreferences.getInstance();
+  return AppState(
+    PathString(instance.getStringOrDot(AppState.targetDirKey)),
+    PathString(instance.getStringOrDot(AppState.launcherFileKey)),
+    instance.getBoolOrFalse(AppState.runTogetherKey),
+    instance.getBoolOrFalse(AppState.moveOnDragKey),
+    instance.getBoolOrTrue(AppState.showFolderIconKey),
+  );
 }
