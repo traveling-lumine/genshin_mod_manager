@@ -1,10 +1,11 @@
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/base/appbar.dart';
 import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
-import 'package:genshin_mod_manager/provider/app_state.dart';
+import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
 import 'package:genshin_mod_manager/window/page/folder.dart';
 import 'package:genshin_mod_manager/window/page/setting.dart';
@@ -54,16 +55,7 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
   }
 
   NavigationAppBar buildNavigationAppBar() {
-    return const NavigationAppBar(
-      actions: WindowButtons(),
-      automaticallyImplyLeading: false,
-      title: DragToMoveArea(
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text('Genshin Mod Manager'),
-        ),
-      ),
-    );
+    return getAppbar('Genshin Mod Manager');
   }
 
   NavigationPane buildNavigationPane(BuildContext context) {
@@ -92,7 +84,7 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
 
   List<PaneItemAction> buildPaneItemActions(BuildContext context) {
     const icon = Icon(FluentIcons.user_window);
-    return context.select<AppState, bool>((value) => value.runTogether)
+    return context.select<AppStateService, bool>((value) => value.runTogether)
         ? [
             PaneItemAction(
               icon: icon,
@@ -202,14 +194,14 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
   }
 
   void runMigoto(BuildContext context) {
-    final tDir = context.read<AppState>().targetDir;
+    final tDir = context.read<AppStateService>().targetDir;
     final path = tDir.join(exeName);
     runProgram(path.toFile);
     logger.t('Ran 3d migoto $path');
   }
 
   void runLauncher(BuildContext context) {
-    final launcher = context.read<AppState>().launcherFile;
+    final launcher = context.read<AppStateService>().launcherFile;
     runProgram(launcher.toFile);
     logger.t('Ran launcher $launcher');
   }
@@ -219,8 +211,8 @@ class FolderPaneItem extends PaneItem {
   static const maxIconSize = 80.0;
   static final logger = Logger();
 
-  static Selector<AppState, bool> _getIcon(File? imageFile) {
-    return Selector<AppState, bool>(
+  static Selector<AppStateService, bool> _getIcon(File? imageFile) {
+    return Selector<AppStateService, bool>(
       selector: (_, appState) => appState.showFolderIcon,
       builder: (context, value, child) {
         if (!value) return const Icon(FluentIcons.folder_open);
@@ -233,17 +225,19 @@ class FolderPaneItem extends PaneItem {
     final Image image;
     if (imageFile == null) {
       image = Image.asset('images/app_icon.ico');
-    } else{
+    } else {
       image = Image.file(
         imageFile,
         fit: BoxFit.contain,
         filterQuality: FilterQuality.medium,
       );
     }
-    return SizedBox(
-      width: maxIconSize,
-      height: maxIconSize,
-      child: image,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: maxIconSize),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: image,
+      ),
     );
   }
 
@@ -285,18 +279,5 @@ class FolderPaneItem extends PaneItem {
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return '${super.toString(minLevel: minLevel)}($dirPath)';
-  }
-}
-
-class WindowButtons extends StatelessWidget {
-  const WindowButtons({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      width: 138,
-      height: 50,
-      child: WindowCaption(),
-    );
   }
 }

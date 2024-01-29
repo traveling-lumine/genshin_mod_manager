@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
-import 'package:genshin_mod_manager/provider/app_state.dart';
+import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
@@ -52,7 +52,7 @@ class FolderToggle extends StatelessWidget {
       return;
     }
     final tgt =
-        context.read<AppState>().targetDir.join(shaderFixes).toDirectory;
+        context.read<AppStateService>().targetDir.join(shaderFixes).toDirectory;
     try {
       copyShaders(tgt, shaderFilenames);
     } on FileSystemException catch (e) {
@@ -89,7 +89,7 @@ class FolderToggle extends StatelessWidget {
       return;
     }
     final tgt =
-        context.read<AppState>().targetDir.join(shaderFixes).toDirectory;
+        context.read<AppStateService>().targetDir.join(shaderFixes).toDirectory;
     try {
       deleteShaders(tgt, shaderFilenames);
     } catch (e) {

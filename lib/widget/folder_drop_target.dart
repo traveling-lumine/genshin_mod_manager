@@ -4,7 +4,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/copy_directory.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
-import 'package:genshin_mod_manager/provider/app_state.dart';
+import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
@@ -31,7 +31,7 @@ class FolderDropTarget extends StatelessWidget {
   }
 
   void _dropFinishHandler(BuildContext context, DropDoneDetails details) {
-    final moveInsteadOfCopy = context.read<AppState>().moveOnDrag;
+    final moveInsteadOfCopy = context.read<AppStateService>().moveOnDrag;
     for (final xFile in details.files) {
       final path = PathString(xFile.path);
       if (!path.isDirectorySync) continue;
