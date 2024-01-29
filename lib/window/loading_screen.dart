@@ -11,11 +11,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoadingScreen extends StatefulWidget {
-  static const resourceDir = PathString('Resources');
-  static const modDir = PathString('Mods');
-  static const sharedPreferencesAwaitTime = Duration(seconds: 5);
-  static final Logger logger = Logger();
-
   const LoadingScreen({super.key});
 
   @override
@@ -23,6 +18,10 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
+  static const resourceDir = PathString('Resources');
+  static const modDir = PathString('Mods');
+  static final Logger logger = Logger();
+
   bool overrideBuild = false;
 
   @override
@@ -40,8 +39,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           return buildLoadingScreen();
         }
         if (snapshot.hasError) {
-          LoadingScreen.logger
-              .e('App FutureBuilder snapshot error: ${snapshot.error}');
+          logger.e('App FutureBuilder snapshot error: ${snapshot.error}');
           return buildErrorScreen(context, snapshot.error);
         }
         return buildMain(context);
@@ -95,10 +93,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   Widget buildMain(BuildContext context) {
     final dirPath = context.select<AppStateService, PathString>(
-        (value) => value.targetDir.join(LoadingScreen.modDir));
+        (value) => value.targetDir.join(modDir));
     final curExePath = PathString(Platform.resolvedExecutable);
     final curExeParentDir = curExePath.dirname;
-    final modResourcePath = curExeParentDir.join(LoadingScreen.resourceDir);
+    final modResourcePath = curExeParentDir.join(resourceDir);
     modResourcePath.toDirectory.createSync();
     return HomeWindow(dirPaths: [dirPath, modResourcePath]);
   }

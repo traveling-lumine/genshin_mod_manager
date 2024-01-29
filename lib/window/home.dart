@@ -11,7 +11,6 @@ import 'package:genshin_mod_manager/window/page/folder.dart';
 import 'package:genshin_mod_manager/window/page/setting.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
 
 class HomeWindow extends MultiDirectoryWatchWidget {
   const HomeWindow({
@@ -23,25 +22,13 @@ class HomeWindow extends MultiDirectoryWatchWidget {
   MDWState<HomeWindow> createState() => _HomeWindowState();
 }
 
-class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
+class _HomeWindowState extends MDWState<HomeWindow> {
   static const navigationPaneOpenWidth = 270.0;
   static const PathString exeName = PathString('3DMigoto Loader.exe');
   static final Logger logger = Logger();
 
   late List<NavigationPaneItem> subFolders;
   int? selected;
-
-  @override
-  void initState() {
-    super.initState();
-    windowManager.addListener(this);
-  }
-
-  @override
-  void dispose() {
-    windowManager.removeListener(this);
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +101,7 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
       items: subFolders
           .map((e) => AutoSuggestBoxItem(
                 value: e.key,
-                label: (e as FolderPaneItem).dirPath.basename.asString,
+                label: (e as _FolderPaneItem).dirPath.basename.asString,
               ))
           .toList(),
       trailingIcon: const Icon(FluentIcons.search),
@@ -162,7 +149,7 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
         if (previewFile != null) {
           logger.d('Preview file for $folderName: $previewFile');
         }
-        subFolders.add(FolderPaneItem(
+        subFolders.add(_FolderPaneItem(
           dirPath: element.pathString,
           imageFile: previewFile,
         ));
@@ -175,7 +162,7 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
     } else if (updateIndex == -1 || updateIndex == 1) {
       final List<NavigationPaneItem> updateFolder = [];
       for (final element in subFolders) {
-        final fpelem = element as FolderPaneItem;
+        final fpelem = element as _FolderPaneItem;
         final folderName = fpelem.dirPath.basename;
         final previewFile =
             findPreviewFile(widget.dirPaths[1].toDirectory, name: folderName);
@@ -183,7 +170,7 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
           logger.d('Preview file for $folderName: $previewFile');
         }
         updateFolder.add(
-          FolderPaneItem(
+          _FolderPaneItem(
             dirPath: fpelem.dirPath,
             imageFile: previewFile,
           ),
@@ -207,16 +194,16 @@ class _HomeWindowState extends MDWState<HomeWindow> with WindowListener {
   }
 }
 
-class FolderPaneItem extends PaneItem {
-  static const maxIconSize = 80.0;
-  static final logger = Logger();
+class _FolderPaneItem extends PaneItem {
+  static const maxIconWidth = 80.0;
 
   static Selector<AppStateService, bool> _getIcon(File? imageFile) {
     return Selector<AppStateService, bool>(
-      selector: (_, appState) => appState.showFolderIcon,
-      builder: (context, value, child) {
-        if (!value) return const Icon(FluentIcons.folder_open);
-        return buildImage(imageFile);
+      selector: (_, service) => service.showFolderIcon,
+      builder: (_, value, __) {
+        return value
+            ? buildImage(imageFile)
+            : const Icon(FluentIcons.folder_open);
       },
     );
   }
@@ -233,7 +220,7 @@ class FolderPaneItem extends PaneItem {
       );
     }
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: maxIconSize),
+      constraints: const BoxConstraints(maxWidth: maxIconWidth),
       child: AspectRatio(
         aspectRatio: 1,
         child: image,
@@ -243,7 +230,7 @@ class FolderPaneItem extends PaneItem {
 
   PathString dirPath;
 
-  FolderPaneItem({
+  _FolderPaneItem({
     required this.dirPath,
     File? imageFile,
   }) : super(

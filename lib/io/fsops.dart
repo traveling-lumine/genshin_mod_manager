@@ -20,17 +20,20 @@ List<File> getActiveiniFiles(Directory dir) {
   }).toList(growable: false);
 }
 
+const _previewExtensions = [
+  PathString('.png'),
+  PathString('.jpg'),
+  PathString('.jpeg'),
+  PathString('.gif'),
+];
+
 File? findPreviewFile(Directory dir,
     {PathString name = const PathString('preview')}) {
   for (final element in getFilesUnder(dir)) {
     final filename = element.basenameWithoutExtension;
     if (filename != name) continue;
     final ext = element.extension;
-    if (ext == const PathString('.png') ||
-        ext == const PathString('.jpg') ||
-        ext == const PathString('.jpeg')) {
-      return element;
-    }
+    if (_previewExtensions.contains(ext)) return element;
   }
   return null;
 }
