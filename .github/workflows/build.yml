@@ -18,7 +18,7 @@ jobs:
           cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
           architecture: x64
       - run: flutter build windows
-      - run: move build\windows\runner\Release GenshinModManager
+      - run: move build\windows\x64\runner\Release GenshinModManager
       - run: mkdir GenshinModManager\Resources
       - run: tar -acf GenshinModManager.zip GenshinModManager
       - run: echo "${{ hashFiles('GenshinModManager.zip') }}"
