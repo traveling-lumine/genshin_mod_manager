@@ -372,7 +372,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'Collections and utilities functions and classes related to collections.',
     repository: 'https://github.com/dart-lang/collection',
     authors: [],
-    version: '1.17.2',
+    version: '1.18.0',
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -411,7 +411,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/cross_file',
     authors: [],
-    version: '0.3.3+6',
+    version: '0.3.3+8',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -1054,7 +1054,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     homepage: 'https://bdlukaa.github.io/fluent_ui/#/',
     repository: 'https://github.com/bdlukaa/fluent_ui',
     authors: [],
-    version: '4.7.6',
+    version: '4.8.5',
     license: '''Copyright 2020 Bruno D'Luka
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -1075,7 +1075,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     description: 'A framework for writing Flutter applications',
     homepage: 'https://flutter.dev',
     authors: [],
-    version: '3.13.7',
+    version: '3.16.9',
     license: '''Copyright 2014 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -1112,7 +1112,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/flutter_lints',
     authors: [],
-    version: '2.0.3',
+    version: '3.0.1',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -1182,7 +1182,7 @@ SOFTWARE.''',
         'A composable, multi-platform, Future-based API for HTTP requests.',
     repository: 'https://github.com/dart-lang/http/tree/master/pkgs/http',
     authors: [],
-    version: '1.1.0',
+    version: '1.2.0',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -1373,7 +1373,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
 ''',
     repository: 'https://github.com/dart-lang/lints',
     authors: [],
-    version: '2.1.1',
+    version: '3.0.0',
     license: '''Copyright 2021, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -1727,7 +1727,7 @@ SOFTWARE.''',
         'Annotations used to express developer intentions that can\'t otherwise be deduced by statically analyzing source code.',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/meta',
     authors: [],
-    version: '1.9.1',
+    version: '1.10.0',
     license: '''Copyright 2016, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -1799,7 +1799,7 @@ SOFTWARE.''',
     repository:
         'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/package_info_plus/package_info_plus',
     authors: [],
-    version: '4.2.0',
+    version: '5.0.1',
     license: '''Copyright 2017 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -2164,7 +2164,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_platform_interface',
     authors: [],
-    version: '2.1.1',
+    version: '2.1.2',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -2237,7 +2237,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/platform',
     authors: [],
-    version: '3.1.3',
+    version: '3.1.4',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -2274,7 +2274,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/plugin_platform_interface',
     authors: [],
-    version: '2.1.6',
+    version: '2.1.8',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -2310,7 +2310,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'A wrapper around InheritedWidget to make them easier to use and more reusable.',
     repository: 'https://github.com/rrousselGit/provider',
     authors: [],
-    version: '6.0.5',
+    version: '6.1.1',
     license: '''MIT License
 
 Copyright (c) 2019 Remi Rousselet
@@ -2394,7 +2394,7 @@ SOFTWARE.''',
         'Provides some additional functions to ScrollController to define item position relative to the screen.',
     homepage: 'https://github.com/WinXaito/scroll_pos',
     authors: [],
-    version: '0.4.0',
+    version: '0.5.0',
     license: '''MIT License
 
 Copyright (c) 2021 WinXaito
@@ -2500,7 +2500,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_foundation',
     authors: [],
-    version: '2.3.4',
+    version: '2.3.5',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -2573,7 +2573,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_platform_interface',
     authors: [],
-    version: '2.3.1',
+    version: '2.3.2',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -2609,7 +2609,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_web',
     authors: [],
-    version: '2.2.1',
+    version: '2.2.2',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -2719,7 +2719,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'A package for manipulating stack traces and printing them readably.',
     repository: 'https://github.com/dart-lang/stack_trace',
     authors: [],
-    version: '1.11.0',
+    version: '1.11.1',
     license: '''Copyright 2014, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -2757,7 +2757,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'An abstraction for two-way communication channels based on the Dart Stream class.',
     repository: 'https://github.com/dart-lang/stream_channel',
     authors: [],
-    version: '2.1.1',
+    version: '2.1.2',
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -2869,7 +2869,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'The user facing API for structuring Dart tests and checking expectations.',
     repository: 'https://github.com/dart-lang/test/tree/master/pkgs/test_api',
     authors: [],
-    version: '0.6.0',
+    version: '0.6.1',
     license: '''Copyright 2018, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -2946,7 +2946,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher',
     authors: [],
-    version: '6.2.1',
+    version: '6.2.4',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -2982,7 +2982,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_android',
     authors: [],
-    version: '6.2.0',
+    version: '6.2.2',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3018,7 +3018,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_ios',
     authors: [],
-    version: '6.2.0',
+    version: '6.2.4',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3054,7 +3054,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_linux',
     authors: [],
-    version: '3.1.0',
+    version: '3.1.1',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3126,7 +3126,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_platform_interface',
     authors: [],
-    version: '2.2.0',
+    version: '2.3.1',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3162,7 +3162,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_web',
     authors: [],
-    version: '2.2.0',
+    version: '2.2.3',
     license: '''url_launcher_web
 
 Copyright 2013 The Flutter Authors. All rights reserved.
@@ -3404,7 +3404,7 @@ platform_detect
     repository:
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_windows',
     authors: [],
-    version: '3.1.0',
+    version: '3.1.1',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3534,7 +3534,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'Lightweight DOM and JS bindings built around JS static interop.',
     repository: 'https://github.com/dart-lang/web',
     authors: [],
-    version: '0.1.4-beta',
+    version: '0.3.0',
     license: '''Copyright 2023, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -3568,11 +3568,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   Package(
     name: 'win32',
     description:
-        'A Dart library for accessing common Win32 APIs using FFI. No C required!',
+        '''A Dart library for accessing common Win32 APIs using FFI. No C required!
+''',
     homepage: 'https://win32.pub',
     repository: 'https://github.com/dart-windows/win32',
     authors: [],
-    version: '5.0.9',
+    version: '5.2.0',
     license: '''Copyright 2019, Dart | Windows. All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -3609,7 +3610,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'This plugin allows Flutter desktop apps to resizing and repositioning the window.',
     homepage: 'https://github.com/leanflutter/window_manager',
     authors: [],
-    version: '0.3.7',
+    version: '0.3.8',
     license: '''MIT License
 
 Copyright (c) 2022 LiJianying <lijy91@foxmail.com>
@@ -3642,7 +3643,7 @@ SOFTWARE.''',
     repository:
         'https://github.com/flutter/packages/tree/main/packages/xdg_directories',
     authors: [],
-    version: '1.0.3',
+    version: '1.0.4',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
