@@ -113,9 +113,14 @@ class _HomeWindowState extends MDWState<HomeWindow> {
       onSubmissionFailed: (text) {
         if (text.isEmpty) return;
         test(e) {
-          final name = (e.key as ValueKey<PathString>).value.basename.asString.toLowerCase();
+          final name = (e.key as ValueKey<PathString>)
+              .value
+              .basename
+              .asString
+              .toLowerCase();
           return name.startsWith(text.toLowerCase());
         }
+
         final index = subFolders.indexWhere(test);
         if (index == -1) return;
         setState(() => selected = index);
@@ -193,6 +198,17 @@ class _HomeWindowState extends MDWState<HomeWindow> {
   void runMigoto(BuildContext context) {
     final path = context.read<AppStateService>().modExecFile;
     runProgram(path.toFile);
+    displayInfoBar(
+      context,
+      builder: (context, close) {
+        return InfoBar(
+            title: const Text('Ran 3d migoto'),
+            action: IconButton(
+              icon: const Icon(FluentIcons.clear),
+              onPressed: close,
+            ));
+      },
+    );
     logger.t('Ran 3d migoto $path');
   }
 

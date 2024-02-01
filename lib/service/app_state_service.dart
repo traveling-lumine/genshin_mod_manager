@@ -71,7 +71,7 @@ class AppStateService with ChangeNotifier {
 
       final mRootRaw = value.getString(modRootKey);
       _modRoot = mRootRaw == null ? _modRoot : PathString(mRootRaw);
-      const dotString = const PathString('.');
+      const dotString = PathString('.');
       if (_modRoot == dotString && _targetDir != dotString) {
         _modRoot = _targetDir.join(const PathString('Mods'));
         _sharedPreferences?.setString(modRootKey, _modRoot.asString);

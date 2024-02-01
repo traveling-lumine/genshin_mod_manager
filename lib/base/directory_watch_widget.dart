@@ -38,7 +38,6 @@ abstract class DWState<T extends DirectoryWatchWidget>
 
   @override
   void dispose() {
-    logger.t('$this bids you a goodbye');
     subscription.cancel();
     super.dispose();
   }

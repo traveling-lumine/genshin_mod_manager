@@ -91,8 +91,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Widget buildMain(BuildContext context) {
-    final dirPath = context.select<AppStateService, PathString>(
-        (value) => value.modRoot);
+    final dirPath =
+        context.select<AppStateService, PathString>((value) => value.modRoot);
     final curExePath = PathString(Platform.resolvedExecutable);
     final curExeParentDir = curExePath.dirname;
     final modResourcePath = curExeParentDir.join(resourceDir);

@@ -33,8 +33,8 @@ class SettingPage extends StatelessWidget {
         SelectItem(
           title: 'Select 3D Migoto executable',
           icon: FluentIcons.document_management,
-          path: context
-              .select<AppStateService, PathString>((value) => value.modExecFile),
+          path: context.select<AppStateService, PathString>(
+              (value) => value.modExecFile),
           onPressed: () {
             final file = OpenNoDereferenceFilePicker().getFile();
             if (file == null) return;
