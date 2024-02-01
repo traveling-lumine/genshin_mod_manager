@@ -51,8 +51,12 @@ class FolderToggle extends StatelessWidget {
       showDirectoryExists(context, renameTarget);
       return;
     }
-    final tgt =
-        context.read<AppStateService>().targetDir.join(shaderFixes).toDirectory;
+    final tgt = context
+        .read<AppStateService>()
+        .modExecFile
+        .dirname
+        .join(shaderFixes)
+        .toDirectory;
     try {
       copyShaders(tgt, shaderFilenames);
     } on FileSystemException catch (e) {
@@ -88,8 +92,12 @@ class FolderToggle extends StatelessWidget {
       showDirectoryExists(context, renameTarget);
       return;
     }
-    final tgt =
-        context.read<AppStateService>().targetDir.join(shaderFixes).toDirectory;
+    final tgt = context
+        .read<AppStateService>()
+        .modExecFile
+        .dirname
+        .join(shaderFixes)
+        .toDirectory;
     try {
       deleteShaders(tgt, shaderFilenames);
     } catch (e) {

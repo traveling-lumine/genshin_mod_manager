@@ -25,7 +25,6 @@ class HomeWindow extends MultiDirectoryWatchWidget {
 
 class _HomeWindowState extends MDWState<HomeWindow> {
   static const navigationPaneOpenWidth = 270.0;
-  static const PathString exeName = PathString('3DMigoto Loader.exe');
   static final Logger logger = Logger();
 
   late List<NavigationPaneItem> subFolders;
@@ -192,8 +191,7 @@ class _HomeWindowState extends MDWState<HomeWindow> {
   }
 
   void runMigoto(BuildContext context) {
-    final tDir = context.read<AppStateService>().targetDir;
-    final path = tDir.join(exeName);
+    final path = context.read<AppStateService>().modExecFile;
     runProgram(path.toFile);
     logger.t('Ran 3d migoto $path');
   }

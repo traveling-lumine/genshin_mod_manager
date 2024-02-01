@@ -19,7 +19,6 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
   static const resourceDir = PathString('Resources');
-  static const modDir = PathString('Mods');
   static final Logger logger = Logger();
 
   bool overrideBuild = false;
@@ -93,7 +92,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   Widget buildMain(BuildContext context) {
     final dirPath = context.select<AppStateService, PathString>(
-        (value) => value.targetDir.join(modDir));
+        (value) => value.modRoot);
     final curExePath = PathString(Platform.resolvedExecutable);
     final curExeParentDir = curExePath.dirname;
     final modResourcePath = curExeParentDir.join(resourceDir);

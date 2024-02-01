@@ -20,14 +20,25 @@ class SettingPage extends StatelessWidget {
       ),
       children: [
         SelectItem(
-          title: 'Select 3D Migoto folder',
+          title: 'Select mod root folder',
           icon: FluentIcons.folder_open,
           path: context
-              .select<AppStateService, PathString>((value) => value.targetDir),
+              .select<AppStateService, PathString>((value) => value.modRoot),
           onPressed: () {
             final dir = DirectoryPicker().getDirectory();
             if (dir == null) return;
-            context.read<AppStateService>().targetDir = dir.pathString;
+            context.read<AppStateService>().modRoot = dir.pathString;
+          },
+        ),
+        SelectItem(
+          title: 'Select 3D Migoto executable',
+          icon: FluentIcons.document_management,
+          path: context
+              .select<AppStateService, PathString>((value) => value.modExecFile),
+          onPressed: () {
+            final file = OpenNoDereferenceFilePicker().getFile();
+            if (file == null) return;
+            context.read<AppStateService>().modExecFile = file.pathString;
           },
         ),
         SelectItem(
