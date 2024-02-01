@@ -42,17 +42,25 @@ class _FolderPageState extends DWState<FolderPage> {
             ],
           ),
         ),
-        content: GridView(
-          padding: const EdgeInsets.all(8),
-          gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
-            minCrossAxisExtent: minCrossAxisExtent,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-            mainAxisExtent: mainAxisExtent,
+        content: FluentTheme(
+          data: FluentThemeData(
+            scrollbarTheme: const ScrollbarThemeData(
+              thickness: 8,
+              hoveringThickness: 10,
+            ),
           ),
-          children: allChildrenFolder
-              .map((e) => FolderCard(dirPath: e.pathString))
-              .toList(),
+          child: GridView(
+            padding: const EdgeInsets.all(8),
+            gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
+              minCrossAxisExtent: minCrossAxisExtent,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              mainAxisExtent: mainAxisExtent,
+            ),
+            children: allChildrenFolder
+                .map((e) => FolderCard(dirPath: e.pathString))
+                .toList(),
+          ),
         ),
       ),
     );
