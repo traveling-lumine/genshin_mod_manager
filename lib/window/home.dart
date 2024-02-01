@@ -6,6 +6,7 @@ import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
+import 'package:genshin_mod_manager/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
 import 'package:genshin_mod_manager/window/page/folder.dart';
 import 'package:genshin_mod_manager/window/page/setting.dart';
@@ -96,10 +97,10 @@ class _HomeWindowState extends MDWState<HomeWindow> {
           ];
   }
 
-  AutoSuggestBox<Key> buildAutoSuggestBox() {
-    return AutoSuggestBox(
+  Widget buildAutoSuggestBox() {
+    return AutoSuggestBox2(
       items: subFolders
-          .map((e) => AutoSuggestBoxItem(
+          .map((e) => AutoSuggestBoxItem2(
                 value: e.key,
                 label: (e as _FolderPaneItem).dirPath.basename.asString,
               ))
@@ -109,6 +110,16 @@ class _HomeWindowState extends MDWState<HomeWindow> {
         setState(() {
           selected = subFolders.indexWhere((e) => e.key == item.value);
         });
+      },
+      onSubmissionFailed: (text) {
+        if (text.isEmpty) return;
+        test(e) {
+          final name = (e.key as ValueKey<PathString>).value.basename.asString.toLowerCase();
+          return name.startsWith(text.toLowerCase());
+        }
+        final index = subFolders.indexWhere(test);
+        if (index == -1) return;
+        setState(() => selected = index);
       },
     );
   }
