@@ -21,6 +21,9 @@ class _FolderCardState extends DWState<FolderCard> {
   static const minIniSectionWidth = 150;
   static final logger = Logger();
 
+  final contextController = FlyoutController();
+  final contextAttachKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     final dirPath = widget.dirPath;
@@ -105,6 +108,17 @@ class _FolderCardState extends DWState<FolderCard> {
                       .join(const PathString('preview.png'))
                       .toFile;
                   await file.writeAsBytes(image);
+                  if (!mounted) return;
+                  await displayInfoBar(
+                    context,
+                    builder: (_, close) {
+                      return InfoBar(
+                        title: const Text('Image pasted'),
+                        content: Text('to ${file.path}'),
+                        onClose: close,
+                      );
+                    },
+                  );
                   logger.d('Image pasted to ${file.path}');
                 } else {
                   logger.d('No image found in clipboard');
@@ -116,14 +130,120 @@ class _FolderCardState extends DWState<FolderCard> {
         ),
       );
     }
+    return _buildImageDesc(context, constraints, previewFile);
+  }
+
+  Widget _buildImageDesc(
+      BuildContext context, BoxConstraints constraints, File previewFile) {
     return ConstrainedBox(
       constraints: BoxConstraints(
         maxWidth: constraints.maxWidth - minIniSectionWidth,
       ),
-      child: Image.file(
-        previewFile,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.medium,
+      child: GestureDetector(
+        onSecondaryTapUp: (details) {
+          final targetContext = contextAttachKey.currentContext;
+          if (targetContext == null) return;
+          final box = targetContext.findRenderObject() as RenderBox;
+          final position = box.localToGlobal(
+            details.localPosition,
+            ancestor: Navigator.of(context).context.findRenderObject(),
+          );
+          contextController.showFlyout(
+            position: position,
+            builder: (context) {
+              return FlyoutContent(
+                child: SizedBox(
+                  width: 120,
+                  child: CommandBar(
+                    primaryItems: [
+                      CommandBarButton(
+                        icon: const Icon(FluentIcons.delete),
+                        label: const Text('Delete'),
+                        onPressed: () {
+                          // show alert dialog
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return ContentDialog(
+                                title: const Text('Delete preview image?'),
+                                content: const Text(
+                                    'Are you sure you want to delete the preview image?'),
+                                actions: [
+                                  Button(
+                                    child: const Text('Cancel'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  Button(
+                                    // red button
+                                    style: ButtonStyle(
+                                      backgroundColor:
+                                          ButtonState.resolveWith((states) {
+                                        final res =
+                                            FluentTheme.of(context).resources;
+                                        final color = Colors.red;
+                                        const t = 0.8;
+                                        if (states.isPressing) {
+                                          return res.controlFillColorTertiary
+                                              .lerpWith(color, t);
+                                        } else if (states.isHovering) {
+                                          return res.controlFillColorSecondary
+                                              .lerpWith(color, t);
+                                        } else if (states.isDisabled) {
+                                          return res.controlFillColorDisabled
+                                              .lerpWith(color, t);
+                                        }
+                                        return res.controlFillColorDefault
+                                            .lerpWith(color, t);
+                                      }),
+                                    ),
+                                    child: const Text('Delete'),
+                                    onPressed: () async {
+                                      previewFile.deleteSync();
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pop();
+                                      displayInfoBar(
+                                        context,
+                                        builder: (context, close) {
+                                          return InfoBar(
+                                            title:
+                                                const Text('Preview deleted'),
+                                            content: Text(
+                                                'Preview deleted from ${previewFile.path}'),
+                                            severity: InfoBarSeverity.warning,
+                                            onClose: close,
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        child: FlyoutTarget(
+          controller: contextController,
+          key: contextAttachKey,
+          child: () {
+            FileImage(previewFile).evict();
+            return Image.file(
+              previewFile,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.medium,
+            );
+          }(),
+        ),
       ),
     );
   }
