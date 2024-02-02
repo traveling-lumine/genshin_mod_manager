@@ -12,7 +12,7 @@ import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 
 class CharaModCard extends StatelessWidget {
-  static const minIniSectionWidth = 150;
+  static const minIniSectionWidth = 150.0;
   static final logger = Logger();
 
   final PathW dirPath;

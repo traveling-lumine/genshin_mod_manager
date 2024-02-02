@@ -65,8 +65,8 @@ class _FolderMatchWidget extends StatefulWidget {
 }
 
 class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
-  static const minCrossAxisExtent = 400.0;
-  static const mainAxisExtent = 380.0;
+  static const minCrossAxisExtent = 440.0;
+  static const mainAxisExtent = 400.0;
 
   List<FileWatchProvider>? currentChildren;
 

@@ -79,6 +79,10 @@ class AppStateService with ChangeNotifier {
         _sharedPreferences?.setString(modExecFileKey, _modExecFile.asString);
       }
 
+      if (targetDir != dotString) {
+        _sharedPreferences?.setString(_targetDirKey, dotString.asString);
+      }
+
       final lFileRaw = value.getString(launcherFileKey);
       _launcherFile = lFileRaw == null ? _launcherFile : PathW(lFileRaw);
 
