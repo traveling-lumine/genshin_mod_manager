@@ -19,7 +19,7 @@ class CharaModCard extends StatelessWidget {
   final contextController = FlyoutController();
   final contextAttachKey = GlobalKey();
 
-  CharaModCard({required this.dirPath}) : super(key: ValueKey(dirPath));
+  CharaModCard({super.key, required this.dirPath});
 
   @override
   Widget build(BuildContext context) {

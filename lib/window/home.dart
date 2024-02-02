@@ -30,12 +30,14 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
 
   @override
   Widget build(BuildContext context) {
+    print('Building HomeWindow');
     final imageFiles =
-        context.watch<CategoryIconFolderObserverService>().curFiles;
+        context.select<CategoryIconFolderObserverService, List<File>>(
+            (value) => value.curFiles);
     final List<_FolderPaneItem> subFolders = context
-        .watch<DirectFolderObserverService>()
-        .curDirs
-        .map((e) => e.pathW)
+        .select<DirectFolderObserverService, List<PathW>>((value) {
+          return value.curDirs.map((e) => e.pathW).toList(growable: false);
+        })
         .map((e) => _FolderPaneItem(
               dirPath: e,
               imageFile: findPreviewFileIn(imageFiles, name: e.basename),
@@ -239,7 +241,9 @@ class _FolderPaneItem extends PaneItem {
           ),
           icon: _getIcon(imageFile),
           body: DirectDirService(
-              dir: dirPath.toDirectory, child: CategoryPage(dirPath: dirPath)),
+            dir: dirPath.toDirectory,
+            child: CategoryPage(dirPath: dirPath),
+          ),
           key: ValueKey(dirPath),
         );
 

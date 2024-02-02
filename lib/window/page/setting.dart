@@ -76,6 +76,14 @@ class SettingPage extends StatelessWidget {
             context.read<AppStateService>().showFolderIcon = value;
           },
         ),
+        SwitchItem(
+          text: 'Show enabled mods first',
+          checked: context.select<AppStateService, bool>(
+              (value) => value.showEnabledModsFirst),
+          onChanged: (value) {
+            context.read<AppStateService>().showEnabledModsFirst = value;
+          },
+        ),
         Padding(
           padding: itemPadding,
           child: Row(

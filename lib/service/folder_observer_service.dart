@@ -123,6 +123,7 @@ class DirectFileService extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProxyProvider<RecursiveObserverService,
         DirectFileObserverService>(
+      key: ValueKey(dir),
       create: (context) => DirectFileObserverService(targetDir: dir),
       update: (context, value, previous) => previous!..update(value.lastEvent),
       child: child,

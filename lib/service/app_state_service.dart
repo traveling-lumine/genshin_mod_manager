@@ -8,14 +8,13 @@ class AppStateService with ChangeNotifier {
   static const Duration sharedPreferencesAwaitTime = Duration(seconds: 5);
 
   static const String _targetDirKey = 'targetDir';
-
   static const String modRootKey = 'modRoot';
   static const String modExecFileKey = 'modExecFile';
-
   static const String launcherFileKey = 'launcherDir';
   static const String runTogetherKey = 'runTogether';
   static const String moveOnDragKey = 'moveOnDrag';
   static const String showFolderIconKey = 'showFolderIcon';
+  static const String showEnabledModsFirstKey = 'showEnabledModsFirst';
 
   SharedPreferences? _sharedPreferences;
 
@@ -25,6 +24,7 @@ class AppStateService with ChangeNotifier {
   bool _runTogether = false;
   bool _moveOnDrag = false;
   bool _showFolderIcon = true;
+  bool _showEnabledModsFirst = false;
   late Future<SharedPreferences> _initFuture;
 
   Future<SharedPreferences> get initFuture => _initFuture;
@@ -35,11 +35,13 @@ class AppStateService with ChangeNotifier {
 
   PathW get launcherFile => _launcherFile;
 
-  bool get showFolderIcon => _showFolderIcon;
+  bool get runTogether => _runTogether;
 
   bool get moveOnDrag => _moveOnDrag;
 
-  bool get runTogether => _runTogether;
+  bool get showFolderIcon => _showFolderIcon;
+
+  bool get showEnabledModsFirst => _showEnabledModsFirst;
 
   AppStateService() {
     init();
@@ -85,6 +87,9 @@ class AppStateService with ChangeNotifier {
       _moveOnDrag = value.getBool(moveOnDragKey) ?? _moveOnDrag;
 
       _showFolderIcon = value.getBool(showFolderIconKey) ?? _showFolderIcon;
+
+      _showEnabledModsFirst =
+          value.getBool(showEnabledModsFirstKey) ?? _showEnabledModsFirst;
 
       notifyListeners();
       return value;
@@ -132,6 +137,12 @@ class AppStateService with ChangeNotifier {
     notifyListeners();
   }
 
+  set showEnabledModsFirst(bool value) {
+    _sharedPreferences?.setBool(showEnabledModsFirstKey, value);
+    _showEnabledModsFirst = value;
+    notifyListeners();
+  }
+
   @override
   String toString() {
     return 'AppStateService{'
@@ -140,6 +151,7 @@ class AppStateService with ChangeNotifier {
         'launcherFile: $launcherFile, '
         'runTogether: $runTogether, '
         'moveOnDrag: $moveOnDrag, '
-        'showFolderIcon: $showFolderIcon}';
+        'showFolderIcon: $showFolderIcon}, '
+        'showEnabledModsFirst: $showEnabledModsFirst}';
   }
 }
