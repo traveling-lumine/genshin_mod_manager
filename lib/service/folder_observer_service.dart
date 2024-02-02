@@ -28,7 +28,7 @@ class CategoryIconFolderObserverService with ChangeNotifier {
   }
 }
 
-class ModFolderObserverService with ChangeNotifier {
+class ModRecursiveObserverService with ChangeNotifier {
   final Directory targetDir;
   late StreamSubscription<FileSystemEvent> _subscription;
 
@@ -36,7 +36,7 @@ class ModFolderObserverService with ChangeNotifier {
 
   FileSystemEvent? get lastEvent => _lastEvent;
 
-  ModFolderObserverService({required this.targetDir}) {
+  ModRecursiveObserverService({required this.targetDir}) {
     _subscription = targetDir.watch(recursive: true).listen((event) {
       _lastEvent = event;
       notifyListeners();
@@ -50,14 +50,14 @@ class ModFolderObserverService with ChangeNotifier {
   }
 }
 
-class MainFolderObserverService with ChangeNotifier {
+class ModsObserverService with ChangeNotifier {
   final Directory targetDir;
 
   List<Directory> _curDirs;
 
   List<Directory> get curDirs => _curDirs;
 
-  MainFolderObserverService({required this.targetDir})
+  ModsObserverService({required this.targetDir})
       : _curDirs = getDirsUnder(targetDir);
 
   void update(FileSystemEvent? event) {

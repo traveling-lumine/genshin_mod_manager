@@ -27,9 +27,11 @@ const _previewExtensions = [
   PathW('.gif'),
 ];
 
-File? findPreviewFile(Directory dir,
-    {PathW name = const PathW('preview')}) {
-  for (final element in getFilesUnder(dir)) {
+File? findPreviewFile(Directory dir, {PathW name = const PathW('preview')}) =>
+    findPreviewFileIn(getFilesUnder(dir), name: name);
+
+File? findPreviewFileIn(List<File> dir, {PathW name = const PathW('preview')}) {
+  for (final element in dir) {
     final filename = element.basenameWithoutExtension;
     if (filename != name) continue;
     final ext = element.extension;

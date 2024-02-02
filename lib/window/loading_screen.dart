@@ -106,17 +106,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   targetDir: modResourcePath.toDirectory),
             ),
             ChangeNotifierProvider(
-              create: (context) =>
-                  ModFolderObserverService(targetDir: modRootValue.toDirectory),
+              create: (context) => ModRecursiveObserverService(
+                  targetDir: modRootValue.toDirectory),
             ),
           ],
-          child: ChangeNotifierProxyProvider<ModFolderObserverService,
-              MainFolderObserverService>(
+          child: ChangeNotifierProxyProvider<ModRecursiveObserverService,
+              ModsObserverService>(
             create: (context) =>
-                MainFolderObserverService(targetDir: modRootValue.toDirectory),
+                ModsObserverService(targetDir: modRootValue.toDirectory),
             update: (context, value, previous) =>
                 previous!..update(value.lastEvent),
-            child: HomeWindow(dirPaths: [modRootValue, modResourcePath]),
+            child: const HomeWindow(),
           ),
         );
       },
