@@ -131,12 +131,8 @@ class FileWatchProvider extends StatelessWidget {
 
 bool _ifEventDirectUnder(FileSystemEvent? event, Directory watchedDir) {
   if (event == null) return true;
-  final eventPathW = PathW(event.path);
-  final wDirPath = watchedDir.pathW;
-  final sameDir = eventPathW == wDirPath;
-  if (sameDir) return true;
-  final within = eventPathW.isWithin(wDirPath);
-  if (!within) return false;
-  final dirCheck = eventPathW.dirname == wDirPath;
-  return dirCheck;
+  final isModify = event is FileSystemModifyEvent;
+  if (!isModify) return false;
+  if (!event.contentChanged) return false;
+  return PathW(event.path) == watchedDir.pathW;
 }
