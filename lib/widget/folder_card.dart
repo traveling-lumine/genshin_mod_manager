@@ -139,6 +139,24 @@ class _FolderCardState extends DWState<FolderCard> {
         maxWidth: constraints.maxWidth - minIniSectionWidth,
       ),
       child: GestureDetector(
+        onTapUp: (details) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              FileImage(previewFile).evict();
+              // add touch to close
+              return GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                onSecondaryTap: () => Navigator.of(context).pop(),
+                child: Image.file(
+                  previewFile,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.medium,
+                ),
+              );
+            },
+          );
+        },
         onSecondaryTapUp: (details) {
           final targetContext = contextAttachKey.currentContext;
           if (targetContext == null) return;
