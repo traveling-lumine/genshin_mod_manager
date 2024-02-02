@@ -9,9 +9,6 @@ import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
 import 'package:provider/provider.dart';
 
 class CategoryPage extends StatelessWidget {
-  static const minCrossAxisExtent = 400.0;
-  static const mainAxisExtent = 380.0;
-
   final PathW dirPath;
 
   const CategoryPage({
@@ -48,50 +45,88 @@ class CategoryPage extends StatelessWidget {
           ),
           child: Selector<AppStateService, bool>(
             selector: (p0, p1) => p1.showEnabledModsFirst,
-            builder: (context, selVal, child) {
-              return Consumer<DirectFolderObserverService>(
-                builder: (context, dirVal, child) {
-                  final allChildrenFolder = dirVal.curDirs
-                    ..sort(
-                      (a, b) {
-                        final a2 = a.basename.enabledForm.asString;
-                        final b2 = b.basename.enabledForm.asString;
-                        var compareTo =
-                            a2.toLowerCase().compareTo(b2.toLowerCase());
-                        if (selVal) {
-                          final aEnabled = a.basename.isEnabled;
-                          final bEnabled = b.basename.isEnabled;
-                          if (aEnabled && !bEnabled) {
-                            return -1;
-                          } else if (!aEnabled && bEnabled) {
-                            return 1;
-                          }
-                        }
-                        return compareTo;
-                      },
-                    );
-                  return GridView(
-                    padding: const EdgeInsets.all(8),
-                    gridDelegate:
-                        const SliverGridDelegateWithMinCrossAxisExtent(
-                      minCrossAxisExtent: minCrossAxisExtent,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                      mainAxisExtent: mainAxisExtent,
-                    ),
-                    children: allChildrenFolder
-                        .map((e) => DirectFileService(
-                              dir: e,
-                              child: CharaModCard(dirPath: e.pathW),
-                            ))
-                        .toList(),
-                  );
-                },
-              );
+            builder: (context, enabledFirst, child) {
+              return _FolderMatchWidget(enabledFirst: enabledFirst);
             },
           ),
         ),
       ),
+    );
+  }
+}
+
+class _FolderMatchWidget extends StatefulWidget {
+  final bool enabledFirst;
+
+  const _FolderMatchWidget({required this.enabledFirst});
+
+  @override
+  State<_FolderMatchWidget> createState() => _FolderMatchWidgetState();
+}
+
+class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
+  static const minCrossAxisExtent = 400.0;
+  static const mainAxisExtent = 380.0;
+
+  List<DirectFileService>? currentChildren;
+
+  @override
+  Widget build(BuildContext context) {
+    final dirs = context.watch<DirectFolderObserverService>().curDirs
+      ..sort(
+        (a, b) {
+          final a2 = a.basename.enabledForm.asString;
+          final b2 = b.basename.enabledForm.asString;
+          var compareTo = a2.toLowerCase().compareTo(b2.toLowerCase());
+          if (widget.enabledFirst) {
+            final aEnabled = a.basename.isEnabled;
+            final bEnabled = b.basename.isEnabled;
+            if (aEnabled && !bEnabled) {
+              return -1;
+            } else if (!aEnabled && bEnabled) {
+              return 1;
+            }
+          }
+          return compareTo;
+        },
+      );
+
+    if (currentChildren == null) {
+      currentChildren = dirs
+          .map((e) => DirectFileService(
+                dir: e,
+                child: CharaModCard(dirPath: e.pathW),
+              ))
+          .toList();
+    } else {
+      final List<DirectFileService> newCurrentChildren = [];
+      for (var i = 0; i < dirs.length; i++) {
+        final dir = dirs[i];
+        final idx = currentChildren!.indexWhere((e) {
+          return e.dir.path == dir.path;
+        });
+        if (idx == -1) {
+          newCurrentChildren.add(DirectFileService(
+            dir: dir,
+            child: CharaModCard(dirPath: dir.pathW),
+          ));
+        } else {
+          newCurrentChildren.add(currentChildren![idx]);
+        }
+      }
+      currentChildren = newCurrentChildren;
+    }
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(8),
+      gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
+        minCrossAxisExtent: minCrossAxisExtent,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        mainAxisExtent: mainAxisExtent,
+      ),
+      itemCount: currentChildren!.length,
+      itemBuilder: (BuildContext context, int index) => currentChildren![index],
     );
   }
 }
