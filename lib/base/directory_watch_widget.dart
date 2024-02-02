@@ -6,7 +6,7 @@ import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:logger/logger.dart';
 
 abstract class DirectoryWatchWidget extends StatefulWidget {
-  final PathString dirPath;
+  final PathW dirPath;
 
   const DirectoryWatchWidget({super.key, required this.dirPath});
 
@@ -65,100 +65,4 @@ abstract class DWState<T extends DirectoryWatchWidget>
   }
 }
 
-abstract class MultiDirectoryWatchWidget extends StatefulWidget {
-  final List<PathString> dirPaths;
 
-  const MultiDirectoryWatchWidget({super.key, required this.dirPaths});
-
-  @override
-  MDWState createState();
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return '${super.toString(minLevel: minLevel)}($dirPaths)';
-  }
-}
-
-abstract class MDWState<T extends MultiDirectoryWatchWidget>
-    extends State<MultiDirectoryWatchWidget> {
-  static final Logger logger = Logger();
-  late final List<StreamSubscription<FileSystemEvent>> subscriptions;
-
-  @override
-  void initState() {
-    super.initState();
-    _onUpdate(null);
-    logger.t('$this is initialized');
-  }
-
-  @override
-  void didUpdateWidget(covariant MultiDirectoryWatchWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    assert(oldWidget.dirPaths.length == widget.dirPaths.length,
-        'Directory count changed');
-    var shouldUpdate = false;
-    final List<int> updateIndices = [];
-    for (var i = 0; i < widget.dirPaths.length; i++) {
-      final oldDir = oldWidget.dirPaths[i];
-      final newDir = widget.dirPaths[i];
-      if (oldDir == newDir) continue;
-      logger.t('Directory path changed from $oldDir to $newDir');
-      subscriptions[i].cancel();
-      updateIndices.add(i);
-      shouldUpdate = true;
-    }
-    if (shouldUpdate) {
-      _onUpdate(updateIndices);
-    }
-  }
-
-  @override
-  void dispose() {
-    logger.t('$this bids you a goodbye');
-    for (final element in subscriptions) {
-      element.cancel();
-    }
-    super.dispose();
-  }
-
-  void _onUpdate(List<int>? updates) {
-    updateFolder(-1);
-    if (updates == null) {
-      subscriptions = [];
-      for (var index = 0; index < widget.dirPaths.length; index++) {
-        subscriptions
-            .add(widget.dirPaths[index].toDirectory.watch().listen((event) {
-          logger.d('$this update: $event');
-          if (shouldUpdate(index, event)) {
-            logger.d('$this update accepted');
-            setState(() => updateFolder(index));
-          } else {
-            logger.d('$this update rejected');
-          }
-        }));
-      }
-    } else {
-      for (final index in updates) {
-        subscriptions[index] =
-            widget.dirPaths[index].toDirectory.watch().listen((event) {
-          logger.d('$this update: $event');
-          if (shouldUpdate(index, event)) {
-            logger.d('$this update accepted');
-            setState(() => updateFolder(index));
-          } else {
-            logger.d('$this update rejected');
-          }
-        });
-      }
-    }
-  }
-
-  bool shouldUpdate(int index, FileSystemEvent event);
-
-  void updateFolder(int index);
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return '${super.toString(minLevel: minLevel)}($widget)';
-  }
-}

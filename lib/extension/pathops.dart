@@ -3,61 +3,61 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 extension PathFSE on FileSystemEntity {
-  PathString get pathString => PathString(path);
+  PathW get pathString => PathW(path);
 
-  PathString get basename => pathString.basename;
+  PathW get basename => pathString.basename;
 
-  PathString get basenameWithoutExtension =>
+  PathW get basenameWithoutExtension =>
       pathString.basenameWithoutExtension;
 
-  PathString get extension => pathString.extension;
+  PathW get extension => pathString.extension;
 
-  PathString join(PathString str) => pathString.join(str);
+  PathW join(PathW str) => pathString.join(str);
 }
 
 extension PathF on File {
-  File copySyncPath(PathString dest) => copySync(dest.asString);
+  File copySyncPath(PathW dest) => copySync(dest.asString);
 }
 
 extension PathD on Directory {
-  Directory renameSyncPath(PathString dest) => renameSync(dest.asString);
+  Directory renameSyncPath(PathW dest) => renameSync(dest.asString);
 }
 
-class PathString {
+class PathW {
   final String _path;
 
   String get asString => _path;
 
-  const PathString(this._path);
+  const PathW(this._path);
 
   Directory get toDirectory => Directory(asString);
 
   File get toFile => File(asString);
 
-  PathString get dirname => PathString(p.dirname(asString));
+  PathW get dirname => PathW(p.dirname(asString));
 
-  PathString get basename => PathString(p.basename(asString));
+  PathW get basename => PathW(p.basename(asString));
 
-  PathString get basenameWithoutExtension =>
-      PathString(p.basenameWithoutExtension(asString));
+  PathW get basenameWithoutExtension =>
+      PathW(p.basenameWithoutExtension(asString));
 
-  PathString get extension => PathString(p.extension(asString));
+  PathW get extension => PathW(p.extension(asString));
 
   bool get isDirectorySync => FileSystemEntity.isDirectorySync(asString);
 
   bool get isEnabled => !startsWith('DISABLED');
 
-  PathString get enabledForm {
-    if (!isEnabled) return PathString(asString.substring(8).trimLeft());
+  PathW get enabledForm {
+    if (!isEnabled) return PathW(asString.substring(8).trimLeft());
     return this;
   }
 
-  PathString get disabledForm {
-    if (isEnabled) return PathString('DISABLED ${asString.trimLeft()}');
+  PathW get disabledForm {
+    if (isEnabled) return PathW('DISABLED ${asString.trimLeft()}');
     return this;
   }
 
-  PathString join(PathString str) => PathString(p.join(asString, str.asString));
+  PathW join(PathW str) => PathW(p.join(asString, str.asString));
 
   bool startsWith(String s) {
     return asString.toLowerCase().startsWith(s.toLowerCase());
@@ -68,7 +68,7 @@ class PathString {
 
   @override
   bool operator ==(Object other) {
-    if (other is! PathString) return false;
+    if (other is! PathW) return false;
     return p.equals(asString, other.asString);
   }
 

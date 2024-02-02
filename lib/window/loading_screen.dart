@@ -5,6 +5,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/base/appbar.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
+import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/window/home.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +19,7 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  static const resourceDir = PathString('Resources');
+  static const resourceDir = PathW('Resources');
   static final Logger logger = Logger();
 
   bool overrideBuild = false;
@@ -91,12 +92,34 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Widget buildMain(BuildContext context) {
-    final dirPath =
-        context.select<AppStateService, PathString>((value) => value.modRoot);
-    final curExePath = PathString(Platform.resolvedExecutable);
-    final curExeParentDir = curExePath.dirname;
-    final modResourcePath = curExeParentDir.join(resourceDir);
-    modResourcePath.toDirectory.createSync();
-    return HomeWindow(dirPaths: [dirPath, modResourcePath]);
+    final modResourcePath = PathW(Platform.resolvedExecutable)
+        .dirname
+        .join(resourceDir)
+      ..toDirectory.createSync();
+    return Selector<AppStateService, PathW>(
+      selector: (p0, p1) => p1.modRoot,
+      builder: (BuildContext context, PathW modRootValue, Widget? child) {
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(
+              create: (context) => CategoryIconFolderObserverService(
+                  targetDir: modResourcePath.toDirectory),
+            ),
+            ChangeNotifierProvider(
+              create: (context) =>
+                  ModFolderObserverService(targetDir: modRootValue.toDirectory),
+            ),
+          ],
+          child: ChangeNotifierProxyProvider<ModFolderObserverService,
+              MainFolderObserverService>(
+            create: (context) =>
+                MainFolderObserverService(targetDir: modRootValue.toDirectory),
+            update: (context, value, previous) =>
+                previous!..update(value.lastEvent),
+            child: HomeWindow(dirPaths: [modRootValue, modResourcePath]),
+          ),
+        );
+      },
+    );
   }
 }

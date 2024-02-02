@@ -23,7 +23,7 @@ class SettingPage extends StatelessWidget {
           title: 'Select mod root folder',
           icon: FluentIcons.folder_open,
           path: context
-              .select<AppStateService, PathString>((value) => value.modRoot),
+              .select<AppStateService, PathW>((value) => value.modRoot),
           onPressed: () {
             final dir = DirectoryPicker().getDirectory();
             if (dir == null) return;
@@ -33,7 +33,7 @@ class SettingPage extends StatelessWidget {
         SelectItem(
           title: 'Select 3D Migoto executable',
           icon: FluentIcons.document_management,
-          path: context.select<AppStateService, PathString>(
+          path: context.select<AppStateService, PathW>(
               (value) => value.modExecFile),
           onPressed: () {
             final file = OpenNoDereferenceFilePicker().getFile();
@@ -44,7 +44,7 @@ class SettingPage extends StatelessWidget {
         SelectItem(
           title: 'Select launcher',
           icon: FluentIcons.document_management,
-          path: context.select<AppStateService, PathString>(
+          path: context.select<AppStateService, PathW>(
               (value) => value.launcherFile),
           onPressed: () {
             final file = OpenNoDereferenceFilePicker().getFile();
@@ -162,7 +162,7 @@ class SwitchItem extends StatelessWidget {
 
 class SelectItem extends StatelessWidget {
   final String title;
-  final PathString path;
+  final PathW path;
   final IconData icon;
   final VoidCallback? onPressed;
 

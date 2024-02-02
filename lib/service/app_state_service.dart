@@ -7,8 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AppStateService with ChangeNotifier {
   static const Duration sharedPreferencesAwaitTime = Duration(seconds: 5);
 
-  @Deprecated('Use modRootKey, modExecFileKey instead')
-  static const String targetDirKey = 'targetDir';
+  static const String _targetDirKey = 'targetDir';
 
   static const String modRootKey = 'modRoot';
   static const String modExecFileKey = 'modExecFile';
@@ -20,12 +19,9 @@ class AppStateService with ChangeNotifier {
 
   SharedPreferences? _sharedPreferences;
 
-  @Deprecated('Use _modRoot, _modExecFile instead')
-  PathString _targetDir = const PathString('.');
-
-  PathString _modRoot = const PathString('.');
-  PathString _modExecFile = const PathString('.');
-  PathString _launcherFile = const PathString('.');
+  PathW _modRoot = const PathW('.');
+  PathW _modExecFile = const PathW('.');
+  PathW _launcherFile = const PathW('.');
   bool _runTogether = false;
   bool _moveOnDrag = false;
   bool _showFolderIcon = true;
@@ -33,14 +29,11 @@ class AppStateService with ChangeNotifier {
 
   Future<SharedPreferences> get initFuture => _initFuture;
 
-  @Deprecated('Use modRoot, modExecFile instead')
-  PathString get targetDir => _targetDir;
+  PathW get modRoot => _modRoot;
 
-  PathString get modRoot => _modRoot;
+  PathW get modExecFile => _modExecFile;
 
-  PathString get modExecFile => _modExecFile;
-
-  PathString get launcherFile => _launcherFile;
+  PathW get launcherFile => _launcherFile;
 
   bool get showFolderIcon => _showFolderIcon;
 
@@ -66,26 +59,26 @@ class AppStateService with ChangeNotifier {
     initFuture = timeoutFuture.then((value) {
       _sharedPreferences = value;
 
-      final tDirRaw = value.getString(targetDirKey);
-      _targetDir = tDirRaw == null ? _targetDir : PathString(tDirRaw);
+      const dotString = PathW('.');
+      final tDirRaw = value.getString(_targetDirKey);
+      final targetDir = tDirRaw == null ? dotString : PathW(tDirRaw);
 
       final mRootRaw = value.getString(modRootKey);
-      _modRoot = mRootRaw == null ? _modRoot : PathString(mRootRaw);
-      const dotString = PathString('.');
-      if (_modRoot == dotString && _targetDir != dotString) {
-        _modRoot = _targetDir.join(const PathString('Mods'));
+      _modRoot = mRootRaw == null ? _modRoot : PathW(mRootRaw);
+      if (_modRoot == dotString && targetDir != dotString) {
+        _modRoot = targetDir.join(const PathW('Mods'));
         _sharedPreferences?.setString(modRootKey, _modRoot.asString);
       }
 
       final mExecRaw = value.getString(modExecFileKey);
-      _modExecFile = mExecRaw == null ? _modExecFile : PathString(mExecRaw);
-      if (_modExecFile == dotString && _targetDir != dotString) {
-        _modExecFile = _targetDir.join(const PathString('3DMigoto Loader.exe'));
+      _modExecFile = mExecRaw == null ? _modExecFile : PathW(mExecRaw);
+      if (_modExecFile == dotString && targetDir != dotString) {
+        _modExecFile = targetDir.join(const PathW('3DMigoto Loader.exe'));
         _sharedPreferences?.setString(modExecFileKey, _modExecFile.asString);
       }
 
       final lFileRaw = value.getString(launcherFileKey);
-      _launcherFile = lFileRaw == null ? _launcherFile : PathString(lFileRaw);
+      _launcherFile = lFileRaw == null ? _launcherFile : PathW(lFileRaw);
 
       _runTogether = value.getBool(runTogetherKey) ?? _runTogether;
 
@@ -103,26 +96,19 @@ class AppStateService with ChangeNotifier {
     notifyListeners();
   }
 
-  @Deprecated('Use modRoot, modExecFile instead')
-  set targetDir(PathString value) {
-    _sharedPreferences?.setString(targetDirKey, value.asString);
-    _targetDir = value;
-    notifyListeners();
-  }
-
-  set modRoot(PathString value) {
+  set modRoot(PathW value) {
     _sharedPreferences?.setString(modRootKey, value.asString);
     _modRoot = value;
     notifyListeners();
   }
 
-  set modExecFile(PathString value) {
+  set modExecFile(PathW value) {
     _sharedPreferences?.setString(modExecFileKey, value.asString);
     _modExecFile = value;
     notifyListeners();
   }
 
-  set launcherFile(PathString value) {
+  set launcherFile(PathW value) {
     _sharedPreferences?.setString(launcherFileKey, value.asString);
     _launcherFile = value;
     notifyListeners();

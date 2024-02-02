@@ -12,7 +12,7 @@ class FolderDropTarget extends StatelessWidget {
   static final Logger logger = Logger();
 
   final Widget child;
-  final PathString dirPath;
+  final PathW dirPath;
 
   const FolderDropTarget({
     super.key,
@@ -33,7 +33,7 @@ class FolderDropTarget extends StatelessWidget {
   void _dropFinishHandler(BuildContext context, DropDoneDetails details) {
     final moveInsteadOfCopy = context.read<AppStateService>().moveOnDrag;
     for (final xFile in details.files) {
-      final path = PathString(xFile.path);
+      final path = PathW(xFile.path);
       if (!path.isDirectorySync) continue;
       logger.d('Dragged $path');
       final dir = path.toDirectory;

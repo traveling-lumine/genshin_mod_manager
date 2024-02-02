@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/base/appbar.dart';
-import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
@@ -13,22 +13,67 @@ import 'package:genshin_mod_manager/window/page/setting.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
-class HomeWindow extends MultiDirectoryWatchWidget {
+class HomeWindow extends StatefulWidget {
+  final List<PathW> dirPaths;
+
   const HomeWindow({
     super.key,
-    required super.dirPaths,
+    required this.dirPaths,
   });
 
   @override
-  MDWState<HomeWindow> createState() => _HomeWindowState();
+  State<HomeWindow> createState() => _HomeWindowState();
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return '${super.toString(minLevel: minLevel)}($dirPaths)';
+  }
 }
 
-class _HomeWindowState extends MDWState<HomeWindow> {
+class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
   static const navigationPaneOpenWidth = 270.0;
   static final Logger logger = Logger();
 
+  late final List<StreamSubscription<FileSystemEvent>> subscriptions;
   late List<NavigationPaneItem> subFolders;
   int? selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _onUpdate(null);
+    logger.t('$this is initialized');
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeWindow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    assert(oldWidget.dirPaths.length == widget.dirPaths.length,
+        'Directory count changed');
+    var shouldUpdate = false;
+    final List<int> updateIndices = [];
+    for (var i = 0; i < widget.dirPaths.length; i++) {
+      final oldDir = oldWidget.dirPaths[i];
+      final newDir = widget.dirPaths[i];
+      if (oldDir == newDir) continue;
+      logger.t('Directory path changed from $oldDir to $newDir');
+      subscriptions[i].cancel();
+      updateIndices.add(i);
+      shouldUpdate = true;
+    }
+    if (shouldUpdate) {
+      _onUpdate(updateIndices);
+    }
+  }
+
+  @override
+  void dispose() {
+    logger.t('$this bids you a goodbye');
+    for (final element in subscriptions) {
+      element.cancel();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +158,7 @@ class _HomeWindowState extends MDWState<HomeWindow> {
       onSubmissionFailed: (text) {
         if (text.isEmpty) return;
         test(e) {
-          final name = (e.key as ValueKey<PathString>)
+          final name = (e.key as ValueKey<PathW>)
               .value
               .basename
               .asString
@@ -128,7 +173,6 @@ class _HomeWindowState extends MDWState<HomeWindow> {
     );
   }
 
-  @override
   bool shouldUpdate(int index, FileSystemEvent event) {
     logger.d('$this update: $index, $event');
     if (index == -1 || index == 0) {
@@ -139,7 +183,6 @@ class _HomeWindowState extends MDWState<HomeWindow> {
     return false;
   }
 
-  @override
   void updateFolder(int updateIndex) {
     logger.d('$this updateFolder: $updateIndex');
     if (updateIndex == -1 || updateIndex == 0) {
@@ -152,7 +195,7 @@ class _HomeWindowState extends MDWState<HomeWindow> {
       subFolders = [];
       final List<Directory> allFolder;
       try {
-        allFolder = getFoldersUnder(dir);
+        allFolder = getDirsUnder(dir);
       } on PathNotFoundException {
         logger.e('Path not found: $dir');
         return;
@@ -195,6 +238,38 @@ class _HomeWindowState extends MDWState<HomeWindow> {
     }
   }
 
+  void _onUpdate(List<int>? updates) {
+    updateFolder(-1);
+    if (updates == null) {
+      subscriptions = [];
+      for (var index = 0; index < widget.dirPaths.length; index++) {
+        subscriptions
+            .add(widget.dirPaths[index].toDirectory.watch().listen((event) {
+          logger.d('$this update: $event');
+          if (shouldUpdate(index, event)) {
+            logger.d('$this update accepted');
+            setState(() => updateFolder(index));
+          } else {
+            logger.d('$this update rejected');
+          }
+        }));
+      }
+    } else {
+      for (final index in updates) {
+        subscriptions[index] =
+            widget.dirPaths[index].toDirectory.watch().listen((event) {
+          logger.d('$this update: $event');
+          if (shouldUpdate(index, event)) {
+            logger.d('$this update accepted');
+            setState(() => updateFolder(index));
+          } else {
+            logger.d('$this update rejected');
+          }
+        });
+      }
+    }
+  }
+
   void runMigoto(BuildContext context) {
     final path = context.read<AppStateService>().modExecFile;
     runProgram(path.toFile);
@@ -216,6 +291,11 @@ class _HomeWindowState extends MDWState<HomeWindow> {
     final launcher = context.read<AppStateService>().launcherFile;
     runProgram(launcher.toFile);
     logger.t('Ran launcher $launcher');
+  }
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return '${super.toString(minLevel: minLevel)}($widget)';
   }
 }
 
@@ -253,7 +333,7 @@ class _FolderPaneItem extends PaneItem {
     );
   }
 
-  PathString dirPath;
+  PathW dirPath;
 
   _FolderPaneItem({
     required this.dirPath,

@@ -8,11 +8,11 @@ import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class FolderToggle extends StatelessWidget {
-  static const shaderFixes = PathString('ShaderFixes');
+  static const shaderFixes = PathW('ShaderFixes');
   static final Logger logger = Logger();
 
   final Widget child;
-  final PathString dirPath;
+  final PathW dirPath;
 
   const FolderToggle({
     super.key,
@@ -45,7 +45,7 @@ class FolderToggle extends StatelessWidget {
       logger.i(e);
     }
 
-    final PathString renameTarget =
+    final PathW renameTarget =
         dir.parent.join(dirPath.basename.enabledForm);
     if (renameTarget.toDirectory.existsSync()) {
       showDirectoryExists(context, renameTarget);
@@ -86,7 +86,7 @@ class FolderToggle extends StatelessWidget {
       logger.i(e);
     }
 
-    final PathString renameTarget =
+    final PathW renameTarget =
         dir.parent.join(dirPath.basename.disabledForm);
     if (renameTarget.toDirectory.existsSync()) {
       showDirectoryExists(context, renameTarget);
@@ -152,7 +152,7 @@ class FolderToggle extends StatelessWidget {
     }
   }
 
-  void showDirectoryExists(BuildContext context, PathString renameTarget) {
+  void showDirectoryExists(BuildContext context, PathW renameTarget) {
     renameTarget = renameTarget.basename;
     errorDialog(context, '$renameTarget directory already exists!');
   }

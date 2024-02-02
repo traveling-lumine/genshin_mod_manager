@@ -105,7 +105,7 @@ class _FolderCardState extends DWState<FolderCard> {
                 final image = await Pasteboard.image;
                 if (image != null) {
                   final file = widget.dirPath
-                      .join(const PathString('preview.png'))
+                      .join(const PathW('preview.png'))
                       .toFile;
                   await file.writeAsBytes(image);
                   if (!mounted) return;

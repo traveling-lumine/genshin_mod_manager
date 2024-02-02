@@ -44,9 +44,10 @@ class _FolderPageState extends DWState<FolderPage> {
         ),
         content: FluentTheme(
           data: FluentThemeData(
-            scrollbarTheme: const ScrollbarThemeData(
+            scrollbarTheme: ScrollbarThemeData(
               thickness: 8,
               hoveringThickness: 10,
+              scrollbarColor: Colors.grey[140],
             ),
           ),
           child: GridView(
@@ -72,7 +73,7 @@ class _FolderPageState extends DWState<FolderPage> {
 
   @override
   void updateFolder() {
-    allChildrenFolder = getFoldersUnder(widget.dirPath.toDirectory)
+    allChildrenFolder = getDirsUnder(widget.dirPath.toDirectory)
       ..sort(
         (a, b) {
           final a2 = a.basename.enabledForm.asString;
