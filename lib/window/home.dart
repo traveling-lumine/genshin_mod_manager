@@ -34,9 +34,9 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
         context.select<CategoryIconFolderObserverService, List<File>>(
             (value) => value.curFiles);
     final List<_FolderPaneItem> subFolders = context
-        .select<DirWatchService, List<PathW>>((value) {
-          return value.curDirs.map((e) => e.pathW).toList(growable: false);
-        })
+        .select<DirWatchService, List<String>>(
+            (value) => value.curDirs.map((e) => e.path).toList(growable: false))
+        .map((e) => PathW(e))
         .map((e) => _FolderPaneItem(
               dirPath: e,
               imageFile: findPreviewFileIn(imageFiles, name: e.basename),
