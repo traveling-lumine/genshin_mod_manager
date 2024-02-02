@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class CategoryIconFolderObserverService with ChangeNotifier {
@@ -30,6 +31,7 @@ class CategoryIconFolderObserverService with ChangeNotifier {
 }
 
 class RecursiveObserverService with ChangeNotifier {
+  static final logger = Logger();
   final Directory targetDir;
   late StreamSubscription<FileSystemEvent> _subscription;
 
@@ -40,6 +42,7 @@ class RecursiveObserverService with ChangeNotifier {
   RecursiveObserverService({required this.targetDir}) {
     _subscription = targetDir.watch(recursive: true).listen((event) {
       _lastEvent = event;
+      logger.d('Received event: $event');
       notifyListeners();
     });
   }
@@ -131,8 +134,17 @@ class FileWatchProvider extends StatelessWidget {
 
 bool _ifEventDirectUnder(FileSystemEvent? event, Directory watchedDir) {
   if (event == null) return true;
-  final isModify = event is FileSystemModifyEvent;
-  if (!isModify) return false;
-  if (!event.contentChanged) return false;
-  return PathW(event.path) == watchedDir.pathW;
+  if (event is FileSystemModifyEvent) {
+    if (!event.contentChanged) return false;
+    return PathW(event.path) == watchedDir.pathW;
+  }
+  if (event is FileSystemCreateEvent || event is FileSystemDeleteEvent) {
+    return PathW(event.path).dirname == watchedDir.pathW;
+  }
+  if (event is FileSystemMoveEvent) {
+    final destination = event.destination;
+    if (destination == null) return true;
+    return PathW(destination).dirname == watchedDir.pathW;
+  }
+  throw UnimplementedError('Unknown event type: $event');
 }

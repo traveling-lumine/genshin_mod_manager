@@ -106,8 +106,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   targetDir: modResourcePath.toDirectory),
             ),
             ChangeNotifierProvider(
-              create: (context) => RecursiveObserverService(
-                  targetDir: modRootValue.dirname.toDirectory),
+              create: (context) =>
+                  RecursiveObserverService(targetDir: modRootValue.toDirectory),
             ),
           ],
           child: _buildHomeWindowScope(modRootValue),
