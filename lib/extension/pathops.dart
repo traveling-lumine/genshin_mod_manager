@@ -46,6 +46,8 @@ class PathW {
 
   bool get isEnabled => !startsWith('DISABLED');
 
+  bool isWithin(PathW other) => p.isWithin(other.asString, asString);
+
   PathW get enabledForm {
     if (!isEnabled) return PathW(asString.substring(8).trimLeft());
     return this;

@@ -9,7 +9,7 @@ import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
-import 'package:genshin_mod_manager/window/page/folder.dart';
+import 'package:genshin_mod_manager/window/page/category.dart';
 import 'package:genshin_mod_manager/window/page/setting.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
@@ -33,7 +33,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     final imageFiles =
         context.watch<CategoryIconFolderObserverService>().curFiles;
     final List<_FolderPaneItem> subFolders = context
-        .watch<ModsObserverService>()
+        .watch<DirectFolderObserverService>()
         .curDirs
         .map((e) => e.pathW)
         .map((e) => _FolderPaneItem(
@@ -63,9 +63,16 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     // search matching key in combined list
     final idx = combined.indexWhere((e) => e.key == selectedKey);
     if (idx == -1) {
-      final selVal = selected;
-      selected = selVal == null ? 0 : selVal.clamp(0, subFolders.length - 1);
-      selectedKey = combined.first.key;
+      if (subFolders.isEmpty) {
+        selected = combined.length - 1;
+        selectedKey = combined.last.key;
+      } else {
+        final selVal = selected;
+        final afterVal =
+            selVal == null ? 0 : selVal.clamp(0, subFolders.length - 1);
+        selected = afterVal;
+        selectedKey = subFolders[afterVal].key;
+      }
     } else {
       selected = idx;
     }
@@ -231,7 +238,8 @@ class _FolderPaneItem extends PaneItem {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           icon: _getIcon(imageFile),
-          body: FolderPage(dirPath: dirPath),
+          body: DirectDirService(
+              dir: dirPath.toDirectory, child: CategoryPage(dirPath: dirPath)),
           key: ValueKey(dirPath),
         );
 

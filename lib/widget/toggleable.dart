@@ -7,14 +7,14 @@ import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
-class FolderToggle extends StatelessWidget {
+class ToggleableMod extends StatelessWidget {
   static const shaderFixes = PathW('ShaderFixes');
   static final Logger logger = Logger();
 
   final Widget child;
   final PathW dirPath;
 
-  const FolderToggle({
+  const ToggleableMod({
     super.key,
     required this.child,
     required this.dirPath,

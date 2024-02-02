@@ -2,38 +2,34 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
+import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/widget/editor_text.dart';
-import 'package:genshin_mod_manager/widget/folder_toggle.dart';
+import 'package:genshin_mod_manager/widget/toggleable.dart';
 import 'package:logger/logger.dart';
 import 'package:pasteboard/pasteboard.dart';
+import 'package:provider/provider.dart';
 
-class FolderCard extends DirectoryWatchWidget {
-  FolderCard({required super.dirPath}) : super(key: ValueKey(dirPath));
-
-  @override
-  DWState<FolderCard> createState() => _FolderCardState();
-}
-
-class _FolderCardState extends DWState<FolderCard> {
+class CharaModCard extends StatelessWidget {
   static const minIniSectionWidth = 150;
   static final logger = Logger();
 
+  final PathW dirPath;
   final contextController = FlyoutController();
   final contextAttachKey = GlobalKey();
 
+  CharaModCard({required this.dirPath}) : super(key: ValueKey(dirPath));
+
   @override
   Widget build(BuildContext context) {
-    final dirPath = widget.dirPath;
     final basename = dirPath.basename;
     final isEnabled = basename.isEnabled;
     final color = isEnabled
         ? Colors.green.lightest
         : Colors.red.lightest.withOpacity(0.5);
 
-    return FolderToggle(
+    return ToggleableMod(
       dirPath: dirPath,
       child: Card(
         backgroundColor: color,
@@ -50,7 +46,6 @@ class _FolderCardState extends DWState<FolderCard> {
   }
 
   Widget buildFolderHeader(BuildContext context) {
-    final dirPath = widget.dirPath;
     return Row(
       children: [
         Expanded(
@@ -92,7 +87,8 @@ class _FolderCardState extends DWState<FolderCard> {
   }
 
   Widget buildDesc(BuildContext context, BoxConstraints constraints) {
-    final previewFile = findPreviewFile(widget.dirPath.toDirectory);
+    final v = context.watch<DirectFileObserverService>().curFiles;
+    final previewFile = findPreviewFileIn(v);
     if (previewFile == null) {
       return Expanded(
         child: Column(
@@ -104,10 +100,9 @@ class _FolderCardState extends DWState<FolderCard> {
               onPressed: () async {
                 final image = await Pasteboard.image;
                 if (image != null) {
-                  final file =
-                      widget.dirPath.join(const PathW('preview.png')).toFile;
+                  final file = dirPath.join(const PathW('preview.png')).toFile;
                   await file.writeAsBytes(image);
-                  if (!mounted) return;
+                  if (!context.mounted) return;
                   await displayInfoBar(
                     context,
                     builder: (_, close) {
@@ -176,71 +171,7 @@ class _FolderCardState extends DWState<FolderCard> {
                       CommandBarButton(
                         icon: const Icon(FluentIcons.delete),
                         label: const Text('Delete'),
-                        onPressed: () {
-                          // show alert dialog
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return ContentDialog(
-                                title: const Text('Delete preview image?'),
-                                content: const Text(
-                                    'Are you sure you want to delete the preview image?'),
-                                actions: [
-                                  Button(
-                                    child: const Text('Cancel'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  Button(
-                                    // red button
-                                    style: ButtonStyle(
-                                      backgroundColor:
-                                          ButtonState.resolveWith((states) {
-                                        final res =
-                                            FluentTheme.of(context).resources;
-                                        final color = Colors.red;
-                                        const t = 0.8;
-                                        if (states.isPressing) {
-                                          return res.controlFillColorTertiary
-                                              .lerpWith(color, t);
-                                        } else if (states.isHovering) {
-                                          return res.controlFillColorSecondary
-                                              .lerpWith(color, t);
-                                        } else if (states.isDisabled) {
-                                          return res.controlFillColorDisabled
-                                              .lerpWith(color, t);
-                                        }
-                                        return res.controlFillColorDefault
-                                            .lerpWith(color, t);
-                                      }),
-                                    ),
-                                    child: const Text('Delete'),
-                                    onPressed: () async {
-                                      previewFile.deleteSync();
-                                      Navigator.of(context).pop();
-                                      Navigator.of(context).pop();
-                                      displayInfoBar(
-                                        context,
-                                        builder: (context, close) {
-                                          return InfoBar(
-                                            title:
-                                                const Text('Preview deleted'),
-                                            content: Text(
-                                                'Preview deleted from ${previewFile.path}'),
-                                            severity: InfoBarSeverity.warning,
-                                            onClose: close,
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
+                        onPressed: () => _showDialog(context, previewFile),
                       ),
                     ],
                   ),
@@ -265,6 +196,60 @@ class _FolderCardState extends DWState<FolderCard> {
     );
   }
 
+  void _showDialog(BuildContext context, File previewFile) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => ContentDialog(
+        title: const Text('Delete preview image?'),
+        content:
+            const Text('Are you sure you want to delete the preview image?'),
+        actions: [
+          Button(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+          ),
+          Button(
+            // red button
+            style: ButtonStyle(
+              backgroundColor: ButtonState.resolveWith((states) {
+                final res = FluentTheme.of(context).resources;
+                final color = Colors.red;
+                const t = 0.8;
+                if (states.isPressing) {
+                  return res.controlFillColorTertiary.lerpWith(color, t);
+                } else if (states.isHovering) {
+                  return res.controlFillColorSecondary.lerpWith(color, t);
+                } else if (states.isDisabled) {
+                  return res.controlFillColorDisabled.lerpWith(color, t);
+                }
+                return res.controlFillColorDefault.lerpWith(color, t);
+              }),
+            ),
+            child: const Text('Delete'),
+            onPressed: () {
+              previewFile.deleteSync();
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+              displayInfoBar(
+                context,
+                builder: (context, close) => InfoBar(
+                  title: const Text('Preview deleted'),
+                  content: Text('Preview deleted from ${previewFile.path}'),
+                  severity: InfoBarSeverity.warning,
+                  onClose: close,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget buildIni() {
     final alliniFile = allFilesToWidget();
     return Expanded(
@@ -283,7 +268,7 @@ class _FolderCardState extends DWState<FolderCard> {
   }
 
   List<Widget> allFilesToWidget() {
-    final allFiles = getActiveiniFiles(widget.dirPath.toDirectory);
+    final allFiles = getActiveiniFiles(dirPath.toDirectory);
     final List<Widget> alliniFile = [];
     for (final file in allFiles) {
       alliniFile.add(buildIniHeader(file));
@@ -355,10 +340,4 @@ class _FolderCardState extends DWState<FolderCard> {
       ],
     );
   }
-
-  @override
-  bool shouldUpdate(FileSystemEvent event) => true;
-
-  @override
-  void updateFolder() => setState(() {});
 }

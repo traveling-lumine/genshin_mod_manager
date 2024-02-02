@@ -106,8 +106,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   targetDir: modResourcePath.toDirectory),
             ),
             ChangeNotifierProvider(
-              create: (context) => ModRecursiveObserverService(
-                  targetDir: modRootValue.toDirectory),
+              create: (context) =>
+                  RecursiveObserverService(targetDir: modRootValue.toDirectory),
             ),
           ],
           child: _buildHomeWindowScope(modRootValue),
@@ -117,11 +117,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Widget _buildHomeWindowScope(PathW modRootValue) {
-    return ChangeNotifierProxyProvider<ModRecursiveObserverService,
-        ModsObserverService>(
-      create: (context) =>
-          ModsObserverService(targetDir: modRootValue.toDirectory),
-      update: (context, value, previous) => previous!..update(value.lastEvent),
+    return DirectDirService(
+      dir: modRootValue.toDirectory,
       child: const HomeWindow(),
     );
   }

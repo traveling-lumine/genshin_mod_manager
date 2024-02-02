@@ -1,42 +1,45 @@
-import 'dart:io';
-
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
+import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
-import 'package:genshin_mod_manager/widget/folder_card.dart';
+import 'package:genshin_mod_manager/widget/chara_mod_card.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
+import 'package:provider/provider.dart';
 
-class FolderPage extends DirectoryWatchWidget {
-  FolderPage({
-    required super.dirPath,
+class CategoryPage extends StatelessWidget {
+  static const minCrossAxisExtent = 400.0;
+  static const mainAxisExtent = 380.0;
+  final PathW dirPath;
+
+  CategoryPage({
+    required this.dirPath,
   }) : super(key: ValueKey(dirPath));
 
   @override
-  DWState<FolderPage> createState() => _FolderPageState();
-}
-
-class _FolderPageState extends DWState<FolderPage> {
-  static const minCrossAxisExtent = 400.0;
-  static const mainAxisExtent = 380.0;
-
-  late List<Directory> allChildrenFolder;
-
-  @override
   Widget build(BuildContext context) {
+    final allChildrenFolder =
+        context.watch<DirectFolderObserverService>().curDirs
+          ..sort(
+            (a, b) {
+              final a2 = a.basename.enabledForm.asString;
+              final b2 = b.basename.enabledForm.asString;
+              var compareTo = a2.toLowerCase().compareTo(b2.toLowerCase());
+              return compareTo;
+            },
+          );
     return FolderDropTarget(
-      dirPath: widget.dirPath,
+      dirPath: dirPath,
       child: ScaffoldPage(
         header: PageHeader(
-          title: Text(widget.dirPath.basename.asString),
+          title: Text(dirPath.basename.asString),
           commandBar: CommandBar(
             mainAxisAlignment: MainAxisAlignment.end,
             primaryItems: [
               CommandBarButton(
                 icon: const Icon(FluentIcons.folder_open),
                 onPressed: () {
-                  openFolder(widget.dirPath.toDirectory);
+                  openFolder(dirPath.toDirectory);
                 },
               ),
             ],
@@ -59,28 +62,14 @@ class _FolderPageState extends DWState<FolderPage> {
               mainAxisExtent: mainAxisExtent,
             ),
             children: allChildrenFolder
-                .map((e) => FolderCard(dirPath: e.pathW))
+                .map((e) => DirectFileService(
+                      dir: e,
+                      child: CharaModCard(dirPath: e.pathW),
+                    ))
                 .toList(),
           ),
         ),
       ),
     );
-  }
-
-  @override
-  bool shouldUpdate(FileSystemEvent event) =>
-      !(event is FileSystemModifyEvent && event.contentChanged);
-
-  @override
-  void updateFolder() {
-    allChildrenFolder = getDirsUnder(widget.dirPath.toDirectory)
-      ..sort(
-        (a, b) {
-          final a2 = a.basename.enabledForm.asString;
-          final b2 = b.basename.enabledForm.asString;
-          var compareTo = a2.toLowerCase().compareTo(b2.toLowerCase());
-          return compareTo;
-        },
-      );
   }
 }
