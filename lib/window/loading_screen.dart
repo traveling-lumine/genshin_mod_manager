@@ -106,8 +106,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   targetDir: modResourcePath.toDirectory),
             ),
             ChangeNotifierProvider(
-              create: (context) =>
-                  RecursiveObserverService(targetDir: modRootValue.toDirectory),
+              create: (context) => RecursiveObserverService(
+                  targetDir: modRootValue.dirname.toDirectory),
             ),
           ],
           child: _buildHomeWindowScope(modRootValue),
@@ -117,7 +117,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Widget _buildHomeWindowScope(PathW modRootValue) {
-    return DirectDirService(
+    return DirWatchProvider(
       dir: modRootValue.toDirectory,
       child: const HomeWindow(),
     );

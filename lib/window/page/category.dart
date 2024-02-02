@@ -68,11 +68,11 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
   static const minCrossAxisExtent = 400.0;
   static const mainAxisExtent = 380.0;
 
-  List<DirectFileService>? currentChildren;
+  List<FileWatchProvider>? currentChildren;
 
   @override
   Widget build(BuildContext context) {
-    final dirs = context.watch<DirectFolderObserverService>().curDirs
+    final dirs = context.watch<DirWatchService>().curDirs
       ..sort(
         (a, b) {
           final a2 = a.basename.enabledForm.asString;
@@ -93,20 +93,20 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
 
     if (currentChildren == null) {
       currentChildren = dirs
-          .map((e) => DirectFileService(
+          .map((e) => FileWatchProvider(
                 dir: e,
                 child: CharaModCard(dirPath: e.pathW),
               ))
           .toList();
     } else {
-      final List<DirectFileService> newCurrentChildren = [];
+      final List<FileWatchProvider> newCurrentChildren = [];
       for (var i = 0; i < dirs.length; i++) {
         final dir = dirs[i];
         final idx = currentChildren!.indexWhere((e) {
           return e.dir.path == dir.path;
         });
         if (idx == -1) {
-          newCurrentChildren.add(DirectFileService(
+          newCurrentChildren.add(FileWatchProvider(
             dir: dir,
             child: CharaModCard(dirPath: dir.pathW),
           ));

@@ -87,7 +87,7 @@ class CharaModCard extends StatelessWidget {
   }
 
   Widget buildDesc(BuildContext context, BoxConstraints constraints) {
-    final v = context.watch<DirectFileObserverService>().curFiles;
+    final v = context.watch<FileWatchService>().curFiles;
     final previewFile = findPreviewFileIn(v);
     if (previewFile == null) {
       return Expanded(

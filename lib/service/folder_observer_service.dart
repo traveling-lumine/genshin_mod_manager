@@ -51,47 +51,45 @@ class RecursiveObserverService with ChangeNotifier {
   }
 }
 
-class DirectFolderObserverService with ChangeNotifier {
+class DirWatchService with ChangeNotifier {
   final Directory targetDir;
 
   List<Directory> _curDirs;
 
   List<Directory> get curDirs => _curDirs;
 
-  DirectFolderObserverService({required this.targetDir})
+  DirWatchService({required this.targetDir})
       : _curDirs = getDirsUnder(targetDir);
 
   void update(FileSystemEvent? event) {
-    if (_ifEventDirectUnder(event, targetDir)) {
-      _curDirs = getDirsUnder(targetDir);
-      notifyListeners();
-    }
+    if (!_ifEventDirectUnder(event, targetDir)) return;
+    _curDirs = getDirsUnder(targetDir);
+    notifyListeners();
   }
 }
 
-class DirectFileObserverService with ChangeNotifier {
+class FileWatchService with ChangeNotifier {
   final Directory targetDir;
 
   List<File> _curFiles;
 
   List<File> get curFiles => _curFiles;
 
-  DirectFileObserverService({required this.targetDir})
+  FileWatchService({required this.targetDir})
       : _curFiles = getFilesUnder(targetDir);
 
   void update(FileSystemEvent? event) {
-    if (_ifEventDirectUnder(event, targetDir)) {
-      _curFiles = getFilesUnder(targetDir);
-      notifyListeners();
-    }
+    if (!_ifEventDirectUnder(event, targetDir)) return;
+    _curFiles = getFilesUnder(targetDir);
+    notifyListeners();
   }
 }
 
-class DirectDirService extends StatelessWidget {
+class DirWatchProvider extends StatelessWidget {
   final Directory dir;
   final Widget child;
 
-  const DirectDirService({
+  const DirWatchProvider({
     super.key,
     required this.dir,
     required this.child,
@@ -100,20 +98,20 @@ class DirectDirService extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProxyProvider<RecursiveObserverService,
-        DirectFolderObserverService>(
+        DirWatchService>(
       key: ValueKey(dir),
-      create: (context) => DirectFolderObserverService(targetDir: dir),
+      create: (context) => DirWatchService(targetDir: dir),
       update: (context, value, previous) => previous!..update(value.lastEvent),
       child: child,
     );
   }
 }
 
-class DirectFileService extends StatelessWidget {
+class FileWatchProvider extends StatelessWidget {
   final Directory dir;
   final Widget child;
 
-  const DirectFileService({
+  const FileWatchProvider({
     super.key,
     required this.dir,
     required this.child,
@@ -122,9 +120,9 @@ class DirectFileService extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProxyProvider<RecursiveObserverService,
-        DirectFileObserverService>(
+        FileWatchService>(
       key: ValueKey(dir),
-      create: (context) => DirectFileObserverService(targetDir: dir),
+      create: (context) => FileWatchService(targetDir: dir),
       update: (context, value, previous) => previous!..update(value.lastEvent),
       child: child,
     );
