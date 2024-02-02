@@ -45,8 +45,7 @@ class FolderToggle extends StatelessWidget {
       logger.i(e);
     }
 
-    final PathW renameTarget =
-        dir.parent.join(dirPath.basename.enabledForm);
+    final PathW renameTarget = dir.parent.join(dirPath.basename.enabledForm);
     if (renameTarget.toDirectory.existsSync()) {
       showDirectoryExists(context, renameTarget);
       return;
@@ -86,8 +85,7 @@ class FolderToggle extends StatelessWidget {
       logger.i(e);
     }
 
-    final PathW renameTarget =
-        dir.parent.join(dirPath.basename.disabledForm);
+    final PathW renameTarget = dir.parent.join(dirPath.basename.disabledForm);
     if (renameTarget.toDirectory.existsSync()) {
       showDirectoryExists(context, renameTarget);
       return;

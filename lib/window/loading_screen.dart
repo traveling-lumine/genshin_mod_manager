@@ -33,21 +33,21 @@ class _LoadingScreenState extends State<LoadingScreen> {
       future: initFuture,
       builder: (context, snapshot) {
         if (overrideBuild) {
-          return buildMain(context);
+          return _buildMain(context);
         }
         if (snapshot.connectionState != ConnectionState.done) {
-          return buildLoadingScreen();
+          return _buildLoading();
         }
         if (snapshot.hasError) {
           logger.e('App FutureBuilder snapshot error: ${snapshot.error}');
-          return buildErrorScreen(context, snapshot.error);
+          return _buildError(context, snapshot.error);
         }
-        return buildMain(context);
+        return _buildMain(context);
       },
     );
   }
 
-  Widget buildErrorScreen(BuildContext context, Object? error) {
+  Widget _buildError(BuildContext context, Object? error) {
     return NavigationView(
       appBar: getAppbar("Error!"),
       content: Center(
@@ -76,7 +76,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     );
   }
 
-  Widget buildLoadingScreen() {
+  Widget _buildLoading() {
     return NavigationView(
       appBar: getAppbar("Loading..."),
       content: const Center(
@@ -91,7 +91,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     );
   }
 
-  Widget buildMain(BuildContext context) {
+  Widget _buildMain(BuildContext context) {
     final modResourcePath = PathW(Platform.resolvedExecutable)
         .dirname
         .join(resourceDir)
@@ -110,16 +110,19 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   targetDir: modRootValue.toDirectory),
             ),
           ],
-          child: ChangeNotifierProxyProvider<ModRecursiveObserverService,
-              ModsObserverService>(
-            create: (context) =>
-                ModsObserverService(targetDir: modRootValue.toDirectory),
-            update: (context, value, previous) =>
-                previous!..update(value.lastEvent),
-            child: const HomeWindow(),
-          ),
+          child: _buildHomeWindowScope(modRootValue),
         );
       },
+    );
+  }
+
+  Widget _buildHomeWindowScope(PathW modRootValue) {
+    return ChangeNotifierProxyProvider<ModRecursiveObserverService,
+        ModsObserverService>(
+      create: (context) =>
+          ModsObserverService(targetDir: modRootValue.toDirectory),
+      update: (context, value, previous) => previous!..update(value.lastEvent),
+      child: const HomeWindow(),
     );
   }
 }

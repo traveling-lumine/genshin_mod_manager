@@ -12,7 +12,7 @@ List<File> getFilesUnder(Directory dir) {
 
 List<File> getActiveiniFiles(Directory dir) {
   return getFilesUnder(dir).where((element) {
-    final path = element.pathString;
+    final path = element.pathW;
     final extension = path.extension;
     if (extension != const PathW('.ini')) return false;
     final filename = path.basenameWithoutExtension;

@@ -22,8 +22,8 @@ class HomeWindow extends StatefulWidget {
 }
 
 class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
-  static const navigationPaneOpenWidth = 270.0;
-  static final Logger logger = Logger();
+  static const _navigationPaneOpenWidth = 270.0;
+  static final _logger = Logger();
 
   Key? selectedKey;
   int? selected;
@@ -35,7 +35,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     final List<_FolderPaneItem> subFolders = context
         .watch<ModsObserverService>()
         .curDirs
-        .map((e) => e.pathString)
+        .map((e) => e.pathW)
         .map((e) => _FolderPaneItem(
               dirPath: e,
               imageFile: findPreviewFileIn(imageFiles, name: e.basename),
@@ -63,39 +63,32 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     // search matching key in combined list
     final idx = combined.indexWhere((e) => e.key == selectedKey);
     if (idx == -1) {
-      selected = 0;
+      final selVal = selected;
+      selected = selVal == null ? 0 : selVal.clamp(0, subFolders.length - 1);
       selectedKey = combined.first.key;
     } else {
       selected = idx;
     }
 
     return NavigationView(
-      transitionBuilder: (child, animation) {
-        return SuppressPageTransition(child: child);
-      },
+      transitionBuilder: (child, animation) =>
+          SuppressPageTransition(child: child),
       appBar: getAppbar('Genshin Mod Manager'),
-      pane: _buildNavigationPane(context, subFolders, footerItems, combined),
-    );
-  }
-
-  NavigationPane _buildNavigationPane(
-      BuildContext context,
-      List<_FolderPaneItem> subFolders,
-      List<NavigationPaneItem> footerItems,
-      List<NavigationPaneItem> combined) {
-    return NavigationPane(
-      selected: selected,
-      onChanged: (value) => _setSelectedState(value, combined[value].key!),
-      displayMode: PaneDisplayMode.auto,
-      size: const NavigationPaneSize(openWidth: navigationPaneOpenWidth),
-      autoSuggestBox: _buildAutoSuggestBox(subFolders, combined),
-      autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-      items: subFolders.map((e) {
-        // haha... blame List<T>::+ operator
-        // ignore: unnecessary_cast
-        return e as NavigationPaneItem;
-      }).toList(growable: false),
-      footerItems: footerItems,
+      pane: NavigationPane(
+        selected: selected,
+        onChanged: (value) => _setSelectedState(value, combined[value].key!),
+        displayMode: PaneDisplayMode.auto,
+        size: const NavigationPaneSize(
+            openWidth: _HomeWindowState._navigationPaneOpenWidth),
+        autoSuggestBox: _buildAutoSuggestBox(subFolders, combined),
+        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+        items: subFolders.map((e) {
+          // haha... blame List<T>::+ operator
+          // ignore: unnecessary_cast
+          return e as NavigationPaneItem;
+        }).toList(growable: false),
+        footerItems: footerItems,
+      ),
     );
   }
 
@@ -172,13 +165,13 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
             ));
       },
     );
-    logger.t('Ran 3d migoto $path');
+    _logger.t('Ran 3d migoto $path');
   }
 
   void _runLauncher(BuildContext context) {
     final launcher = context.read<AppStateService>().launcherFile;
     runProgram(launcher.toFile);
-    logger.t('Ran launcher $launcher');
+    _logger.t('Ran launcher $launcher');
   }
 
   void _setSelectedState(int index, Key key) {
@@ -199,14 +192,11 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
 class _FolderPaneItem extends PaneItem {
   static const maxIconWidth = 80.0;
 
-  static Selector<AppStateService, bool> _getIcon(File? imageFile) {
+  static Widget _getIcon(File? imageFile) {
     return Selector<AppStateService, bool>(
       selector: (_, service) => service.showFolderIcon,
-      builder: (_, value, __) {
-        return value
-            ? _buildImage(imageFile)
-            : const Icon(FluentIcons.folder_open);
-      },
+      builder: (_, value, __) =>
+          value ? _buildImage(imageFile) : const Icon(FluentIcons.folder_open),
     );
   }
 

@@ -59,7 +59,7 @@ class _FolderPageState extends DWState<FolderPage> {
               mainAxisExtent: mainAxisExtent,
             ),
             children: allChildrenFolder
-                .map((e) => FolderCard(dirPath: e.pathString))
+                .map((e) => FolderCard(dirPath: e.pathW))
                 .toList(),
           ),
         ),

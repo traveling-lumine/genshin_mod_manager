@@ -64,5 +64,3 @@ abstract class DWState<T extends DirectoryWatchWidget>
     return '${super.toString(minLevel: minLevel)}($widget)';
   }
 }
-
-

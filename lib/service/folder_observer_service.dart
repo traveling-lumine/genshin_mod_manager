@@ -68,6 +68,6 @@ class ModsObserverService with ChangeNotifier {
 
   bool _shouldUpdate(FileSystemEvent? event) {
     if (event == null) return true;
-    return PathW(event.path).dirname == targetDir.pathString;
+    return PathW(event.path).dirname == targetDir.pathW;
   }
 }
