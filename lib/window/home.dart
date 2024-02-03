@@ -53,10 +53,13 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
         PackageInfo.fromPlatform().then((value) => value.version);
     final List<String?> versions =
         await Future.wait([upstreamVersion, currentVersion]);
-
-    // split by . and compare each part
-    final upstream = versions[0]!.split('.').map(int.parse).toList();
-    final current = versions[1]!.split('.').map(int.parse).toList();
+    final upVersion = versions[0];
+    final curVersion = versions[1];
+    if (upVersion == null || curVersion == null) return;
+    final upstream =
+        upVersion.split('.').map(int.parse).toList(growable: false);
+    final current =
+        curVersion.split('.').map(int.parse).toList(growable: false);
     bool shouldUpdate = false;
     for (var i = 0; i < 3; i++) {
       if (upstream[i] > current[i]) {
@@ -75,47 +78,46 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
         return InfoBar(
           title: GestureDetector(
             onTapUp: (details) => launchUrl(url),
-            child: Text(
-                'Update available: ${versions[0]}. Click here to open link.'),
+            child:
+                Text('Update available: $upVersion. Click here to open link.'),
           ),
-          action: Button(
-            onPressed: () {
+          action: FilledButton(
+            onPressed: () async {
               close();
               final url = Uri.parse('$baseLink/download/GenshinModManager.zip');
-              http.get(url).then((value) async {
-                final archive = ZipDecoder().decodeBytes(value.bodyBytes);
-                for (final aFile in archive) {
-                  final path = '${Directory.current.path}/${aFile.name}';
-                  if (aFile.isFile) {
-                    await File(path).writeAsBytes(aFile.content);
-                  } else {
-                    Directory(path).createSync(recursive: true);
-                  }
+              final response = await http.get(url);
+              final archive = ZipDecoder().decodeBytes(response.bodyBytes);
+              for (final aFile in archive) {
+                final path = '${Directory.current.path}/${aFile.name}';
+                if (aFile.isFile) {
+                  await File(path).writeAsBytes(aFile.content);
+                } else {
+                  Directory(path).createSync(recursive: true);
                 }
-                const updateScript = "@echo off\n"
-                    "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd\"') do del \"%%i\"\n"
-                    "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources GenshinModManager\"') do rd /s /q \"%%i\"\n"
-                    "cd GenshinModManager\n"
-                    "for /f \"delims=\" %%i in ('dir /b ^| findstr /v /i \"Resources\"') do move \"%%i\" ..\n"
-                    "cd ..\n"
-                    "rd /s /q GenshinModManager\n"
-                    "start genshin_mod_manager.exe\n"
-                    "del update.cmd";
-                await File('update.cmd').writeAsString(updateScript);
-                Process.run(
-                  'start',
-                  [
-                    'cmd',
-                    '/c',
-                    'timeout /t 5 && call update.cmd',
-                  ],
-                  runInShell: true,
-                );
-                Future.delayed(
-                    const Duration(milliseconds: 200), () => exit(0));
-              });
+              }
+              const updateScript = "@echo off\n"
+                  "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd\"') do del \"%%i\"\n"
+                  "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources GenshinModManager\"') do rd /s /q \"%%i\"\n"
+                  "cd GenshinModManager\n"
+                  "for /f \"delims=\" %%i in ('dir /b ^| findstr /v /i \"Resources\"') do move \"%%i\" ..\n"
+                  "cd ..\n"
+                  "rd /s /q GenshinModManager\n"
+                  "start genshin_mod_manager.exe\n"
+                  "del update.cmd";
+              await File('update.cmd').writeAsString(updateScript);
+              Process.run(
+                'start',
+                [
+                  'cmd',
+                  '/c',
+                  'timeout /t 5 && call update.cmd',
+                ],
+                runInShell: true,
+              );
+              await Future.delayed(const Duration(milliseconds: 200));
+              exit(0);
             },
-            child: const Text('Auto update (EXPERIMENTAL!!)'),
+            child: const Text('Auto update (use at your own risk)'),
           ),
           onClose: close,
         );
@@ -127,7 +129,6 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
   Widget build(BuildContext context) {
     if (!updateDisplayed) {
       updateDisplayed = true;
-
       unawaited(_checkUpdate(context));
     }
 
