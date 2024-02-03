@@ -49,6 +49,8 @@ dependencies:
   watcher: ^1.1.0
   win32: ^5.2.0
   window_manager: ^0.3.8
+  http:
+  archive:
 
 dev_dependencies:
   flutter_test:

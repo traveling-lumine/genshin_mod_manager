@@ -1,214 +1,359 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:genshin_mod_manager/base/appbar.dart';
-import 'package:genshin_mod_manager/base/directory_watch_widget.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
+import 'package:genshin_mod_manager/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
-import 'package:genshin_mod_manager/window/page/folder.dart';
+import 'package:genshin_mod_manager/window/page/category.dart';
 import 'package:genshin_mod_manager/window/page/setting.dart';
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:window_manager/window_manager.dart';
 
-class HomeWindow extends MultiDirectoryWatchWidget {
-  const HomeWindow({
-    super.key,
-    required super.dirPaths,
-  });
+class HomeWindow extends StatefulWidget {
+  const HomeWindow({super.key});
 
   @override
-  MDWState<HomeWindow> createState() => _HomeWindowState();
+  State<HomeWindow> createState() => _HomeWindowState();
 }
 
-class _HomeWindowState extends MDWState<HomeWindow> {
-  static const navigationPaneOpenWidth = 270.0;
-  static const PathString exeName = PathString('3DMigoto Loader.exe');
-  static final Logger logger = Logger();
+class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
+  static const _navigationPaneOpenWidth = 270.0;
+  static final _logger = Logger();
 
-  late List<NavigationPaneItem> subFolders;
+  Key? selectedKey;
   int? selected;
+  bool updateDisplayed = false;
+
+  Future<void> _checkUpdate(context) async {
+    const baseLink =
+        'https://github.com/traveling-lumine/genshin_mod_manager/releases/latest';
+    final url = Uri.parse(baseLink);
+    final client = http.Client();
+    final request = http.Request('GET', url)..followRedirects = false;
+    final upstreamVersion = client.send(request).then((value) {
+      final location = value.headers['location'];
+      if (location == null) return null;
+      final lastSlash = location.lastIndexOf('tag/v');
+      if (lastSlash == -1) return null;
+      return location.substring(lastSlash + 5, location.length);
+    });
+    final currentVersion =
+        PackageInfo.fromPlatform().then((value) => value.version);
+    final List<String?> versions =
+        await Future.wait([upstreamVersion, currentVersion]);
+
+    // split by . and compare each part
+    final upstream = versions[0]!.split('.').map(int.parse).toList();
+    final current = versions[1]!.split('.').map(int.parse).toList();
+    bool shouldUpdate = false;
+    for (var i = 0; i < 3; i++) {
+      if (upstream[i] > current[i]) {
+        shouldUpdate = true;
+        break;
+      } else if (upstream[i] < current[i]) {
+        break;
+      }
+    }
+    if (!shouldUpdate) return;
+    if (!context.mounted) return;
+    displayInfoBar(
+      context,
+      duration: const Duration(seconds: 10),
+      builder: (_, close) {
+        return InfoBar(
+          title: GestureDetector(
+            onTapUp: (details) => launchUrl(url),
+            child: Text(
+                'Update available: ${versions[0]}. Click here to open link.'),
+          ),
+          action: Button(
+            onPressed: () {
+              close();
+              final url = Uri.parse('$baseLink/download/GenshinModManager.zip');
+              http.get(url).then((value) async {
+                final archive = ZipDecoder().decodeBytes(value.bodyBytes);
+                for (final aFile in archive) {
+                  final path = '${Directory.current.path}/${aFile.name}';
+                  if (aFile.isFile) {
+                    await File(path).writeAsBytes(aFile.content);
+                  } else {
+                    Directory(path).createSync(recursive: true);
+                  }
+                }
+                const updateScript = "@echo off\n"
+                    "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd\"') do del \"%%i\"\n"
+                    "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources GenshinModManager\"') do rd /s /q \"%%i\"\n"
+                    "cd GenshinModManager\n"
+                    "for /f \"delims=\" %%i in ('dir /b ^| findstr /v /i \"Resources\"') do move \"%%i\" ..\n"
+                    "cd ..\n"
+                    "rd /s /q GenshinModManager\n"
+                    "start genshin_mod_manager.exe\n"
+                    "del update.cmd";
+                await File('update.cmd').writeAsString(updateScript);
+                Process.run(
+                  'start',
+                  [
+                    'cmd',
+                    '/c',
+                    'timeout /t 5 && call update.cmd',
+                  ],
+                  runInShell: true,
+                );
+                Future.delayed(
+                    const Duration(milliseconds: 200), () => exit(0));
+              });
+            },
+            child: const Text('Auto update (EXPERIMENTAL!!)'),
+          ),
+          onClose: close,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (!updateDisplayed) {
+      updateDisplayed = true;
+
+      unawaited(_checkUpdate(context));
+    }
+
+    final imageFiles =
+        context.select<CategoryIconFolderObserverService, List<File>>(
+            (value) => value.curFiles);
+    final List<_FolderPaneItem> subFolders = context
+        .select<DirWatchService, List<String>>(
+            (value) => value.curDirs.map((e) => e.path).toList(growable: false))
+        .map((e) => PathW(e))
+        .map((e) => _FolderPaneItem(
+              dirPath: e,
+              imageFile: findPreviewFileIn(imageFiles, name: e.basename),
+            ))
+        .toList(growable: false);
+
+    final List<NavigationPaneItem> footerItems = [
+      PaneItemSeparator(
+        key: const ValueKey('<separator>'),
+      ),
+      ..._buildPaneItemActions(context),
+      PaneItem(
+        key: const ValueKey('<settings>'),
+        icon: const Icon(FluentIcons.settings),
+        title: const Text('Settings'),
+        body: const SettingPage(),
+      ),
+    ];
+
+    final List<NavigationPaneItem> combined = [
+      ...subFolders,
+      ...footerItems,
+    ];
+
+    // search matching key in combined list
+    final idx = combined.indexWhere((e) => e.key == selectedKey);
+
+    if (idx == -1) {
+      if (subFolders.isEmpty) {
+        selected = combined.length - 1;
+        selectedKey = combined.last.key;
+      } else {
+        final selVal = selected;
+        final afterVal =
+            selVal == null ? 0 : selVal.clamp(0, subFolders.length - 1);
+        selected = afterVal;
+        selectedKey = subFolders[afterVal].key;
+      }
+    } else {
+      selected = idx;
+    }
+
     return NavigationView(
-      transitionBuilder: (child, animation) {
-        return SuppressPageTransition(child: child);
-      },
-      appBar: buildNavigationAppBar(),
-      pane: buildNavigationPane(context),
+      transitionBuilder: (child, animation) =>
+          SuppressPageTransition(child: child),
+      appBar: () {
+        return NavigationAppBar(
+          actions: const WindowButtons(),
+          automaticallyImplyLeading: false,
+          title: DragToMoveArea(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Genshin Mod Manager'),
+                  Row(
+                    children: [
+                      IconButton(
+                          icon: const Icon(FluentIcons.add), onPressed: () {}),
+                      const SizedBox(width: 8),
+                      ComboBox(
+                        items: List.generate(
+                          142,
+                          (index) => ComboBoxItem(
+                            value: index,
+                            child: const Text('Enabled first'),
+                          ),
+                        ),
+                        placeholder: const Text('Preset...'),
+                        onChanged: (value) {
+                          displayInfoBar(
+                            context,
+                            builder: (context, close) {
+                              return InfoBar(
+                                title: Text(value.toString()),
+                                onClose: close,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 138),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }(),
+      pane: NavigationPane(
+        selected: selected,
+        onChanged: (value) => _setSelectedState(value, combined[value].key!),
+        displayMode: PaneDisplayMode.auto,
+        size: const NavigationPaneSize(
+            openWidth: _HomeWindowState._navigationPaneOpenWidth),
+        autoSuggestBox: _buildAutoSuggestBox(subFolders, combined),
+        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+        items: subFolders.map((e) {
+          // haha... blame List<T>::+ operator
+          // ignore: unnecessary_cast
+          return e as NavigationPaneItem;
+        }).toList(growable: false),
+        footerItems: footerItems,
+      ),
     );
   }
 
-  NavigationAppBar buildNavigationAppBar() {
-    return getAppbar('Genshin Mod Manager');
-  }
-
-  NavigationPane buildNavigationPane(BuildContext context) {
-    return NavigationPane(
-      selected: selected,
-      onChanged: (i) {
-        logger.d('Selected $i th PaneItem');
-        setState(() => selected = i);
-      },
-      displayMode: PaneDisplayMode.auto,
-      size: const NavigationPaneSize(openWidth: navigationPaneOpenWidth),
-      autoSuggestBox: buildAutoSuggestBox(),
-      autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-      items: subFolders,
-      footerItems: [
-        PaneItemSeparator(),
-        ...buildPaneItemActions(context),
-        PaneItem(
-          icon: const Icon(FluentIcons.settings),
-          title: const Text('Settings'),
-          body: const SettingPage(),
-        ),
-      ],
-    );
-  }
-
-  List<PaneItemAction> buildPaneItemActions(BuildContext context) {
+  List<PaneItemAction> _buildPaneItemActions(BuildContext context) {
     const icon = Icon(FluentIcons.user_window);
     return context.select<AppStateService, bool>((value) => value.runTogether)
         ? [
             PaneItemAction(
+              key: const ValueKey('<run_both>'),
               icon: icon,
               title: const Text('Run 3d migoto & launcher'),
               onTap: () {
-                runMigoto(context);
-                runLauncher(context);
+                _runMigoto(context);
+                _runLauncher(context);
               },
             ),
           ]
         : [
             PaneItemAction(
+              key: const ValueKey('<run_migoto>'),
               icon: icon,
               title: const Text('Run 3d migoto'),
-              onTap: () => runMigoto(context),
+              onTap: () => _runMigoto(context),
             ),
             PaneItemAction(
+              key: const ValueKey('<run_launcher>'),
               icon: icon,
               title: const Text('Run launcher'),
-              onTap: () => runLauncher(context),
+              onTap: () => _runLauncher(context),
             ),
           ];
   }
 
-  AutoSuggestBox<Key> buildAutoSuggestBox() {
-    return AutoSuggestBox(
+  Widget _buildAutoSuggestBox(
+      List<_FolderPaneItem> subFolders, List<NavigationPaneItem> combined) {
+    return AutoSuggestBox2(
       items: subFolders
-          .map((e) => AutoSuggestBoxItem(
+          .map((e) => AutoSuggestBoxItem2(
                 value: e.key,
-                label: (e as _FolderPaneItem).dirPath.basename.asString,
+                label: e.dirPath.basename.asString,
               ))
-          .toList(),
+          .toList(growable: false),
       trailingIcon: const Icon(FluentIcons.search),
       onSelected: (item) {
-        setState(() {
-          selected = subFolders.indexWhere((e) => e.key == item.value);
-        });
+        final idx = subFolders.indexWhere((e) => e.key == item.value);
+        _setSelectedState(idx, combined[idx].key!);
+      },
+      onSubmissionFailed: (text) {
+        if (text.isEmpty) return;
+        test(e) {
+          final name =
+              (e.key as ValueKey<PathW>).value.basename.asString.toLowerCase();
+          return name.startsWith(text.toLowerCase());
+        }
+
+        final index = subFolders.indexWhere(test);
+        if (index == -1) return;
+        _setSelectedState(index, combined[index].key!);
       },
     );
   }
 
-  @override
-  bool shouldUpdate(int index, FileSystemEvent event) {
-    logger.d('$this update: $index, $event');
-    if (index == -1 || index == 0) {
-      return !(event is FileSystemModifyEvent && event.contentChanged);
-    } else if (index == -1 || index == 1) {
-      return true;
-    }
-    return false;
-  }
-
-  @override
-  void updateFolder(int updateIndex) {
-    logger.d('$this updateFolder: $updateIndex');
-    if (updateIndex == -1 || updateIndex == 0) {
-      final dir = widget.dirPaths[0].toDirectory;
-      final sel_ = selected;
-      Key? selectedFolder;
-      if (sel_ != null && sel_ < subFolders.length) {
-        selectedFolder = subFolders[sel_].key;
-      }
-      subFolders = [];
-      final List<Directory> allFolder;
-      try {
-        allFolder = getFoldersUnder(dir);
-      } on PathNotFoundException {
-        logger.e('Path not found: $dir');
-        return;
-      }
-      for (final element in allFolder) {
-        final folderName = element.basename;
-        final previewFile =
-            findPreviewFile(widget.dirPaths[1].toDirectory, name: folderName);
-        if (previewFile != null) {
-          logger.d('Preview file for $folderName: $previewFile');
-        }
-        subFolders.add(_FolderPaneItem(
-          dirPath: element.pathString,
-          imageFile: previewFile,
-        ));
-      }
-      logger.d('Home subfolders: $subFolders');
-      if (selectedFolder == null) return;
-      final index = subFolders.indexWhere((e) => e.key == selectedFolder);
-      if (index == -1) return;
-      selected = index;
-    } else if (updateIndex == -1 || updateIndex == 1) {
-      final List<NavigationPaneItem> updateFolder = [];
-      for (final element in subFolders) {
-        final fpelem = element as _FolderPaneItem;
-        final folderName = fpelem.dirPath.basename;
-        final previewFile =
-            findPreviewFile(widget.dirPaths[1].toDirectory, name: folderName);
-        if (previewFile != null) {
-          logger.d('Preview file for $folderName: $previewFile');
-        }
-        updateFolder.add(
-          _FolderPaneItem(
-            dirPath: fpelem.dirPath,
-            imageFile: previewFile,
-          ),
-        );
-      }
-      subFolders = updateFolder;
-    }
-  }
-
-  void runMigoto(BuildContext context) {
-    final tDir = context.read<AppStateService>().targetDir;
-    final path = tDir.join(exeName);
+  void _runMigoto(BuildContext context) {
+    final path = context.read<AppStateService>().modExecFile;
     runProgram(path.toFile);
-    logger.t('Ran 3d migoto $path');
+    displayInfoBar(
+      context,
+      builder: (context, close) {
+        return InfoBar(
+          title: const Text('Ran 3d migoto'),
+          onClose: close,
+        );
+      },
+    );
+    _logger.t('Ran 3d migoto $path');
   }
 
-  void runLauncher(BuildContext context) {
+  void _runLauncher(BuildContext context) {
     final launcher = context.read<AppStateService>().launcherFile;
     runProgram(launcher.toFile);
-    logger.t('Ran launcher $launcher');
+    _logger.t('Ran launcher $launcher');
+  }
+
+  void _setSelectedState(int index, Key key) {
+    setState(() {
+      selected = index;
+      selectedKey = key;
+    });
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Key>('selectedKey', selectedKey));
+    properties.add(IntProperty('selected', selected));
   }
 }
 
 class _FolderPaneItem extends PaneItem {
   static const maxIconWidth = 80.0;
 
-  static Selector<AppStateService, bool> _getIcon(File? imageFile) {
+  static Widget _getIcon(File? imageFile) {
     return Selector<AppStateService, bool>(
       selector: (_, service) => service.showFolderIcon,
-      builder: (_, value, __) {
-        return value
-            ? buildImage(imageFile)
-            : const Icon(FluentIcons.folder_open);
-      },
+      builder: (_, value, __) =>
+          value ? _buildImage(imageFile) : const Icon(FluentIcons.folder_open),
     );
   }
 
-  static Widget buildImage(File? imageFile) {
+  static Widget _buildImage(File? imageFile) {
     final Image image;
     if (imageFile == null) {
       image = Image.asset('images/app_icon.ico');
@@ -228,7 +373,7 @@ class _FolderPaneItem extends PaneItem {
     );
   }
 
-  PathString dirPath;
+  PathW dirPath;
 
   _FolderPaneItem({
     required this.dirPath,
@@ -239,7 +384,10 @@ class _FolderPaneItem extends PaneItem {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           icon: _getIcon(imageFile),
-          body: FolderPage(dirPath: dirPath),
+          body: DirWatchProvider(
+            dir: dirPath.toDirectory,
+            child: CategoryPage(dirPath: dirPath),
+          ),
           key: ValueKey(dirPath),
         );
 
@@ -264,7 +412,8 @@ class _FolderPaneItem extends PaneItem {
   }
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return '${super.toString(minLevel: minLevel)}($dirPath)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<PathW>('dirPath', dirPath));
   }
 }

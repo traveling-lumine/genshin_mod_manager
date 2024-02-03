@@ -5,6 +5,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/base/appbar.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
+import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/window/home.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
@@ -18,8 +19,7 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  static const resourceDir = PathString('Resources');
-  static const modDir = PathString('Mods');
+  static const resourceDir = PathW('Resources');
   static final Logger logger = Logger();
 
   bool overrideBuild = false;
@@ -33,21 +33,21 @@ class _LoadingScreenState extends State<LoadingScreen> {
       future: initFuture,
       builder: (context, snapshot) {
         if (overrideBuild) {
-          return buildMain(context);
+          return _buildMain(context);
         }
         if (snapshot.connectionState != ConnectionState.done) {
-          return buildLoadingScreen();
+          return _buildLoading();
         }
         if (snapshot.hasError) {
           logger.e('App FutureBuilder snapshot error: ${snapshot.error}');
-          return buildErrorScreen(context, snapshot.error);
+          return _buildError(context, snapshot.error);
         }
-        return buildMain(context);
+        return _buildMain(context);
       },
     );
   }
 
-  Widget buildErrorScreen(BuildContext context, Object? error) {
+  Widget _buildError(BuildContext context, Object? error) {
     return NavigationView(
       appBar: getAppbar("Error!"),
       content: Center(
@@ -76,7 +76,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     );
   }
 
-  Widget buildLoadingScreen() {
+  Widget _buildLoading() {
     return NavigationView(
       appBar: getAppbar("Loading..."),
       content: const Center(
@@ -91,13 +91,35 @@ class _LoadingScreenState extends State<LoadingScreen> {
     );
   }
 
-  Widget buildMain(BuildContext context) {
-    final dirPath = context.select<AppStateService, PathString>(
-        (value) => value.targetDir.join(modDir));
-    final curExePath = PathString(Platform.resolvedExecutable);
-    final curExeParentDir = curExePath.dirname;
-    final modResourcePath = curExeParentDir.join(resourceDir);
-    modResourcePath.toDirectory.createSync();
-    return HomeWindow(dirPaths: [dirPath, modResourcePath]);
+  Widget _buildMain(BuildContext context) {
+    final modResourcePath = PathW(Platform.resolvedExecutable)
+        .dirname
+        .join(resourceDir)
+      ..toDirectory.createSync();
+    return Selector<AppStateService, PathW>(
+      selector: (p0, p1) => p1.modRoot,
+      builder: (BuildContext context, PathW modRootValue, Widget? child) {
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(
+              create: (context) => CategoryIconFolderObserverService(
+                  targetDir: modResourcePath.toDirectory),
+            ),
+            ChangeNotifierProvider(
+              create: (context) =>
+                  RecursiveObserverService(targetDir: modRootValue.toDirectory),
+            ),
+          ],
+          child: _buildHomeWindowScope(modRootValue),
+        );
+      },
+    );
+  }
+
+  Widget _buildHomeWindowScope(PathW modRootValue) {
+    return DirWatchProvider(
+      dir: modRootValue.toDirectory,
+      child: const HomeWindow(),
+    );
   }
 }

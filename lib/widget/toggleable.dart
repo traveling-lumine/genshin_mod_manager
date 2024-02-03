@@ -7,14 +7,14 @@ import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
-class FolderToggle extends StatelessWidget {
-  static const shaderFixes = PathString('ShaderFixes');
+class ToggleableMod extends StatelessWidget {
+  static const shaderFixes = PathW('ShaderFixes');
   static final Logger logger = Logger();
 
   final Widget child;
-  final PathString dirPath;
+  final PathW dirPath;
 
-  const FolderToggle({
+  const ToggleableMod({
     super.key,
     required this.child,
     required this.dirPath,
@@ -45,14 +45,17 @@ class FolderToggle extends StatelessWidget {
       logger.i(e);
     }
 
-    final PathString renameTarget =
-        dir.parent.join(dirPath.basename.enabledForm);
+    final PathW renameTarget = dir.parent.join(dirPath.basename.enabledForm);
     if (renameTarget.toDirectory.existsSync()) {
       showDirectoryExists(context, renameTarget);
       return;
     }
-    final tgt =
-        context.read<AppStateService>().targetDir.join(shaderFixes).toDirectory;
+    final tgt = context
+        .read<AppStateService>()
+        .modExecFile
+        .dirname
+        .join(shaderFixes)
+        .toDirectory;
     try {
       copyShaders(tgt, shaderFilenames);
     } on FileSystemException catch (e) {
@@ -82,14 +85,17 @@ class FolderToggle extends StatelessWidget {
       logger.i(e);
     }
 
-    final PathString renameTarget =
-        dir.parent.join(dirPath.basename.disabledForm);
+    final PathW renameTarget = dir.parent.join(dirPath.basename.disabledForm);
     if (renameTarget.toDirectory.existsSync()) {
       showDirectoryExists(context, renameTarget);
       return;
     }
-    final tgt =
-        context.read<AppStateService>().targetDir.join(shaderFixes).toDirectory;
+    final tgt = context
+        .read<AppStateService>()
+        .modExecFile
+        .dirname
+        .join(shaderFixes)
+        .toDirectory;
     try {
       deleteShaders(tgt, shaderFilenames);
     } catch (e) {
@@ -144,7 +150,7 @@ class FolderToggle extends StatelessWidget {
     }
   }
 
-  void showDirectoryExists(BuildContext context, PathString renameTarget) {
+  void showDirectoryExists(BuildContext context, PathW renameTarget) {
     renameTarget = renameTarget.basename;
     errorDialog(context, '$renameTarget directory already exists!');
   }

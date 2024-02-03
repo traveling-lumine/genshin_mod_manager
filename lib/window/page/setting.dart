@@ -20,25 +20,36 @@ class SettingPage extends StatelessWidget {
       ),
       children: [
         SelectItem(
-          title: 'Select 3D Migoto folder',
+          title: 'Select mod root folder',
           icon: FluentIcons.folder_open,
-          path: context
-              .select<AppStateService, PathString>((value) => value.targetDir),
+          path:
+              context.select<AppStateService, PathW>((value) => value.modRoot),
           onPressed: () {
             final dir = DirectoryPicker().getDirectory();
             if (dir == null) return;
-            context.read<AppStateService>().targetDir = dir.pathString;
+            context.read<AppStateService>().modRoot = dir.pathW;
+          },
+        ),
+        SelectItem(
+          title: 'Select 3D Migoto executable',
+          icon: FluentIcons.document_management,
+          path: context
+              .select<AppStateService, PathW>((value) => value.modExecFile),
+          onPressed: () {
+            final file = OpenNoDereferenceFilePicker().getFile();
+            if (file == null) return;
+            context.read<AppStateService>().modExecFile = file.pathW;
           },
         ),
         SelectItem(
           title: 'Select launcher',
           icon: FluentIcons.document_management,
-          path: context.select<AppStateService, PathString>(
-              (value) => value.launcherFile),
+          path: context
+              .select<AppStateService, PathW>((value) => value.launcherFile),
           onPressed: () {
             final file = OpenNoDereferenceFilePicker().getFile();
             if (file == null) return;
-            context.read<AppStateService>().launcherFile = file.pathString;
+            context.read<AppStateService>().launcherFile = file.pathW;
           },
         ),
         SwitchItem(
@@ -63,6 +74,14 @@ class SettingPage extends StatelessWidget {
               .select<AppStateService, bool>((value) => value.showFolderIcon),
           onChanged: (value) {
             context.read<AppStateService>().showFolderIcon = value;
+          },
+        ),
+        SwitchItem(
+          text: 'Show enabled mods first',
+          checked: context.select<AppStateService, bool>(
+              (value) => value.showEnabledModsFirst),
+          onChanged: (value) {
+            context.read<AppStateService>().showEnabledModsFirst = value;
           },
         ),
         Padding(
@@ -151,7 +170,7 @@ class SwitchItem extends StatelessWidget {
 
 class SelectItem extends StatelessWidget {
   final String title;
-  final PathString path;
+  final PathW path;
   final IconData icon;
   final VoidCallback? onPressed;
 
