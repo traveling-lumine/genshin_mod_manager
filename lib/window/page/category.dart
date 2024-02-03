@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
@@ -114,7 +116,7 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
   static const minCrossAxisExtent = 440.0;
   static const mainAxisExtent = 400.0;
 
-  List<FileWatchProvider>? currentChildren;
+  List<CharaScope>? currentChildren;
 
   @override
   Widget build(BuildContext context) {
@@ -138,24 +140,16 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
       );
 
     if (currentChildren == null) {
-      currentChildren = dirs
-          .map((e) => FileWatchProvider(
-                dir: e,
-                child: CharaModCard(dirPath: e.pathW),
-              ))
-          .toList();
+      currentChildren = dirs.map((e) => _buildCharaCard(e)).toList();
     } else {
-      final List<FileWatchProvider> newCurrentChildren = [];
+      final List<CharaScope> newCurrentChildren = [];
       for (var i = 0; i < dirs.length; i++) {
         final dir = dirs[i];
         final idx = currentChildren!.indexWhere((e) {
           return e.dir.path == dir.path;
         });
         if (idx == -1) {
-          newCurrentChildren.add(FileWatchProvider(
-            dir: dir,
-            child: CharaModCard(dirPath: dir.pathW),
-          ));
+          newCurrentChildren.add(_buildCharaCard(dir));
         } else {
           newCurrentChildren.add(currentChildren![idx]);
         }
@@ -173,6 +167,13 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
       ),
       itemCount: currentChildren!.length,
       itemBuilder: (BuildContext context, int index) => currentChildren![index],
+    );
+  }
+
+  CharaScope _buildCharaCard(Directory dir) {
+    return CharaScope(
+      key: Key(dir.path),
+      dir: dir,
     );
   }
 }

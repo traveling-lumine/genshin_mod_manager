@@ -386,6 +386,7 @@ class _FolderPaneItem extends PaneItem {
           ),
           icon: _getIcon(imageFile),
           body: DirWatchProvider(
+            key: Key(dirPath.asString),
             dir: dirPath.toDirectory,
             child: CategoryPage(dirPath: dirPath),
           ),

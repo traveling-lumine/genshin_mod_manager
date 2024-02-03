@@ -11,41 +11,56 @@ import 'package:logger/logger.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 
-class CharaModCard extends StatelessWidget {
-  static const minIniSectionWidth = 150.0;
-  static final logger = Logger();
+class CharaScope extends StatelessWidget {
+  final Directory dir;
 
-  final PathW dirPath;
-  final contextController = FlyoutController();
-  final contextAttachKey = GlobalKey();
-
-  CharaModCard({super.key, required this.dirPath});
+  const CharaScope({
+    super.key,
+    required this.dir,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final basename = dirPath.basename;
-    final isEnabled = basename.isEnabled;
-    final color = isEnabled
-        ? Colors.green.lightest
-        : Colors.red.lightest.withOpacity(0.5);
+    return FileWatchProvider(
+      dir: dir,
+      child: _CharaModCard(
+        dirPath: dir.pathW,
+      ),
+    );
+  }
+}
 
+class _CharaModCard extends StatelessWidget {
+  static const _minIniSectionWidth = 150.0;
+  static final _logger = Logger();
+
+  final PathW dirPath;
+  final _contextController = FlyoutController();
+  final _contextAttachKey = GlobalKey();
+
+  _CharaModCard({required this.dirPath});
+
+  @override
+  Widget build(BuildContext context) {
     return ToggleableMod(
       dirPath: dirPath,
       child: Card(
-        backgroundColor: color,
+        backgroundColor: dirPath.basename.isEnabled
+            ? Colors.green.lightest
+            : Colors.red.lightest.withOpacity(0.5),
         padding: const EdgeInsets.all(6),
         child: Column(
           children: [
-            buildFolderHeader(context),
+            _buildFolderHeader(context),
             const SizedBox(height: 4),
-            buildFolderContent(context),
+            _buildFolderContent(context),
           ],
         ),
       ),
     );
   }
 
-  Widget buildFolderHeader(BuildContext context) {
+  Widget _buildFolderHeader(BuildContext context) {
     return Row(
       children: [
         Expanded(
@@ -65,7 +80,7 @@ class CharaModCard extends StatelessWidget {
     );
   }
 
-  Widget buildFolderContent(BuildContext context) {
+  Widget _buildFolderContent(BuildContext context) {
     return Expanded(
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -73,7 +88,7 @@ class CharaModCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              buildDesc(context, constraints),
+              _buildDesc(context, constraints),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Divider(direction: Axis.vertical),
@@ -86,7 +101,7 @@ class CharaModCard extends StatelessWidget {
     );
   }
 
-  Widget buildDesc(BuildContext context, BoxConstraints constraints) {
+  Widget _buildDesc(BuildContext context, BoxConstraints constraints) {
     final v = context.watch<FileWatchService>().curFiles;
     final previewFile = findPreviewFileIn(v);
     if (previewFile == null) {
@@ -99,24 +114,24 @@ class CharaModCard extends StatelessWidget {
             Button(
               onPressed: () async {
                 final image = await Pasteboard.image;
-                if (image != null) {
-                  final file = dirPath.join(const PathW('preview.png')).toFile;
-                  await file.writeAsBytes(image);
-                  if (!context.mounted) return;
-                  await displayInfoBar(
-                    context,
-                    builder: (_, close) {
-                      return InfoBar(
-                        title: const Text('Image pasted'),
-                        content: Text('to ${file.path}'),
-                        onClose: close,
-                      );
-                    },
-                  );
-                  logger.d('Image pasted to ${file.path}');
-                } else {
-                  logger.d('No image found in clipboard');
+                if (image == null) {
+                  _logger.d('No image found in clipboard');
+                  return;
                 }
+                final file = dirPath.join(const PathW('preview.png')).toFile;
+                await file.writeAsBytes(image);
+                if (!context.mounted) return;
+                await displayInfoBar(
+                  context,
+                  builder: (_, close) {
+                    return InfoBar(
+                      title: const Text('Image pasted'),
+                      content: Text('to ${file.path}'),
+                      onClose: close,
+                    );
+                  },
+                );
+                _logger.d('Image pasted to ${file.path}');
               },
               child: const Text('Paste'),
             )
@@ -131,7 +146,7 @@ class CharaModCard extends StatelessWidget {
       BuildContext context, BoxConstraints constraints, File previewFile) {
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxWidth: constraints.maxWidth - minIniSectionWidth,
+        maxWidth: constraints.maxWidth - _minIniSectionWidth,
       ),
       child: GestureDetector(
         onTapUp: (details) {
@@ -153,14 +168,14 @@ class CharaModCard extends StatelessWidget {
           );
         },
         onSecondaryTapUp: (details) {
-          final targetContext = contextAttachKey.currentContext;
+          final targetContext = _contextAttachKey.currentContext;
           if (targetContext == null) return;
           final box = targetContext.findRenderObject() as RenderBox;
           final position = box.localToGlobal(
             details.localPosition,
             ancestor: Navigator.of(context).context.findRenderObject(),
           );
-          contextController.showFlyout(
+          _contextController.showFlyout(
             position: position,
             builder: (context) {
               return FlyoutContent(
@@ -181,8 +196,8 @@ class CharaModCard extends StatelessWidget {
           );
         },
         child: FlyoutTarget(
-          controller: contextController,
-          key: contextAttachKey,
+          controller: _contextController,
+          key: _contextAttachKey,
           child: () {
             FileImage(previewFile).evict();
             return Image.file(

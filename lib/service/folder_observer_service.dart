@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
-import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class CategoryIconFolderObserverService with ChangeNotifier {
@@ -31,7 +30,6 @@ class CategoryIconFolderObserverService with ChangeNotifier {
 }
 
 class RecursiveObserverService with ChangeNotifier {
-  static final logger = Logger();
   final Directory targetDir;
   late StreamSubscription<FileSystemEvent> _subscription;
 
@@ -42,7 +40,6 @@ class RecursiveObserverService with ChangeNotifier {
   RecursiveObserverService({required this.targetDir}) {
     _subscription = targetDir.watch(recursive: true).listen((event) {
       _lastEvent = event;
-      logger.d('Received event: $event');
       notifyListeners();
     });
   }
@@ -102,7 +99,6 @@ class DirWatchProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProxyProvider<RecursiveObserverService,
         DirWatchService>(
-      key: ValueKey(dir.path),
       create: (context) => DirWatchService(targetDir: dir),
       update: (context, value, previous) => previous!..update(value.lastEvent),
       child: child,
@@ -124,7 +120,6 @@ class FileWatchProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProxyProvider<RecursiveObserverService,
         FileWatchService>(
-      key: ValueKey(dir.path),
       create: (context) => FileWatchService(targetDir: dir),
       update: (context, value, previous) => previous!..update(value.lastEvent),
       child: child,
