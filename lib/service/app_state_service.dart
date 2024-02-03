@@ -15,6 +15,7 @@ class AppStateService with ChangeNotifier {
   static const String moveOnDragKey = 'moveOnDrag';
   static const String showFolderIconKey = 'showFolderIcon';
   static const String showEnabledModsFirstKey = 'showEnabledModsFirst';
+  static const String presetDatakey = 'presetData';
 
   SharedPreferences? _sharedPreferences;
 
@@ -25,6 +26,7 @@ class AppStateService with ChangeNotifier {
   bool _moveOnDrag = false;
   bool _showFolderIcon = true;
   bool _showEnabledModsFirst = false;
+  String _presetData = '{"global":{},"local":{}}';
   late Future<SharedPreferences> _initFuture;
 
   Future<SharedPreferences> get initFuture => _initFuture;
@@ -42,6 +44,8 @@ class AppStateService with ChangeNotifier {
   bool get showFolderIcon => _showFolderIcon;
 
   bool get showEnabledModsFirst => _showEnabledModsFirst;
+
+  String get presetData => _presetData;
 
   AppStateService() {
     init();
@@ -95,6 +99,8 @@ class AppStateService with ChangeNotifier {
       _showEnabledModsFirst =
           value.getBool(showEnabledModsFirstKey) ?? _showEnabledModsFirst;
 
+      _presetData = value.getString(presetDatakey) ?? _presetData;
+
       notifyListeners();
       return value;
     });
@@ -147,6 +153,12 @@ class AppStateService with ChangeNotifier {
     notifyListeners();
   }
 
+  set presetData(String value) {
+    _sharedPreferences?.setString(presetDatakey, value);
+    _presetData = value;
+    notifyListeners();
+  }
+
   @override
   String toString() {
     return 'AppStateService{'
@@ -155,7 +167,8 @@ class AppStateService with ChangeNotifier {
         'launcherFile: $launcherFile, '
         'runTogether: $runTogether, '
         'moveOnDrag: $moveOnDrag, '
-        'showFolderIcon: $showFolderIcon}, '
-        'showEnabledModsFirst: $showEnabledModsFirst}';
+        'showFolderIcon: $showFolderIcon, '
+        'showEnabledModsFirst: $showEnabledModsFirst, '
+        'presetData: $presetData}';
   }
 }

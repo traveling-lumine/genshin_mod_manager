@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/service/preset_service.dart';
+import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
 import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
 import 'package:genshin_mod_manager/widget/chara_mod_card.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
@@ -10,8 +14,9 @@ import 'package:provider/provider.dart';
 
 class CategoryPage extends StatelessWidget {
   final PathW dirPath;
+  final textEditingController = TextEditingController();
 
-  const CategoryPage({
+  CategoryPage({
     super.key,
     required this.dirPath,
   });
@@ -26,44 +31,9 @@ class CategoryPage extends StatelessWidget {
           commandBar: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              IconButton(icon: const Icon(FluentIcons.add), onPressed: () {}),
+              _buildPresetAddIcon(context),
               const SizedBox(width: 8),
-              ComboBox(
-                items: [
-                  ComboBoxItem(
-                    child: GestureDetector(
-                      onTapUp: (details) {
-                        displayInfoBar(
-                          context,
-                          builder:
-                              (BuildContext context, void Function() close) {
-                            return InfoBar(
-                              title: const Text('Enabled first'),
-                              onClose: close,
-                            );
-                          },
-                        );
-                      },
-                      onSecondaryTapUp: (details) {
-                        displayInfoBar(
-                          context,
-                          builder:
-                              (BuildContext context, void Function() close) {
-                            return InfoBar(
-                              title: const Text('Enabled R first'),
-                              onClose: close,
-                            );
-                          },
-                        );
-                      },
-                      child: const Text('Enabled first'),
-                    ),
-                  ),
-                  const ComboBoxItem(child: Text('Disabled first')),
-                ],
-                placeholder: const Text('Preset...'),
-                onChanged: (value) {},
-              ),
+              _buildPresetSelect(),
               SizedBox(
                 width: 60,
                 child: CommandBar(
@@ -99,6 +69,104 @@ class CategoryPage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildPresetSelect() {
+    return Selector<PresetService, List<String>>(
+      selector: (p0, p1) => p1.getLocalPresets(dirPath.basename.asString),
+      builder: (context, value, child) {
+        return ComboBox(
+          items: value
+              .map((e) => ComboBoxItem(
+                    value: e,
+                    child: Text(e),
+                  ))
+              .toList(growable: false),
+          placeholder: const Text('Local Preset...'),
+          onChanged: (value) {
+            showDialog(
+              context: context,
+              builder: (context2) {
+                return ContentDialog(
+                  title: const Text('Apply Local Preset?'),
+                  content: Text('Preset name: $value'),
+                  actions: [
+                    RedFilledButton(
+                      child: const Text('Delete'),
+                      onPressed: () {
+                        Navigator.of(context2).pop();
+                        context.read<PresetService>().removeLocalPreset(
+                              dirPath.basename.asString,
+                              value!,
+                            );
+                      },
+                    ),
+                    Button(
+                      child: const Text('Cancel'),
+                      onPressed: () {
+                        Navigator.of(context2).pop();
+                      },
+                    ),
+                    FilledButton(
+                      child: const Text('Apply'),
+                      onPressed: () {
+                        Navigator.of(context2).pop();
+                        context.read<PresetService>().setLocalPreset(
+                              dirPath.basename.asString,
+                              value!,
+                            );
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildPresetAddIcon(BuildContext context) {
+    return IconButton(
+      icon: const Icon(FluentIcons.add),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (context2) {
+            return ContentDialog(
+              title: const Text('Add Local Preset'),
+              content: SizedBox(
+                height: 40,
+                child: TextBox(
+                  controller: textEditingController,
+                  placeholder: 'Preset Name',
+                ),
+              ),
+              actions: [
+                Button(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context2).pop();
+                  },
+                ),
+                FilledButton(
+                  child: const Text('Add'),
+                  onPressed: () {
+                    Navigator.of(context2).pop();
+                    final text = textEditingController.text;
+                    textEditingController.clear();
+                    context
+                        .read<PresetService>()
+                        .addLocalPreset(dirPath.basename.asString, text);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 }
 
 class _FolderMatchWidget extends StatefulWidget {
@@ -114,7 +182,7 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
   static const minCrossAxisExtent = 440.0;
   static const mainAxisExtent = 400.0;
 
-  List<FileWatchProvider>? currentChildren;
+  List<CharaScope>? currentChildren;
 
   @override
   Widget build(BuildContext context) {
@@ -138,24 +206,16 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
       );
 
     if (currentChildren == null) {
-      currentChildren = dirs
-          .map((e) => FileWatchProvider(
-                dir: e,
-                child: CharaModCard(dirPath: e.pathW),
-              ))
-          .toList();
+      currentChildren = dirs.map((e) => _buildCharaCard(e)).toList();
     } else {
-      final List<FileWatchProvider> newCurrentChildren = [];
+      final List<CharaScope> newCurrentChildren = [];
       for (var i = 0; i < dirs.length; i++) {
         final dir = dirs[i];
         final idx = currentChildren!.indexWhere((e) {
           return e.dir.path == dir.path;
         });
         if (idx == -1) {
-          newCurrentChildren.add(FileWatchProvider(
-            dir: dir,
-            child: CharaModCard(dirPath: dir.pathW),
-          ));
+          newCurrentChildren.add(_buildCharaCard(dir));
         } else {
           newCurrentChildren.add(currentChildren![idx]);
         }
@@ -173,6 +233,13 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
       ),
       itemCount: currentChildren!.length,
       itemBuilder: (BuildContext context, int index) => currentChildren![index],
+    );
+  }
+
+  CharaScope _buildCharaCard(Directory dir) {
+    return CharaScope(
+      key: Key(dir.path),
+      dir: dir,
     );
   }
 }

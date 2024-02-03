@@ -10,7 +10,9 @@ import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/service/preset_service.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/auto_suggest_box.dart';
+import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
 import 'package:genshin_mod_manager/window/page/category.dart';
 import 'package:genshin_mod_manager/window/page/setting.dart';
@@ -31,6 +33,8 @@ class HomeWindow extends StatefulWidget {
 class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
   static const _navigationPaneOpenWidth = 270.0;
   static final _logger = Logger();
+
+  final textEditingController = TextEditingController();
 
   Key? selectedKey;
   int? selected;
@@ -53,10 +57,13 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
         PackageInfo.fromPlatform().then((value) => value.version);
     final List<String?> versions =
         await Future.wait([upstreamVersion, currentVersion]);
-
-    // split by . and compare each part
-    final upstream = versions[0]!.split('.').map(int.parse).toList();
-    final current = versions[1]!.split('.').map(int.parse).toList();
+    final upVersion = versions[0];
+    final curVersion = versions[1];
+    if (upVersion == null || curVersion == null) return;
+    final upstream =
+        upVersion.split('.').map(int.parse).toList(growable: false);
+    final current =
+        curVersion.split('.').map(int.parse).toList(growable: false);
     bool shouldUpdate = false;
     for (var i = 0; i < 3; i++) {
       if (upstream[i] > current[i]) {
@@ -75,47 +82,46 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
         return InfoBar(
           title: GestureDetector(
             onTapUp: (details) => launchUrl(url),
-            child: Text(
-                'Update available: ${versions[0]}. Click here to open link.'),
+            child:
+                Text('Update available: $upVersion. Click here to open link.'),
           ),
-          action: Button(
-            onPressed: () {
+          action: FilledButton(
+            onPressed: () async {
               close();
               final url = Uri.parse('$baseLink/download/GenshinModManager.zip');
-              http.get(url).then((value) async {
-                final archive = ZipDecoder().decodeBytes(value.bodyBytes);
-                for (final aFile in archive) {
-                  final path = '${Directory.current.path}/${aFile.name}';
-                  if (aFile.isFile) {
-                    await File(path).writeAsBytes(aFile.content);
-                  } else {
-                    Directory(path).createSync(recursive: true);
-                  }
+              final response = await http.get(url);
+              final archive = ZipDecoder().decodeBytes(response.bodyBytes);
+              for (final aFile in archive) {
+                final path = '${Directory.current.path}/${aFile.name}';
+                if (aFile.isFile) {
+                  await File(path).writeAsBytes(aFile.content);
+                } else {
+                  Directory(path).createSync(recursive: true);
                 }
-                const updateScript = "@echo off\n"
-                    "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd\"') do del \"%%i\"\n"
-                    "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources GenshinModManager\"') do rd /s /q \"%%i\"\n"
-                    "cd GenshinModManager\n"
-                    "for /f \"delims=\" %%i in ('dir /b ^| findstr /v /i \"Resources\"') do move \"%%i\" ..\n"
-                    "cd ..\n"
-                    "rd /s /q GenshinModManager\n"
-                    "start genshin_mod_manager.exe\n"
-                    "del update.cmd";
-                await File('update.cmd').writeAsString(updateScript);
-                Process.run(
-                  'start',
-                  [
-                    'cmd',
-                    '/c',
-                    'timeout /t 5 && call update.cmd',
-                  ],
-                  runInShell: true,
-                );
-                Future.delayed(
-                    const Duration(milliseconds: 200), () => exit(0));
-              });
+              }
+              const updateScript = "@echo off\n"
+                  "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd\"') do del \"%%i\"\n"
+                  "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources GenshinModManager\"') do rd /s /q \"%%i\"\n"
+                  "cd GenshinModManager\n"
+                  "for /f \"delims=\" %%i in ('dir /b ^| findstr /v /i \"Resources\"') do move \"%%i\" ..\n"
+                  "cd ..\n"
+                  "rd /s /q GenshinModManager\n"
+                  "start genshin_mod_manager.exe\n"
+                  "del update.cmd";
+              await File('update.cmd').writeAsString(updateScript);
+              Process.run(
+                'start',
+                [
+                  'cmd',
+                  '/c',
+                  'timeout /t 5 && call update.cmd',
+                ],
+                runInShell: true,
+              );
+              await Future.delayed(const Duration(milliseconds: 200));
+              exit(0);
             },
-            child: const Text('Auto update (EXPERIMENTAL!!)'),
+            child: const Text('Auto update (use at your own risk)'),
           ),
           onClose: close,
         );
@@ -127,7 +133,6 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
   Widget build(BuildContext context) {
     if (!updateDisplayed) {
       updateDisplayed = true;
-
       unawaited(_checkUpdate(context));
     }
 
@@ -196,30 +201,9 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
                   const Text('Genshin Mod Manager'),
                   Row(
                     children: [
-                      IconButton(
-                          icon: const Icon(FluentIcons.add), onPressed: () {}),
+                      _buildPresetAddIcon(),
                       const SizedBox(width: 8),
-                      ComboBox(
-                        items: List.generate(
-                          142,
-                          (index) => ComboBoxItem(
-                            value: index,
-                            child: const Text('Enabled first'),
-                          ),
-                        ),
-                        placeholder: const Text('Preset...'),
-                        onChanged: (value) {
-                          displayInfoBar(
-                            context,
-                            builder: (context, close) {
-                              return InfoBar(
-                                title: Text(value.toString()),
-                                onClose: close,
-                              );
-                            },
-                          );
-                        },
-                      ),
+                      _buildPresetSelect(),
                       const SizedBox(width: 138),
                     ],
                   ),
@@ -244,6 +228,100 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
         }).toList(growable: false),
         footerItems: footerItems,
       ),
+    );
+  }
+
+  Widget _buildPresetSelect() {
+    return Selector<PresetService, List<String>>(
+      selector: (p0, p1) => p1.getGlobalPresets(),
+      builder: (context, value, child) {
+        return ComboBox(
+          items: value
+              .map((e) => ComboBoxItem(
+                    value: e,
+                    child: Text(e),
+                  ))
+              .toList(growable: false),
+          placeholder: const Text('Global Preset...'),
+          onChanged: (value) {
+            showDialog(
+              context: context,
+              builder: (context2) {
+                return ContentDialog(
+                  title: const Text('Apply Global Preset?'),
+                  content: Text('Preset name: $value'),
+                  actions: [
+                    RedFilledButton(
+                      child: const Text('Delete'),
+                      onPressed: () {
+                        Navigator.of(context2).pop();
+                        context.read<PresetService>().removeGlobalPreset(
+                              value!,
+                            );
+                      },
+                    ),
+                    Button(
+                      child: const Text('Cancel'),
+                      onPressed: () {
+                        Navigator.of(context2).pop();
+                      },
+                    ),
+                    FilledButton(
+                      child: const Text('Apply'),
+                      onPressed: () {
+                        Navigator.of(context2).pop();
+                        context.read<PresetService>().setGlobalPreset(
+                              value!,
+                            );
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildPresetAddIcon() {
+    return IconButton(
+      icon: const Icon(FluentIcons.add),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (context2) {
+            return ContentDialog(
+              title: const Text('Add Global Preset'),
+              content: SizedBox(
+                height: 40,
+                child: TextBox(
+                  controller: textEditingController,
+                  placeholder: 'Preset Name',
+                ),
+              ),
+              actions: [
+                Button(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context2).pop();
+                  },
+                ),
+                FilledButton(
+                  child: const Text('Add'),
+                  onPressed: () {
+                    Navigator.of(context2).pop();
+                    final text = textEditingController.text;
+                    textEditingController.clear();
+                    context.read<PresetService>().addGlobalPreset(text);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -385,6 +463,7 @@ class _FolderPaneItem extends PaneItem {
           ),
           icon: _getIcon(imageFile),
           body: DirWatchProvider(
+            key: Key(dirPath.asString),
             dir: dirPath.toDirectory,
             child: CategoryPage(dirPath: dirPath),
           ),
