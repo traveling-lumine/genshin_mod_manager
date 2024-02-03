@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:genshin_mod_manager/base/appbar.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
@@ -11,8 +14,11 @@ import 'package:genshin_mod_manager/third_party/fluent_ui/auto_suggest_box.dart'
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
 import 'package:genshin_mod_manager/window/page/category.dart';
 import 'package:genshin_mod_manager/window/page/setting.dart';
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 class HomeWindow extends StatefulWidget {
@@ -28,9 +34,103 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
 
   Key? selectedKey;
   int? selected;
+  bool updateDisplayed = false;
+
+  Future<void> _checkUpdate(context) async {
+    const baseLink =
+        'https://github.com/traveling-lumine/genshin_mod_manager/releases/latest';
+    final url = Uri.parse(baseLink);
+    final client = http.Client();
+    final request = http.Request('GET', url)..followRedirects = false;
+    final upstreamVersion = client.send(request).then((value) {
+      final location = value.headers['location'];
+      if (location == null) return null;
+      final lastSlash = location.lastIndexOf('tag/v');
+      if (lastSlash == -1) return null;
+      return location.substring(lastSlash + 5, location.length);
+    });
+    final currentVersion =
+        PackageInfo.fromPlatform().then((value) => value.version);
+    final List<String?> versions =
+        await Future.wait([upstreamVersion, currentVersion]);
+
+    // split by . and compare each part
+    final upstream = versions[0]!.split('.').map(int.parse).toList();
+    final current = versions[1]!.split('.').map(int.parse).toList();
+    bool shouldUpdate = false;
+    for (var i = 0; i < 3; i++) {
+      if (upstream[i] > current[i]) {
+        shouldUpdate = true;
+        break;
+      } else if (upstream[i] < current[i]) {
+        break;
+      }
+    }
+    if (!shouldUpdate) return;
+    if (!context.mounted) return;
+    displayInfoBar(
+      context,
+      duration: const Duration(seconds: 10),
+      builder: (_, close) {
+        return InfoBar(
+          title: GestureDetector(
+            onTapUp: (details) => launchUrl(url),
+            child: Text(
+                'Update available: ${versions[0]}. Click here to open link.'),
+          ),
+          action: Button(
+            onPressed: () {
+              close();
+              final url = Uri.parse('$baseLink/download/GenshinModManager.zip');
+              http.get(url).then((value) async {
+                final archive = ZipDecoder().decodeBytes(value.bodyBytes);
+                for (final aFile in archive) {
+                  final path = '${Directory.current.path}/${aFile.name}';
+                  if (aFile.isFile) {
+                    await File(path).writeAsBytes(aFile.content);
+                  } else {
+                    Directory(path).createSync(recursive: true);
+                  }
+                }
+                const updateScript = "@echo off\n"
+                    "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd\"') do del \"%%i\"\n"
+                    "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources GenshinModManager\"') do rd /s /q \"%%i\"\n"
+                    "cd GenshinModManager\n"
+                    "for /f \"delims=\" %%i in ('dir /b ^| findstr /v /i \"Resources\"') do move \"%%i\" ..\n"
+                    "cd ..\n"
+                    "rd /s /q GenshinModManager\n"
+                    "start genshin_mod_manager.exe\n"
+                    "del update.cmd";
+                await File('update.cmd').writeAsString(updateScript);
+                Process.run(
+                  'start',
+                  [
+                    'cmd',
+                    '/c',
+                    'timeout /t 5 && call update.cmd',
+                  ],
+                  runInShell: true,
+                );
+                Future.delayed(
+                    const Duration(milliseconds: 200), () => exit(0));
+              });
+            },
+            child: const Text('Auto update (EXPERIMENTAL!!)'),
+          ),
+          onClose: close,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (!updateDisplayed) {
+      updateDisplayed = true;
+
+      unawaited(_checkUpdate(context));
+    }
+
     final imageFiles =
         context.select<CategoryIconFolderObserverService, List<File>>(
             (value) => value.curFiles);
@@ -64,6 +164,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
 
     // search matching key in combined list
     final idx = combined.indexWhere((e) => e.key == selectedKey);
+
     if (idx == -1) {
       if (subFolders.isEmpty) {
         selected = combined.length - 1;
@@ -95,7 +196,8 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
                   const Text('Genshin Mod Manager'),
                   Row(
                     children: [
-                      IconButton(icon: const Icon(FluentIcons.add), onPressed: () {}),
+                      IconButton(
+                          icon: const Icon(FluentIcons.add), onPressed: () {}),
                       const SizedBox(width: 8),
                       ComboBox(
                         items: List.generate(
