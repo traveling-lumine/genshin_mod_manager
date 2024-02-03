@@ -10,7 +10,9 @@ import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/service/preset_service.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/auto_suggest_box.dart';
+import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
 import 'package:genshin_mod_manager/window/page/category.dart';
 import 'package:genshin_mod_manager/window/page/setting.dart';
@@ -31,6 +33,8 @@ class HomeWindow extends StatefulWidget {
 class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
   static const _navigationPaneOpenWidth = 270.0;
   static final _logger = Logger();
+
+  final textEditingController = TextEditingController();
 
   Key? selectedKey;
   int? selected;
@@ -197,30 +201,9 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
                   const Text('Genshin Mod Manager'),
                   Row(
                     children: [
-                      IconButton(
-                          icon: const Icon(FluentIcons.add), onPressed: () {}),
+                      _buildPresetAddIcon(),
                       const SizedBox(width: 8),
-                      ComboBox(
-                        items: List.generate(
-                          142,
-                          (index) => ComboBoxItem(
-                            value: index,
-                            child: const Text('Enabled first'),
-                          ),
-                        ),
-                        placeholder: const Text('Preset...'),
-                        onChanged: (value) {
-                          displayInfoBar(
-                            context,
-                            builder: (context, close) {
-                              return InfoBar(
-                                title: Text(value.toString()),
-                                onClose: close,
-                              );
-                            },
-                          );
-                        },
-                      ),
+                      _buildPresetSelect(),
                       const SizedBox(width: 138),
                     ],
                   ),
@@ -245,6 +228,100 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
         }).toList(growable: false),
         footerItems: footerItems,
       ),
+    );
+  }
+
+  Widget _buildPresetSelect() {
+    return Selector<PresetService, List<String>>(
+      selector: (p0, p1) => p1.getGlobalPresets(),
+      builder: (context, value, child) {
+        return ComboBox(
+          items: value
+              .map((e) => ComboBoxItem(
+                    value: e,
+                    child: Text(e),
+                  ))
+              .toList(growable: false),
+          placeholder: const Text('Global Preset...'),
+          onChanged: (value) {
+            showDialog(
+              context: context,
+              builder: (context2) {
+                return ContentDialog(
+                  title: const Text('Apply Global Preset?'),
+                  content: Text('Preset name: $value'),
+                  actions: [
+                    RedFilledButton(
+                      child: const Text('Delete'),
+                      onPressed: () {
+                        Navigator.of(context2).pop();
+                        context.read<PresetService>().removeGlobalPreset(
+                              value!,
+                            );
+                      },
+                    ),
+                    Button(
+                      child: const Text('Cancel'),
+                      onPressed: () {
+                        Navigator.of(context2).pop();
+                      },
+                    ),
+                    FilledButton(
+                      child: const Text('Apply'),
+                      onPressed: () {
+                        Navigator.of(context2).pop();
+                        context.read<PresetService>().setGlobalPreset(
+                              value!,
+                            );
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildPresetAddIcon() {
+    return IconButton(
+      icon: const Icon(FluentIcons.add),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (context2) {
+            return ContentDialog(
+              title: const Text('Add Global Preset'),
+              content: SizedBox(
+                height: 40,
+                child: TextBox(
+                  controller: textEditingController,
+                  placeholder: 'Preset Name',
+                ),
+              ),
+              actions: [
+                Button(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context2).pop();
+                  },
+                ),
+                FilledButton(
+                  child: const Text('Add'),
+                  onPressed: () {
+                    Navigator.of(context2).pop();
+                    final text = textEditingController.text;
+                    textEditingController.clear();
+                    context.read<PresetService>().addGlobalPreset(text);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 

@@ -5,6 +5,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
 import 'package:genshin_mod_manager/widget/editor_text.dart';
 import 'package:genshin_mod_manager/widget/toggleable.dart';
 import 'package:logger/logger.dart';
@@ -227,24 +228,7 @@ class _CharaModCard extends StatelessWidget {
               Navigator.of(context).pop();
             },
           ),
-          Button(
-            // red button
-            style: ButtonStyle(
-              backgroundColor: ButtonState.resolveWith((states) {
-                final res = FluentTheme.of(context).resources;
-                final color = Colors.red;
-                const t = 0.8;
-                if (states.isPressing) {
-                  return res.controlFillColorTertiary.lerpWith(color, t);
-                } else if (states.isHovering) {
-                  return res.controlFillColorSecondary.lerpWith(color, t);
-                } else if (states.isDisabled) {
-                  return res.controlFillColorDisabled.lerpWith(color, t);
-                }
-                return res.controlFillColorDefault.lerpWith(color, t);
-              }),
-            ),
-            child: const Text('Delete'),
+          RedFilledButton(
             onPressed: () {
               previewFile.deleteSync();
               Navigator.of(context).pop();
@@ -259,6 +243,7 @@ class _CharaModCard extends StatelessWidget {
                 ),
               );
             },
+            child: const Text('Delete'),
           ),
         ],
       ),

@@ -6,6 +6,7 @@ import 'package:genshin_mod_manager/base/appbar.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/service/preset_service.dart';
 import 'package:genshin_mod_manager/window/home.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
@@ -117,9 +118,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Widget _buildHomeWindowScope(PathW modRootValue) {
-    return DirWatchProvider(
-      dir: modRootValue.toDirectory,
-      child: const HomeWindow(),
+    return ChangeNotifierProxyProvider<AppStateService, PresetService>(
+      create: (context) => PresetService(),
+      update: (context, value, previous) => previous!..update(value),
+      child: DirWatchProvider(
+        dir: modRootValue.toDirectory,
+        child: const HomeWindow(),
+      ),
     );
   }
 }
