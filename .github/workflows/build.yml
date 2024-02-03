@@ -4,6 +4,10 @@ on:
     branches:
       - main
 
+  pull_request:
+    branches:
+      - main
+
 jobs:
   build:
     runs-on: windows-latest
@@ -12,15 +16,11 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true
-          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
-          cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
           architecture: x64
       - run: flutter build windows
       - run: move build\windows\x64\runner\Release GenshinModManager
-      - run: mkdir GenshinModManager\Resources
       - run: tar -acf GenshinModManager.zip GenshinModManager
-      - run: echo "${{ hashFiles('GenshinModManager.zip') }}"
+      - run: certutil -hashfile GenshinModManager.zip SHA256
       - uses: actions/upload-artifact@v2
         with:
           name: Binary Artifact
