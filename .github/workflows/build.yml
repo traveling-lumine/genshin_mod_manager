@@ -12,12 +12,18 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+          cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
+          architecture: x64
       - run: flutter build windows
-      - run: move build\windows\runner\Release GenshinModManager
+      - run: move build\windows\x64\runner\Release GenshinModManager
       - run: mkdir GenshinModManager\Resources
       - run: tar -acf GenshinModManager.zip GenshinModManager
-      - run: certutil -hashfile .\GenshinModManager.zip SHA256
+      - run: echo "${{ hashFiles('GenshinModManager.zip') }}"
       - uses: actions/upload-artifact@v2
         with:
-          name: Release binary
+          name: Binary Artifact
           path: GenshinModManager.zip
+          retention-days: 1
+          if-no-files-found: error

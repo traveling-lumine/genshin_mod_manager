@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:genshin_mod_manager/extension/pathops.dart';
 
-List<Directory> getFoldersUnder(Directory dir) {
+List<Directory> getDirsUnder(Directory dir) {
   return dir.listSync().whereType<Directory>().toList(growable: false);
 }
 
@@ -12,25 +12,30 @@ List<File> getFilesUnder(Directory dir) {
 
 List<File> getActiveiniFiles(Directory dir) {
   return getFilesUnder(dir).where((element) {
-    final path = element.pathString;
+    final path = element.pathW;
     final extension = path.extension;
-    if (extension != const PathString('.ini')) return false;
+    if (extension != const PathW('.ini')) return false;
     final filename = path.basenameWithoutExtension;
     return filename.isEnabled;
   }).toList(growable: false);
 }
 
-File? findPreviewFile(Directory dir,
-    {PathString name = const PathString('preview')}) {
-  for (final element in getFilesUnder(dir)) {
+const _previewExtensions = [
+  PathW('.png'),
+  PathW('.jpg'),
+  PathW('.jpeg'),
+  PathW('.gif'),
+];
+
+File? findPreviewFile(Directory dir, {PathW name = const PathW('preview')}) =>
+    findPreviewFileIn(getFilesUnder(dir), name: name);
+
+File? findPreviewFileIn(List<File> dir, {PathW name = const PathW('preview')}) {
+  for (final element in dir) {
     final filename = element.basenameWithoutExtension;
     if (filename != name) continue;
     final ext = element.extension;
-    if (ext == const PathString('.png') ||
-        ext == const PathString('.jpg') ||
-        ext == const PathString('.jpeg')) {
-      return element;
-    }
+    if (_previewExtensions.contains(ext)) return element;
   }
   return null;
 }

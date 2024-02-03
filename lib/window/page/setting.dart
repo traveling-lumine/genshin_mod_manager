@@ -1,17 +1,16 @@
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
-import 'package:genshin_mod_manager/provider/app_state.dart';
+import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/third_party/no_deref_file_opener.dart';
 import 'package:genshin_mod_manager/window/page/license.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+const itemPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 16);
 
 class SettingPage extends StatelessWidget {
-  const SettingPage({
-    super.key,
-  });
+  const SettingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,62 +20,68 @@ class SettingPage extends StatelessWidget {
       ),
       children: [
         SelectItem(
-          title: 'Select 3D Migoto folder',
+          title: 'Select mod root folder',
           icon: FluentIcons.folder_open,
           path:
-              context.select<AppState, PathString>((value) => value.targetDir),
+              context.select<AppStateService, PathW>((value) => value.modRoot),
           onPressed: () {
             final dir = DirectoryPicker().getDirectory();
             if (dir == null) return;
-            SharedPreferences.getInstance().then((instance) {
-              instance.setString(AppState.targetDirKey, dir.path);
-            });
-            context.read<AppState>().targetDir = dir.pathString;
+            context.read<AppStateService>().modRoot = dir.pathW;
+          },
+        ),
+        SelectItem(
+          title: 'Select 3D Migoto executable',
+          icon: FluentIcons.document_management,
+          path: context
+              .select<AppStateService, PathW>((value) => value.modExecFile),
+          onPressed: () {
+            final file = OpenNoDereferenceFilePicker().getFile();
+            if (file == null) return;
+            context.read<AppStateService>().modExecFile = file.pathW;
           },
         ),
         SelectItem(
           title: 'Select launcher',
           icon: FluentIcons.document_management,
           path: context
-              .select<AppState, PathString>((value) => value.launcherFile),
+              .select<AppStateService, PathW>((value) => value.launcherFile),
           onPressed: () {
             final file = OpenNoDereferenceFilePicker().getFile();
             if (file == null) return;
-            SharedPreferences.getInstance().then((instance) {
-              instance.setString(AppState.launcherFileKey, file.path);
-            });
-            context.read<AppState>().launcherFile = file.pathString;
+            context.read<AppStateService>().launcherFile = file.pathW;
           },
         ),
         SwitchItem(
           text: 'Run 3d migoto and launcher using one button',
-          checked: context.select<AppState, bool>((value) => value.runTogether),
+          checked: context
+              .select<AppStateService, bool>((value) => value.runTogether),
           onChanged: (value) {
-            SharedPreferences.getInstance().then((instance) {
-              instance.setBool(AppState.runTogetherKey, value);
-            });
-            context.read<AppState>().runTogether = value;
+            context.read<AppStateService>().runTogether = value;
           },
         ),
         SwitchItem(
           text: 'Move folder instead of copying for mod folder drag-and-drop',
-          checked: context.select<AppState, bool>((value) => value.moveOnDrag),
+          checked: context
+              .select<AppStateService, bool>((value) => value.moveOnDrag),
           onChanged: (value) {
-            SharedPreferences.getInstance().then((instance) {
-              instance.setBool(AppState.moveOnDragKey, value);
-            });
-            context.read<AppState>().moveOnDrag = value;
+            context.read<AppStateService>().moveOnDrag = value;
           },
         ),
         SwitchItem(
           text: 'Show folder icon images',
-          checked:
-              context.select<AppState, bool>((value) => value.showFolderIcon),
+          checked: context
+              .select<AppStateService, bool>((value) => value.showFolderIcon),
           onChanged: (value) {
-            SharedPreferences.getInstance().then((instance) {
-              instance.setBool(AppState.showFolderIconKey, value);
-            });
-            context.read<AppState>().showFolderIcon = value;
+            context.read<AppStateService>().showFolderIcon = value;
+          },
+        ),
+        SwitchItem(
+          text: 'Show enabled mods first',
+          checked: context.select<AppStateService, bool>(
+              (value) => value.showEnabledModsFirst),
+          onChanged: (value) {
+            context.read<AppStateService>().showEnabledModsFirst = value;
           },
         ),
         Padding(
@@ -127,8 +132,6 @@ class SettingPage extends StatelessWidget {
   }
 }
 
-const itemPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 16);
-
 class SwitchItem extends StatelessWidget {
   final String text;
   final bool checked;
@@ -167,7 +170,7 @@ class SwitchItem extends StatelessWidget {
 
 class SelectItem extends StatelessWidget {
   final String title;
-  final PathString path;
+  final PathW path;
   final IconData icon;
   final VoidCallback? onPressed;
 
