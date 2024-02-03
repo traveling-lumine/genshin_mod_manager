@@ -13,6 +13,7 @@ import 'package:genshin_mod_manager/window/page/category.dart';
 import 'package:genshin_mod_manager/window/page/setting.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
+import 'package:window_manager/window_manager.dart';
 
 class HomeWindow extends StatefulWidget {
   const HomeWindow({super.key});
@@ -81,7 +82,51 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     return NavigationView(
       transitionBuilder: (child, animation) =>
           SuppressPageTransition(child: child),
-      appBar: getAppbar('Genshin Mod Manager'),
+      appBar: () {
+        return NavigationAppBar(
+          actions: const WindowButtons(),
+          automaticallyImplyLeading: false,
+          title: DragToMoveArea(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Genshin Mod Manager'),
+                  Row(
+                    children: [
+                      IconButton(icon: const Icon(FluentIcons.add), onPressed: () {}),
+                      const SizedBox(width: 8),
+                      ComboBox(
+                        items: List.generate(
+                          142,
+                          (index) => ComboBoxItem(
+                            value: index,
+                            child: const Text('Enabled first'),
+                          ),
+                        ),
+                        placeholder: const Text('Preset...'),
+                        onChanged: (value) {
+                          displayInfoBar(
+                            context,
+                            builder: (context, close) {
+                              return InfoBar(
+                                title: Text(value.toString()),
+                                onClose: close,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 138),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }(),
       pane: NavigationPane(
         selected: selected,
         onChanged: (value) => _setSelectedState(value, combined[value].key!),
@@ -166,11 +211,9 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
       context,
       builder: (context, close) {
         return InfoBar(
-            title: const Text('Ran 3d migoto'),
-            action: IconButton(
-              icon: const Icon(FluentIcons.clear),
-              onPressed: close,
-            ));
+          title: const Text('Ran 3d migoto'),
+          onClose: close,
+        );
       },
     );
     _logger.t('Ran 3d migoto $path');

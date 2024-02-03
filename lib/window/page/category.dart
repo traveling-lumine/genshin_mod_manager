@@ -23,14 +23,60 @@ class CategoryPage extends StatelessWidget {
       child: ScaffoldPage(
         header: PageHeader(
           title: Text(dirPath.basename.asString),
-          commandBar: CommandBar(
+          commandBar: Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            primaryItems: [
-              CommandBarButton(
-                icon: const Icon(FluentIcons.folder_open),
-                onPressed: () {
-                  openFolder(dirPath.toDirectory);
-                },
+            children: [
+              IconButton(icon: const Icon(FluentIcons.add), onPressed: () {}),
+              const SizedBox(width: 8),
+              ComboBox(
+                items: [
+                  ComboBoxItem(
+                    child: GestureDetector(
+                      onTapUp: (details) {
+                        displayInfoBar(
+                          context,
+                          builder:
+                              (BuildContext context, void Function() close) {
+                            return InfoBar(
+                              title: const Text('Enabled first'),
+                              onClose: close,
+                            );
+                          },
+                        );
+                      },
+                      onSecondaryTapUp: (details) {
+                        displayInfoBar(
+                          context,
+                          builder:
+                              (BuildContext context, void Function() close) {
+                            return InfoBar(
+                              title: const Text('Enabled R first'),
+                              onClose: close,
+                            );
+                          },
+                        );
+                      },
+                      child: const Text('Enabled first'),
+                    ),
+                  ),
+                  const ComboBoxItem(child: Text('Disabled first')),
+                ],
+                placeholder: const Text('Preset...'),
+                onChanged: (value) {},
+              ),
+              SizedBox(
+                width: 60,
+                child: CommandBar(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  primaryItems: [
+                    CommandBarButton(
+                      icon: const Icon(FluentIcons.folder_open),
+                      onPressed: () {
+                        openFolder(dirPath.toDirectory);
+                      },
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

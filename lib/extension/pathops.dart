@@ -74,5 +74,5 @@ class PathW {
   }
 
   @override
-  int get hashCode => p.canonicalize(asString).hashCode;
+  int get hashCode => p.hash(asString);
 }

@@ -102,7 +102,7 @@ class DirWatchProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProxyProvider<RecursiveObserverService,
         DirWatchService>(
-      key: ValueKey(dir),
+      key: ValueKey(dir.path),
       create: (context) => DirWatchService(targetDir: dir),
       update: (context, value, previous) => previous!..update(value.lastEvent),
       child: child,
@@ -124,7 +124,7 @@ class FileWatchProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProxyProvider<RecursiveObserverService,
         FileWatchService>(
-      key: ValueKey(dir),
+      key: ValueKey(dir.path),
       create: (context) => FileWatchService(targetDir: dir),
       update: (context, value, previous) => previous!..update(value.lastEvent),
       child: child,
