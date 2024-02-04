@@ -153,7 +153,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
                           Directory(path).createSync(recursive: true);
                         }
                       }
-                      const updateScript = "@echo off\n"
+                      const updateScript = "@echo update script running\n"
                           "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd\"') do del \"%%i\"\n"
                           "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources GenshinModManager\"') do rd /s /q \"%%i\"\n"
                           "cd GenshinModManager\n"
@@ -168,7 +168,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
                         [
                           'cmd',
                           '/c',
-                          'timeout /t 3 && call update.cmd',
+                          'timeout /t 3 && call update.cmd > update.log',
                         ],
                         runInShell: true,
                       ));
