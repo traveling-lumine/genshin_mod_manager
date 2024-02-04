@@ -66,7 +66,7 @@ class PresetService with ChangeNotifier {
   }
 
   void removeGlobalPreset(String name) {
-    _curLocal.remove(name);
+    _curGlobal.remove(name);
     _writeBack();
   }
 
