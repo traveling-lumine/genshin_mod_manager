@@ -101,6 +101,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       selector: (p0, p1) => p1.modRoot,
       builder: (BuildContext context, PathW modRootValue, Widget? child) {
         return MultiProvider(
+          key: Key(modRootValue.asString),
           providers: [
             ChangeNotifierProvider(
               create: (context) => CategoryIconFolderObserverService(
