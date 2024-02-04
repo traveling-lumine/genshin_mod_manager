@@ -84,6 +84,7 @@ class CategoryPage extends StatelessWidget {
           placeholder: const Text('Local Preset...'),
           onChanged: (value) {
             showDialog(
+              barrierDismissible: true,
               context: context,
               builder: (context2) {
                 return ContentDialog(
@@ -131,6 +132,7 @@ class CategoryPage extends StatelessWidget {
       icon: const Icon(FluentIcons.add),
       onPressed: () {
         showDialog(
+          barrierDismissible: true,
           context: context,
           builder: (context2) {
             return ContentDialog(

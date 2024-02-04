@@ -242,6 +242,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
             .toList(growable: false),
         placeholder: const Text('Global Preset...'),
         onChanged: (value) => showDialog(
+          barrierDismissible: true,
           context: context,
           builder: (context2) => ContentDialog(
             title: const Text('Apply Global Preset?'),
@@ -279,6 +280,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
       icon: const Icon(FluentIcons.add),
       onPressed: () {
         showDialog(
+          barrierDismissible: true,
           context: context,
           builder: (context2) {
             return ContentDialog(

@@ -154,13 +154,12 @@ class _CharaModCard extends StatelessWidget {
           showDialog(
             context: context,
             builder: (context) {
-              FileImage(previewFile).evict();
               // add touch to close
               return GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 onSecondaryTap: () => Navigator.of(context).pop(),
-                child: Image.file(
-                  previewFile,
+                child: Image.memory(
+                  previewFile.readAsBytesSync(),
                   fit: BoxFit.contain,
                   filterQuality: FilterQuality.medium,
                 ),
