@@ -6,6 +6,8 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,7 +21,12 @@ jobs:
       - run: tar -acf GenshinModManager.zip GenshinModManager
       - run: certutil -hashfile GenshinModManager.zip SHA256
       - name: Get tag version
-        run: '"TAG=v$(cider version)" >> $GITHUB_ENV'
+        run: 'echo "TAG=v$(cider version)" >> $env:GITHUB_ENV'
+      - name: Create Tag
+        uses: ydataai/create-tag@v1
+        with:
+          tag: ${{ env.TAG }}
+          message: ${{ env.TAG }}
       - uses: softprops/action-gh-release@v1
         with:
           files: GenshinModManager.zip
