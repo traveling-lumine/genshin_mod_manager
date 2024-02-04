@@ -11,7 +11,7 @@ extension CopyDirectory on Directory {
 void _copyDirectorySync(Directory dir, PathW dest) {
   final newDir = dest.toDirectory..createSync(recursive: true);
   dir.listSync().forEach((element) {
-    final newName = newDir.join(element.basename);
+    final newName = newDir.pathW.join(element.pathW.basename);
     if (element is File) {
       element.copySyncPath(newName);
     } else if (element is Directory) {

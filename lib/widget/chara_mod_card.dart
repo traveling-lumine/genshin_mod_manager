@@ -154,13 +154,12 @@ class _CharaModCard extends StatelessWidget {
           showDialog(
             context: context,
             builder: (context) {
-              FileImage(previewFile).evict();
               // add touch to close
               return GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 onSecondaryTap: () => Navigator.of(context).pop(),
-                child: Image.file(
-                  previewFile,
+                child: Image.memory(
+                  previewFile.readAsBytesSync(),
                   fit: BoxFit.contain,
                   filterQuality: FilterQuality.medium,
                 ),
@@ -199,14 +198,11 @@ class _CharaModCard extends StatelessWidget {
         child: FlyoutTarget(
           controller: _contextController,
           key: _contextAttachKey,
-          child: () {
-            FileImage(previewFile).evict();
-            return Image.file(
-              previewFile,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.medium,
-            );
-          }(),
+          child: Image.memory(
+            previewFile.readAsBytesSync(),
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.medium,
+          ),
         ),
       ),
     );
@@ -302,7 +298,7 @@ class _CharaModCard extends StatelessWidget {
   }
 
   Widget buildIniHeader(File iniFile) {
-    final basenameString = iniFile.basename.asString;
+    final basenameString = iniFile.pathW.basename.asString;
     return Row(
       children: [
         Expanded(

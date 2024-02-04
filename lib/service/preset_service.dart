@@ -43,9 +43,9 @@ class PresetService with ChangeNotifier {
     final modRoot = _appStateService!.modRoot;
     final categoryDirs = getDirsUnder(modRoot.toDirectory);
     for (var categoryDir in categoryDirs) {
-      final category = categoryDir.basename.asString;
+      final category = categoryDir.pathW.basename.asString;
       data[category] = getDirsUnder(categoryDir)
-          .map((e) => e.basename)
+          .map((e) => e.pathW.basename)
           .where((e) => e.isEnabled)
           .map((e) => e.asString)
           .toList(growable: false);
@@ -58,7 +58,7 @@ class PresetService with ChangeNotifier {
     final modRoot = _appStateService!.modRoot;
     final categoryDir = modRoot.join(PathW(category)).toDirectory;
     List<String> data = getDirsUnder(categoryDir)
-        .map((e) => e.basename)
+        .map((e) => e.pathW.basename)
         .where((e) => e.isEnabled)
         .map((e) => e.asString)
         .toList(growable: false);
@@ -111,7 +111,7 @@ class PresetService with ChangeNotifier {
       final categoryDir = _appStateService!.modRoot.join(PathW(category.key));
       final shouldBeEnabled = category.value;
       final currentEnabled = getDirsUnder(categoryDir.toDirectory)
-          .map((e) => e.basename)
+          .map((e) => e.pathW.basename)
           .where((e) => e.isEnabled)
           .map((e) => e.asString)
           .toList(growable: false);
@@ -146,7 +146,7 @@ class PresetService with ChangeNotifier {
         _appStateService!.modExecFile.dirname.join(kShaderFixes);
     final categoryDir = _appStateService!.modRoot.join(PathW(category));
     final currentEnabled = getDirsUnder(categoryDir.toDirectory)
-        .map((e) => e.basename)
+        .map((e) => e.pathW.basename)
         .where((e) => e.isEnabled)
         .map((e) => e.asString)
         .toList(growable: false);

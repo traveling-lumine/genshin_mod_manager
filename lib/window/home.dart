@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:genshin_mod_manager/base/appbar.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
@@ -40,7 +41,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
   int? selected;
   bool updateDisplayed = false;
 
-  Future<void> _checkUpdate(context) async {
+  Future<void> _checkUpdate() async {
     const baseLink =
         'https://github.com/traveling-lumine/genshin_mod_manager/releases/latest';
     final url = Uri.parse(baseLink);
@@ -75,65 +76,122 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     }
     if (!shouldUpdate) return;
     if (!context.mounted) return;
-    displayInfoBar(
+    unawaited(displayInfoBar(
       context,
-      duration: const Duration(seconds: 10),
-      builder: (_, close) {
-        return InfoBar(
-          title: GestureDetector(
-            onTapUp: (details) => launchUrl(url),
-            child:
-                Text('Update available: $upVersion. Click here to open link.'),
+      duration: const Duration(minutes: 1),
+      builder: (_, close) => InfoBar(
+        title: RichText(
+          text: TextSpan(
+            style: DefaultTextStyle.of(context).style,
+            children: [
+              const TextSpan(text: 'New version available: '),
+              TextSpan(
+                text: upVersion,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const TextSpan(text: '. Click '),
+              TextSpan(
+                text: 'here',
+                style: TextStyle(
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () => launchUrl(url),
+              ),
+              const TextSpan(text: ' to open link.'),
+            ],
           ),
-          action: FilledButton(
-            onPressed: () async {
-              close();
-              final url = Uri.parse('$baseLink/download/GenshinModManager.zip');
-              final response = await http.get(url);
-              final archive = ZipDecoder().decodeBytes(response.bodyBytes);
-              for (final aFile in archive) {
-                final path = '${Directory.current.path}/${aFile.name}';
-                if (aFile.isFile) {
-                  await File(path).writeAsBytes(aFile.content);
-                } else {
-                  Directory(path).createSync(recursive: true);
-                }
-              }
-              const updateScript = "@echo off\n"
-                  "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd\"') do del \"%%i\"\n"
-                  "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources GenshinModManager\"') do rd /s /q \"%%i\"\n"
-                  "cd GenshinModManager\n"
-                  "for /f \"delims=\" %%i in ('dir /b ^| findstr /v /i \"Resources\"') do move \"%%i\" ..\n"
-                  "cd ..\n"
-                  "rd /s /q GenshinModManager\n"
-                  "start genshin_mod_manager.exe\n"
-                  "del update.cmd";
-              await File('update.cmd').writeAsString(updateScript);
-              Process.run(
-                'start',
-                [
-                  'cmd',
-                  '/c',
-                  'timeout /t 5 && call update.cmd',
+        ),
+        action: FilledButton(
+          onPressed: () async {
+            unawaited(showDialog(
+              context: context,
+              builder: (context2) => ContentDialog(
+                title: const Text('Start auto update?'),
+                content: RichText(
+                  textAlign: TextAlign.justify,
+                  text: TextSpan(
+                    style: DefaultTextStyle.of(context).style,
+                    children: [
+                      const TextSpan(
+                        text:
+                            'This will download the latest version and replace the current one.'
+                            ' This feature is experimental and may not work as expected.\n',
+                        // justify
+                      ),
+                      TextSpan(
+                        text:
+                            'Please backup your mods and resources before proceeding.\nDELETION OF UNRELATED FILES IS POSSIBLE.',
+                        style: TextStyle(
+                            color: Colors.red, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  Button(
+                    child: const Text('Cancel'),
+                    onPressed: () {
+                      Navigator.of(context2).pop();
+                    },
+                  ),
+                  RedFilledButton(
+                    child: const Text('Start'),
+                    onPressed: () async {
+                      Navigator.of(context2).pop();
+                      final url =
+                          Uri.parse('$baseLink/download/GenshinModManager.zip');
+                      final response = await http.get(url);
+                      final archive =
+                          ZipDecoder().decodeBytes(response.bodyBytes);
+                      for (final aFile in archive) {
+                        final path = '${Directory.current.path}/${aFile.name}';
+                        if (aFile.isFile) {
+                          await File(path).writeAsBytes(aFile.content);
+                        } else {
+                          Directory(path).createSync(recursive: true);
+                        }
+                      }
+                      const updateScript = "@echo update script running\n"
+                          "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd\"') do del \"%%i\"\n"
+                          "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources GenshinModManager\"') do rd /s /q \"%%i\"\n"
+                          "cd GenshinModManager\n"
+                          "for /f \"delims=\" %%i in ('dir /b ^| findstr /v /i \"Resources\"') do move \"%%i\" ..\n"
+                          "cd ..\n"
+                          "rd /s /q GenshinModManager\n"
+                          "start genshin_mod_manager.exe\n"
+                          "del update.cmd";
+                      await File('update.cmd').writeAsString(updateScript);
+                      unawaited(Process.run(
+                        'start',
+                        [
+                          'cmd',
+                          '/c',
+                          'timeout /t 3 && call update.cmd > update.log',
+                        ],
+                        runInShell: true,
+                      ));
+                      await Future.delayed(const Duration(milliseconds: 200));
+                      exit(0);
+                    },
+                  ),
                 ],
-                runInShell: true,
-              );
-              await Future.delayed(const Duration(milliseconds: 200));
-              exit(0);
-            },
-            child: const Text('Auto update (use at your own risk)'),
-          ),
-          onClose: close,
-        );
-      },
-    );
+              ),
+            ));
+          },
+          child: const Text('Auto update'),
+        ),
+        onClose: close,
+      ),
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     if (!updateDisplayed) {
       updateDisplayed = true;
-      unawaited(_checkUpdate(context));
+      unawaited(_checkUpdate());
     }
 
     final imageFiles =
@@ -153,7 +211,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
       PaneItemSeparator(
         key: const ValueKey('<separator>'),
       ),
-      ..._buildPaneItemActions(context),
+      ..._buildPaneItemActions(),
       PaneItem(
         key: const ValueKey('<settings>'),
         icon: const Icon(FluentIcons.settings),
@@ -192,24 +250,26 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
         return NavigationAppBar(
           actions: const WindowButtons(),
           automaticallyImplyLeading: false,
-          title: DragToMoveArea(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Genshin Mod Manager'),
-                  Row(
-                    children: [
-                      _buildPresetAddIcon(),
-                      const SizedBox(width: 8),
-                      _buildPresetSelect(),
-                      const SizedBox(width: 138),
-                    ],
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: DragToMoveArea(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Genshin Mod Manager'),
                   ),
+                ),
+              ),
+              Row(
+                children: [
+                  _buildPresetAddIcon(),
+                  const SizedBox(width: 8),
+                  _buildPresetSelect(),
+                  const SizedBox(width: 138),
                 ],
               ),
-            ),
+            ],
           ),
         );
       }(),
@@ -234,54 +294,42 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
   Widget _buildPresetSelect() {
     return Selector<PresetService, List<String>>(
       selector: (p0, p1) => p1.getGlobalPresets(),
-      builder: (context, value, child) {
-        return ComboBox(
-          items: value
-              .map((e) => ComboBoxItem(
-                    value: e,
-                    child: Text(e),
-                  ))
-              .toList(growable: false),
-          placeholder: const Text('Global Preset...'),
-          onChanged: (value) {
-            showDialog(
-              context: context,
-              builder: (context2) {
-                return ContentDialog(
-                  title: const Text('Apply Global Preset?'),
-                  content: Text('Preset name: $value'),
-                  actions: [
-                    RedFilledButton(
-                      child: const Text('Delete'),
-                      onPressed: () {
-                        Navigator.of(context2).pop();
-                        context.read<PresetService>().removeGlobalPreset(
-                              value!,
-                            );
-                      },
-                    ),
-                    Button(
-                      child: const Text('Cancel'),
-                      onPressed: () {
-                        Navigator.of(context2).pop();
-                      },
-                    ),
-                    FilledButton(
-                      child: const Text('Apply'),
-                      onPressed: () {
-                        Navigator.of(context2).pop();
-                        context.read<PresetService>().setGlobalPreset(
-                              value!,
-                            );
-                      },
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-        );
-      },
+      builder: (context, value, child) => ComboBox(
+        items: value
+            .map((e) => ComboBoxItem(value: e, child: Text(e)))
+            .toList(growable: false),
+        placeholder: const Text('Global Preset...'),
+        onChanged: (value) => showDialog(
+          barrierDismissible: true,
+          context: context,
+          builder: (context2) => ContentDialog(
+            title: const Text('Apply Global Preset?'),
+            content: Text('Preset name: $value'),
+            actions: [
+              RedFilledButton(
+                child: const Text('Delete'),
+                onPressed: () {
+                  Navigator.of(context2).pop();
+                  context.read<PresetService>().removeGlobalPreset(value!);
+                },
+              ),
+              Button(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context2).pop();
+                },
+              ),
+              FilledButton(
+                child: const Text('Apply'),
+                onPressed: () {
+                  Navigator.of(context2).pop();
+                  context.read<PresetService>().setGlobalPreset(value!);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -290,6 +338,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
       icon: const Icon(FluentIcons.add),
       onPressed: () {
         showDialog(
+          barrierDismissible: true,
           context: context,
           builder: (context2) {
             return ContentDialog(
@@ -325,7 +374,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     );
   }
 
-  List<PaneItemAction> _buildPaneItemActions(BuildContext context) {
+  List<PaneItemAction> _buildPaneItemActions() {
     const icon = Icon(FluentIcons.user_window);
     return context.select<AppStateService, bool>((value) => value.runTogether)
         ? [
@@ -334,8 +383,8 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
               icon: icon,
               title: const Text('Run 3d migoto & launcher'),
               onTap: () {
-                _runMigoto(context);
-                _runLauncher(context);
+                _runMigoto();
+                _runLauncher();
               },
             ),
           ]
@@ -344,13 +393,13 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
               key: const ValueKey('<run_migoto>'),
               icon: icon,
               title: const Text('Run 3d migoto'),
-              onTap: () => _runMigoto(context),
+              onTap: () => _runMigoto(),
             ),
             PaneItemAction(
               key: const ValueKey('<run_launcher>'),
               icon: icon,
               title: const Text('Run launcher'),
-              onTap: () => _runLauncher(context),
+              onTap: () => _runLauncher(),
             ),
           ];
   }
@@ -384,7 +433,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     );
   }
 
-  void _runMigoto(BuildContext context) {
+  void _runMigoto() {
     final path = context.read<AppStateService>().modExecFile;
     runProgram(path.toFile);
     displayInfoBar(
@@ -399,7 +448,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     _logger.t('Ran 3d migoto $path');
   }
 
-  void _runLauncher(BuildContext context) {
+  void _runLauncher() {
     final launcher = context.read<AppStateService>().launcherFile;
     runProgram(launcher.toFile);
     _logger.t('Ran launcher $launcher');

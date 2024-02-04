@@ -129,17 +129,13 @@ class FileWatchProvider extends StatelessWidget {
 
 bool _ifEventDirectUnder(FileSystemEvent? event, Directory watchedDir) {
   if (event == null) return true;
-  if (event is FileSystemModifyEvent) {
-    if (!event.contentChanged) return false;
-    return PathW(event.path) == watchedDir.pathW;
-  }
-  if (event is FileSystemCreateEvent || event is FileSystemDeleteEvent) {
-    return PathW(event.path).dirname == watchedDir.pathW;
-  }
+  final tgts = [event.pathW, event.pathW.dirname];
   if (event is FileSystemMoveEvent) {
-    final destination = event.destination;
-    if (destination == null) return true;
-    return PathW(destination).dirname == watchedDir.pathW;
+    var destination = event.destination;
+    if (destination != null) {
+      tgts.add(destination.pathW);
+      tgts.add(destination.pathW.dirname);
+    }
   }
-  throw UnimplementedError('Unknown event type: $event');
+  return tgts.any((e) => e == watchedDir.pathW);
 }

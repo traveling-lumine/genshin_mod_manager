@@ -2,16 +2,16 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
-extension PathFSE on FileSystemEntity {
+extension PathWFileSystemEntity on FileSystemEntity {
   PathW get pathW => PathW(path);
+}
 
-  PathW get basename => pathW.basename;
+extension PathWString on String {
+  PathW get pathW => PathW(this);
+}
 
-  PathW get basenameWithoutExtension => pathW.basenameWithoutExtension;
-
-  PathW get extension => pathW.extension;
-
-  PathW join(PathW str) => pathW.join(str);
+extension PathWFileSystemEvent on FileSystemEvent {
+  PathW get pathW => PathW(path);
 }
 
 extension PathF on File {

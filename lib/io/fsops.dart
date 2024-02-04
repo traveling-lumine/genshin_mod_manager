@@ -32,9 +32,9 @@ File? findPreviewFile(Directory dir, {PathW name = const PathW('preview')}) =>
 
 File? findPreviewFileIn(List<File> dir, {PathW name = const PathW('preview')}) {
   for (final element in dir) {
-    final filename = element.basenameWithoutExtension;
+    final filename = element.pathW.basenameWithoutExtension;
     if (filename != name) continue;
-    final ext = element.extension;
+    final ext = element.pathW.extension;
     if (_previewExtensions.contains(ext)) return element;
   }
   return null;
@@ -43,7 +43,7 @@ File? findPreviewFileIn(List<File> dir, {PathW name = const PathW('preview')}) {
 void runProgram(File program) {
   Process.run(
     'start',
-    ['/b', '/d', program.parent.path, '', program.basename.asString],
+    ['/b', '/d', program.parent.path, '', program.pathW.basename.asString],
     runInShell: true,
   );
 }

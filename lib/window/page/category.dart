@@ -84,6 +84,7 @@ class CategoryPage extends StatelessWidget {
           placeholder: const Text('Local Preset...'),
           onChanged: (value) {
             showDialog(
+              barrierDismissible: true,
               context: context,
               builder: (context2) {
                 return ContentDialog(
@@ -131,6 +132,7 @@ class CategoryPage extends StatelessWidget {
       icon: const Icon(FluentIcons.add),
       onPressed: () {
         showDialog(
+          barrierDismissible: true,
           context: context,
           builder: (context2) {
             return ContentDialog(
@@ -189,12 +191,12 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
     final dirs = context.watch<DirWatchService>().curDirs
       ..sort(
         (a, b) {
-          final a2 = a.basename.enabledForm.asString;
-          final b2 = b.basename.enabledForm.asString;
+          final a2 = a.pathW.basename.enabledForm.asString;
+          final b2 = b.pathW.basename.enabledForm.asString;
           var compareTo = a2.toLowerCase().compareTo(b2.toLowerCase());
           if (widget.enabledFirst) {
-            final aEnabled = a.basename.isEnabled;
-            final bEnabled = b.basename.isEnabled;
+            final aEnabled = a.pathW.basename.isEnabled;
+            final bEnabled = b.pathW.basename.isEnabled;
             if (aEnabled && !bEnabled) {
               return -1;
             } else if (!aEnabled && bEnabled) {
