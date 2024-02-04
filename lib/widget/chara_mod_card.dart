@@ -199,14 +199,11 @@ class _CharaModCard extends StatelessWidget {
         child: FlyoutTarget(
           controller: _contextController,
           key: _contextAttachKey,
-          child: () {
-            FileImage(previewFile).evict();
-            return Image.file(
-              previewFile,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.medium,
-            );
-          }(),
+          child: Image.memory(
+            previewFile.readAsBytesSync(),
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.medium,
+          ),
         ),
       ),
     );

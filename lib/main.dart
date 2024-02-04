@@ -18,7 +18,7 @@ Future<void> initialize() async {
 
   await windowManager.ensureInitialized();
 
-  windowManager.waitUntilReadyToShow(const WindowOptions(
+  await windowManager.waitUntilReadyToShow(const WindowOptions(
     titleBarStyle: TitleBarStyle.hidden,
     minimumSize: _minWindowSize,
   ));

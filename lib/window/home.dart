@@ -40,7 +40,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
   int? selected;
   bool updateDisplayed = false;
 
-  Future<void> _checkUpdate(context) async {
+  Future<void> _checkUpdate() async {
     const baseLink =
         'https://github.com/traveling-lumine/genshin_mod_manager/releases/latest';
     final url = Uri.parse(baseLink);
@@ -75,7 +75,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     }
     if (!shouldUpdate) return;
     if (!context.mounted) return;
-    displayInfoBar(
+    unawaited(displayInfoBar(
       context,
       duration: const Duration(seconds: 10),
       builder: (_, close) {
@@ -109,15 +109,15 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
                   "start genshin_mod_manager.exe\n"
                   "del update.cmd";
               await File('update.cmd').writeAsString(updateScript);
-              Process.run(
+              unawaited(Process.run(
                 'start',
                 [
                   'cmd',
                   '/c',
-                  'timeout /t 5 && call update.cmd',
+                  'timeout /t 3 && call update.cmd',
                 ],
                 runInShell: true,
-              );
+              ));
               await Future.delayed(const Duration(milliseconds: 200));
               exit(0);
             },
@@ -126,14 +126,14 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
           onClose: close,
         );
       },
-    );
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     if (!updateDisplayed) {
       updateDisplayed = true;
-      unawaited(_checkUpdate(context));
+      unawaited(_checkUpdate());
     }
 
     final imageFiles =
@@ -153,7 +153,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
       PaneItemSeparator(
         key: const ValueKey('<separator>'),
       ),
-      ..._buildPaneItemActions(context),
+      ..._buildPaneItemActions(),
       PaneItem(
         key: const ValueKey('<settings>'),
         icon: const Icon(FluentIcons.settings),
@@ -236,54 +236,41 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
   Widget _buildPresetSelect() {
     return Selector<PresetService, List<String>>(
       selector: (p0, p1) => p1.getGlobalPresets(),
-      builder: (context, value, child) {
-        return ComboBox(
-          items: value
-              .map((e) => ComboBoxItem(
-                    value: e,
-                    child: Text(e),
-                  ))
-              .toList(growable: false),
-          placeholder: const Text('Global Preset...'),
-          onChanged: (value) {
-            showDialog(
-              context: context,
-              builder: (context2) {
-                return ContentDialog(
-                  title: const Text('Apply Global Preset?'),
-                  content: Text('Preset name: $value'),
-                  actions: [
-                    RedFilledButton(
-                      child: const Text('Delete'),
-                      onPressed: () {
-                        Navigator.of(context2).pop();
-                        context.read<PresetService>().removeGlobalPreset(
-                              value!,
-                            );
-                      },
-                    ),
-                    Button(
-                      child: const Text('Cancel'),
-                      onPressed: () {
-                        Navigator.of(context2).pop();
-                      },
-                    ),
-                    FilledButton(
-                      child: const Text('Apply'),
-                      onPressed: () {
-                        Navigator.of(context2).pop();
-                        context.read<PresetService>().setGlobalPreset(
-                              value!,
-                            );
-                      },
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-        );
-      },
+      builder: (context, value, child) => ComboBox(
+        items: value
+            .map((e) => ComboBoxItem(value: e, child: Text(e)))
+            .toList(growable: false),
+        placeholder: const Text('Global Preset...'),
+        onChanged: (value) => showDialog(
+          context: context,
+          builder: (context2) => ContentDialog(
+            title: const Text('Apply Global Preset?'),
+            content: Text('Preset name: $value'),
+            actions: [
+              RedFilledButton(
+                child: const Text('Delete'),
+                onPressed: () {
+                  Navigator.of(context2).pop();
+                  context.read<PresetService>().removeGlobalPreset(value!);
+                },
+              ),
+              Button(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context2).pop();
+                },
+              ),
+              FilledButton(
+                child: const Text('Apply'),
+                onPressed: () {
+                  Navigator.of(context2).pop();
+                  context.read<PresetService>().setGlobalPreset(value!);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -327,7 +314,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     );
   }
 
-  List<PaneItemAction> _buildPaneItemActions(BuildContext context) {
+  List<PaneItemAction> _buildPaneItemActions() {
     const icon = Icon(FluentIcons.user_window);
     return context.select<AppStateService, bool>((value) => value.runTogether)
         ? [
@@ -336,8 +323,8 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
               icon: icon,
               title: const Text('Run 3d migoto & launcher'),
               onTap: () {
-                _runMigoto(context);
-                _runLauncher(context);
+                _runMigoto();
+                _runLauncher();
               },
             ),
           ]
@@ -346,13 +333,13 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
               key: const ValueKey('<run_migoto>'),
               icon: icon,
               title: const Text('Run 3d migoto'),
-              onTap: () => _runMigoto(context),
+              onTap: () => _runMigoto(),
             ),
             PaneItemAction(
               key: const ValueKey('<run_launcher>'),
               icon: icon,
               title: const Text('Run launcher'),
-              onTap: () => _runLauncher(context),
+              onTap: () => _runLauncher(),
             ),
           ];
   }
@@ -386,7 +373,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     );
   }
 
-  void _runMigoto(BuildContext context) {
+  void _runMigoto() {
     final path = context.read<AppStateService>().modExecFile;
     runProgram(path.toFile);
     displayInfoBar(
@@ -401,7 +388,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     _logger.t('Ran 3d migoto $path');
   }
 
-  void _runLauncher(BuildContext context) {
+  void _runLauncher() {
     final launcher = context.read<AppStateService>().launcherFile;
     runProgram(launcher.toFile);
     _logger.t('Ran launcher $launcher');
