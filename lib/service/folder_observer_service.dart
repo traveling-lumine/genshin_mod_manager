@@ -44,6 +44,11 @@ class RecursiveObserverService with ChangeNotifier {
     });
   }
 
+  void forceUpdate() {
+    _lastEvent = null;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _subscription.cancel();

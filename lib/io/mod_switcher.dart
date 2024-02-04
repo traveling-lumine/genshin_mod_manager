@@ -2,10 +2,8 @@ import 'dart:io';
 
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
-import 'package:logger/logger.dart';
 
 const kShaderFixes = PathW('ShaderFixes');
-final _logger = Logger();
 
 void enable({
   required Directory shaderFixesDir,
@@ -72,8 +70,8 @@ List<File> _getModShaders(PathW modPathW) {
   final modShaderDir = modPathW.join(kShaderFixes).toDirectory;
   try {
     shaderFilenames.addAll(getFilesUnder(modShaderDir));
-  } on PathNotFoundException catch (e) {
-    _logger.i(e);
+  } on PathNotFoundException {
+    // _logger.i(e);
   }
   return shaderFilenames;
 }

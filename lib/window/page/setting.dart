@@ -115,7 +115,7 @@ class SettingPage extends StatelessWidget {
               }
               final packageInfo = snapshot.data as PackageInfo;
               return Text(
-                'Version: ${packageInfo.version}+${packageInfo.buildNumber}',
+                'Version: ${packageInfo.version}',
                 style: FluentTheme.of(context).typography.caption,
               );
             },
