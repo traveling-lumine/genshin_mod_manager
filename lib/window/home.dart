@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:genshin_mod_manager/base/appbar.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
@@ -77,55 +78,112 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     if (!context.mounted) return;
     unawaited(displayInfoBar(
       context,
-      duration: const Duration(seconds: 10),
-      builder: (_, close) {
-        return InfoBar(
-          title: GestureDetector(
-            onTapUp: (details) => launchUrl(url),
-            child:
-                Text('Update available: $upVersion. Click here to open link.'),
+      duration: const Duration(minutes: 1),
+      builder: (_, close) => InfoBar(
+        title: RichText(
+          text: TextSpan(
+            style: DefaultTextStyle.of(context).style,
+            children: [
+              const TextSpan(text: 'New version available: '),
+              TextSpan(
+                text: upVersion,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const TextSpan(text: '. Click '),
+              TextSpan(
+                text: 'here',
+                style: TextStyle(
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () => launchUrl(url),
+              ),
+              const TextSpan(text: ' to open link.'),
+            ],
           ),
-          action: FilledButton(
-            onPressed: () async {
-              close();
-              final url = Uri.parse('$baseLink/download/GenshinModManager.zip');
-              final response = await http.get(url);
-              final archive = ZipDecoder().decodeBytes(response.bodyBytes);
-              for (final aFile in archive) {
-                final path = '${Directory.current.path}/${aFile.name}';
-                if (aFile.isFile) {
-                  await File(path).writeAsBytes(aFile.content);
-                } else {
-                  Directory(path).createSync(recursive: true);
-                }
-              }
-              const updateScript = "@echo off\n"
-                  "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd\"') do del \"%%i\"\n"
-                  "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources GenshinModManager\"') do rd /s /q \"%%i\"\n"
-                  "cd GenshinModManager\n"
-                  "for /f \"delims=\" %%i in ('dir /b ^| findstr /v /i \"Resources\"') do move \"%%i\" ..\n"
-                  "cd ..\n"
-                  "rd /s /q GenshinModManager\n"
-                  "start genshin_mod_manager.exe\n"
-                  "del update.cmd";
-              await File('update.cmd').writeAsString(updateScript);
-              unawaited(Process.run(
-                'start',
-                [
-                  'cmd',
-                  '/c',
-                  'timeout /t 3 && call update.cmd',
+        ),
+        action: FilledButton(
+          onPressed: () async {
+            unawaited(showDialog(
+              context: context,
+              builder: (context2) => ContentDialog(
+                title: const Text('Start auto update?'),
+                content: RichText(
+                  textAlign: TextAlign.justify,
+                  text: TextSpan(
+                    style: DefaultTextStyle.of(context).style,
+                    children: [
+                      const TextSpan(
+                        text:
+                            'This will download the latest version and replace the current one.'
+                            ' This feature is experimental and may not work as expected.\n',
+                        // justify
+                      ),
+                      TextSpan(
+                        text:
+                            'Please backup your mods and resources before proceeding.\nDELETION OF UNRELATED FILES IS POSSIBLE.',
+                        style: TextStyle(
+                            color: Colors.red, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  Button(
+                    child: const Text('Cancel'),
+                    onPressed: () {
+                      Navigator.of(context2).pop();
+                    },
+                  ),
+                  RedFilledButton(
+                    child: const Text('Start'),
+                    onPressed: () async {
+                      Navigator.of(context2).pop();
+                      final url =
+                          Uri.parse('$baseLink/download/GenshinModManager.zip');
+                      final response = await http.get(url);
+                      final archive =
+                          ZipDecoder().decodeBytes(response.bodyBytes);
+                      for (final aFile in archive) {
+                        final path = '${Directory.current.path}/${aFile.name}';
+                        if (aFile.isFile) {
+                          await File(path).writeAsBytes(aFile.content);
+                        } else {
+                          Directory(path).createSync(recursive: true);
+                        }
+                      }
+                      const updateScript = "@echo off\n"
+                          "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd\"') do del \"%%i\"\n"
+                          "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources GenshinModManager\"') do rd /s /q \"%%i\"\n"
+                          "cd GenshinModManager\n"
+                          "for /f \"delims=\" %%i in ('dir /b ^| findstr /v /i \"Resources\"') do move \"%%i\" ..\n"
+                          "cd ..\n"
+                          "rd /s /q GenshinModManager\n"
+                          "start genshin_mod_manager.exe\n"
+                          "del update.cmd";
+                      await File('update.cmd').writeAsString(updateScript);
+                      unawaited(Process.run(
+                        'start',
+                        [
+                          'cmd',
+                          '/c',
+                          'timeout /t 3 && call update.cmd',
+                        ],
+                        runInShell: true,
+                      ));
+                      await Future.delayed(const Duration(milliseconds: 200));
+                      exit(0);
+                    },
+                  ),
                 ],
-                runInShell: true,
-              ));
-              await Future.delayed(const Duration(milliseconds: 200));
-              exit(0);
-            },
-            child: const Text('Auto update (use at your own risk)'),
-          ),
-          onClose: close,
-        );
-      },
+              ),
+            ));
+          },
+          child: const Text('Auto update'),
+        ),
+        onClose: close,
+      ),
     ));
   }
 
