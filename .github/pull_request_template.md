@@ -1,6 +1,6 @@
 ### Pull Request Checklist
 
-- [ ] **Increment build number and version**
+- [ ] `cider bump <option>`
 
 ### Related Issues
 

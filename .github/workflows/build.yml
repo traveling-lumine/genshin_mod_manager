@@ -13,13 +13,17 @@ jobs:
         with:
           channel: 'stable'
           architecture: x64
+      - run: flutter pub global activate cider
       - run: flutter build windows
       - run: move build\windows\x64\runner\Release GenshinModManager
       - run: tar -acf GenshinModManager.zip GenshinModManager
       - run: certutil -hashfile GenshinModManager.zip SHA256
-      - uses: actions/upload-artifact@v2
+      - name: Get tag version
+        run: |
+          echo|set /p="TAG=v" >> $GITHUB_ENV
+          cider version >> $GITHUB_ENV
+      - uses: softprops/action-gh-release@v1
         with:
-          name: Binary Artifact
-          path: GenshinModManager.zip
-          retention-days: 1
-          if-no-files-found: error
+          files: GenshinModManager.zip
+          tag_name: ${{ env.TAG }}
+          generate_release_notes: true
