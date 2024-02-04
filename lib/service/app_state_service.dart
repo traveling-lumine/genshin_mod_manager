@@ -26,7 +26,7 @@ class AppStateService with ChangeNotifier {
   bool _moveOnDrag = false;
   bool _showFolderIcon = true;
   bool _showEnabledModsFirst = false;
-  String _presetData = '{"global":{},"local":{}}';
+  String _presetData = '123';
   late Future<SharedPreferences> _initFuture;
 
   Future<SharedPreferences> get initFuture => _initFuture;
