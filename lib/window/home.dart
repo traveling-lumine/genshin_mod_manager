@@ -192,24 +192,26 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
         return NavigationAppBar(
           actions: const WindowButtons(),
           automaticallyImplyLeading: false,
-          title: DragToMoveArea(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Genshin Mod Manager'),
-                  Row(
-                    children: [
-                      _buildPresetAddIcon(),
-                      const SizedBox(width: 8),
-                      _buildPresetSelect(),
-                      const SizedBox(width: 138),
-                    ],
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: DragToMoveArea(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Genshin Mod Manager'),
                   ),
+                ),
+              ),
+              Row(
+                children: [
+                  _buildPresetAddIcon(),
+                  const SizedBox(width: 8),
+                  _buildPresetSelect(),
+                  const SizedBox(width: 138),
                 ],
               ),
-            ),
+            ],
           ),
         );
       }(),
