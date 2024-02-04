@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
+import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -197,10 +198,15 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     final imageFiles =
         context.select<CategoryIconFolderObserverService, List<File>>(
             (value) => value.curFiles);
-    final List<_FolderPaneItem> subFolders = context
+    final sortedMenus = context
         .select<DirWatchService, List<String>>(
             (value) => value.curDirs.map((e) => e.path).toList(growable: false))
         .map((e) => PathW(e))
+        .toList(growable: false)
+      ..sort(
+        (a, b) => compareNatural(a.basename.asString, b.basename.asString),
+      );
+    final List<_FolderPaneItem> subFolders = sortedMenus
         .map((e) => _FolderPaneItem(
               dirPath: e,
               imageFile: findPreviewFileIn(imageFiles, name: e.basename),
