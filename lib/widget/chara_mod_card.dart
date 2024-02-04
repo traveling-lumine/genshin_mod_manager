@@ -302,7 +302,7 @@ class _CharaModCard extends StatelessWidget {
   }
 
   Widget buildIniHeader(File iniFile) {
-    final basenameString = iniFile.basename.asString;
+    final basenameString = iniFile.pathW.basename.asString;
     return Row(
       children: [
         Expanded(
