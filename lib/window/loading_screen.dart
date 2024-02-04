@@ -119,9 +119,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Widget _buildHomeWindowScope(PathW modRootValue) {
-    return ChangeNotifierProxyProvider<AppStateService, PresetService>(
+    return ChangeNotifierProxyProvider2<AppStateService,
+        RecursiveObserverService, PresetService>(
       create: (context) => PresetService(),
-      update: (context, value, previous) => previous!..update(value),
+      update: (context, value, value2, previous) =>
+          previous!..update(value, value2),
       child: DirWatchProvider(
         dir: modRootValue.toDirectory,
         child: const HomeWindow(),

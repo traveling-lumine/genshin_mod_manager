@@ -4,18 +4,21 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/io/mod_switcher.dart';
+import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 
 import 'app_state_service.dart';
 
 class PresetService with ChangeNotifier {
   AppStateService? _appStateService;
+  RecursiveObserverService? _observerService;
   dynamic _internal;
   String? _cache;
 
   PresetService();
 
-  void update(AppStateService data) {
+  void update(AppStateService data, RecursiveObserverService observerService) {
     _appStateService = data;
+    _observerService = observerService;
     final prevCache = _cache;
     _cache = data.presetData;
     _internal = jsonDecode(data.presetData);
@@ -92,6 +95,7 @@ class PresetService with ChangeNotifier {
     final directives = internal[name];
     if (directives != null) {
       _toggleGlobal(directives);
+      _observerService?.forceUpdate();
     }
   }
 
@@ -101,6 +105,7 @@ class PresetService with ChangeNotifier {
     final directives = internal2![name];
     if (directives != null) {
       _toggleLocal(category, directives);
+      _observerService?.forceUpdate();
     }
   }
 
