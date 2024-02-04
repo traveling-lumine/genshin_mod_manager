@@ -19,9 +19,7 @@ jobs:
       - run: tar -acf GenshinModManager.zip GenshinModManager
       - run: certutil -hashfile GenshinModManager.zip SHA256
       - name: Get tag version
-        run: |
-          echo|set /p="TAG=v" >> $GITHUB_ENV
-          cider version >> $GITHUB_ENV
+        run: '"TAG=v$(cider version)" >> $GITHUB_ENV'
       - uses: softprops/action-gh-release@v1
         with:
           files: GenshinModManager.zip
