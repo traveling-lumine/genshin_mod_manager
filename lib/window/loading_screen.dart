@@ -141,7 +141,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
 final router = GoRouter(
   debugLogDiagnostics: true,
-  initialLocation: '/category/0',
+  initialLocation: '/setting',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
