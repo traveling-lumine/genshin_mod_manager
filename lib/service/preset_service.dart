@@ -171,8 +171,7 @@ class PresetService with ChangeNotifier {
     }
     const equality = DeepCollectionEquality();
     try {
-      final parsedGlobal =
-          Map<String, Map<String, List<String>>>.from(data['global']);
+      final parsedGlobal = _parseMap(data['global']);
       final globalDiffers = !equality.equals(parsedGlobal, _curGlobal);
       if (globalDiffers) {
         _curGlobal = parsedGlobal;
@@ -182,8 +181,7 @@ class PresetService with ChangeNotifier {
       // do nothing
     }
     try {
-      final parsedLocal =
-          Map<String, Map<String, List<String>>>.from(data['local']);
+      final parsedLocal = _parseMap(data['local']);
       final localDiffers = !equality.equals(parsedLocal, _curLocal);
       if (localDiffers) {
         _curLocal = parsedLocal;
@@ -195,5 +193,26 @@ class PresetService with ChangeNotifier {
     if (doUpdate) {
       notifyListeners();
     }
+  }
+
+  Map<String, Map<String, List<String>>> _parseMap(dynamic data) {
+    final Map<String, Map<String, List<String>>> parsedGlobal = {};
+    data.forEach((k, v) {
+      if (k is! String) return;
+      if (v is! Map) return;
+      final Map<String, List<String>> b = {};
+      v.forEach((k, v) {
+        if (k is! String) return;
+        if (v is! List) return;
+        final List<String> c = [];
+        for (final e in v) {
+          if (e is! String) continue;
+          c.add(e);
+        }
+        b[k] = c;
+      });
+      parsedGlobal[k] = b;
+    });
+    return parsedGlobal;
   }
 }
