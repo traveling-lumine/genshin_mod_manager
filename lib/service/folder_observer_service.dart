@@ -59,34 +59,52 @@ class RecursiveObserverService with ChangeNotifier {
 class DirWatchService with ChangeNotifier {
   final Directory targetDir;
 
-  List<Directory> _curDirs;
+  late List<Directory> _curDirs;
 
   List<Directory> get curDirs => _curDirs;
 
-  DirWatchService({required this.targetDir})
-      : _curDirs = getDirsUnder(targetDir);
+  DirWatchService({required this.targetDir}) {
+    _getDirs();
+  }
 
   void update(FileSystemEvent? event) {
     if (!_ifEventDirectUnder(event, targetDir)) return;
-    _curDirs = getDirsUnder(targetDir);
+    _getDirs();
     notifyListeners();
+  }
+
+  void _getDirs() {
+    try {
+      _curDirs = getDirsUnder(targetDir);
+    } on PathNotFoundException {
+      _curDirs = [];
+    }
   }
 }
 
 class FileWatchService with ChangeNotifier {
   final Directory targetDir;
 
-  List<File> _curFiles;
+  late List<File> _curFiles;
 
   List<File> get curFiles => _curFiles;
 
-  FileWatchService({required this.targetDir})
-      : _curFiles = getFilesUnder(targetDir);
+  FileWatchService({required this.targetDir}) {
+    _getFiles();
+  }
 
   void update(FileSystemEvent? event) {
     if (!_ifEventDirectUnder(event, targetDir)) return;
-    _curFiles = getFilesUnder(targetDir);
+    _getFiles();
     notifyListeners();
+  }
+
+  void _getFiles() {
+    try {
+      _curFiles = getFilesUnder(targetDir);
+    } on PathNotFoundException {
+      _curFiles = [];
+    }
   }
 }
 

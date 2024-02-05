@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
@@ -11,31 +12,26 @@ import 'app_state_service.dart';
 class PresetService with ChangeNotifier {
   AppStateService? _appStateService;
   RecursiveObserverService? _observerService;
-  dynamic _internal;
-  String? _cache;
+  Map<String, Map<String, List<String>>> _curGlobal = {};
+  Map<String, Map<String, List<String>>> _curLocal = {};
 
   PresetService();
 
   void update(AppStateService data, RecursiveObserverService observerService) {
     _appStateService = data;
     _observerService = observerService;
-    final prevCache = _cache;
-    _cache = data.presetData;
-    _internal = jsonDecode(data.presetData);
-    if (prevCache != _cache) {
-      notifyListeners();
+    if (_shouldUpdate(data.presetData)) {
+      _update(data.presetData);
     }
   }
 
   List<String> getGlobalPresets() {
-    Map<String, dynamic> global = _internal['global'];
-    return global.keys.toList(growable: false);
+    return _curGlobal.keys.toList(growable: false);
   }
 
   List<String> getLocalPresets(String category) {
-    Map<String, dynamic> local = _internal['local'];
     try {
-      return local[category]!.keys.toList(growable: false);
+      return _curLocal[category]!.keys.toList(growable: false);
     } catch (e) {
       return [];
     }
@@ -53,7 +49,7 @@ class PresetService with ChangeNotifier {
           .map((e) => e.asString)
           .toList(growable: false);
     }
-    _internal['global'][name] = data;
+    _curGlobal[name] = data;
     _writeBack();
   }
 
@@ -65,99 +61,63 @@ class PresetService with ChangeNotifier {
         .where((e) => e.isEnabled)
         .map((e) => e.asString)
         .toList(growable: false);
-    try {
-      _internal['local'][category][name] = data;
-    } catch (e) {
-      _internal['local'][category] = {};
-      _internal['local'][category][name] = data;
-    }
+    _curLocal.putIfAbsent(category, () => {})[name] = data;
     _writeBack();
   }
 
   void removeGlobalPreset(String name) {
-    Map<String, dynamic> internal = _internal['global'];
-    internal.remove(name);
+    _curGlobal.remove(name);
     _writeBack();
   }
 
   void removeLocalPreset(String category, String name) {
-    Map<String, dynamic> internal = _internal['local'];
-    try {
-      internal[category]?.remove(name);
-      _writeBack();
-    } catch (e) {
-      // do nothing
-    }
+    _curLocal[category]?.remove(name);
+    _writeBack();
   }
 
   void setGlobalPreset(String name) {
-    Map<String, dynamic> internal = _internal['global'];
-    final directives = internal[name];
-    if (directives != null) {
-      _toggleGlobal(directives);
-      _observerService?.forceUpdate();
-    }
+    final directives = _curGlobal[name];
+    if (directives == null) return;
+    _toggleGlobal(directives);
+    _observerService!.forceUpdate();
   }
 
   void setLocalPreset(String category, String name) {
-    Map<String, dynamic> internal = _internal['local'];
-    var internal2 = internal[category];
-    final directives = internal2![name];
-    if (directives != null) {
-      _toggleLocal(category, directives);
-      _observerService?.forceUpdate();
-    }
+    final locCat = _curLocal[category];
+    if (locCat == null) return;
+    final directives = locCat[name];
+    if (directives == null) return;
+    _toggleLocal(category, directives);
+    _observerService!.forceUpdate();
   }
 
-  void _toggleGlobal(Map<String, dynamic> directives) {
+  void _toggleGlobal(Map<String, List<String>> directives) {
     final shaderFixes =
         _appStateService!.modExecFile.dirname.join(kShaderFixes);
     for (var category in directives.entries) {
-      final categoryDir = _appStateService!.modRoot.join(PathW(category.key));
       final shouldBeEnabled = category.value;
-      final currentEnabled = getDirsUnder(categoryDir.toDirectory)
-          .map((e) => e.pathW.basename)
-          .where((e) => e.isEnabled)
-          .map((e) => e.asString)
-          .toList(growable: false);
-
-      // two steps: disable all that are enabled but shouldn't be, and enable all that should be enabled but aren't
-      // disable first
-      final shouldBeOff =
-          currentEnabled.where((e) => !shouldBeEnabled.contains(e));
-      for (var mod in shouldBeOff) {
-        final modDir = categoryDir.join(PathW(mod));
-        disable(
-          shaderFixesDir: shaderFixes.toDirectory,
-          modPathW: modDir,
-        );
-      }
-
-      // enable second
-      final shouldBeOn =
-          shouldBeEnabled.where((e) => !currentEnabled.contains(e));
-      for (var mod in shouldBeOn) {
-        final modDir = categoryDir.join(PathW(mod).disabledForm);
-        enable(
-          shaderFixesDir: shaderFixes.toDirectory,
-          modPathW: modDir,
-        );
-      }
+      final categoryDir = _appStateService!.modRoot.join(PathW(category.key));
+      _toggleCategory(categoryDir, shouldBeEnabled, shaderFixes);
     }
   }
 
-  void _toggleLocal(String category, List<dynamic> shouldBeEnabled) {
+  void _toggleLocal(String category, List<String> shouldBeEnabled) {
     final shaderFixes =
         _appStateService!.modExecFile.dirname.join(kShaderFixes);
     final categoryDir = _appStateService!.modRoot.join(PathW(category));
+    _toggleCategory(categoryDir, shouldBeEnabled, shaderFixes);
+  }
+
+  void _toggleCategory(
+    PathW categoryDir,
+    List<String> shouldBeEnabled,
+    PathW shaderFixes,
+  ) {
     final currentEnabled = getDirsUnder(categoryDir.toDirectory)
         .map((e) => e.pathW.basename)
         .where((e) => e.isEnabled)
         .map((e) => e.asString)
         .toList(growable: false);
-
-    // two steps: disable all that are enabled but shouldn't be, and enable all that should be enabled but aren't
-    // disable first
     final shouldBeOff =
         currentEnabled.where((e) => !shouldBeEnabled.contains(e));
     for (var mod in shouldBeOff) {
@@ -167,8 +127,6 @@ class PresetService with ChangeNotifier {
         modPathW: modDir,
       );
     }
-
-    // enable second
     final shouldBeOn =
         shouldBeEnabled.where((e) => !currentEnabled.contains(e));
     for (var mod in shouldBeOn) {
@@ -181,6 +139,61 @@ class PresetService with ChangeNotifier {
   }
 
   void _writeBack() {
-    _appStateService!.presetData = jsonEncode(_internal);
+    final presetData = _getStringRepresentation();
+    final appStateService = _appStateService!;
+
+    notifyListeners();
+
+    if (appStateService.presetData != presetData) {
+      appStateService.presetData = presetData;
+    }
+  }
+
+  bool _shouldUpdate(String prevString) {
+    var bool = prevString != _getStringRepresentation();
+    return bool;
+  }
+
+  String _getStringRepresentation() {
+    return jsonEncode({
+      'global': _curGlobal,
+      'local': _curLocal,
+    });
+  }
+
+  void _update(String presetData) {
+    bool doUpdate = false;
+    dynamic data;
+    try {
+      data = jsonDecode(presetData);
+    } catch (e) {
+      return;
+    }
+    const equality = DeepCollectionEquality();
+    try {
+      final parsedGlobal =
+          Map<String, Map<String, List<String>>>.from(data['global']);
+      final globalDiffers = !equality.equals(parsedGlobal, _curGlobal);
+      if (globalDiffers) {
+        _curGlobal = parsedGlobal;
+        doUpdate = true;
+      }
+    } catch (e) {
+      // do nothing
+    }
+    try {
+      final parsedLocal =
+          Map<String, Map<String, List<String>>>.from(data['local']);
+      final localDiffers = !equality.equals(parsedLocal, _curLocal);
+      if (localDiffers) {
+        _curLocal = parsedLocal;
+        doUpdate = true;
+      }
+    } catch (e) {
+      // do nothing
+    }
+    if (doUpdate) {
+      notifyListeners();
+    }
   }
 }
