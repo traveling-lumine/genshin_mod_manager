@@ -73,9 +73,11 @@ class _CharaModCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 4),
-        Button(
-          child: const Icon(FluentIcons.folder_open),
-          onPressed: () => openFolder(dirPath.toDirectory),
+        RepaintBoundary(
+          child: Button(
+            child: const Icon(FluentIcons.folder_open),
+            onPressed: () => openFolder(dirPath.toDirectory),
+          ),
         ),
       ],
     );
@@ -112,29 +114,31 @@ class _CharaModCard extends StatelessWidget {
           children: [
             const Icon(FluentIcons.unknown),
             const SizedBox(height: 4),
-            Button(
-              onPressed: () async {
-                final image = await Pasteboard.image;
-                if (image == null) {
-                  _logger.d('No image found in clipboard');
-                  return;
-                }
-                final file = dirPath.join(const PathW('preview.png')).toFile;
-                await file.writeAsBytes(image);
-                if (!context.mounted) return;
-                await displayInfoBar(
-                  context,
-                  builder: (_, close) {
-                    return InfoBar(
-                      title: const Text('Image pasted'),
-                      content: Text('to ${file.path}'),
-                      onClose: close,
-                    );
-                  },
-                );
-                _logger.d('Image pasted to ${file.path}');
-              },
-              child: const Text('Paste'),
+            RepaintBoundary(
+              child: Button(
+                onPressed: () async {
+                  final image = await Pasteboard.image;
+                  if (image == null) {
+                    _logger.d('No image found in clipboard');
+                    return;
+                  }
+                  final file = dirPath.join(const PathW('preview.png')).toFile;
+                  await file.writeAsBytes(image);
+                  if (!context.mounted) return;
+                  await displayInfoBar(
+                    context,
+                    builder: (_, close) {
+                      return InfoBar(
+                        title: const Text('Image pasted'),
+                        content: Text('to ${file.path}'),
+                        onClose: close,
+                      );
+                    },
+                  );
+                  _logger.d('Image pasted to ${file.path}');
+                },
+                child: const Text('Paste'),
+              ),
             )
           ],
         ),
@@ -313,9 +317,11 @@ class _CharaModCard extends StatelessWidget {
             ),
           ),
         ),
-        Button(
-          child: const Icon(FluentIcons.document_management),
-          onPressed: () => runProgram(iniFile),
+        RepaintBoundary(
+          child: Button(
+            child: const Icon(FluentIcons.document_management),
+            onPressed: () => runProgram(iniFile),
+          ),
         ),
       ],
     );

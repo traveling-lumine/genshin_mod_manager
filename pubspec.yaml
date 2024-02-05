@@ -51,7 +51,8 @@ dependencies:
   window_manager: ^0.3.8
   http: ^1.2.0
   archive: ^3.4.10
-  collection:
+  collection: ^1.18.0
+  go_router: ^13.1.0
 
 dev_dependencies:
   flutter_test:

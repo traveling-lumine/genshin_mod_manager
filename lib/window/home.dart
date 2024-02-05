@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
@@ -16,8 +17,7 @@ import 'package:genshin_mod_manager/service/preset_service.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
-import 'package:genshin_mod_manager/window/page/category.dart';
-import 'package:genshin_mod_manager/window/page/setting.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -26,7 +26,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 class HomeWindow extends StatefulWidget {
-  const HomeWindow({super.key});
+  final Widget child;
+
+  const HomeWindow({super.key, required this.child});
 
   @override
   State<HomeWindow> createState() => _HomeWindowState();
@@ -37,9 +39,10 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
   static final _logger = Logger();
 
   final textEditingController = TextEditingController();
+  late List<_FolderPaneItem> _items;
+  late List<NavigationPaneItem> _footerItems;
+  int? _selected;
 
-  Key? selectedKey;
-  int? selected;
   bool updateDisplayed = false;
 
   Future<void> _checkUpdate() async {
@@ -199,164 +202,168 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
         context.select<CategoryIconFolderObserverService, List<File>>(
             (value) => value.curFiles);
     final sortedMenus = context
-        .select<DirWatchService, List<String>>(
-            (value) => value.curDirs.map((e) => e.path).toList(growable: false))
-        .map((e) => PathW(e))
+        .select<DirWatchService, List<String>>((value) => value.curDirs
+            .map((e) => e.pathW.basename.asString)
+            .toList(growable: false))
         .toList(growable: false)
       ..sort(
-        (a, b) => compareNatural(a.basename.asString, b.basename.asString),
+        (a, b) => compareNatural(a, b),
       );
-    final List<_FolderPaneItem> subFolders = sortedMenus
+    _items = sortedMenus
         .map((e) => _FolderPaneItem(
-              dirPath: e,
-              imageFile: findPreviewFileIn(imageFiles, name: e.basename),
-            ))
+            category: e,
+            imageFile: findPreviewFileIn(imageFiles, name: e.pathW),
+            onTap: () => context.go('/category/$e')))
         .toList(growable: false);
 
-    final List<NavigationPaneItem> footerItems = [
-      PaneItemSeparator(
-        key: const ValueKey('<separator>'),
-      ),
+    _footerItems = [
+      PaneItemSeparator(),
       ..._buildPaneItemActions(),
       PaneItem(
-        key: const ValueKey('<settings>'),
+        key: const ValueKey('/setting'),
         icon: const Icon(FluentIcons.settings),
         title: const Text('Settings'),
-        body: const SettingPage(),
+        body: const SizedBox.shrink(),
+        onTap: () => context.go('/setting'),
       ),
     ];
 
-    final List<NavigationPaneItem> combined = [
-      ...subFolders,
-      ...footerItems,
-    ];
-
-    // search matching key in combined list
-    final idx = combined.indexWhere((e) => e.key == selectedKey);
-
-    if (idx == -1) {
-      if (subFolders.isEmpty) {
-        selected = combined.length - 1;
-        selectedKey = combined.last.key;
-      } else {
-        final selVal = selected;
-        final afterVal =
-            selVal == null ? 0 : selVal.clamp(0, subFolders.length - 1);
-        selected = afterVal;
-        selectedKey = subFolders[afterVal].key;
-      }
+    final effectiveItems = ((_items.cast<NavigationPaneItem>() + _footerItems)
+          ..removeWhere((i) => i is! PaneItem || i is PaneItemAction))
+        .cast<PaneItem>();
+    final currentRoute = GoRouterState.of(context).uri.toString();
+    final index = effectiveItems.indexWhere((e) {
+      final key = e.key;
+      if (key is! ValueKey<String>) return false;
+      return key.value == currentRoute;
+    });
+    String? notFoundSoGoto;
+    if (index != -1) {
+      _selected = index;
     } else {
-      selected = idx;
+      final closest = max(0, min(effectiveItems.length - 1, _selected ?? 0));
+      notFoundSoGoto = (effectiveItems[closest].key as ValueKey<String>).value;
+      _selected = null;
     }
 
     return NavigationView(
       transitionBuilder: (child, animation) =>
           SuppressPageTransition(child: child),
-      appBar: () {
-        return NavigationAppBar(
-          actions: const WindowButtons(),
-          automaticallyImplyLeading: false,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Expanded(
-                child: DragToMoveArea(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Genshin Mod Manager'),
-                  ),
+      appBar: _buildAppbar(),
+      pane: _buildPane(),
+      paneBodyBuilder: (item, body) {
+        final child = widget.child;
+        final curRoute = GoRouterState.of(context).uri.toString();
+        if (curRoute == '/setting') return child;
+        final category = GoRouterState.of(context).pathParameters['name']!;
+        final notFoundSoGoto2 = notFoundSoGoto;
+        if (notFoundSoGoto2 == null) {
+          final modRoot = context.read<AppStateService>().modRoot;
+          final dir = modRoot.join(category.pathW).toDirectory;
+          return DirWatchProvider(
+            key: Key(category),
+            dir: dir,
+            child: child,
+          );
+        }
+        String dest;
+        try {
+          dest = notFoundSoGoto2.split('/')[2];
+        } on RangeError {
+          dest = 'setting';
+        }
+        return ScaffoldPage(
+          header: PageHeader(title: Text('Folder $category Not Found')),
+          content: Builder(
+            builder: (context2) {
+              unawaited(Future.delayed(const Duration(seconds: 0), () {
+                context.go(notFoundSoGoto2);
+              }));
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const ProgressRing(),
+                    const SizedBox(height: 20),
+                    Text('Redirecting to $dest...'),
+                  ],
                 ),
-              ),
-              Row(
-                children: [
-                  _buildPresetAddIcon(),
-                  const SizedBox(width: 8),
-                  _buildPresetSelect(),
-                  const SizedBox(width: 138),
-                ],
-              ),
-            ],
+              );
+            },
           ),
         );
-      }(),
-      pane: NavigationPane(
-        selected: selected,
-        onChanged: (value) => _setSelectedState(value, combined[value].key!),
-        displayMode: PaneDisplayMode.auto,
-        size: const NavigationPaneSize(
-            openWidth: _HomeWindowState._navigationPaneOpenWidth),
-        autoSuggestBox: _buildAutoSuggestBox(subFolders, combined),
-        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-        items: subFolders.map((e) {
-          // haha... blame List<T>::+ operator
-          // ignore: unnecessary_cast
-          return e as NavigationPaneItem;
-        }).toList(growable: false),
-        footerItems: footerItems,
+      },
+    );
+  }
+
+  NavigationAppBar _buildAppbar() {
+    return NavigationAppBar(
+      actions: const RepaintBoundary(child: WindowButtons()),
+      automaticallyImplyLeading: false,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Expanded(
+            child: DragToMoveArea(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Genshin Mod Manager'),
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              _buildPresetAddIcon(),
+              const SizedBox(width: 8),
+              _buildPresetSelect(),
+              const SizedBox(width: 138),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+
+  NavigationPane _buildPane() {
+    return NavigationPane(
+      selected: _selected,
+      displayMode: PaneDisplayMode.auto,
+      size: const NavigationPaneSize(
+          openWidth: _HomeWindowState._navigationPaneOpenWidth),
+      autoSuggestBox: _buildAutoSuggestBox(),
+      autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+      items: _items.map((e) {
+        // haha... blame List<T>::+ operator
+        // ignore: unnecessary_cast
+        return e as NavigationPaneItem;
+      }).toList(growable: false),
+      footerItems: _footerItems,
     );
   }
 
   Widget _buildPresetSelect() {
     return Selector<PresetService, List<String>>(
       selector: (p0, p1) => p1.getGlobalPresets(),
-      builder: (context, value, child) => ComboBox(
-        items: value
-            .map((e) => ComboBoxItem(value: e, child: Text(e)))
-            .toList(growable: false),
-        placeholder: const Text('Global Preset...'),
-        onChanged: (value) => showDialog(
-          barrierDismissible: true,
-          context: context,
-          builder: (context2) => ContentDialog(
-            title: const Text('Apply Global Preset?'),
-            content: Text('Preset name: $value'),
-            actions: [
-              RedFilledButton(
-                child: const Text('Delete'),
-                onPressed: () {
-                  Navigator.of(context2).pop();
-                  context.read<PresetService>().removeGlobalPreset(value!);
-                },
-              ),
-              Button(
-                child: const Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context2).pop();
-                },
-              ),
-              FilledButton(
-                child: const Text('Apply'),
-                onPressed: () {
-                  Navigator.of(context2).pop();
-                  context.read<PresetService>().setGlobalPreset(value!);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPresetAddIcon() {
-    return IconButton(
-      icon: const Icon(FluentIcons.add),
-      onPressed: () {
-        showDialog(
-          barrierDismissible: true,
-          context: context,
-          builder: (context2) {
-            return ContentDialog(
-              title: const Text('Add Global Preset'),
-              content: SizedBox(
-                height: 40,
-                child: TextBox(
-                  controller: textEditingController,
-                  placeholder: 'Preset Name',
-                ),
-              ),
+      builder: (context, value, child) => RepaintBoundary(
+        child: ComboBox(
+          items: value
+              .map((e) => ComboBoxItem(value: e, child: Text(e)))
+              .toList(growable: false),
+          placeholder: const Text('Global Preset...'),
+          onChanged: (value) => showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (context2) => ContentDialog(
+              title: const Text('Apply Global Preset?'),
+              content: Text('Preset name: $value'),
               actions: [
+                RedFilledButton(
+                  child: const Text('Delete'),
+                  onPressed: () {
+                    Navigator.of(context2).pop();
+                    context.read<PresetService>().removeGlobalPreset(value!);
+                  },
+                ),
                 Button(
                   child: const Text('Cancel'),
                   onPressed: () {
@@ -364,19 +371,60 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
                   },
                 ),
                 FilledButton(
-                  child: const Text('Add'),
+                  child: const Text('Apply'),
                   onPressed: () {
                     Navigator.of(context2).pop();
-                    final text = textEditingController.text;
-                    textEditingController.clear();
-                    context.read<PresetService>().addGlobalPreset(text);
+                    context.read<PresetService>().setGlobalPreset(value!);
                   },
                 ),
               ],
-            );
-          },
-        );
-      },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPresetAddIcon() {
+    return RepaintBoundary(
+      child: IconButton(
+        icon: const Icon(FluentIcons.add),
+        onPressed: () {
+          showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (context2) {
+              return ContentDialog(
+                title: const Text('Add Global Preset'),
+                content: SizedBox(
+                  height: 40,
+                  child: TextBox(
+                    controller: textEditingController,
+                    placeholder: 'Preset Name',
+                  ),
+                ),
+                actions: [
+                  Button(
+                    child: const Text('Cancel'),
+                    onPressed: () {
+                      Navigator.of(context2).pop();
+                    },
+                  ),
+                  FilledButton(
+                    child: const Text('Add'),
+                    onPressed: () {
+                      Navigator.of(context2).pop();
+                      final text = textEditingController.text;
+                      textEditingController.clear();
+                      context.read<PresetService>().addGlobalPreset(text);
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -410,31 +458,27 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
           ];
   }
 
-  Widget _buildAutoSuggestBox(
-      List<_FolderPaneItem> subFolders, List<NavigationPaneItem> combined) {
+  Widget _buildAutoSuggestBox() {
     return AutoSuggestBox2(
-      items: subFolders
+      items: _items
           .map((e) => AutoSuggestBoxItem2(
                 value: e.key,
-                label: e.dirPath.basename.asString,
+                label: e.category,
+                onSelected: () => context.go('/category/${e.category}'),
               ))
           .toList(growable: false),
       trailingIcon: const Icon(FluentIcons.search),
-      onSelected: (item) {
-        final idx = subFolders.indexWhere((e) => e.key == item.value);
-        _setSelectedState(idx, combined[idx].key!);
-      },
       onSubmissionFailed: (text) {
         if (text.isEmpty) return;
-        test(e) {
-          final name =
-              (e.key as ValueKey<PathW>).value.basename.asString.toLowerCase();
+        text = '/category/$text';
+        final index = _items.indexWhere((_FolderPaneItem e) {
+          final name = (e.key as ValueKey<String>).value.toLowerCase();
           return name.startsWith(text.toLowerCase());
-        }
-
-        final index = subFolders.indexWhere(test);
+        });
+        print(text);
         if (index == -1) return;
-        _setSelectedState(index, combined[index].key!);
+        final category = _items[index].category;
+        context.go('/category/$category');
       },
     );
   }
@@ -458,20 +502,6 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     final launcher = context.read<AppStateService>().launcherFile;
     runProgram(launcher.toFile);
     _logger.t('Ran launcher $launcher');
-  }
-
-  void _setSelectedState(int index, Key key) {
-    setState(() {
-      selected = index;
-      selectedKey = key;
-    });
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Key>('selectedKey', selectedKey));
-    properties.add(IntProperty('selected', selected));
   }
 }
 
@@ -506,23 +536,20 @@ class _FolderPaneItem extends PaneItem {
     );
   }
 
-  PathW dirPath;
+  String category;
 
   _FolderPaneItem({
-    required this.dirPath,
+    required this.category,
+    super.onTap,
     File? imageFile,
   }) : super(
+          key: Key('/category/$category'),
           title: Text(
-            dirPath.basename.asString,
+            category,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           icon: _getIcon(imageFile),
-          body: DirWatchProvider(
-            key: Key(dirPath.asString),
-            dir: dirPath.toDirectory,
-            child: CategoryPage(dirPath: dirPath),
-          ),
-          key: ValueKey(dirPath),
+          body: const SizedBox.shrink(),
         );
 
   @override
@@ -532,7 +559,7 @@ class _FolderPaneItem extends PaneItem {
       int? itemIndex,
       bool? autofocus}) {
     return FolderDropTarget(
-      dirPath: dirPath,
+      category: category,
       child: super.build(
         context,
         selected,
@@ -548,6 +575,6 @@ class _FolderPaneItem extends PaneItem {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<PathW>('dirPath', dirPath));
+    properties.add(StringProperty('category', category));
   }
 }

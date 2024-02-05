@@ -8,6 +8,9 @@ import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/service/preset_service.dart';
 import 'package:genshin_mod_manager/window/home.dart';
+import 'package:genshin_mod_manager/window/page/category.dart';
+import 'package:genshin_mod_manager/window/page/setting.dart';
+import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -126,8 +129,37 @@ class _LoadingScreenState extends State<LoadingScreen> {
           previous!..update(value, value2),
       child: DirWatchProvider(
         dir: modRootValue.toDirectory,
-        child: const HomeWindow(),
+        child: Router(
+          routerDelegate: router.routerDelegate,
+          routeInformationProvider: router.routeInformationProvider,
+          routeInformationParser: router.routeInformationParser,
+        ),
       ),
     );
   }
 }
+
+final router = GoRouter(
+  debugLogDiagnostics: true,
+  initialLocation: '/category/0',
+  routes: [
+    ShellRoute(
+      builder: (context, state, child) {
+        return HomeWindow(child: child);
+      },
+      routes: [
+        GoRoute(
+          path: '/setting',
+          builder: (context, state) => const SettingPage(),
+        ),
+        GoRoute(
+          path: '/category/:name',
+          builder: (context, state) {
+            final category = state.pathParameters['name']!;
+            return CategoryPage(category: category);
+          },
+        ),
+      ],
+    ),
+  ],
+);
