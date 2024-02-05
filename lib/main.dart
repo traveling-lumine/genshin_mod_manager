@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
@@ -10,6 +11,54 @@ const _minWindowSize = Size(600, 600);
 
 void main() async {
   await initialize();
+
+  // write to error log
+  FlutterError.onError = (details) {
+    final now = DateTime.now();
+    String stackTrace;
+    try {
+      stackTrace = details.stack.toString();
+    } catch (e) {
+      stackTrace = 'Stack trace not available';
+    }
+    String message;
+    try {
+      message = details.exception.toString();
+    } catch (e) {
+      try {
+        message = details.toString();
+      } catch (e) {
+        message = 'details not available';
+      }
+    }
+    try {
+      File('error_log.txt').writeAsStringSync(
+        '[$now]\nMessage:\n$message\nStacktrace:\n$stackTrace\n\n',
+        mode: FileMode.append,
+      );
+    } catch (e) {
+      // print('Error writing to error log: $e');
+    }
+  };
+
+  ErrorWidget.builder = (details) {
+    return Center(
+      child: SelectableText(
+        () {
+          try {
+            return details.exception.toString();
+          } catch (e) {
+            try {
+              return details.toString();
+            } catch (e) {
+              return 'An error occurred';
+            }
+          }
+        }(),
+        style: TextStyle(color: Colors.red.darker),
+      ),
+    );
+  };
   runApp(const MyApp());
 }
 
