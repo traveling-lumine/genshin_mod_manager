@@ -43,6 +43,9 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
   late List<NavigationPaneItem> _footerItems;
   int? _selected;
 
+  bool _isRedirecting = false;
+  String? _redirectPath;
+
   bool updateDisplayed = false;
 
   Future<void> _checkUpdate() async {
@@ -276,9 +279,16 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
           header: PageHeader(title: Text('Folder $category Not Found')),
           content: Builder(
             builder: (context2) {
-              unawaited(Future.delayed(const Duration(seconds: 0), () {
-                context.go(notFoundSoGoto2);
-              }));
+              if (_isRedirecting) {
+                _redirectPath = notFoundSoGoto2;
+              } else {
+                _isRedirecting = true;
+                _redirectPath = notFoundSoGoto2;
+                unawaited(Future.delayed(const Duration(seconds: 1), () {
+                  _isRedirecting = false;
+                  context.go(_redirectPath!);
+                }));
+              }
               return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
