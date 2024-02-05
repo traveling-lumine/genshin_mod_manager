@@ -50,12 +50,14 @@ class _CharaModCard extends StatelessWidget {
             ? Colors.green.lightest
             : Colors.red.lightest.withOpacity(0.5),
         padding: const EdgeInsets.all(6),
-        child: Column(
-          children: [
-            _buildFolderHeader(context),
-            const SizedBox(height: 4),
-            _buildFolderContent(context),
-          ],
+        child: FocusTraversalGroup(
+          child: Column(
+            children: [
+              _buildFolderHeader(context),
+              const SizedBox(height: 4),
+              _buildFolderContent(context),
+            ],
+          ),
         ),
       ),
     );
@@ -216,7 +218,7 @@ class _CharaModCard extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => ContentDialog(
+      builder: (context2) => ContentDialog(
         title: const Text('Delete preview image?'),
         content:
             const Text('Are you sure you want to delete the preview image?'),
@@ -224,14 +226,14 @@ class _CharaModCard extends StatelessWidget {
           Button(
             child: const Text('Cancel'),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context2).pop();
               Navigator.of(context).pop();
             },
           ),
           RedFilledButton(
             onPressed: () {
               previewFile.deleteSync();
-              Navigator.of(context).pop();
+              Navigator.of(context2).pop();
               Navigator.of(context).pop();
               displayInfoBar(
                 context,
