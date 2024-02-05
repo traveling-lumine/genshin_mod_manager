@@ -14,10 +14,30 @@ void main() async {
 
   // write to error log
   FlutterError.onError = (details) {
-    final now = DateTime.now();
+    // in UTC
+    final now = DateTime.now().toUtc().toIso8601String();
     String stackTrace;
     try {
       stackTrace = details.stack.toString();
+      // only choose lines that include genshin_mod_manager. Lines that don't include it are shrunk to ...
+      final lines = [];
+      int elidedLines = 0;
+      for (final line in stackTrace.split('\n')) {
+        if (line.contains('genshin_mod_manager')) {
+          if (elidedLines > 0) {
+            lines.add('... ($elidedLines lines elided)');
+            elidedLines = 0;
+          }
+          lines.add(line);
+          elidedLines = 0;
+        } else {
+          elidedLines++;
+        }
+      }
+      if (elidedLines > 0) {
+        lines.add('... ($elidedLines lines elided)');
+      }
+      stackTrace = lines.join('\n');
     } catch (e) {
       stackTrace = 'Stack trace not available';
     }
@@ -32,7 +52,7 @@ void main() async {
       }
     }
     try {
-      File('error_log.txt').writeAsStringSync(
+      File('error.log').writeAsStringSync(
         '[$now]\nMessage:\n$message\nStacktrace:\n$stackTrace\n\n',
         mode: FileMode.append,
       );
