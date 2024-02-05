@@ -160,22 +160,42 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
                           Directory(path).createSync(recursive: true);
                         }
                       }
-                      const updateScript = "@echo update script running\n"
-                          "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd\"') do del \"%%i\"\n"
-                          "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources GenshinModManager\"') do rd /s /q \"%%i\"\n"
-                          "cd GenshinModManager\n"
-                          "for /f \"delims=\" %%i in ('dir /b ^| findstr /v /i \"Resources\"') do move \"%%i\" ..\n"
-                          "cd ..\n"
-                          "rd /s /q GenshinModManager\n"
+                      const teeScript = "call update.cmd > update.log 2>&1\n"
+                          "if %errorlevel% == 1 (\n"
+                          "    echo Maybe not in the mod manager folder? Exiting for safety.\n"
+                          "	   pause\n"
+                          ")\n"
+                          "if %errorlevel% == 2 (\n"
+                          "    echo Failed to download data! Go to the link and install manually.\n"
+                          "	   pause\n"
+                          ")\n"
+                          "del update.cmd\n"
+                          "start /b cmd /c del tee.cmd\n";
+                      ;
+                      const updateScript = "setlocal\n"
+                          "echo update script running\n"
+                          "set \"sourceFolder=GenshinModManager\"\n"
+                          "if not exist \"genshin_mod_manager.exe\" (\n"
+                          "    exit /b 1\n"
+                          ")\n"
+                          "if not exist %sourceFolder% (\n"
+                          "    exit /b 2\n"
+                          ")\n"
+                          "echo So it's good to go. Let's update.\n"
+                          "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"tee.cmd update.cmd update.log error.log\"') do del \"%%i\"\n"
+                          "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources %sourceFolder%\"') do rd /s /q \"%%i\"\n"
+                          "for /f \"delims=\" %%i in ('dir /b \"%sourceFolder%\"') do move /y \"%sourceFolder%\\%%i\" .\n"
+                          "rd /s /q %sourceFolder%\n"
                           "start genshin_mod_manager.exe\n"
-                          "del update.cmd";
+                          "endlocal\n";
+                      await File('tee.cmd').writeAsString(teeScript);
                       await File('update.cmd').writeAsString(updateScript);
                       unawaited(Process.run(
                         'start',
                         [
                           'cmd',
                           '/c',
-                          'timeout /t 3 && call update.cmd > update.log',
+                          'timeout /t 3 && call tee.cmd',
                         ],
                         runInShell: true,
                       ));
@@ -485,7 +505,6 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
           final name = (e.key as ValueKey<String>).value.toLowerCase();
           return name.startsWith(text.toLowerCase());
         });
-        print(text);
         if (index == -1) return;
         final category = _items[index].category;
         context.go('/category/$category');
