@@ -3,15 +3,14 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/third_party/no_deref_file_opener.dart';
-import 'package:genshin_mod_manager/window/page/license.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 const itemPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 16);
 
-class SettingPage extends StatelessWidget {
-  const SettingPage({super.key});
+class SettingRoute extends StatelessWidget {
+  const SettingRoute({super.key});
 
   @override
   Widget build(BuildContext context) {

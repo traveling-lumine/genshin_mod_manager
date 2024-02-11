@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
+import 'package:genshin_mod_manager/service/route_refresh_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppStateService with ChangeNotifier {
@@ -101,6 +102,7 @@ class AppStateService with ChangeNotifier {
 
       _presetData = value.getString(presetDatakey) ?? _presetData;
 
+      _value.refresh('/setting');
       notifyListeners();
       return value;
     });
@@ -157,6 +159,12 @@ class AppStateService with ChangeNotifier {
     _sharedPreferences?.setString(presetDatakey, value);
     _presetData = value;
     notifyListeners();
+  }
+
+  late RouteRefreshService _value;
+
+  void update(RouteRefreshService value) {
+    _value = value;
   }
 
   @override

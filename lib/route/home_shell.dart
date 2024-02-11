@@ -24,16 +24,61 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
-class HomeShell extends StatefulWidget {
+class HomeShell extends StatelessWidget {
+  static const resourceDir = PathW('Resources');
   final Widget child;
-
   const HomeShell({super.key, required this.child});
 
   @override
-  State<HomeShell> createState() => _HomeShellState();
+  Widget build(BuildContext context) {
+    final modResourcePath = PathW(Platform.resolvedExecutable)
+        .dirname
+        .join(resourceDir)
+        .toDirectory
+      ..createSync();
+    return Selector<AppStateService, PathW>(
+      selector: (p0, p1) => p1.modRoot,
+      builder: (BuildContext context, PathW modRootValue, Widget? child2) {
+        return MultiProvider(
+          key: Key(modRootValue.asString),
+          providers: [
+            ChangeNotifierProvider(
+              create: (context) => CategoryIconFolderObserverService(
+                targetDir: modResourcePath,
+              ),
+            ),
+            ChangeNotifierProvider(
+              create: (context) => RecursiveObserverService(
+                targetDir: modRootValue.toDirectory,
+              ),
+            ),
+            ChangeNotifierProxyProvider2<AppStateService,
+                RecursiveObserverService, PresetService>(
+              create: (context) => PresetService(),
+              update: (context, value, value2, previous) =>
+                  previous!..update(value, value2),
+            ),
+          ],
+          child: DirWatchProvider(
+            dir: modRootValue.toDirectory,
+            child: _HomeShell(child: child),
+          ),
+        );
+      },
+    );
+  }
 }
 
-class _HomeShellState<T extends StatefulWidget> extends State<HomeShell> {
+class _HomeShell extends StatefulWidget {
+  final Widget child;
+
+  const _HomeShell({required this.child});
+
+  @override
+  State<_HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell> {
   static const _navigationPaneOpenWidth = 270.0;
   static final _logger = Logger();
 
@@ -164,7 +209,6 @@ class _HomeShellState<T extends StatefulWidget> extends State<HomeShell> {
                           ")\n"
                           "del update.cmd\n"
                           "start /b cmd /c del tee.cmd\n";
-                      ;
                       const updateScript = "setlocal\n"
                           "echo update script running\n"
                           "set \"sourceFolder=GenshinModManager\"\n"
@@ -244,18 +288,13 @@ class _HomeShellState<T extends StatefulWidget> extends State<HomeShell> {
     final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
           ..removeWhere((i) => i is! PaneItem || i is PaneItemAction))
         .cast<PaneItem>();
-    final currentRoute = GoRouterState.of(context).uri.toString();
+    final currentRoute = Uri.decodeFull(GoRouterState.of(context).uri.path);
     final index = effectiveItems.indexWhere((e) {
       final key = e.key;
       if (key is! ValueKey<String>) return false;
       return key.value == currentRoute;
     });
-    final int? selected;
-    if (index != -1) {
-       selected = index;
-    } else {
-       selected = null;
-    }
+    final int? selected = index != -1 ? index : null;
 
     return NavigationView(
       transitionBuilder: (child, animation) =>
@@ -426,8 +465,8 @@ class _HomeShellState<T extends StatefulWidget> extends State<HomeShell> {
           ];
   }
 
-  Widget _buildAutoSuggestBox(List<_FolderPaneItem> items,
-      List<NavigationPaneItem> footerItems) {
+  Widget _buildAutoSuggestBox(
+      List<_FolderPaneItem> items, List<NavigationPaneItem> footerItems) {
     return AutoSuggestBox2(
       items: items
           .map((e) => AutoSuggestBoxItem2(

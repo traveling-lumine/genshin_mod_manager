@@ -3,7 +3,13 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
-import 'package:genshin_mod_manager/window/loading_screen.dart';
+import 'package:genshin_mod_manager/service/route_refresh_service.dart';
+import 'package:genshin_mod_manager/route/home_shell.dart';
+import 'package:genshin_mod_manager/route/loading_screen.dart';
+import 'package:genshin_mod_manager/route/category.dart';
+import 'package:genshin_mod_manager/route/license.dart';
+import 'package:genshin_mod_manager/route/setting.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -12,7 +18,7 @@ const _minWindowSize = Size(600, 600);
 void main() async {
   await _initialize();
   _registerErrorHandlers();
-  runApp(const _MyApp());
+  runApp(_MyApp());
 }
 
 Future<void> _initialize() async {
@@ -93,16 +99,56 @@ String _errorToString(FlutterErrorDetails details) {
 }
 
 class _MyApp extends StatelessWidget {
-  const _MyApp();
+  final _routeRefreshService = RouteRefreshService();
+  late final _router = GoRouter(
+    debugLogDiagnostics: true,
+    initialLocation: '/loading',
+    refreshListenable: _routeRefreshService,
+    redirect: (context, state) {
+      return context.read<RouteRefreshService>().destination;
+    },
+    routes: [
+      GoRoute(
+        path: '/loading',
+        builder: (context, state) => const LoadingRoute(),
+      ),
+      ShellRoute(
+        builder: (context, state, child) => HomeShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/setting',
+            builder: (context, state) => const SettingRoute(),
+          ),
+          GoRoute(
+            path: '/license',
+            builder: (context, state) => const OssLicensesRoute(),
+          ),
+          GoRoute(
+            path: '/category/:name',
+            builder: (context, state) => CategoryRoute(
+              category: state.pathParameters['name']!,
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
-    // Place application scope services here
-    return FluentApp(
-      title: 'Genshin Mod Manager',
-      home: ChangeNotifierProvider(
-        create: (BuildContext context) => AppStateService(),
-        builder: (context, child) => const LoadingScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: _routeRefreshService),
+        ChangeNotifierProxyProvider<RouteRefreshService, AppStateService>(
+          create: (context) => AppStateService(),
+          update: (context, value, previous) => previous!..update(value),
+        ),
+      ],
+      child: FluentApp.router(
+        title: 'Genshin Mod Manager',
+        routerDelegate: _router.routerDelegate,
+        routeInformationParser: _router.routeInformationParser,
+        routeInformationProvider: _router.routeInformationProvider,
       ),
     );
   }

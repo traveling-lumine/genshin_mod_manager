@@ -12,22 +12,28 @@ import 'package:genshin_mod_manager/widget/chara_mod_card.dart';
 import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
 import 'package:provider/provider.dart';
 
-class CategoryPage extends StatelessWidget {
+class CategoryRoute extends StatelessWidget {
   final _textEditingController = TextEditingController();
   final String category;
 
-  CategoryPage({
+  CategoryRoute({
     super.key,
     required this.category,
   });
 
   @override
   Widget build(BuildContext context) {
-    return FolderDropTarget(
-      category: category,
-      child: ScaffoldPage(
-        header: _buildHeader(context),
-        content: _buildContent(),
+    final modRoot = context.read<AppStateService>().modRoot;
+    final dir = modRoot.join(category.pathW).toDirectory;
+    return DirWatchProvider(
+      key: Key(category),
+      dir: dir,
+      child: FolderDropTarget(
+        category: category,
+        child: ScaffoldPage(
+          header: _buildHeader(context),
+          content: _buildContent(),
+        ),
       ),
     );
   }
