@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
@@ -25,26 +24,20 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
-class HomeWindow extends StatefulWidget {
+class HomeShell extends StatefulWidget {
   final Widget child;
 
-  const HomeWindow({super.key, required this.child});
+  const HomeShell({super.key, required this.child});
 
   @override
-  State<HomeWindow> createState() => _HomeWindowState();
+  State<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
+class _HomeShellState<T extends StatefulWidget> extends State<HomeShell> {
   static const _navigationPaneOpenWidth = 270.0;
   static final _logger = Logger();
 
   final textEditingController = TextEditingController();
-  late List<_FolderPaneItem> _items;
-  late List<NavigationPaneItem> _footerItems;
-  int? _selected;
-
-  bool _isRedirecting = false;
-  String? _redirectPath;
 
   bool updateDisplayed = false;
 
@@ -140,13 +133,13 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
                   Button(
                     child: const Text('Cancel'),
                     onPressed: () {
-                      Navigator.of(context2).pop();
+                      context2.pop();
                     },
                   ),
                   RedFilledButton(
                     child: const Text('Start'),
                     onPressed: () async {
-                      Navigator.of(context2).pop();
+                      context2.pop();
                       final url =
                           Uri.parse('$baseLink/download/GenshinModManager.zip');
                       final response = await http.get(url);
@@ -224,22 +217,19 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     final imageFiles =
         context.select<CategoryIconFolderObserverService, List<File>>(
             (value) => value.curFiles);
-    final sortedMenus = context
-        .select<DirWatchService, List<String>>((value) => value.curDirs
+    final sortedMenus = context.select<DirWatchService, List<String>>((value) =>
+        value.curDirs
             .map((e) => e.pathW.basename.asString)
             .toList(growable: false))
-        .toList(growable: false)
-      ..sort(
-        (a, b) => compareNatural(a, b),
-      );
-    _items = sortedMenus
+      ..sort(compareNatural);
+    final items = sortedMenus
         .map((e) => _FolderPaneItem(
             category: e,
             imageFile: findPreviewFileIn(imageFiles, name: e.pathW),
             onTap: () => context.go('/category/$e')))
         .toList(growable: false);
 
-    _footerItems = [
+    final footerItems = [
       PaneItemSeparator(),
       ..._buildPaneItemActions(),
       PaneItem(
@@ -251,7 +241,7 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
       ),
     ];
 
-    final effectiveItems = ((_items.cast<NavigationPaneItem>() + _footerItems)
+    final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
           ..removeWhere((i) => i is! PaneItem || i is PaneItemAction))
         .cast<PaneItem>();
     final currentRoute = GoRouterState.of(context).uri.toString();
@@ -260,69 +250,19 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
       if (key is! ValueKey<String>) return false;
       return key.value == currentRoute;
     });
-    String? notFoundSoGoto;
+    final int? selected;
     if (index != -1) {
-      _selected = index;
+       selected = index;
     } else {
-      final closest = max(0, min(effectiveItems.length - 1, _selected ?? 0));
-      notFoundSoGoto = (effectiveItems[closest].key as ValueKey<String>).value;
-      _selected = null;
+       selected = null;
     }
 
     return NavigationView(
       transitionBuilder: (child, animation) =>
           SuppressPageTransition(child: child),
       appBar: _buildAppbar(),
-      pane: _buildPane(),
-      paneBodyBuilder: (item, body) {
-        final child = widget.child;
-        final curRoute = GoRouterState.of(context).uri.toString();
-        if (curRoute == '/setting') return child;
-        final category = GoRouterState.of(context).pathParameters['name']!;
-        final notFoundSoGoto2 = notFoundSoGoto;
-        if (notFoundSoGoto2 == null) {
-          final modRoot = context.read<AppStateService>().modRoot;
-          final dir = modRoot.join(category.pathW).toDirectory;
-          return DirWatchProvider(
-            key: Key(category),
-            dir: dir,
-            child: child,
-          );
-        }
-        String dest;
-        try {
-          dest = notFoundSoGoto2.split('/')[2];
-        } on RangeError {
-          dest = 'setting';
-        }
-        return ScaffoldPage(
-          header: PageHeader(title: Text('Folder $category Not Found')),
-          content: Builder(
-            builder: (context2) {
-              if (_isRedirecting) {
-                _redirectPath = notFoundSoGoto2;
-              } else {
-                _isRedirecting = true;
-                _redirectPath = notFoundSoGoto2;
-                unawaited(Future.delayed(const Duration(seconds: 1), () {
-                  _isRedirecting = false;
-                  context.go(_redirectPath!);
-                }));
-              }
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const ProgressRing(),
-                    const SizedBox(height: 20),
-                    Text('Redirecting to $dest...'),
-                  ],
-                ),
-              );
-            },
-          ),
-        );
-      },
+      pane: _buildPane(selected, items, footerItems),
+      paneBodyBuilder: (item, body) => widget.child,
     );
   }
 
@@ -354,20 +294,18 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
     );
   }
 
-  NavigationPane _buildPane() {
+  NavigationPane _buildPane(int? selected, List<_FolderPaneItem> items,
+      List<NavigationPaneItem> footerItems) {
     return NavigationPane(
-      selected: _selected,
+      selected: selected,
+      items: items.cast<NavigationPaneItem>(),
+      footerItems: footerItems,
       displayMode: PaneDisplayMode.auto,
       size: const NavigationPaneSize(
-          openWidth: _HomeWindowState._navigationPaneOpenWidth),
-      autoSuggestBox: _buildAutoSuggestBox(),
+        openWidth: _HomeShellState._navigationPaneOpenWidth,
+      ),
+      autoSuggestBox: _buildAutoSuggestBox(items, footerItems),
       autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-      items: _items.map((e) {
-        // haha... blame List<T>::+ operator
-        // ignore: unnecessary_cast
-        return e as NavigationPaneItem;
-      }).toList(growable: false),
-      footerItems: _footerItems,
     );
   }
 
@@ -488,9 +426,10 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
           ];
   }
 
-  Widget _buildAutoSuggestBox() {
+  Widget _buildAutoSuggestBox(List<_FolderPaneItem> items,
+      List<NavigationPaneItem> footerItems) {
     return AutoSuggestBox2(
-      items: _items
+      items: items
           .map((e) => AutoSuggestBoxItem2(
                 value: e.key,
                 label: e.category,
@@ -501,12 +440,12 @@ class _HomeWindowState<T extends StatefulWidget> extends State<HomeWindow> {
       onSubmissionFailed: (text) {
         if (text.isEmpty) return;
         text = '/category/$text';
-        final index = _items.indexWhere((_FolderPaneItem e) {
+        final index = items.indexWhere((_FolderPaneItem e) {
           final name = (e.key as ValueKey<String>).value.toLowerCase();
           return name.startsWith(text.toLowerCase());
         });
         if (index == -1) return;
-        final category = _items[index].category;
+        final category = items[index].category;
         context.go('/category/$category');
       },
     );

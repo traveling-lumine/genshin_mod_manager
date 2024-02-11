@@ -9,6 +9,7 @@ import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/service/preset_service.dart';
 import 'package:genshin_mod_manager/window/home.dart';
 import 'package:genshin_mod_manager/window/page/category.dart';
+import 'package:genshin_mod_manager/window/page/license.dart';
 import 'package:genshin_mod_manager/window/page/setting.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
@@ -129,37 +130,61 @@ class _LoadingScreenState extends State<LoadingScreen> {
           previous!..update(value, value2),
       child: DirWatchProvider(
         dir: modRootValue.toDirectory,
-        child: Router(
-          routerDelegate: router.routerDelegate,
-          routeInformationProvider: router.routeInformationProvider,
-          routeInformationParser: router.routeInformationParser,
+        child: FluentApp.router(
+          routerDelegate: _router.routerDelegate,
+          routeInformationParser: _router.routeInformationParser,
+          routeInformationProvider: _router.routeInformationProvider,
         ),
       ),
     );
   }
-}
 
-final router = GoRouter(
-  debugLogDiagnostics: true,
-  initialLocation: '/setting',
-  routes: [
-    ShellRoute(
-      builder: (context, state, child) {
-        return HomeWindow(child: child);
-      },
-      routes: [
-        GoRoute(
-          path: '/setting',
-          builder: (context, state) => const SettingPage(),
-        ),
-        GoRoute(
-          path: '/category/:name',
-          builder: (context, state) {
-            final category = state.pathParameters['name']!;
-            return CategoryPage(category: category);
-          },
-        ),
-      ],
-    ),
-  ],
-);
+  final _router = GoRouter(
+    debugLogDiagnostics: true,
+    initialLocation: '/',
+    routes: [
+      ShellRoute(
+        builder: (context, state, child) => HomeShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => const SettingPage(),
+          ),
+          GoRoute(
+            path: '/setting',
+            builder: (context, state) => const SettingPage(),
+          ),
+          GoRoute(
+            path: '/license',
+            builder: (context, state) => const OssLicensesPage(),
+          ),
+          GoRoute(
+            path: '/category/:name',
+            redirect: (context, state) {
+              print('Redirecting to /setting');
+              final categories = context
+                  .read<DirWatchService>()
+                  .curDirs
+                  .map((e) => e.pathW.basename.asString)
+                  .toList(growable: false);
+              final currentName = state.pathParameters['name']!;
+              if (!categories.contains(currentName)) {
+                return '/setting';
+              }
+            },
+            builder: (context, state) {
+              final category = state.pathParameters['name']!;
+              final modRoot = context.read<AppStateService>().modRoot;
+              final dir = modRoot.join(category.pathW).toDirectory;
+              return DirWatchProvider(
+                key: Key(category),
+                dir: dir,
+                child: CategoryPage(category: category),
+              );
+            },
+          ),
+        ],
+      ),
+    ],
+  );
+}
