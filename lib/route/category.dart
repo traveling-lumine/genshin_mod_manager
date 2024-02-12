@@ -8,8 +8,8 @@ import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/service/preset_service.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
 import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
+import 'package:genshin_mod_manager/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/widget/chara_mod_card.dart';
-import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
 import 'package:provider/provider.dart';
 
 class CategoryRoute extends StatelessWidget {
@@ -28,7 +28,7 @@ class CategoryRoute extends StatelessWidget {
     return DirWatchProvider(
       key: Key(category),
       dir: dir,
-      child: FolderDropTarget(
+      child: CategoryDropTarget(
         category: category,
         child: ScaffoldPage(
           header: _buildHeader(context),

@@ -15,7 +15,7 @@ import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/service/preset_service.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
-import 'package:genshin_mod_manager/widget/folder_drop_target.dart';
+import 'package:genshin_mod_manager/widget/category_drop_target.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
@@ -569,7 +569,7 @@ class _FolderPaneItem extends PaneItem {
       bool showTextOnTop = true,
       int? itemIndex,
       bool? autofocus}) {
-    return FolderDropTarget(
+    return CategoryDropTarget(
       category: category,
       child: super.build(
         context,

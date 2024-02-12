@@ -8,13 +8,13 @@ import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
-class FolderDropTarget extends StatelessWidget {
+class CategoryDropTarget extends StatelessWidget {
   static final Logger logger = Logger();
 
   final Widget child;
   final String category;
 
-  const FolderDropTarget({
+  const CategoryDropTarget({
     super.key,
     required this.child,
     required this.category,
