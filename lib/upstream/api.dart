@@ -161,9 +161,15 @@ class NahidaliveAPI {
     }
   }
 
-  Future<NahidaliveDownloadElement> downloadUrl(String uuid, String pw) async {
-    final response = await client
-        .get(Uri.parse('$_base/mods/apiv2/download?uuid=$uuid&password=$pw'));
+  Future<NahidaliveDownloadElement> downloadUrl(String uuid,
+      [String? pw]) async {
+    final Uri uri;
+    if (pw != null) {
+      uri = Uri.parse('$_base/mods/apiv2/download?uuid=$uuid&password=$pw');
+    } else {
+      uri = Uri.parse('$_base/mods/apiv2/download?uuid=$uuid');
+    }
+    final response = await client.get(uri);
     if (response.statusCode == 200) {
       return NahidaliveDownloadElement.fromJson(jsonDecode(response.body));
     } else {
