@@ -2,13 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/service/app_state_service.dart';
-import 'package:genshin_mod_manager/service/route_refresh_service.dart';
-import 'package:genshin_mod_manager/route/home_shell.dart';
-import 'package:genshin_mod_manager/route/loading.dart';
 import 'package:genshin_mod_manager/route/category.dart';
+import 'package:genshin_mod_manager/route/home_shell.dart';
 import 'package:genshin_mod_manager/route/license.dart';
+import 'package:genshin_mod_manager/route/loading.dart';
 import 'package:genshin_mod_manager/route/setting.dart';
+import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -101,18 +100,10 @@ String _errorToString(FlutterErrorDetails details) {
 final kNavigationKey = GlobalKey<NavigatorState>();
 
 class _MyApp extends StatelessWidget {
-  final _routeRefreshService = RouteRefreshService();
   late final _router = GoRouter(
     navigatorKey: kNavigationKey,
     debugLogDiagnostics: true,
     initialLocation: '/loading',
-    refreshListenable: _routeRefreshService,
-    redirect: (context, state) {
-      final read = context.read<RouteRefreshService>();
-      final destination2 = read.destination;
-      read.clear();
-      return destination2;
-    },  
     routes: [
       GoRoute(
         path: '/loading',
@@ -142,14 +133,8 @@ class _MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: _routeRefreshService),
-        ChangeNotifierProxyProvider<RouteRefreshService, AppStateService>(
-          create: (context) => AppStateService(),
-          update: (context, value, previous) => previous!..update(value),
-        ),
-      ],
+    return ChangeNotifierProvider(
+      create: (context) => AppStateService(),
       child: FluentApp.router(
         title: 'Genshin Mod Manager',
         routerDelegate: _router.routerDelegate,

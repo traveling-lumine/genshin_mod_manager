@@ -5,18 +5,16 @@ import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
-import 'package:genshin_mod_manager/service/preset_service.dart';
-import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
 import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
 import 'package:genshin_mod_manager/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/widget/chara_mod_card.dart';
+import 'package:genshin_mod_manager/widget/preset_control.dart';
 import 'package:provider/provider.dart';
 
 class CategoryRoute extends StatelessWidget {
-  final _textEditingController = TextEditingController();
   final String category;
 
-  CategoryRoute({
+  const CategoryRoute({
     super.key,
     required this.category,
   });
@@ -25,9 +23,11 @@ class CategoryRoute extends StatelessWidget {
   Widget build(BuildContext context) {
     final modRoot = context.read<AppStateService>().modRoot;
     final dir = modRoot.join(category.pathW).toDirectory;
-    return DirWatchProvider(
+    return ChangeNotifierProxyProvider<RecursiveObserverService,
+        DirWatchService>(
       key: Key(category),
-      dir: dir,
+      create: (context) => DirWatchService(targetDir: dir),
+      update: (context, value, previous) => previous!..update(value.lastEvent),
       child: CategoryDropTarget(
         category: category,
         child: ScaffoldPage(
@@ -49,9 +49,7 @@ class CategoryRoute extends StatelessWidget {
       commandBar: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          _buildPresetAddIcon(context),
-          const SizedBox(width: 8),
-          _buildPresetSelect(),
+          PresetControlWidget(isLocal: true, category: category),
           SizedBox(
             width: 60,
             child: RepaintBoundary(
@@ -87,108 +85,6 @@ class CategoryRoute extends StatelessWidget {
         builder: (context, enabledFirst, child) {
           return _FolderMatchWidget(
               key: Key(category), enabledFirst: enabledFirst);
-        },
-      ),
-    );
-  }
-
-  Widget _buildPresetSelect() {
-    return Selector<PresetService, List<String>>(
-      selector: (p0, p1) => p1.getLocalPresets(category),
-      builder: (context, value, child) {
-        return RepaintBoundary(
-          child: ComboBox(
-            items: value
-                .map((e) => ComboBoxItem(
-                      value: e,
-                      child: Text(e),
-                    ))
-                .toList(growable: false),
-            placeholder: const Text('Local Preset...'),
-            onChanged: (value) {
-              showDialog(
-                barrierDismissible: true,
-                context: context,
-                builder: (context2) {
-                  return ContentDialog(
-                    title: const Text('Apply Local Preset?'),
-                    content: Text('Preset name: $value'),
-                    actions: [
-                      RedFilledButton(
-                        child: const Text('Delete'),
-                        onPressed: () {
-                          Navigator.of(context2).pop();
-                          context
-                              .read<PresetService>()
-                              .removeLocalPreset(category, value!);
-                        },
-                      ),
-                      Button(
-                        child: const Text('Cancel'),
-                        onPressed: () {
-                          Navigator.of(context2).pop();
-                        },
-                      ),
-                      FilledButton(
-                        child: const Text('Apply'),
-                        onPressed: () {
-                          Navigator.of(context2).pop();
-                          context
-                              .read<PresetService>()
-                              .setLocalPreset(category, value!);
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPresetAddIcon(BuildContext context) {
-    return RepaintBoundary(
-      child: IconButton(
-        icon: const Icon(FluentIcons.add),
-        onPressed: () {
-          showDialog(
-            barrierDismissible: true,
-            context: context,
-            builder: (context2) {
-              return ContentDialog(
-                title: const Text('Add Local Preset'),
-                content: SizedBox(
-                  height: 40,
-                  child: TextBox(
-                    controller: _textEditingController,
-                    placeholder: 'Preset Name',
-                  ),
-                ),
-                actions: [
-                  Button(
-                    child: const Text('Cancel'),
-                    onPressed: () {
-                      Navigator.of(context2).pop();
-                    },
-                  ),
-                  FilledButton(
-                    child: const Text('Add'),
-                    onPressed: () {
-                      Navigator.of(context2).pop();
-                      final text = _textEditingController.text;
-                      _textEditingController.clear();
-                      context
-                          .read<PresetService>()
-                          .addLocalPreset(category, text);
-                    },
-                  ),
-                ],
-              );
-            },
-          );
         },
       ),
     );

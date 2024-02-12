@@ -9,14 +9,13 @@ import 'package:flutter/services.dart';
 import 'package:genshin_mod_manager/base/appbar.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
-import 'package:genshin_mod_manager/main.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/service/preset_service.dart';
-import 'package:genshin_mod_manager/service/route_refresh_service.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
 import 'package:genshin_mod_manager/widget/category_drop_target.dart';
+import 'package:genshin_mod_manager/widget/preset_control.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
@@ -28,6 +27,7 @@ import 'package:window_manager/window_manager.dart';
 class HomeShell extends StatelessWidget {
   static const resourceDir = PathW('Resources');
   final Widget child;
+
   const HomeShell({super.key, required this.child});
 
   @override
@@ -37,42 +37,36 @@ class HomeShell extends StatelessWidget {
         .join(resourceDir)
         .toDirectory
       ..createSync();
-    return Selector<AppStateService, PathW>(
-      selector: (p0, p1) => p1.modRoot,
-      builder: (BuildContext context, PathW modRootValue, Widget? child2) {
-        return MultiProvider(
-          key: Key(modRootValue.asString),
-          providers: [
-            ChangeNotifierProvider(
-              create: (context) => CategoryIconFolderObserverService(
-                targetDir: modResourcePath,
-              ),
-            ),
-            ChangeNotifierProvider(
-              create: (context) => RecursiveObserverService(
-                targetDir: modRootValue.toDirectory,
-              ),
-            ),
-            ChangeNotifierProxyProvider2<AppStateService,
-                RecursiveObserverService, PresetService>(
-              create: (context) => PresetService(),
-              update: (context, value, value2, previous) =>
-                  previous!..update(value, value2),
-            ),
-            ChangeNotifierProxyProvider<RecursiveObserverService,
-                RootWatchService>(
-              create: (context) => RootWatchService(
-                targetDir: modRootValue.toDirectory,
-                navigationKey: kNavigationKey,
-                routeRefreshService: context.read<RouteRefreshService>(),
-              ),
-              update: (context, value, previous) =>
-                  previous!..update(value.lastEvent),
-            ),
-          ],
-          child: _HomeShell(child: child),
-        );
-      },
+    final modRootValue =
+        context.select<AppStateService, PathW>((value) => value.modRoot);
+    return MultiProvider(
+      key: Key(modRootValue.asString),
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => CategoryIconFolderObserverService(
+            targetDir: modResourcePath,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => RecursiveObserverService(
+            targetDir: modRootValue.toDirectory,
+          ),
+        ),
+        ChangeNotifierProxyProvider2<AppStateService, RecursiveObserverService,
+            PresetService>(
+          create: (context) => PresetService(),
+          update: (context, value, value2, previous) =>
+              previous!..update(value, value2),
+        ),
+        ChangeNotifierProxyProvider<RecursiveObserverService, RootWatchService>(
+          create: (context) => RootWatchService(
+            targetDir: modRootValue.toDirectory,
+          ),
+          update: (context, value, previous) =>
+              previous!..update(value.lastEvent),
+        ),
+      ],
+      child: _HomeShell(child: child),
     );
   }
 }
@@ -86,184 +80,35 @@ class _HomeShell extends StatefulWidget {
   State<_HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell> {
+class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
+    with WindowListener {
   static const _navigationPaneOpenWidth = 270.0;
   static final _logger = Logger();
 
-  final textEditingController = TextEditingController();
-
   bool updateDisplayed = false;
 
-  Future<void> _checkUpdate() async {
-    const baseLink =
-        'https://github.com/traveling-lumine/genshin_mod_manager/releases/latest';
-    final url = Uri.parse(baseLink);
-    final client = http.Client();
-    final request = http.Request('GET', url)..followRedirects = false;
-    final upstreamVersion = client.send(request).then((value) {
-      final location = value.headers['location'];
-      if (location == null) return null;
-      final lastSlash = location.lastIndexOf('tag/v');
-      if (lastSlash == -1) return null;
-      return location.substring(lastSlash + 5, location.length);
-    });
-    final currentVersion =
-        PackageInfo.fromPlatform().then((value) => value.version);
-    final List<String?> versions =
-        await Future.wait([upstreamVersion, currentVersion]);
-    final upVersion = versions[0];
-    final curVersion = versions[1];
-    if (upVersion == null || curVersion == null) return;
-    final upstream =
-        upVersion.split('.').map(int.parse).toList(growable: false);
-    final current =
-        curVersion.split('.').map(int.parse).toList(growable: false);
-    bool shouldUpdate = false;
-    for (var i = 0; i < 3; i++) {
-      if (upstream[i] > current[i]) {
-        shouldUpdate = true;
-        break;
-      } else if (upstream[i] < current[i]) {
-        break;
-      }
-    }
-    if (!shouldUpdate) return;
-    if (!context.mounted) return;
-    unawaited(displayInfoBar(
-      context,
-      duration: const Duration(minutes: 1),
-      builder: (_, close) => InfoBar(
-        title: RichText(
-          text: TextSpan(
-            style: DefaultTextStyle.of(context).style,
-            children: [
-              const TextSpan(text: 'New version available: '),
-              TextSpan(
-                text: upVersion,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const TextSpan(text: '. Click '),
-              TextSpan(
-                text: 'here',
-                style: TextStyle(
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
-                ),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () => launchUrl(url),
-              ),
-              const TextSpan(text: ' to open link.'),
-            ],
-          ),
-        ),
-        action: FilledButton(
-          onPressed: () async {
-            unawaited(showDialog(
-              context: context,
-              builder: (context2) => ContentDialog(
-                title: const Text('Start auto update?'),
-                content: RichText(
-                  textAlign: TextAlign.justify,
-                  text: TextSpan(
-                    style: DefaultTextStyle.of(context).style,
-                    children: [
-                      const TextSpan(
-                        text:
-                            'This will download the latest version and replace the current one.'
-                            ' This feature is experimental and may not work as expected.\n',
-                        // justify
-                      ),
-                      TextSpan(
-                        text:
-                            'Please backup your mods and resources before proceeding.\nDELETION OF UNRELATED FILES IS POSSIBLE.',
-                        style: TextStyle(
-                            color: Colors.red, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  Button(
-                    child: const Text('Cancel'),
-                    onPressed: () {
-                      context2.pop();
-                    },
-                  ),
-                  RedFilledButton(
-                    child: const Text('Start'),
-                    onPressed: () async {
-                      context2.pop();
-                      final url =
-                          Uri.parse('$baseLink/download/GenshinModManager.zip');
-                      final response = await http.get(url);
-                      final archive =
-                          ZipDecoder().decodeBytes(response.bodyBytes);
-                      for (final aFile in archive) {
-                        final path = '${Directory.current.path}/${aFile.name}';
-                        if (aFile.isFile) {
-                          await File(path).writeAsBytes(aFile.content);
-                        } else {
-                          Directory(path).createSync(recursive: true);
-                        }
-                      }
-                      const teeScript = "call update.cmd > update.log 2>&1\n"
-                          "if %errorlevel% == 1 (\n"
-                          "    echo Maybe not in the mod manager folder? Exiting for safety.\n"
-                          "	   pause\n"
-                          ")\n"
-                          "if %errorlevel% == 2 (\n"
-                          "    echo Failed to download data! Go to the link and install manually.\n"
-                          "	   pause\n"
-                          ")\n"
-                          "del update.cmd\n"
-                          "start /b cmd /c del tee.cmd\n";
-                      const updateScript = "setlocal\n"
-                          "echo update script running\n"
-                          "set \"sourceFolder=GenshinModManager\"\n"
-                          "if not exist \"genshin_mod_manager.exe\" (\n"
-                          "    exit /b 1\n"
-                          ")\n"
-                          "if not exist %sourceFolder% (\n"
-                          "    exit /b 2\n"
-                          ")\n"
-                          "echo So it's good to go. Let's update.\n"
-                          "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"tee.cmd update.cmd update.log error.log\"') do del \"%%i\"\n"
-                          "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources %sourceFolder%\"') do rd /s /q \"%%i\"\n"
-                          "for /f \"delims=\" %%i in ('dir /b \"%sourceFolder%\"') do move /y \"%sourceFolder%\\%%i\" .\n"
-                          "rd /s /q %sourceFolder%\n"
-                          "start genshin_mod_manager.exe\n"
-                          "endlocal\n";
-                      await File('tee.cmd').writeAsString(teeScript);
-                      await File('update.cmd').writeAsString(updateScript);
-                      unawaited(Process.run(
-                        'start',
-                        [
-                          'cmd',
-                          '/c',
-                          'timeout /t 3 && call tee.cmd',
-                        ],
-                        runInShell: true,
-                      ));
-                      await Future.delayed(const Duration(milliseconds: 200));
-                      exit(0);
-                    },
-                  ),
-                ],
-              ),
-            ));
-          },
-          child: const Text('Auto update'),
-        ),
-        onClose: close,
-      ),
-    ));
+  @override
+  void onWindowFocus() {
+    context.read<RecursiveObserverService>().forceUpdate();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WindowManager.instance.addListener(this);
+  }
+
+  @override
+  void dispose() {
+    WindowManager.instance.removeListener(this);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (!updateDisplayed) {
       updateDisplayed = true;
-      unawaited(_checkUpdate());
+      _checkUpdate(context);
     }
 
     final imageFiles =
@@ -316,10 +161,8 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell> {
           ),
           Row(
             children: [
-              _buildPresetAddIcon(),
-              const SizedBox(width: 8),
-              _buildPresetSelect(),
-              const SizedBox(width: 138),
+              PresetControlWidget(isLocal: false),
+              const SizedBox(width: kWindowButtonWidth),
             ],
           ),
         ],
@@ -349,93 +192,6 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell> {
       ),
       autoSuggestBox: _buildAutoSuggestBox(items, footerItems),
       autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-    );
-  }
-
-  Widget _buildPresetSelect() {
-    return Selector<PresetService, List<String>>(
-      selector: (p0, p1) => p1.getGlobalPresets(),
-      builder: (context, value, child) => RepaintBoundary(
-        child: ComboBox(
-          items: value
-              .map((e) => ComboBoxItem(value: e, child: Text(e)))
-              .toList(growable: false),
-          placeholder: const Text('Global Preset...'),
-          onChanged: (value) => showDialog(
-            barrierDismissible: true,
-            context: context,
-            builder: (context2) => ContentDialog(
-              title: const Text('Apply Global Preset?'),
-              content: Text('Preset name: $value'),
-              actions: [
-                RedFilledButton(
-                  child: const Text('Delete'),
-                  onPressed: () {
-                    Navigator.of(context2).pop();
-                    context.read<PresetService>().removeGlobalPreset(value!);
-                  },
-                ),
-                Button(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context2).pop();
-                  },
-                ),
-                FilledButton(
-                  child: const Text('Apply'),
-                  onPressed: () {
-                    Navigator.of(context2).pop();
-                    context.read<PresetService>().setGlobalPreset(value!);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPresetAddIcon() {
-    return RepaintBoundary(
-      child: IconButton(
-        icon: const Icon(FluentIcons.add),
-        onPressed: () {
-          showDialog(
-            barrierDismissible: true,
-            context: context,
-            builder: (context2) {
-              return ContentDialog(
-                title: const Text('Add Global Preset'),
-                content: SizedBox(
-                  height: 40,
-                  child: TextBox(
-                    controller: textEditingController,
-                    placeholder: 'Preset Name',
-                  ),
-                ),
-                actions: [
-                  Button(
-                    child: const Text('Cancel'),
-                    onPressed: () {
-                      Navigator.of(context2).pop();
-                    },
-                  ),
-                  FilledButton(
-                    child: const Text('Add'),
-                    onPressed: () {
-                      Navigator.of(context2).pop();
-                      final text = textEditingController.text;
-                      textEditingController.clear();
-                      context.read<PresetService>().addGlobalPreset(text);
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      ),
     );
   }
 
@@ -588,4 +344,166 @@ class _FolderPaneItem extends PaneItem {
     super.debugFillProperties(properties);
     properties.add(StringProperty('category', category));
   }
+}
+
+Future<void> _checkUpdate(BuildContext context) async {
+  const baseLink =
+      'https://github.com/traveling-lumine/genshin_mod_manager/releases/latest';
+  final url = Uri.parse(baseLink);
+  final client = http.Client();
+  final request = http.Request('GET', url)..followRedirects = false;
+  final upstreamVersion = client.send(request).then((value) {
+    final location = value.headers['location'];
+    if (location == null) return null;
+    final lastSlash = location.lastIndexOf('tag/v');
+    if (lastSlash == -1) return null;
+    return location.substring(lastSlash + 5, location.length);
+  });
+  final currentVersion =
+      PackageInfo.fromPlatform().then((value) => value.version);
+  final List<String?> versions =
+      await Future.wait([upstreamVersion, currentVersion]);
+  final upVersion = versions[0];
+  final curVersion = versions[1];
+  if (upVersion == null || curVersion == null) return;
+  final upstream = upVersion.split('.').map(int.parse).toList(growable: false);
+  final current = curVersion.split('.').map(int.parse).toList(growable: false);
+  bool shouldUpdate = false;
+  for (var i = 0; i < 3; i++) {
+    if (upstream[i] > current[i]) {
+      shouldUpdate = true;
+      break;
+    } else if (upstream[i] < current[i]) {
+      break;
+    }
+  }
+  if (!shouldUpdate) return;
+  if (!context.mounted) return;
+  unawaited(displayInfoBar(
+    context,
+    duration: const Duration(minutes: 1),
+    builder: (_, close) => InfoBar(
+      title: RichText(
+        text: TextSpan(
+          style: DefaultTextStyle.of(context).style,
+          children: [
+            const TextSpan(text: 'New version available: '),
+            TextSpan(
+              text: upVersion,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const TextSpan(text: '. Click '),
+            TextSpan(
+              text: 'here',
+              style: TextStyle(
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
+              recognizer: TapGestureRecognizer()..onTap = () => launchUrl(url),
+            ),
+            const TextSpan(text: ' to open link.'),
+          ],
+        ),
+      ),
+      action: FilledButton(
+        onPressed: () async {
+          unawaited(showDialog(
+            context: context,
+            builder: (context2) => ContentDialog(
+              title: const Text('Start auto update?'),
+              content: RichText(
+                textAlign: TextAlign.justify,
+                text: TextSpan(
+                  style: DefaultTextStyle.of(context).style,
+                  children: [
+                    const TextSpan(
+                      text:
+                          'This will download the latest version and replace the current one.'
+                          ' This feature is experimental and may not work as expected.\n',
+                      // justify
+                    ),
+                    TextSpan(
+                      text:
+                          'Please backup your mods and resources before proceeding.\nDELETION OF UNRELATED FILES IS POSSIBLE.',
+                      style: TextStyle(
+                          color: Colors.red, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                Button(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    context2.pop();
+                  },
+                ),
+                RedFilledButton(
+                  child: const Text('Start'),
+                  onPressed: () async {
+                    context2.pop();
+                    final url =
+                        Uri.parse('$baseLink/download/GenshinModManager.zip');
+                    final response = await http.get(url);
+                    final archive =
+                        ZipDecoder().decodeBytes(response.bodyBytes);
+                    for (final aFile in archive) {
+                      final path = '${Directory.current.path}/${aFile.name}';
+                      if (aFile.isFile) {
+                        await File(path).writeAsBytes(aFile.content);
+                      } else {
+                        Directory(path).createSync(recursive: true);
+                      }
+                    }
+                    const teeScript = "call update.cmd > update.log 2>&1\n"
+                        "if %errorlevel% == 1 (\n"
+                        "    echo Maybe not in the mod manager folder? Exiting for safety.\n"
+                        "	   pause\n"
+                        ")\n"
+                        "if %errorlevel% == 2 (\n"
+                        "    echo Failed to download data! Go to the link and install manually.\n"
+                        "	   pause\n"
+                        ")\n"
+                        "del update.cmd\n"
+                        "start /b cmd /c del tee.cmd\n";
+                    const updateScript = "setlocal\n"
+                        "echo update script running\n"
+                        "set \"sourceFolder=GenshinModManager\"\n"
+                        "if not exist \"genshin_mod_manager.exe\" (\n"
+                        "    exit /b 1\n"
+                        ")\n"
+                        "if not exist %sourceFolder% (\n"
+                        "    exit /b 2\n"
+                        ")\n"
+                        "echo So it's good to go. Let's update.\n"
+                        "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"tee.cmd update.cmd update.log error.log\"') do del \"%%i\"\n"
+                        "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources %sourceFolder%\"') do rd /s /q \"%%i\"\n"
+                        "for /f \"delims=\" %%i in ('dir /b \"%sourceFolder%\"') do move /y \"%sourceFolder%\\%%i\" .\n"
+                        "rd /s /q %sourceFolder%\n"
+                        "start genshin_mod_manager.exe\n"
+                        "endlocal\n";
+                    await File('tee.cmd').writeAsString(teeScript);
+                    await File('update.cmd').writeAsString(updateScript);
+                    unawaited(Process.run(
+                      'start',
+                      [
+                        'cmd',
+                        '/c',
+                        'timeout /t 3 && call tee.cmd',
+                      ],
+                      runInShell: true,
+                    ));
+                    await Future.delayed(const Duration(milliseconds: 200));
+                    exit(0);
+                  },
+                ),
+              ],
+            ),
+          ));
+        },
+        child: const Text('Auto update'),
+      ),
+      onClose: close,
+    ),
+  ));
 }

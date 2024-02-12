@@ -22,8 +22,10 @@ class CharaScope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FileWatchProvider(
-      dir: dir,
+    return ChangeNotifierProxyProvider<RecursiveObserverService,
+        FileWatchService>(
+      create: (context) => FileWatchService(targetDir: dir),
+      update: (context, value, previous) => previous!..update(value.lastEvent),
       child: _CharaModCard(
         dirPath: dir.pathW,
       ),

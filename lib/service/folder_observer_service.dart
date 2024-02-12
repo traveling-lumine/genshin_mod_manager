@@ -5,9 +5,6 @@ import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
-import 'package:genshin_mod_manager/service/route_refresh_service.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 class CategoryIconFolderObserverService with ChangeNotifier {
   final Directory targetDir;
@@ -62,18 +59,11 @@ class RecursiveObserverService with ChangeNotifier {
 class RootWatchService with ChangeNotifier {
   final _listEquality = const ListEquality();
   final Directory targetDir;
-  final GlobalKey<NavigatorState> navigationKey;
-  final RouteRefreshService routeRefreshService;
-
-  late List<String> _categories;
+  List<String> _categories = [];
 
   List<String> get categories => _categories;
 
-  RootWatchService(
-      {required this.targetDir,
-      required this.navigationKey,
-      required this.routeRefreshService}) {
-    _categories = [];
+  RootWatchService({required this.targetDir}) {
     _getDirs();
   }
 
@@ -81,24 +71,6 @@ class RootWatchService with ChangeNotifier {
     if (!_ifEventDirectUnder(event, targetDir)) return;
     final isEqual = _getDirs();
     if (isEqual) return;
-
-    final pathSegments = GoRouter.of(navigationKey.currentContext!)
-        .routeInformationProvider
-        .value
-        .uri
-        .pathSegments;
-    // GoRouterState.of(navigationKey.currentState!.context).uri.pathSegments;
-    if (pathSegments.length >= 2 &&
-        pathSegments[0] == 'category' &&
-        !_categories.contains(pathSegments[1])) {
-      final prevCategory = pathSegments[1];
-      final index = _searchIndex(prevCategory);
-      if (index == -1) {
-        routeRefreshService.refresh('/setting');
-      } else {
-        routeRefreshService.refresh('/category/${_categories[index]}');
-      }
-    }
     notifyListeners();
   }
 
@@ -113,23 +85,6 @@ class RootWatchService with ChangeNotifier {
       _categories = [];
     }
     return _listEquality.equals(before, _categories);
-  }
-
-  int _searchIndex(String category) {
-    int lo = 0;
-    int hi = _categories.length;
-    while (lo < hi) {
-      int mid = lo + ((hi - lo) >> 1);
-      if (compareNatural(_categories[mid], category) < 0) {
-        lo = mid + 1;
-      } else {
-        hi = mid;
-      }
-    }
-    if (lo == _categories.length) {
-      lo -= 1;
-    }
-    return lo;
   }
 }
 
@@ -182,48 +137,6 @@ class FileWatchService with ChangeNotifier {
     } on PathNotFoundException {
       _curFiles = [];
     }
-  }
-}
-
-class DirWatchProvider extends StatelessWidget {
-  final Directory dir;
-  final Widget child;
-
-  const DirWatchProvider({
-    super.key,
-    required this.dir,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProxyProvider<RecursiveObserverService,
-        DirWatchService>(
-      create: (context) => DirWatchService(targetDir: dir),
-      update: (context, value, previous) => previous!..update(value.lastEvent),
-      child: child,
-    );
-  }
-}
-
-class FileWatchProvider extends StatelessWidget {
-  final Directory dir;
-  final Widget child;
-
-  const FileWatchProvider({
-    super.key,
-    required this.dir,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProxyProvider<RecursiveObserverService,
-        FileWatchService>(
-      create: (context) => FileWatchService(targetDir: dir),
-      update: (context, value, previous) => previous!..update(value.lastEvent),
-      child: child,
-    );
   }
 }
 

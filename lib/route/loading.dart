@@ -1,14 +1,16 @@
 import 'dart:async';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:genshin_mod_manager/base/appbar.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
-import 'package:genshin_mod_manager/service/route_refresh_service.dart';
+import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoadingRoute extends StatelessWidget {
+  static const String _destinationRoute = '/setting';
   static final Logger logger = Logger();
 
   const LoadingRoute({super.key});
@@ -28,6 +30,9 @@ class LoadingRoute extends StatelessWidget {
           logger.e('App FutureBuilder snapshot error: ${snapshot.error}');
           return _buildError(context, snapshot.error);
         }
+        SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+          context.go(_destinationRoute);
+        });
         return _buildDone(context);
       },
     );
@@ -51,8 +56,7 @@ class LoadingRoute extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Button(
-                  onPressed: () =>
-                      context.read<RouteRefreshService>().refresh('/setting'),
+                  onPressed: () => context.go(_destinationRoute),
                   child: const Text('Override'),
                 ),
               ],
@@ -81,14 +85,14 @@ class LoadingRoute extends StatelessWidget {
   Widget _buildDone(BuildContext context) {
     return NavigationView(
       appBar: getAppbar("Done!"),
-      content:  Center(
+      content: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text('Done!'),
             const SizedBox(height: 16),
             Button(
-              onPressed: () => context.read<RouteRefreshService>().refresh('/setting'),
+              onPressed: () => context.go(_destinationRoute),
               child: const Text('Go to Home'),
             ),
           ],
