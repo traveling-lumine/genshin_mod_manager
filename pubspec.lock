@@ -133,18 +133,18 @@ packages:
     dependency: "direct main"
     description:
       name: filepicker_windows
-      sha256: da047c72b64abcc0103747c0d6f8f09d68655a5da10ddd6a0d291f8f27f897c9
+      sha256: "93981269ecc2bf71be6e4c3ae030f8f9911e5f7ce69f109e4ffee42bd9ecdda9"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.11"
+    version: "2.1.0"
   fluent_ui:
     dependency: "direct main"
     description:
       name: fluent_ui
-      sha256: d6ffe21ff6bc61e98044a0529c139277dac2bbe6e71f868f7791d7eabc53d718
+      sha256: "432615c5b0cff4c3a162c94efc7f563ba783de447f6c6fbcaf7546dfab2fcb0a"
       url: "https://pub.dev"
     source: hosted
-    version: "4.8.5"
+    version: "4.8.6"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -181,6 +181,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  go_router:
+    dependency: "direct main"
+    description:
+      name: go_router
+      sha256: "170c46e237d6eb0e6e9f0e8b3f56101e14fb64f787016e42edd74c39cf8b176a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "13.2.0"
   http:
     dependency: "direct main"
     description:
@@ -237,6 +245,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2+1"
+  logging:
+    dependency: transitive
+    description:
+      name: logging
+      sha256: "623a88c9594aa774443aa3eb2d41807a48486b5613e67599fb4c41c0ad47c340"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   matcher:
     dependency: transitive
     description:

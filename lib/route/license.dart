@@ -28,8 +28,8 @@ import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/oss_licenses.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class OssLicensesPage extends StatelessWidget {
-  const OssLicensesPage({super.key});
+class OssLicensesRoute extends StatelessWidget {
+  const OssLicensesRoute({super.key});
 
   static Future<List<Package>> loadLicenses() async {
     // merging non-dart dependency list using LicenseRegistry.
@@ -65,31 +65,34 @@ class OssLicensesPage extends StatelessWidget {
         title: Text('Open Source Licenses'),
       ),
       content: ScaffoldPage(
-          content: FutureBuilder<List<Package>>(
-              future: _licenses,
-              initialData: const [],
-              builder: (context, snapshot) {
-                return ListView.separated(
-                    padding: const EdgeInsets.all(0),
-                    itemCount: snapshot.data?.length ?? 0,
-                    itemBuilder: (context, index) {
-                      final package = snapshot.data![index];
-                      return ListTile(
-                        title: Text('${package.name} ${package.version}'),
-                        subtitle: package.description.isNotEmpty
-                            ? Text(package.description)
-                            : null,
-                        trailing: const Icon(FluentIcons.chevron_right),
-                        onPressed: () => Navigator.of(context).push(
-                          FluentPageRoute(
-                            builder: (context) =>
-                                MiscOssLicenseSingle(package: package),
-                          ),
-                        ),
-                      );
-                    },
-                    separatorBuilder: (context, index) => const Divider());
-              })),
+        content: FutureBuilder<List<Package>>(
+          future: _licenses,
+          initialData: const [],
+          builder: (context, snapshot) {
+            return ListView.separated(
+              padding: const EdgeInsets.all(0),
+              itemCount: snapshot.data?.length ?? 0,
+              itemBuilder: (context, index) {
+                final package = snapshot.data![index];
+                return ListTile(
+                  title: Text('${package.name} ${package.version}'),
+                  subtitle: package.description.isNotEmpty
+                      ? Text(package.description)
+                      : null,
+                  trailing: const Icon(FluentIcons.chevron_right),
+                  onPressed: () => Navigator.of(context).push(
+                    FluentPageRoute(
+                      builder: (context) =>
+                          MiscOssLicenseSingle(package: package),
+                    ),
+                  ),
+                );
+              },
+              separatorBuilder: (context, index) => const Divider(),
+            );
+          },
+        ),
+      ),
     );
   }
 }

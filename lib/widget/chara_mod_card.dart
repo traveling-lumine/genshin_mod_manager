@@ -22,8 +22,10 @@ class CharaScope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FileWatchProvider(
-      dir: dir,
+    return ChangeNotifierProxyProvider<RecursiveObserverService,
+        FileWatchService>(
+      create: (context) => FileWatchService(targetDir: dir),
+      update: (context, value, previous) => previous!..update(value.lastEvent),
       child: _CharaModCard(
         dirPath: dir.pathW,
       ),
@@ -50,12 +52,14 @@ class _CharaModCard extends StatelessWidget {
             ? Colors.green.lightest
             : Colors.red.lightest.withOpacity(0.5),
         padding: const EdgeInsets.all(6),
-        child: Column(
-          children: [
-            _buildFolderHeader(context),
-            const SizedBox(height: 4),
-            _buildFolderContent(context),
-          ],
+        child: FocusTraversalGroup(
+          child: Column(
+            children: [
+              _buildFolderHeader(context),
+              const SizedBox(height: 4),
+              _buildFolderContent(context),
+            ],
+          ),
         ),
       ),
     );
@@ -73,9 +77,11 @@ class _CharaModCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 4),
-        Button(
-          child: const Icon(FluentIcons.folder_open),
-          onPressed: () => openFolder(dirPath.toDirectory),
+        RepaintBoundary(
+          child: Button(
+            child: const Icon(FluentIcons.folder_open),
+            onPressed: () => openFolder(dirPath.toDirectory),
+          ),
         ),
       ],
     );
@@ -112,29 +118,31 @@ class _CharaModCard extends StatelessWidget {
           children: [
             const Icon(FluentIcons.unknown),
             const SizedBox(height: 4),
-            Button(
-              onPressed: () async {
-                final image = await Pasteboard.image;
-                if (image == null) {
-                  _logger.d('No image found in clipboard');
-                  return;
-                }
-                final file = dirPath.join(const PathW('preview.png')).toFile;
-                await file.writeAsBytes(image);
-                if (!context.mounted) return;
-                await displayInfoBar(
-                  context,
-                  builder: (_, close) {
-                    return InfoBar(
-                      title: const Text('Image pasted'),
-                      content: Text('to ${file.path}'),
-                      onClose: close,
-                    );
-                  },
-                );
-                _logger.d('Image pasted to ${file.path}');
-              },
-              child: const Text('Paste'),
+            RepaintBoundary(
+              child: Button(
+                onPressed: () async {
+                  final image = await Pasteboard.image;
+                  if (image == null) {
+                    _logger.d('No image found in clipboard');
+                    return;
+                  }
+                  final file = dirPath.join(const PathW('preview.png')).toFile;
+                  await file.writeAsBytes(image);
+                  if (!context.mounted) return;
+                  await displayInfoBar(
+                    context,
+                    builder: (_, close) {
+                      return InfoBar(
+                        title: const Text('Image pasted'),
+                        content: Text('to ${file.path}'),
+                        onClose: close,
+                      );
+                    },
+                  );
+                  _logger.d('Image pasted to ${file.path}');
+                },
+                child: const Text('Paste'),
+              ),
             )
           ],
         ),
@@ -212,7 +220,7 @@ class _CharaModCard extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => ContentDialog(
+      builder: (context2) => ContentDialog(
         title: const Text('Delete preview image?'),
         content:
             const Text('Are you sure you want to delete the preview image?'),
@@ -220,14 +228,14 @@ class _CharaModCard extends StatelessWidget {
           Button(
             child: const Text('Cancel'),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context2).pop();
               Navigator.of(context).pop();
             },
           ),
           RedFilledButton(
             onPressed: () {
               previewFile.deleteSync();
-              Navigator.of(context).pop();
+              Navigator.of(context2).pop();
               Navigator.of(context).pop();
               displayInfoBar(
                 context,
@@ -313,9 +321,11 @@ class _CharaModCard extends StatelessWidget {
             ),
           ),
         ),
-        Button(
-          child: const Icon(FluentIcons.document_management),
-          onPressed: () => runProgram(iniFile),
+        RepaintBoundary(
+          child: Button(
+            child: const Icon(FluentIcons.document_management),
+            onPressed: () => runProgram(iniFile),
+          ),
         ),
       ],
     );

@@ -8,16 +8,16 @@ import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
-class FolderDropTarget extends StatelessWidget {
+class CategoryDropTarget extends StatelessWidget {
   static final Logger logger = Logger();
 
   final Widget child;
-  final PathW dirPath;
+  final String category;
 
-  const FolderDropTarget({
+  const CategoryDropTarget({
     super.key,
     required this.child,
-    required this.dirPath,
+    required this.category,
   });
 
   @override
@@ -31,13 +31,15 @@ class FolderDropTarget extends StatelessWidget {
   }
 
   void _dropFinishHandler(BuildContext context, DropDoneDetails details) {
-    final moveInsteadOfCopy = context.read<AppStateService>().moveOnDrag;
+    final appStateService = context.read<AppStateService>();
+    final moveInsteadOfCopy = appStateService.moveOnDrag;
+    final modRoot = appStateService.modRoot.join(category.pathW);
     final List<(Directory, PathW)> queue = [];
     for (final xFile in details.files) {
       final path = PathW(xFile.path);
       if (!path.isDirectorySync) continue;
       final dir = path.toDirectory;
-      final newPath = dirPath.join(path.basename);
+      final newPath = modRoot.join(path.basename);
       if (newPath.isDirectorySync) {
         queue.add((dir, newPath));
         continue;

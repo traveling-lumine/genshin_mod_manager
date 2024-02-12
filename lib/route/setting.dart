@@ -3,23 +3,21 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/third_party/no_deref_file_opener.dart';
-import 'package:genshin_mod_manager/window/page/license.dart';
+import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 const itemPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 16);
 
-class SettingPage extends StatelessWidget {
-  const SettingPage({super.key});
+class SettingRoute extends StatelessWidget {
+  const SettingRoute({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ScaffoldPage.scrollable(
-      header: const PageHeader(
-        title: Text('Settings'),
-      ),
+      header: const PageHeader(title: Text('Settings')),
       children: [
-        SelectItem(
+        _SelectItem(
           title: 'Select mod root folder',
           icon: FluentIcons.folder_open,
           path:
@@ -30,7 +28,7 @@ class SettingPage extends StatelessWidget {
             context.read<AppStateService>().modRoot = dir.pathW;
           },
         ),
-        SelectItem(
+        _SelectItem(
           title: 'Select 3D Migoto executable',
           icon: FluentIcons.document_management,
           path: context
@@ -41,7 +39,7 @@ class SettingPage extends StatelessWidget {
             context.read<AppStateService>().modExecFile = file.pathW;
           },
         ),
-        SelectItem(
+        _SelectItem(
           title: 'Select launcher',
           icon: FluentIcons.document_management,
           path: context
@@ -52,7 +50,7 @@ class SettingPage extends StatelessWidget {
             context.read<AppStateService>().launcherFile = file.pathW;
           },
         ),
-        SwitchItem(
+        _SwitchItem(
           text: 'Run 3d migoto and launcher using one button',
           checked: context
               .select<AppStateService, bool>((value) => value.runTogether),
@@ -60,7 +58,7 @@ class SettingPage extends StatelessWidget {
             context.read<AppStateService>().runTogether = value;
           },
         ),
-        SwitchItem(
+        _SwitchItem(
           text: 'Move folder instead of copying for mod folder drag-and-drop',
           checked: context
               .select<AppStateService, bool>((value) => value.moveOnDrag),
@@ -68,7 +66,7 @@ class SettingPage extends StatelessWidget {
             context.read<AppStateService>().moveOnDrag = value;
           },
         ),
-        SwitchItem(
+        _SwitchItem(
           text: 'Show folder icon images',
           checked: context
               .select<AppStateService, bool>((value) => value.showFolderIcon),
@@ -76,7 +74,7 @@ class SettingPage extends StatelessWidget {
             context.read<AppStateService>().showFolderIcon = value;
           },
         ),
-        SwitchItem(
+        _SwitchItem(
           text: 'Show enabled mods first',
           checked: context.select<AppStateService, bool>(
               (value) => value.showEnabledModsFirst),
@@ -96,9 +94,7 @@ class SettingPage extends StatelessWidget {
               ),
               RepaintBoundary(
                 child: Button(
-                  onPressed: () {
-                    showLicense(context);
-                  },
+                  onPressed: () => context.push('/license'),
                   child: const Text('View'),
                 ),
               )
@@ -124,21 +120,14 @@ class SettingPage extends StatelessWidget {
       ],
     );
   }
-
-  void showLicense(BuildContext context) {
-    Navigator.of(context).push(FluentPageRoute(
-      builder: (BuildContext context) => const OssLicensesPage(),
-    ));
-  }
 }
 
-class SwitchItem extends StatelessWidget {
+class _SwitchItem extends StatelessWidget {
   final String text;
   final bool checked;
   final void Function(bool) onChanged;
 
-  const SwitchItem({
-    super.key,
+  const _SwitchItem({
     required this.text,
     required this.checked,
     required this.onChanged,
@@ -168,14 +157,13 @@ class SwitchItem extends StatelessWidget {
   }
 }
 
-class SelectItem extends StatelessWidget {
+class _SelectItem extends StatelessWidget {
   final String title;
   final PathW path;
   final IconData icon;
   final VoidCallback? onPressed;
 
-  const SelectItem({
-    super.key,
+  const _SelectItem({
     required this.title,
     required this.icon,
     required this.path,

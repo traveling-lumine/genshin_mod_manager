@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
-import 'package:provider/provider.dart';
 
 class CategoryIconFolderObserverService with ChangeNotifier {
   final Directory targetDir;
@@ -53,6 +53,38 @@ class RecursiveObserverService with ChangeNotifier {
   void dispose() {
     _subscription.cancel();
     super.dispose();
+  }
+}
+
+class RootWatchService with ChangeNotifier {
+  final _listEquality = const ListEquality();
+  final Directory targetDir;
+  List<String> _categories = [];
+
+  List<String> get categories => _categories;
+
+  RootWatchService({required this.targetDir}) {
+    _getDirs();
+  }
+
+  void update(FileSystemEvent? event) {
+    if (!_ifEventDirectUnder(event, targetDir)) return;
+    final isEqual = _getDirs();
+    if (isEqual) return;
+    notifyListeners();
+  }
+
+  bool _getDirs() {
+    final before = _categories;
+    try {
+      _categories = getDirsUnder(targetDir)
+          .map((e) => e.pathW.basename.asString)
+          .toList(growable: false)
+        ..sort(compareNatural);
+    } on PathNotFoundException {
+      _categories = [];
+    }
+    return _listEquality.equals(before, _categories);
   }
 }
 
@@ -105,48 +137,6 @@ class FileWatchService with ChangeNotifier {
     } on PathNotFoundException {
       _curFiles = [];
     }
-  }
-}
-
-class DirWatchProvider extends StatelessWidget {
-  final Directory dir;
-  final Widget child;
-
-  const DirWatchProvider({
-    super.key,
-    required this.dir,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProxyProvider<RecursiveObserverService,
-        DirWatchService>(
-      create: (context) => DirWatchService(targetDir: dir),
-      update: (context, value, previous) => previous!..update(value.lastEvent),
-      child: child,
-    );
-  }
-}
-
-class FileWatchProvider extends StatelessWidget {
-  final Directory dir;
-  final Widget child;
-
-  const FileWatchProvider({
-    super.key,
-    required this.dir,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProxyProvider<RecursiveObserverService,
-        FileWatchService>(
-      create: (context) => FileWatchService(targetDir: dir),
-      update: (context, value, previous) => previous!..update(value.lastEvent),
-      child: child,
-    );
   }
 }
 
