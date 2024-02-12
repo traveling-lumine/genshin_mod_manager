@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
@@ -173,7 +174,7 @@ class NahidaliveAPI {
     if (response.statusCode == 200) {
       return NahidaliveDownloadElement.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('download url failed');
+      throw HttpException('download url failed', uri: uri);
     }
   }
 

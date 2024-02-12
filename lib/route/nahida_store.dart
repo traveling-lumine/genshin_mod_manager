@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/gestures.dart';
@@ -97,6 +98,8 @@ class _StoreElement extends StatelessWidget {
                   ],
                 ),
                 Text(element.description),
+                if (element.tags.isNotEmpty)
+                  Text('Tags: ${element.tags.join(', ')}'),
                 if (element.arcaUrl != null)
                   Center(
                     child: RichText(
@@ -116,8 +119,6 @@ class _StoreElement extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (element.tags.isNotEmpty)
-                  Text('Tags: ${element.tags.join(', ')}'),
               ],
             ),
           ),
@@ -201,11 +202,28 @@ class _StoreElement extends StatelessWidget {
   }
 
   void _download(BuildContext context, [String? pw]) async {
-    final url = await api.downloadUrl(element.uuid, pw);
+    final NahidaliveDownloadElement url;
+    try {
+      url = await api.downloadUrl(element.uuid, pw);
+    } on HttpException catch (e) {
+      if (!context.mounted) return;
+      unawaited(displayInfoBar(
+        context,
+        builder: (infoBarContext, close) => InfoBar(
+          title: const Text('Download failed'),
+          content: Text('${e.uri}'),
+          severity: InfoBarSeverity.error,
+          onClose: close,
+        ),
+      ));
+      return;
+    }
     if (url.status) {
+      var parse = Uri.parse(url.downloadUrl!);
       final data = await api.download(url);
       if (!context.mounted) return;
       var length = data.length;
+      var filename = parse.pathSegments.last;
       print('Downloaded ${element.title} with length $length');
       unawaited(displayInfoBar(
         context,
