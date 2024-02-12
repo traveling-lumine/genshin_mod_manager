@@ -98,15 +98,21 @@ String _errorToString(FlutterErrorDetails details) {
   }
 }
 
+final kNavigationKey = GlobalKey<NavigatorState>();
+
 class _MyApp extends StatelessWidget {
   final _routeRefreshService = RouteRefreshService();
   late final _router = GoRouter(
+    navigatorKey: kNavigationKey,
     debugLogDiagnostics: true,
     initialLocation: '/loading',
     refreshListenable: _routeRefreshService,
     redirect: (context, state) {
-      return context.read<RouteRefreshService>().destination;
-    },
+      final read = context.read<RouteRefreshService>();
+      final destination2 = read.destination;
+      read.clear();
+      return destination2;
+    },  
     routes: [
       GoRoute(
         path: '/loading',

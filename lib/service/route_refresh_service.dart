@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/scheduler.dart';
 
 class RouteRefreshService extends ChangeNotifier {
   String? _destination;
@@ -7,7 +8,13 @@ class RouteRefreshService extends ChangeNotifier {
 
   void refresh(String destination) {
     _destination = destination;
-    notifyListeners();
+    // postframe prevents rebuild while build error
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      notifyListeners();
+    });
+  }
+
+  void clear() {
     _destination = null;
   }
 }

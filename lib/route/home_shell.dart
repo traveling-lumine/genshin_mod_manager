@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
-import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -10,9 +9,11 @@ import 'package:flutter/services.dart';
 import 'package:genshin_mod_manager/base/appbar.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
+import 'package:genshin_mod_manager/main.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/service/preset_service.dart';
+import 'package:genshin_mod_manager/service/route_refresh_service.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
 import 'package:genshin_mod_manager/widget/category_drop_target.dart';
@@ -59,9 +60,12 @@ class HomeShell extends StatelessWidget {
                   previous!..update(value, value2),
             ),
             ChangeNotifierProxyProvider<RecursiveObserverService,
-                DirWatchService>(
-              create: (context) =>
-                  DirWatchService(targetDir: modRootValue.toDirectory),
+                RootWatchService>(
+              create: (context) => RootWatchService(
+                targetDir: modRootValue.toDirectory,
+                navigationKey: kNavigationKey,
+                routeRefreshService: context.read<RouteRefreshService>(),
+              ),
               update: (context, value, previous) =>
                   previous!..update(value.lastEvent),
             ),
@@ -265,12 +269,9 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell> {
     final imageFiles =
         context.select<CategoryIconFolderObserverService, List<File>>(
             (value) => value.curFiles);
-    final sortedMenus = context.select<DirWatchService, List<String>>((value) =>
-        value.curDirs
-            .map((e) => e.pathW.basename.asString)
-            .toList(growable: false))
-      ..sort(compareNatural);
-    final items = sortedMenus
+    final items = context
+        .watch<RootWatchService>()
+        .categories
         .map((e) => _FolderPaneItem(
             category: e,
             imageFile: findPreviewFileIn(imageFiles, name: e.pathW),
@@ -289,22 +290,11 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell> {
       ),
     ];
 
-    final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
-          ..removeWhere((i) => i is! PaneItem || i is PaneItemAction))
-        .cast<PaneItem>();
-    final currentRoute = Uri.decodeFull(GoRouterState.of(context).uri.path);
-    final index = effectiveItems.indexWhere((e) {
-      final key = e.key;
-      if (key is! ValueKey<String>) return false;
-      return key.value == currentRoute;
-    });
-    final int? selected = index != -1 ? index : null;
-
     return NavigationView(
       transitionBuilder: (child, animation) =>
           SuppressPageTransition(child: child),
       appBar: _buildAppbar(),
-      pane: _buildPane(selected, items, footerItems),
+      pane: _buildPane(items, footerItems),
       paneBodyBuilder: (item, body) => widget.child,
     );
   }
@@ -337,8 +327,18 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell> {
     );
   }
 
-  NavigationPane _buildPane(int? selected, List<_FolderPaneItem> items,
-      List<NavigationPaneItem> footerItems) {
+  NavigationPane _buildPane(
+      List<_FolderPaneItem> items, List<NavigationPaneItem> footerItems) {
+    final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
+          ..removeWhere((i) => i is! PaneItem || i is PaneItemAction))
+        .cast<PaneItem>();
+    final currentRoute = Uri.decodeFull(GoRouterState.of(context).uri.path);
+    final index = effectiveItems.indexWhere((e) {
+      final key = e.key;
+      if (key is! ValueKey<String>) return false;
+      return key.value == currentRoute;
+    });
+    final int? selected = index != -1 ? index : null;
     return NavigationPane(
       selected: selected,
       items: items.cast<NavigationPaneItem>(),
