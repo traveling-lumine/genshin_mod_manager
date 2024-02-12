@@ -42,20 +42,12 @@ class CategoryRoute extends StatelessWidget {
     final categoryDir = context.read<AppStateService>().modRoot.pJoin(category);
     return PageHeader(
       title: Text(category),
-      leading: RepaintBoundary(
-        child: IconButton(
-          icon: const Icon(FluentIcons.download),
-          onPressed: () {
-            context.go('/nahidastore');
-          },
-        ),
-      ),
       commandBar: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           PresetControlWidget(isLocal: true, category: category),
           SizedBox(
-            width: 60,
+            width: 110,
             child: RepaintBoundary(
               child: CommandBar(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -64,6 +56,12 @@ class CategoryRoute extends StatelessWidget {
                     icon: const Icon(FluentIcons.folder_open),
                     onPressed: () {
                       openFolder(categoryDir);
+                    },
+                  ),
+                  CommandBarButton(
+                    icon: const Icon(FluentIcons.download),
+                    onPressed: () {
+                      context.go('/nahidastore');
                     },
                   ),
                 ],

@@ -30,7 +30,7 @@ class NahidaStoreRoute extends StatelessWidget {
             return ThickScrollbar(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
-                  minCrossAxisExtent: 400,
+                  minCrossAxisExtent: 500,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                 ),
@@ -71,14 +71,17 @@ class _StoreElement extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      element.title,
-                      style: FluentTheme.of(context).typography.subtitle,
+                    Expanded(
+                      child: Text(
+                        element.title,
+                        style: FluentTheme.of(context).typography.subtitle,
+                      ),
                     ),
                     RepaintBoundary(
                       child: Button(
@@ -95,23 +98,26 @@ class _StoreElement extends StatelessWidget {
                 ),
                 Text(element.description),
                 if (element.arcaUrl != null)
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        const TextSpan(text: 'Arca: '),
-                        TextSpan(
-                          text: element.arcaUrl,
-                          style: TextStyle(
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline,
+                  Center(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: element.arcaUrl,
+                            style: TextStyle(
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap =
+                                  () => launchUrl(Uri.parse(element.arcaUrl!)),
                           ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap =
-                                () => launchUrl(Uri.parse(element.arcaUrl!)),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
+                if (element.tags.isNotEmpty)
+                  Text('Tags: ${element.tags.join(', ')}'),
               ],
             ),
           ),
