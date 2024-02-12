@@ -5,15 +5,16 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'dart:convert';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:genshin_mod_manager/route/welcome.dart';
 
 void main() {
-  try {
-    dynamic a = jsonDecode('{"a": 1}');
-    final b = Map<String, Map<String, List<String>>>.from(a);
-    print(b);
-  } on TypeError catch (e) {
-    print(e);
-    print(e.runtimeType);
-  }
+  testWidgets('MyWidget has a title and message', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const FluentApp(home: WelcomeRoute()));
+
+    // Verify that our counter starts at 0.
+    expect(find.text('Welcome'), findsOneWidget);
+  });
 }

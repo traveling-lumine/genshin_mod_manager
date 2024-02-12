@@ -1,6 +1,5 @@
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/third_party/no_deref_file_opener.dart';
 import 'package:go_router/go_router.dart';
@@ -21,33 +20,33 @@ class SettingRoute extends StatelessWidget {
           title: 'Select mod root folder',
           icon: FluentIcons.folder_open,
           path:
-              context.select<AppStateService, PathW>((value) => value.modRoot),
+              context.select<AppStateService, String>((value) => value.modRoot),
           onPressed: () {
             final dir = DirectoryPicker().getDirectory();
             if (dir == null) return;
-            context.read<AppStateService>().modRoot = dir.pathW;
+            context.read<AppStateService>().modRoot = dir.path;
           },
         ),
         _SelectItem(
           title: 'Select 3D Migoto executable',
           icon: FluentIcons.document_management,
           path: context
-              .select<AppStateService, PathW>((value) => value.modExecFile),
+              .select<AppStateService, String>((value) => value.modExecFile),
           onPressed: () {
             final file = OpenNoDereferenceFilePicker().getFile();
             if (file == null) return;
-            context.read<AppStateService>().modExecFile = file.pathW;
+            context.read<AppStateService>().modExecFile = file.path;
           },
         ),
         _SelectItem(
           title: 'Select launcher',
           icon: FluentIcons.document_management,
           path: context
-              .select<AppStateService, PathW>((value) => value.launcherFile),
+              .select<AppStateService, String>((value) => value.launcherFile),
           onPressed: () {
             final file = OpenNoDereferenceFilePicker().getFile();
             if (file == null) return;
-            context.read<AppStateService>().launcherFile = file.pathW;
+            context.read<AppStateService>().launcherFile = file.path;
           },
         ),
         _SwitchItem(
@@ -159,7 +158,7 @@ class _SwitchItem extends StatelessWidget {
 
 class _SelectItem extends StatelessWidget {
   final String title;
-  final PathW path;
+  final String path;
   final IconData icon;
   final VoidCallback? onPressed;
 
@@ -186,7 +185,7 @@ class _SelectItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  path.asString,
+                  path,
                   style: FluentTheme.of(context).typography.caption,
                 ),
               ],

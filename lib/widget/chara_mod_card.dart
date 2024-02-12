@@ -13,21 +13,21 @@ import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 
 class CharaScope extends StatelessWidget {
-  final Directory dir;
+  final String path;
 
   const CharaScope({
     super.key,
-    required this.dir,
+    required this.path,
   });
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProxyProvider<RecursiveObserverService,
         FileWatchService>(
-      create: (context) => FileWatchService(targetDir: dir),
+      create: (context) => FileWatchService(targetPath: path),
       update: (context, value, previous) => previous!..update(value.lastEvent),
       child: _CharaModCard(
-        dirPath: dir.pathW,
+        dirPath: path,
       ),
     );
   }
@@ -37,7 +37,7 @@ class _CharaModCard extends StatelessWidget {
   static const _minIniSectionWidth = 150.0;
   static final _logger = Logger();
 
-  final PathW dirPath;
+  final String dirPath;
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
 
@@ -48,7 +48,7 @@ class _CharaModCard extends StatelessWidget {
     return ToggleableMod(
       dirPath: dirPath,
       child: Card(
-        backgroundColor: dirPath.basename.isEnabled
+        backgroundColor: dirPath.pBasename.pIsEnabled
             ? Colors.green.lightest
             : Colors.red.lightest.withOpacity(0.5),
         padding: const EdgeInsets.all(6),
@@ -70,7 +70,7 @@ class _CharaModCard extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            dirPath.basename.enabledForm.asString,
+            dirPath.pBasename.pEnabledForm,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: FluentTheme.of(context).typography.bodyStrong,
@@ -80,7 +80,7 @@ class _CharaModCard extends StatelessWidget {
         RepaintBoundary(
           child: Button(
             child: const Icon(FluentIcons.folder_open),
-            onPressed: () => openFolder(dirPath.toDirectory),
+            onPressed: () => openFolder(dirPath),
           ),
         ),
       ],
@@ -126,20 +126,20 @@ class _CharaModCard extends StatelessWidget {
                     _logger.d('No image found in clipboard');
                     return;
                   }
-                  final file = dirPath.join(const PathW('preview.png')).toFile;
-                  await file.writeAsBytes(image);
+                  final filePath = dirPath.pJoin('preview.png');
+                  await File(filePath).writeAsBytes(image);
                   if (!context.mounted) return;
                   await displayInfoBar(
                     context,
                     builder: (_, close) {
                       return InfoBar(
                         title: const Text('Image pasted'),
-                        content: Text('to ${file.path}'),
+                        content: Text('to $filePath'),
                         onClose: close,
                       );
                     },
                   );
-                  _logger.d('Image pasted to ${file.path}');
+                  _logger.d('Image pasted to $filePath');
                 },
                 child: const Text('Paste'),
               ),
@@ -272,7 +272,7 @@ class _CharaModCard extends StatelessWidget {
   }
 
   List<Widget> allFilesToWidget() {
-    final allFiles = getActiveiniFiles(dirPath.toDirectory);
+    final allFiles = getActiveiniFiles(dirPath);
     final List<Widget> alliniFile = [];
     for (final file in allFiles) {
       alliniFile.add(buildIniHeader(file));
@@ -306,7 +306,7 @@ class _CharaModCard extends StatelessWidget {
   }
 
   Widget buildIniHeader(File iniFile) {
-    final basenameString = iniFile.pathW.basename.asString;
+    final basenameString = iniFile.path.pBasename;
     return Row(
       children: [
         Expanded(

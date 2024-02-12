@@ -1,78 +1,46 @@
-import 'dart:io';
-
 import 'package:path/path.dart' as p;
 
-extension PathWFileSystemEntity on FileSystemEntity {
-  PathW get pathW => PathW(path);
-}
+const _disabledHeader = 'DISABLED';
+const _disabledHeaderLength = _disabledHeader.length;
 
-extension PathWString on String {
-  PathW get pathW => PathW(this);
-}
+extension PathOps on String {
+  String get pBasename => p.basename(this);
 
-extension PathWFileSystemEvent on FileSystemEvent {
-  PathW get pathW => PathW(path);
-}
+  String get pDirname => p.dirname(this);
 
-extension PathF on File {
-  File copySyncPath(PathW dest) => copySync(dest.asString);
-}
+  String get pExtension => p.extension(this);
 
-extension PathD on Directory {
-  Directory renameSyncPath(PathW dest) => renameSync(dest.asString);
-}
+  String get pBNameWoExt => p.basenameWithoutExtension(this);
 
-class PathW {
-  final String _path;
+  bool get pIsEnabled => !startsWith(_disabledHeader);
 
-  String get asString => _path;
-
-  const PathW(this._path);
-
-  Directory get toDirectory => Directory(asString);
-
-  File get toFile => File(asString);
-
-  PathW get dirname => PathW(p.dirname(asString));
-
-  PathW get basename => PathW(p.basename(asString));
-
-  PathW get basenameWithoutExtension =>
-      PathW(p.basenameWithoutExtension(asString));
-
-  PathW get extension => PathW(p.extension(asString));
-
-  bool get isDirectorySync => FileSystemEntity.isDirectorySync(asString);
-
-  bool get isEnabled => !startsWith('DISABLED');
-
-  bool isWithin(PathW other) => p.isWithin(other.asString, asString);
-
-  PathW get enabledForm {
-    if (!isEnabled) return PathW(asString.substring(8).trimLeft());
+  String get pEnabledForm {
+    if (!pIsEnabled) return substring(_disabledHeaderLength).trimLeft();
     return this;
   }
 
-  PathW get disabledForm {
-    if (isEnabled) return PathW('DISABLED ${asString.trimLeft()}');
+  String get pDisabledForm {
+    if (pIsEnabled) return '$_disabledHeader ${trimLeft()}';
     return this;
   }
 
-  PathW join(PathW str) => PathW(p.join(asString, str.asString));
+  bool pEquals(String other) => p.equals(this, other);
 
-  bool startsWith(String s) {
-    return asString.toLowerCase().startsWith(s.toLowerCase());
-  }
-
-  @override
-  String toString() => asString;
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! PathW) return false;
-    return p.equals(asString, other.asString);
-  }
-
-  @override
-  int get hashCode => p.hash(asString);
+  String pJoin(String part2,
+          [String? part3,
+          String? part4,
+          String? part5,
+          String? part6,
+          String? part7,
+          String? part8,
+          String? part9,
+          String? part10,
+          String? part11,
+          String? part12,
+          String? part13,
+          String? part14,
+          String? part15,
+          String? part16]) =>
+      p.join(this, part2, part3, part4, part5, part6, part7, part8, part9,
+          part10, part11, part12, part13, part14, part15, part16);
 }

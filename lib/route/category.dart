@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
@@ -21,12 +19,12 @@ class CategoryRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final modRoot = context.read<AppStateService>().modRoot;
-    final dir = modRoot.join(category.pathW).toDirectory;
+    final modRootPath = context.read<AppStateService>().modRoot;
+    final categoryPath = modRootPath.pJoin(category);
     return ChangeNotifierProxyProvider<RecursiveObserverService,
         DirWatchService>(
       key: Key(category),
-      create: (context) => DirWatchService(targetDir: dir),
+      create: (context) => DirWatchService(targetPath: categoryPath),
       update: (context, value, previous) => previous!..update(value.lastEvent),
       child: CategoryDropTarget(
         category: category,
@@ -39,11 +37,7 @@ class CategoryRoute extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final categoryDir = context
-        .read<AppStateService>()
-        .modRoot
-        .join(category.pathW)
-        .toDirectory;
+    final categoryDir = context.read<AppStateService>().modRoot.pJoin(category);
     return PageHeader(
       title: Text(category),
       commandBar: Row(
@@ -111,12 +105,12 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
     final dirs = context.watch<DirWatchService>().curDirs
       ..sort(
         (a, b) {
-          final a2 = a.pathW.basename.enabledForm.asString;
-          final b2 = b.pathW.basename.enabledForm.asString;
+          final a2 = a.path.pBasename.pEnabledForm;
+          final b2 = b.path.pBasename.pEnabledForm;
           var compareTo = a2.toLowerCase().compareTo(b2.toLowerCase());
           if (widget.enabledFirst) {
-            final aEnabled = a.pathW.basename.isEnabled;
-            final bEnabled = b.pathW.basename.isEnabled;
+            final aEnabled = a.path.pBasename.pIsEnabled;
+            final bEnabled = b.path.pBasename.pIsEnabled;
             if (aEnabled && !bEnabled) {
               return -1;
             } else if (!aEnabled && bEnabled) {
@@ -128,16 +122,16 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
       );
 
     if (currentChildren == null) {
-      currentChildren = dirs.map((e) => _buildCharaCard(e)).toList();
+      currentChildren = dirs.map((e) => _buildCharaCard(e.path)).toList();
     } else {
       final List<CharaScope> newCurrentChildren = [];
       for (var i = 0; i < dirs.length; i++) {
         final dir = dirs[i];
         final idx = currentChildren!.indexWhere((e) {
-          return e.dir.path == dir.path;
+          return e.path == dir.path;
         });
         if (idx == -1) {
-          newCurrentChildren.add(_buildCharaCard(dir));
+          newCurrentChildren.add(_buildCharaCard(dir.path));
         } else {
           newCurrentChildren.add(currentChildren![idx]);
         }
@@ -158,10 +152,10 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
     );
   }
 
-  CharaScope _buildCharaCard(Directory dir) {
+  CharaScope _buildCharaCard(String path) {
     return CharaScope(
-      key: Key(dir.path),
-      dir: dir,
+      key: Key(path),
+      path: path,
     );
   }
 }
