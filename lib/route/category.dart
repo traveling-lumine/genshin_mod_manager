@@ -61,7 +61,8 @@ class CategoryRoute extends StatelessWidget {
                   CommandBarButton(
                     icon: const Icon(FluentIcons.download),
                     onPressed: () {
-                      context.go('/nahidastore');
+                      final escapedCategory = Uri.encodeComponent(category);
+                      context.push('/nahidastore?category=$escapedCategory');
                     },
                   ),
                 ],

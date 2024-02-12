@@ -1,24 +1,42 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:archive/archive_io.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/gestures.dart';
+import 'package:genshin_mod_manager/extension/pathops.dart';
+import 'package:genshin_mod_manager/io/fsops.dart';
+import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
 import 'package:genshin_mod_manager/upstream/api.dart';
 import 'package:genshin_mod_manager/widget/thick_scrollbar.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NahidaStoreRoute extends StatelessWidget {
   final _api = NahidaliveAPI();
+  final String category;
 
-  NahidaStoreRoute({super.key});
+  NahidaStoreRoute({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {
     return ScaffoldPage.withPadding(
-      header: const PageHeader(
-        title: Text('Akasha'),
+      header: PageHeader(
+        title: Text('Akasha → $category'),
+        leading: () {
+          if (context.canPop()) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: IconButton(
+                icon: const Icon(FluentIcons.back),
+                onPressed: () => context.pop(),
+              ),
+            );
+          }
+        }(),
       ),
       content: FutureBuilder(
         future: _api.fetchNahidaliveElements(),
@@ -37,7 +55,8 @@ class NahidaStoreRoute extends StatelessWidget {
                 ),
                 itemCount: data.length,
                 itemBuilder: (context, index) {
-                  return _StoreElement(element: data[index], api: _api);
+                  return _StoreElement(
+                      element: data[index], api: _api, category: category);
                 },
               ),
             );
@@ -51,13 +70,15 @@ class NahidaStoreRoute extends StatelessWidget {
 }
 
 class _StoreElement extends StatelessWidget {
+  final _passwordController = TextEditingController();
   final NahidaliveElement element;
   final NahidaliveAPI api;
-  final _passwordController = TextEditingController();
+  final String category;
 
   _StoreElement({
     required this.element,
     required this.api,
+    required this.category,
   });
 
   @override
@@ -146,17 +167,17 @@ class _StoreElement extends StatelessWidget {
   Widget _downloadDialog(BuildContext dialogContext, BuildContext context) {
     return ContentDialog(
       title: Text('Download ${element.title}?'),
-      content: const Text('This will download the mod to memory.'),
+      content: Text('This will download the mod to $category.'),
       actions: [
         Button(
           onPressed: () {
-            dialogContext.pop();
+            Navigator.pop(dialogContext);
           },
           child: const Text('Cancel'),
         ),
         FilledButton(
           onPressed: () async {
-            dialogContext.pop();
+            Navigator.pop(dialogContext);
             _download(context);
           },
           child: const Text('Download'),
@@ -177,7 +198,7 @@ class _StoreElement extends StatelessWidget {
             controller: _passwordController,
             placeholder: 'Password',
             onSubmitted: (value) async {
-              dialogContext.pop();
+              Navigator.pop(dialogContext);
               _download(context, _passwordController.text);
             },
           ),
@@ -185,13 +206,13 @@ class _StoreElement extends StatelessWidget {
         actions: [
           Button(
             onPressed: () {
-              dialogContext.pop();
+              Navigator.pop(dialogContext);
             },
             child: const Text('Cancel'),
           ),
           FilledButton(
             onPressed: () async {
-              dialogContext.pop();
+              Navigator.pop(dialogContext);
               _download(context, _passwordController.text);
             },
             child: const Text('Download'),
@@ -219,12 +240,13 @@ class _StoreElement extends StatelessWidget {
       return;
     }
     if (url.status) {
-      var parse = Uri.parse(url.downloadUrl!);
+      final parse = Uri.parse(url.downloadUrl!);
       final data = await api.download(url);
       if (!context.mounted) return;
-      var length = data.length;
-      var filename = parse.pathSegments.last;
-      print('Downloaded ${element.title} with length $length');
+      final length = data.length;
+      final filename = parse.pathSegments.last;
+      if (await _downloadFile(context, filename, data)) return;
+      if (!context.mounted) return;
       unawaited(displayInfoBar(
         context,
         builder: (context, close) {
@@ -251,5 +273,50 @@ class _StoreElement extends StatelessWidget {
         ),
       ));
     }
+  }
+
+  Future<bool> _downloadFile(
+      BuildContext context, String filename, Uint8List data) async {
+    final catPath = context.read<AppStateService>().modRoot.pJoin(category);
+    final enabledFormDirNames =
+        getDirsUnder(catPath).map((e) => e.path.pBasename.pEnabledForm).toSet();
+    String destDirName = filename.pBNameWoExt.pEnabledForm;
+    while (!destDirName.pIsEnabled) {
+      destDirName = destDirName.pEnabledForm;
+    }
+    int counter = 0;
+    String noCollisionDestDirName = destDirName;
+    while (enabledFormDirNames.contains(destDirName)) {
+      counter++;
+      noCollisionDestDirName = '$destDirName ($counter)';
+    }
+    destDirName = noCollisionDestDirName.pDisabledForm;
+    final destDirPath = catPath.pJoin(destDirName);
+    await Directory(destDirPath).create(recursive: true);
+    try {
+      final archive = ZipDecoder().decodeBytes(data);
+      await extractArchiveToDiskAsync(archive, destDirPath, asyncWrite: true);
+    } on Exception {
+      if (!context.mounted) return true;
+      unawaited(displayInfoBar(
+        context,
+        builder: (context, close) {
+          return InfoBar(
+            title: const Text('Download failed'),
+            content: Text(
+                'Failed to extract archive: $filename decode error. Instead, the archive was saved as $filename.'),
+            severity: InfoBarSeverity.error,
+            onClose: close,
+          );
+        },
+      ));
+      try {
+        await File(catPath.pJoin(filename)).writeAsBytes(data);
+      } catch (e) {
+        print(e);
+      }
+      return true;
+    }
+    return false;
   }
 }

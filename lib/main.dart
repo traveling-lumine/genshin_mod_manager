@@ -131,7 +131,10 @@ class _MyApp extends StatelessWidget {
           ),
           GoRoute(
             path: '/nahidastore',
-            builder: (context, state) => NahidaStoreRoute(),
+            builder: (context, state) {
+              final category = state.uri.queryParameters['category'];
+              return NahidaStoreRoute(category: category!);
+            },
           ),
         ],
       ),
