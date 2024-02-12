@@ -286,7 +286,7 @@ class _StoreElement extends StatelessWidget {
     }
     int counter = 0;
     String noCollisionDestDirName = destDirName;
-    while (enabledFormDirNames.contains(destDirName)) {
+    while (enabledFormDirNames.contains(noCollisionDestDirName)) {
       counter++;
       noCollisionDestDirName = '$destDirName ($counter)';
     }
