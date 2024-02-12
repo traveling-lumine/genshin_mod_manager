@@ -28,7 +28,7 @@ class LoadingRoute extends StatelessWidget {
           logger.e('App FutureBuilder snapshot error: ${snapshot.error}');
           return _buildError(context, snapshot.error);
         }
-        return _buildDone();
+        return _buildDone(context);
       },
     );
   }
@@ -78,11 +78,21 @@ class LoadingRoute extends StatelessWidget {
     );
   }
 
-  Widget _buildDone() {
+  Widget _buildDone(BuildContext context) {
     return NavigationView(
       appBar: getAppbar("Done!"),
-      content: const Center(
-        child: Text('Done!'),
+      content:  Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Done!'),
+            const SizedBox(height: 16),
+            Button(
+              onPressed: () => context.read<RouteRefreshService>().refresh('/setting'),
+              child: const Text('Go to Home'),
+            ),
+          ],
+        ),
       ),
     );
   }

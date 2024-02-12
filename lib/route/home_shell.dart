@@ -58,11 +58,15 @@ class HomeShell extends StatelessWidget {
               update: (context, value, value2, previous) =>
                   previous!..update(value, value2),
             ),
+            ChangeNotifierProxyProvider<RecursiveObserverService,
+                DirWatchService>(
+              create: (context) =>
+                  DirWatchService(targetDir: modRootValue.toDirectory),
+              update: (context, value, previous) =>
+                  previous!..update(value.lastEvent),
+            ),
           ],
-          child: DirWatchProvider(
-            dir: modRootValue.toDirectory,
-            child: _HomeShell(child: child),
-          ),
+          child: _HomeShell(child: child),
         );
       },
     );

@@ -5,7 +5,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/service/route_refresh_service.dart';
 import 'package:genshin_mod_manager/route/home_shell.dart';
-import 'package:genshin_mod_manager/route/loading_screen.dart';
+import 'package:genshin_mod_manager/route/loading.dart';
 import 'package:genshin_mod_manager/route/category.dart';
 import 'package:genshin_mod_manager/route/license.dart';
 import 'package:genshin_mod_manager/route/setting.dart';
