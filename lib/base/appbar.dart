@@ -24,7 +24,7 @@ class WindowButtons extends StatelessWidget {
     return const SizedBox(
       width: kWindowButtonWidth,
       height: 50,
-      child: WindowCaption(),
+      child: RepaintBoundary(child: WindowCaption()),
     );
   }
 }

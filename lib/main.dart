@@ -98,11 +98,8 @@ String _errorToString(FlutterErrorDetails details) {
   }
 }
 
-final kNavigationKey = GlobalKey<NavigatorState>();
-
 class _MyApp extends StatelessWidget {
   late final _router = GoRouter(
-    navigatorKey: kNavigationKey,
     debugLogDiagnostics: true,
     initialLocation: '/loading',
     routes: [

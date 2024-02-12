@@ -144,7 +144,7 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
 
   NavigationAppBar _buildAppbar() {
     return NavigationAppBar(
-      actions: const RepaintBoundary(child: WindowButtons()),
+      actions: const WindowButtons(),
       automaticallyImplyLeading: false,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -275,8 +275,8 @@ class _FolderPaneItem extends PaneItem {
 
   static Widget _getIcon(File? imageFile) {
     return Selector<AppStateService, bool>(
-      selector: (_, service) => service.showFolderIcon,
-      builder: (_, value, __) =>
+      selector: (p0, p1) => p1.showFolderIcon,
+      builder: (context, value, child) =>
           value ? _buildImage(imageFile) : const Icon(FluentIcons.folder_open),
     );
   }
