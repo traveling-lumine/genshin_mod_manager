@@ -10,8 +10,7 @@ const ossLicenses = <Package>[
     repository: 'https://github.com/brendan-duncan/archive',
     authors: [],
     version: '3.4.10',
-    license:
-        '''The MIT License
+    license: '''The MIT License
 
 Copyright (c) 2013-2021 Brendan Duncan.
 All rights reserved.
@@ -44,8 +43,7 @@ THE SOFTWARE.''',
     repository: 'https://github.com/dart-lang/args',
     authors: [],
     version: '2.4.2',
-    license:
-        '''Copyright 2013, the Dart project authors. 
+    license: '''Copyright 2013, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -83,8 +81,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/async',
     authors: [],
     version: '2.11.0',
-    license:
-        '''Copyright 2015, the Dart project authors. 
+    license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -122,8 +119,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/boolean_selector',
     authors: [],
     version: '2.1.1',
-    license:
-        '''Copyright 2016, the Dart project authors.
+    license: '''Copyright 2016, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -161,8 +157,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/characters',
     authors: [],
     version: '1.3.0',
-    license:
-        '''Copyright 2019, the Dart project authors. 
+    license: '''Copyright 2019, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -199,8 +194,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/clock',
     authors: [],
     version: '1.1.1',
-    license:
-        '''Apache License
+    license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
@@ -412,8 +406,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/collection',
     authors: [],
     version: '1.18.0',
-    license:
-        '''Copyright 2015, the Dart project authors. 
+    license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -451,8 +444,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/convert',
     authors: [],
     version: '3.1.1',
-    license:
-        '''Copyright 2015, the Dart project authors.
+    license: '''Copyright 2015, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -491,8 +483,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/cross_file',
     authors: [],
     version: '0.3.3+8',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -528,8 +519,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/crypto',
     authors: [],
     version: '3.0.3',
-    license:
-        '''Copyright 2015, the Dart project authors.
+    license: '''Copyright 2015, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -568,8 +558,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/third_party/packages/cupertino_icons',
     authors: [],
     version: '1.0.6',
-    license:
-        '''The MIT License (MIT)
+    license: '''The MIT License (MIT)
 
 Copyright (c) 2016 Vladimir Kharlampidi
 
@@ -602,8 +591,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
     repository: 'https://github.com/espresso3389/flutter_oss_licenses',
     authors: [],
     version: '2.0.2',
-    license:
-        '''MIT License
+    license: '''MIT License
 
 Copyright (c) 2019 Takashi Kawasaki
 
@@ -636,8 +624,7 @@ SOFTWARE.''',
         'https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/desktop_drop',
     authors: [],
     version: '0.4.4',
-    license:
-        '''Apache License
+    license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
@@ -849,8 +836,7 @@ SOFTWARE.''',
     repository: 'https://github.com/dart-lang/fake_async',
     authors: [],
     version: '1.3.1',
-    license:
-        '''Apache License
+    license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
@@ -1062,8 +1048,7 @@ SOFTWARE.''',
     repository: 'https://github.com/dart-lang/ffi',
     authors: [],
     version: '2.1.0',
-    license:
-        '''Copyright 2019, the Dart project authors. 
+    license: '''Copyright 2019, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -1101,8 +1086,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/google/file.dart/tree/master/packages/file',
     authors: [],
     version: '7.0.0',
-    license:
-        '''Copyright 2017, the Dart project authors. All rights reserved.
+    license: '''Copyright 2017, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
@@ -1140,8 +1124,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-windows/filepicker_windows',
     authors: [],
     version: '2.0.11',
-    license:
-        '''BSD 3-Clause License
+    license: '''BSD 3-Clause License
 
 Copyright (c) 2023, Dart | Windows
 
@@ -1181,8 +1164,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/bdlukaa/fluent_ui',
     authors: [],
     version: '4.8.5',
-    license:
-        '''Copyright 2020 Bruno D'Luka
+    license: '''Copyright 2020 Bruno D'Luka
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
@@ -1203,8 +1185,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     homepage: 'https://flutter.dev',
     authors: [],
     version: '3.16.9',
-    license:
-        '''Copyright 2014 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2014 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -1241,8 +1222,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/flutter_lints',
     authors: [],
     version: '3.0.1',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -1280,8 +1260,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/espresso3389/flutter_oss_licenses',
     authors: [],
     version: '2.0.1',
-    license:
-        '''MIT License
+    license: '''MIT License
 
 Copyright (c) 2019 Takashi Kawasaki
 
@@ -1314,8 +1293,7 @@ SOFTWARE.''',
         'https://github.com/flutter/packages/tree/main/packages/go_router',
     authors: [],
     version: '13.1.0',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -1351,8 +1329,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/http/tree/master/pkgs/http',
     authors: [],
     version: '1.2.0',
-    license:
-        '''Copyright 2014, the Dart project authors. 
+    license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -1390,8 +1367,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/http_parser',
     authors: [],
     version: '4.0.2',
-    license:
-        '''Copyright 2014, the Dart project authors. 
+    license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -1429,8 +1405,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/i18n/tree/main/pkgs/intl',
     authors: [],
     version: '0.18.1',
-    license:
-        '''Copyright 2013, the Dart project authors.
+    license: '''Copyright 2013, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -1468,8 +1443,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/js',
     authors: [],
     version: '0.6.7',
-    license:
-        '''Copyright 2012, the Dart project authors.
+    license: '''Copyright 2012, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -1508,8 +1482,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/google/json_serializable.dart/tree/master/json_annotation',
     authors: [],
     version: '4.8.1',
-    license:
-        '''Copyright 2017, the Dart project authors. All rights reserved.
+    license: '''Copyright 2017, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
@@ -1547,8 +1520,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/lints',
     authors: [],
     version: '3.0.0',
-    license:
-        '''Copyright 2021, the Dart project authors.
+    license: '''Copyright 2021, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -1586,8 +1558,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/SourceHorizon/logger',
     authors: [],
     version: '2.0.2+1',
-    license:
-        '''MIT License
+    license: '''MIT License
 
 Copyright (c) 2019 Simon Leier
 Copyright (c) 2023 Severin Hamader
@@ -1620,8 +1591,7 @@ SOFTWARE.''',
     repository: 'https://github.com/dart-lang/logging',
     authors: [],
     version: '1.2.0',
-    license:
-        '''Copyright 2013, the Dart project authors. 
+    license: '''Copyright 2013, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -1659,8 +1629,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/matcher',
     authors: [],
     version: '0.12.16',
-    license:
-        '''Copyright 2014, the Dart project authors. 
+    license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -1699,8 +1668,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/material-foundation/material-color-utilities/tree/main/dart',
     authors: [],
     version: '0.5.0',
-    license:
-        '''Apache License
+    license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
@@ -1912,8 +1880,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     homepage: 'https://github.com/fkleon/math-expressions',
     authors: [],
     version: '2.4.0',
-    license:
-        '''MIT License
+    license: '''MIT License
 
 Copyright (c) 2013 Frederik Leonhardt, Michael Frey
 
@@ -1945,8 +1912,7 @@ SOFTWARE.''',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/meta',
     authors: [],
     version: '1.10.0',
-    license:
-        '''Copyright 2016, the Dart project authors.
+    license: '''Copyright 2016, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -1984,8 +1950,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/rrousselGit/nested',
     authors: [],
     version: '1.0.0',
-    license:
-        '''MIT License
+    license: '''MIT License
 
 Copyright (c) 2019 Remi Rousselet
 
@@ -2019,8 +1984,7 @@ SOFTWARE.''',
         'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/package_info_plus/package_info_plus',
     authors: [],
     version: '5.0.1',
-    license:
-        '''Copyright 2017 The Chromium Authors. All rights reserved.
+    license: '''Copyright 2017 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -2060,8 +2024,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/',
     authors: [],
     version: '2.0.1',
-    license:
-        '''// Copyright 2017 The Chromium Authors. All rights reserved.
+    license: '''// Copyright 2017 The Chromium Authors. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -2100,8 +2063,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/pasteboard',
     authors: [],
     version: '0.2.0',
-    license:
-        '''Apache License
+    license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
@@ -2313,8 +2275,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/path',
     authors: [],
     version: '1.8.3',
-    license:
-        '''Copyright 2014, the Dart project authors. 
+    license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -2352,8 +2313,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_linux',
     authors: [],
     version: '2.2.1',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -2389,8 +2349,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_platform_interface',
     authors: [],
     version: '2.1.2',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -2426,8 +2385,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_windows',
     authors: [],
     version: '2.2.1',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -2464,8 +2422,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/platform',
     authors: [],
     version: '3.1.4',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -2502,8 +2459,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/plugin_platform_interface',
     authors: [],
     version: '2.1.8',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -2569,8 +2525,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
     repository: 'https://github.com/rrousselGit/provider',
     authors: [],
     version: '6.1.1',
-    license:
-        '''MIT License
+    license: '''MIT License
 
 Copyright (c) 2019 Remi Rousselet
 
@@ -2602,8 +2557,7 @@ SOFTWARE.''',
     homepage: 'https://github.com/techniboogie-dart/recase',
     authors: [],
     version: '4.1.0',
-    license:
-        '''Copyright 2017 Keith Elliott
+    license: '''Copyright 2017 Keith Elliott
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
@@ -2623,8 +2577,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     homepage: 'https://github.com/leanflutter/screen_retriever',
     authors: [],
     version: '0.1.9',
-    license:
-        '''MIT License
+    license: '''MIT License
 
 Copyright (c) 2022 LiJianying <lijy91@foxmail.com>
 
@@ -2656,8 +2609,7 @@ SOFTWARE.''',
     homepage: 'https://github.com/WinXaito/scroll_pos',
     authors: [],
     version: '0.5.0',
-    license:
-        '''MIT License
+    license: '''MIT License
 
 Copyright (c) 2021 WinXaito
 
@@ -2690,8 +2642,7 @@ SOFTWARE.''',
         'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences',
     authors: [],
     version: '2.2.2',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -2727,8 +2678,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_android',
     authors: [],
     version: '2.2.1',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -2765,8 +2715,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_foundation',
     authors: [],
     version: '2.3.5',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -2802,8 +2751,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_linux',
     authors: [],
     version: '2.3.2',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -2840,8 +2788,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_platform_interface',
     authors: [],
     version: '2.3.2',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -2877,8 +2824,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_web',
     authors: [],
     version: '2.2.2',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -2914,8 +2860,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_windows',
     authors: [],
     version: '2.3.2',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -2951,8 +2896,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/source_span',
     authors: [],
     version: '1.10.0',
-    license:
-        '''Copyright 2014, the Dart project authors. 
+    license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -2990,8 +2934,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/stack_trace',
     authors: [],
     version: '1.11.1',
-    license:
-        '''Copyright 2014, the Dart project authors.
+    license: '''Copyright 2014, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -3029,8 +2972,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/stream_channel',
     authors: [],
     version: '2.1.2',
-    license:
-        '''Copyright 2015, the Dart project authors. 
+    license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -3067,8 +3009,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/string_scanner',
     authors: [],
     version: '1.2.0',
-    license:
-        '''Copyright 2014, the Dart project authors. 
+    license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -3105,8 +3046,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/term_glyph',
     authors: [],
     version: '1.2.1',
-    license:
-        '''Copyright 2017, the Dart project authors. 
+    license: '''Copyright 2017, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -3144,8 +3084,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/test/tree/master/pkgs/test_api',
     authors: [],
     version: '0.6.1',
-    license:
-        '''Copyright 2018, the Dart project authors. 
+    license: '''Copyright 2018, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -3183,8 +3122,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/typed_data',
     authors: [],
     version: '1.3.2',
-    license:
-        '''Copyright 2015, the Dart project authors. 
+    license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -3223,8 +3161,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher',
     authors: [],
     version: '6.2.4',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -3260,8 +3197,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_android',
     authors: [],
     version: '6.2.2',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -3297,8 +3233,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_ios',
     authors: [],
     version: '6.2.4',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -3334,8 +3269,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_linux',
     authors: [],
     version: '3.1.1',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -3371,8 +3305,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_macos',
     authors: [],
     version: '3.1.0',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -3408,8 +3341,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_platform_interface',
     authors: [],
     version: '2.3.1',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -3445,8 +3377,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_web',
     authors: [],
     version: '2.2.3',
-    license:
-        '''url_launcher_web
+    license: '''url_launcher_web
 
 Copyright 2013 The Flutter Authors. All rights reserved.
 
@@ -3688,8 +3619,7 @@ platform_detect
         'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_windows',
     authors: [],
     version: '3.1.1',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -3724,8 +3654,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/google/vector_math.dart',
     authors: [],
     version: '2.1.4',
-    license:
-        '''Copyright 2015, Google Inc. All rights reserved.
+    license: '''Copyright 2015, Google Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -3782,8 +3711,7 @@ freely, subject to the following restrictions:
     repository: 'https://github.com/dart-lang/watcher',
     authors: [],
     version: '1.1.0',
-    license:
-        '''Copyright 2014, the Dart project authors. 
+    license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -3821,8 +3749,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/web',
     authors: [],
     version: '0.3.0',
-    license:
-        '''Copyright 2023, the Dart project authors.
+    license: '''Copyright 2023, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -3861,8 +3788,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-windows/win32',
     authors: [],
     version: '5.2.0',
-    license:
-        '''Copyright 2019, Dart | Windows. All rights reserved.
+    license: '''Copyright 2019, Dart | Windows. All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
@@ -3899,8 +3825,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     homepage: 'https://github.com/leanflutter/window_manager',
     authors: [],
     version: '0.3.8',
-    license:
-        '''MIT License
+    license: '''MIT License
 
 Copyright (c) 2022 LiJianying <lijy91@foxmail.com>
 
@@ -3933,8 +3858,7 @@ SOFTWARE.''',
         'https://github.com/flutter/packages/tree/main/packages/xdg_directories',
     authors: [],
     version: '1.0.4',
-    license:
-        '''Copyright 2013 The Flutter Authors. All rights reserved.
+    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -3970,8 +3894,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     repository: 'https://github.com/dart-lang/yaml',
     authors: [],
     version: '3.1.2',
-    license:
-        '''Copyright (c) 2014, the Dart project authors.
+    license: '''Copyright (c) 2014, the Dart project authors.
 Copyright (c) 2006, Kirill Simonov.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of

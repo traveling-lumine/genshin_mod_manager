@@ -19,9 +19,9 @@ class AppStateService with ChangeNotifier {
 
   SharedPreferences? _sharedPreferences;
 
-  PathW _modRoot = const PathW('.');
-  PathW _modExecFile = const PathW('.');
-  PathW _launcherFile = const PathW('.');
+  String _modRoot = '.';
+  String _modExecFile = '.';
+  String _launcherFile = '.';
   bool _runTogether = false;
   bool _moveOnDrag = false;
   bool _showFolderIcon = true;
@@ -31,11 +31,11 @@ class AppStateService with ChangeNotifier {
 
   Future<SharedPreferences> get initFuture => _initFuture;
 
-  PathW get modRoot => _modRoot;
+  String get modRoot => _modRoot;
 
-  PathW get modExecFile => _modExecFile;
+  String get modExecFile => _modExecFile;
 
-  PathW get launcherFile => _launcherFile;
+  String get launcherFile => _launcherFile;
 
   bool get runTogether => _runTogether;
 
@@ -65,30 +65,30 @@ class AppStateService with ChangeNotifier {
     initFuture = timeoutFuture.then((value) {
       _sharedPreferences = value;
 
-      const dotString = PathW('.');
+      const dotString = '.';
       final tDirRaw = value.getString(_targetDirKey);
-      final targetDir = tDirRaw == null ? dotString : PathW(tDirRaw);
+      final targetDir = tDirRaw ?? dotString;
 
       final mRootRaw = value.getString(modRootKey);
-      _modRoot = mRootRaw == null ? _modRoot : PathW(mRootRaw);
+      _modRoot = mRootRaw ?? _modRoot;
       if (_modRoot == dotString && targetDir != dotString) {
-        _modRoot = targetDir.join(const PathW('Mods'));
-        _sharedPreferences?.setString(modRootKey, _modRoot.asString);
+        _modRoot = targetDir.pJoin('Mods');
+        _sharedPreferences?.setString(modRootKey, _modRoot);
       }
 
       final mExecRaw = value.getString(modExecFileKey);
-      _modExecFile = mExecRaw == null ? _modExecFile : PathW(mExecRaw);
+      _modExecFile = mExecRaw ?? _modExecFile;
       if (_modExecFile == dotString && targetDir != dotString) {
-        _modExecFile = targetDir.join(const PathW('3DMigoto Loader.exe'));
-        _sharedPreferences?.setString(modExecFileKey, _modExecFile.asString);
+        _modExecFile = targetDir.pJoin('3DMigoto Loader.exe');
+        _sharedPreferences?.setString(modExecFileKey, _modExecFile);
       }
 
       if (targetDir != dotString) {
-        _sharedPreferences?.setString(_targetDirKey, dotString.asString);
+        _sharedPreferences?.setString(_targetDirKey, dotString);
       }
 
       final lFileRaw = value.getString(launcherFileKey);
-      _launcherFile = lFileRaw == null ? _launcherFile : PathW(lFileRaw);
+      _launcherFile = lFileRaw ?? _launcherFile;
 
       _runTogether = value.getBool(runTogetherKey) ?? _runTogether;
 
@@ -111,20 +111,20 @@ class AppStateService with ChangeNotifier {
     notifyListeners();
   }
 
-  set modRoot(PathW value) {
-    _sharedPreferences?.setString(modRootKey, value.asString);
+  set modRoot(String value) {
+    _sharedPreferences?.setString(modRootKey, value);
     _modRoot = value;
     notifyListeners();
   }
 
-  set modExecFile(PathW value) {
-    _sharedPreferences?.setString(modExecFileKey, value.asString);
+  set modExecFile(String value) {
+    _sharedPreferences?.setString(modExecFileKey, value);
     _modExecFile = value;
     notifyListeners();
   }
 
-  set launcherFile(PathW value) {
-    _sharedPreferences?.setString(launcherFileKey, value.asString);
+  set launcherFile(String value) {
+    _sharedPreferences?.setString(launcherFileKey, value);
     _launcherFile = value;
     notifyListeners();
   }

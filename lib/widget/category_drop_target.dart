@@ -33,21 +33,21 @@ class CategoryDropTarget extends StatelessWidget {
   void _dropFinishHandler(BuildContext context, DropDoneDetails details) {
     final appStateService = context.read<AppStateService>();
     final moveInsteadOfCopy = appStateService.moveOnDrag;
-    final modRoot = appStateService.modRoot.join(category.pathW);
-    final List<(Directory, PathW)> queue = [];
+    final modRoot = appStateService.modRoot.pJoin(category);
+    final List<(Directory, String)> queue = [];
     for (final xFile in details.files) {
-      final path = PathW(xFile.path);
-      if (!path.isDirectorySync) continue;
-      final dir = path.toDirectory;
-      final newPath = modRoot.join(path.basename);
-      if (newPath.isDirectorySync) {
+      final path = xFile.path;
+      if (!FileSystemEntity.isDirectorySync(path)) continue;
+      final dir = Directory(path);
+      final newPath = modRoot.pJoin(path.pBasename);
+      if (FileSystemEntity.isDirectorySync(newPath)) {
         queue.add((dir, newPath));
         continue;
       }
 
       if (moveInsteadOfCopy) {
         try {
-          dir.renameSyncPath(newPath);
+          dir.renameSync(newPath);
           logger.d('Moved $path to $newPath');
         } on FileSystemException {
           dir.copyToPath(newPath);
@@ -67,7 +67,7 @@ class CategoryDropTarget extends StatelessWidget {
       builder: (context, close) {
         final joined = queue.map((e) {
           final (dir, pw) = e;
-          return "'${dir.pathW.basename}' -> '${pw.basename.asString}'";
+          return "'${dir.path.pBasename}' -> '${pw.pBasename}'";
         }).join('\n');
         return InfoBar(
           title: const Text('Folder already exists'),

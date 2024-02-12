@@ -25,31 +25,29 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 class HomeShell extends StatelessWidget {
-  static const resourceDir = PathW('Resources');
+  static const resourceDir = 'Resources';
   final Widget child;
 
   const HomeShell({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    final modResourcePath = PathW(Platform.resolvedExecutable)
-        .dirname
-        .join(resourceDir)
-        .toDirectory
-      ..createSync();
-    final modRootValue =
-        context.select<AppStateService, PathW>((value) => value.modRoot);
+    final resourcePath =
+        Platform.resolvedExecutable.pDirname.pJoin(resourceDir);
+    Directory(resourcePath).createSync(recursive: true);
+    final modRootPath =
+        context.select<AppStateService, String>((value) => value.modRoot);
     return MultiProvider(
-      key: Key(modRootValue.asString),
+      key: Key(modRootPath),
       providers: [
         ChangeNotifierProvider(
           create: (context) => CategoryIconFolderObserverService(
-            targetDir: modResourcePath,
+            targetPath: resourcePath,
           ),
         ),
         ChangeNotifierProvider(
           create: (context) => RecursiveObserverService(
-            targetDir: modRootValue.toDirectory,
+            targetPath: modRootPath,
           ),
         ),
         ChangeNotifierProxyProvider2<AppStateService, RecursiveObserverService,
@@ -60,7 +58,7 @@ class HomeShell extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider<RecursiveObserverService, RootWatchService>(
           create: (context) => RootWatchService(
-            targetDir: modRootValue.toDirectory,
+            targetPath: modRootPath,
           ),
           update: (context, value, previous) =>
               previous!..update(value.lastEvent),
@@ -119,7 +117,7 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
         .categories
         .map((e) => _FolderPaneItem(
             category: e,
-            imageFile: findPreviewFileIn(imageFiles, name: e.pathW),
+            imageFile: findPreviewFileIn(imageFiles, name: e),
             onTap: () => context.go('/category/$e')))
         .toList(growable: false);
 
@@ -252,7 +250,7 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
 
   void _runMigoto() {
     final path = context.read<AppStateService>().modExecFile;
-    runProgram(path.toFile);
+    runProgram(File(path));
     displayInfoBar(
       context,
       builder: (context, close) {
@@ -267,7 +265,7 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
 
   void _runLauncher() {
     final launcher = context.read<AppStateService>().launcherFile;
-    runProgram(launcher.toFile);
+    runProgram(File(launcher));
     _logger.t('Ran launcher $launcher');
   }
 }

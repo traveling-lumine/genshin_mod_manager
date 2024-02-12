@@ -6,11 +6,11 @@ import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class ToggleableMod extends StatelessWidget {
-  static const shaderFixes = PathW('ShaderFixes');
+  static const shaderFixes = 'ShaderFixes';
   static final Logger logger = Logger();
 
   final Widget child;
-  final PathW dirPath;
+  final String dirPath;
 
   const ToggleableMod({
     super.key,
@@ -20,17 +20,16 @@ class ToggleableMod extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isEnabled = dirPath.basename.isEnabled;
+    final isEnabled = dirPath.pBasename.pIsEnabled;
     return GestureDetector(
       onTap: () {
         if (isEnabled) {
           disable(
-            shaderFixesDir: context
+            shaderFixesPath: context
                 .read<AppStateService>()
                 .modExecFile
-                .dirname
-                .join(shaderFixes)
-                .toDirectory,
+                .pDirname
+                .pJoin(shaderFixes),
             modPathW: dirPath,
             onModRenameClash: (p0) => showDirectoryExists(context, p0),
             onShaderDeleteFailed: (e) => errorDialog(
@@ -39,13 +38,12 @@ class ToggleableMod extends StatelessWidget {
           );
         } else {
           enable(
-            shaderFixesDir: context
+            shaderFixesPath: context
                 .read<AppStateService>()
                 .modExecFile
-                .dirname
-                .join(shaderFixes)
-                .toDirectory,
-            modPathW: dirPath,
+                .pDirname
+                .pJoin(shaderFixes),
+            modPath: dirPath,
             onModRenameClash: (p0) => showDirectoryExists(context, p0),
             onShaderExists: (e) =>
                 errorDialog(context, '${e.path} already exists!'),
@@ -66,8 +64,8 @@ class ToggleableMod extends StatelessWidget {
     );
   }
 
-  void showDirectoryExists(BuildContext context, PathW renameTarget) {
-    errorDialog(context, '${renameTarget.basename} directory already exists!');
+  void showDirectoryExists(BuildContext context, String renameTarget) {
+    errorDialog(context, '${renameTarget.pBasename} directory already exists!');
   }
 
   void errorDialog(BuildContext context, String text) {
