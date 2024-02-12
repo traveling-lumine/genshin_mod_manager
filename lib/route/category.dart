@@ -7,6 +7,8 @@ import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
 import 'package:genshin_mod_manager/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/widget/chara_mod_card.dart';
 import 'package:genshin_mod_manager/widget/preset_control.dart';
+import 'package:genshin_mod_manager/widget/thick_scrollbar.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class CategoryRoute extends StatelessWidget {
@@ -45,7 +47,7 @@ class CategoryRoute extends StatelessWidget {
         children: [
           PresetControlWidget(isLocal: true, category: category),
           SizedBox(
-            width: 60,
+            width: 110,
             child: RepaintBoundary(
               child: CommandBar(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -54,6 +56,13 @@ class CategoryRoute extends StatelessWidget {
                     icon: const Icon(FluentIcons.folder_open),
                     onPressed: () {
                       openFolder(categoryDir);
+                    },
+                  ),
+                  CommandBarButton(
+                    icon: const Icon(FluentIcons.download),
+                    onPressed: () {
+                      final escapedCategory = Uri.encodeComponent(category);
+                      context.push('/nahidastore?category=$escapedCategory');
                     },
                   ),
                 ],
@@ -66,14 +75,7 @@ class CategoryRoute extends StatelessWidget {
   }
 
   Widget _buildContent() {
-    return FluentTheme(
-      data: FluentThemeData(
-        scrollbarTheme: ScrollbarThemeData(
-          thickness: 8,
-          hoveringThickness: 10,
-          scrollbarColor: Colors.grey[140],
-        ),
-      ),
+    return ThickScrollbar(
       child: Selector<AppStateService, bool>(
         selector: (p0, p1) => p1.showEnabledModsFirst,
         builder: (context, enabledFirst, child) {

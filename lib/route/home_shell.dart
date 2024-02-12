@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
+import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:genshin_mod_manager/base/appbar.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
@@ -109,18 +111,6 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
       _checkUpdate(context);
     }
 
-    final imageFiles =
-        context.select<CategoryIconFolderObserverService, List<File>>(
-            (value) => value.curFiles);
-    final items = context
-        .watch<RootWatchService>()
-        .categories
-        .map((e) => _FolderPaneItem(
-            category: e,
-            imageFile: findPreviewFileIn(imageFiles, name: e),
-            onTap: () => context.go('/category/$e')))
-        .toList(growable: false);
-
     final footerItems = [
       PaneItemSeparator(),
       ..._buildPaneItemActions(),
@@ -137,7 +127,7 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
       transitionBuilder: (child, animation) =>
           SuppressPageTransition(child: child),
       appBar: _buildAppbar(),
-      pane: _buildPane(items, footerItems),
+      pane: _buildPane(context, footerItems),
       paneBodyBuilder: (item, body) => widget.child,
     );
   }
@@ -169,17 +159,43 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
   }
 
   NavigationPane _buildPane(
-      List<_FolderPaneItem> items, List<NavigationPaneItem> footerItems) {
+      BuildContext context, List<NavigationPaneItem> footerItems) {
+    final imageFiles =
+        context.select<CategoryIconFolderObserverService, List<File>>(
+            (value) => value.curFiles);
+    final categories = context.watch<RootWatchService>().categories;
+    final items = categories
+        .map((e) => _FolderPaneItem(
+            category: e,
+            imageFile: findPreviewFileIn(imageFiles, name: e),
+            onTap: () => context.go('/category/$e')))
+        .toList(growable: false);
     final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
           ..removeWhere((i) => i is! PaneItem || i is PaneItemAction))
         .cast<PaneItem>();
-    final currentRoute = Uri.decodeFull(GoRouterState.of(context).uri.path);
+    final uri = GoRouterState.of(context).uri;
+    final currentRoute = Uri.decodeFull(uri.path);
     final index = effectiveItems.indexWhere((e) {
       final key = e.key;
       if (key is! ValueKey<String>) return false;
       return key.value == currentRoute;
     });
     final int? selected = index != -1 ? index : null;
+    final uriSegments = uri.pathSegments;
+    if (uriSegments.length >= 2 &&
+        uriSegments[0] == 'category' &&
+        !categories.contains(uriSegments[1])) {
+      final String destination;
+      if (categories.isNotEmpty) {
+        final index = _search(categories, uriSegments[1]);
+        destination = '/category/${categories[index]}';
+      } else {
+        destination = '/';
+      }
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        context.go(destination);
+      });
+    }
     return NavigationPane(
       selected: selected,
       items: items.cast<NavigationPaneItem>(),
@@ -504,4 +520,22 @@ Future<void> _checkUpdate(BuildContext context) async {
       onClose: close,
     ),
   ));
+}
+
+int _search(List<String> categories, String uriSegment) {
+  final length = categories.length;
+  int lo = 0;
+  int hi = length;
+  while (lo < hi) {
+    int mid = lo + ((hi - lo) >> 1);
+    if (compareNatural(categories[mid], uriSegment) < 0) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
+    }
+  }
+  if (lo >= length) {
+    return length - 1;
+  }
+  return lo;
 }

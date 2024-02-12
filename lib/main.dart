@@ -6,6 +6,7 @@ import 'package:genshin_mod_manager/route/category.dart';
 import 'package:genshin_mod_manager/route/home_shell.dart';
 import 'package:genshin_mod_manager/route/license.dart';
 import 'package:genshin_mod_manager/route/loading.dart';
+import 'package:genshin_mod_manager/route/nahida_store.dart';
 import 'package:genshin_mod_manager/route/setting.dart';
 import 'package:genshin_mod_manager/route/welcome.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
@@ -127,6 +128,13 @@ class _MyApp extends StatelessWidget {
             builder: (context, state) => CategoryRoute(
               category: state.pathParameters['name']!,
             ),
+          ),
+          GoRoute(
+            path: '/nahidastore',
+            builder: (context, state) {
+              final category = state.uri.queryParameters['category'];
+              return NahidaStoreRoute(category: category!);
+            },
           ),
         ],
       ),
