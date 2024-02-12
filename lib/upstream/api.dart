@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:http/http.dart' as http;
 
 const _base = "https://nahida.live";
@@ -10,12 +11,13 @@ class NahidaliveElement {
   final String sha256;
   final String title;
   final String description;
-  final String virustotalUrl;
+  final String? arcaUrl;
+  final String? virustotalUrl;
   final List<String> tags;
   final String? expirationDate;
-  final int downloadsCount;
   final String uploadDate;
   final String previewUrl;
+  final bool koreaOnly;
 
   const NahidaliveElement({
     required this.uuid,
@@ -23,12 +25,13 @@ class NahidaliveElement {
     required this.sha256,
     required this.title,
     required this.description,
-    required this.virustotalUrl,
+    this.arcaUrl,
+    this.virustotalUrl,
     required this.tags,
-    required this.expirationDate,
-    required this.downloadsCount,
+    this.expirationDate,
     required this.uploadDate,
     required this.previewUrl,
+    required this.koreaOnly,
   });
 
   factory NahidaliveElement.fromJson(Map<String, dynamic> json) {
@@ -39,12 +42,13 @@ class NahidaliveElement {
         'sha256': String sha256,
         'title': String title,
         'description': String description,
-        'virustotal_url': String virustotalUrl,
+        'arca_url': String? arcaUrl,
+        'virustotal_url': String? virustotalUrl,
         'tags': List<dynamic> tags,
         'expiration_date': String? expirationDate,
-        'downloads_count': int downloadsCount,
         'upload_date': String uploadDate,
         'preview_url': String previewUrl,
+        'koreaonly': bool koreaonly,
       } =>
         NahidaliveElement(
           uuid: uuid,
@@ -52,20 +56,34 @@ class NahidaliveElement {
           sha256: sha256,
           title: title,
           description: description,
+          arcaUrl: arcaUrl,
           virustotalUrl: virustotalUrl,
           tags: tags.cast<String>(),
           expirationDate: expirationDate,
-          downloadsCount: downloadsCount,
           uploadDate: uploadDate,
           previewUrl: previewUrl,
+          koreaOnly: koreaonly,
         ),
-      _ => throw const FormatException('Failed to load album.'),
+      _ => throw const FormatException('Unknown NahidaliveElement format.'),
     };
   }
 
   @override
   String toString() {
-    return 'NahidaliveElement(uuid: $uuid, version: $version, sha256: $sha256, title: $title, description: $description, virustotalUrl: $virustotalUrl, tags: $tags, expirationDate: $expirationDate, downloadsCount: $downloadsCount, uploadDate: $uploadDate, previewUrl: $previewUrl)';
+    return 'NahidaliveElement('
+        'uuid: $uuid, '
+        'version: $version, '
+        'sha256: $sha256, '
+        'title: $title, '
+        'description: $description, '
+        'arcaUrl: $arcaUrl, '
+        'virustotalUrl: $virustotalUrl, '
+        'tags: $tags, '
+        'expirationDate: $expirationDate, '
+        'uploadDate: $uploadDate, '
+        'previewUrl: $previewUrl, '
+        'koreaOnly: $koreaOnly'
+        ')';
   }
 }
 
@@ -86,7 +104,7 @@ class NahidaliveDownloadElement {
     return switch (json) {
       {
         'status': bool status,
-        'download_url': String? downloadUrl,
+        'download_url': String downloadUrl,
       } =>
         NahidaliveDownloadElement(
           status: status,
@@ -94,21 +112,27 @@ class NahidaliveDownloadElement {
         ),
       {
         'status': bool status,
-        'error-codes': String? errorCodes,
-        'message': String? message,
+        'error-codes': String errorCodes,
+        'message': String message,
       } =>
         NahidaliveDownloadElement(
           status: status,
           errorCodes: errorCodes,
           message: message,
         ),
-      _ => throw const FormatException('Failed to load album.'),
+      _ => throw const FormatException(
+          'Unknown NahidaliveDownloadElement format.'),
     };
   }
 
   @override
   String toString() {
-    return 'NahidaliveDownloadElement(status: $status, errorCodes: $errorCodes, message: $message, downloadUrl: $downloadUrl)';
+    return 'NahidaliveDownloadElement('
+        'status: $status, '
+        'errorCodes: $errorCodes, '
+        'message: $message, '
+        'downloadUrl: $downloadUrl'
+        ')';
   }
 }
 
@@ -123,7 +147,7 @@ class NahidaliveAPI {
           .map((dynamic json) => NahidaliveElement.fromJson(json))
           .toList();
     } else {
-      throw Exception('Failed to load album');
+      throw Exception('fetch list failed');
     }
   }
 
@@ -133,7 +157,7 @@ class NahidaliveAPI {
     if (response.statusCode == 200) {
       return NahidaliveElement.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to load album');
+      throw Exception('fetch element failed');
     }
   }
 
@@ -143,7 +167,7 @@ class NahidaliveAPI {
     if (response.statusCode == 200) {
       return NahidaliveDownloadElement.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to load album');
+      throw Exception('download url failed');
     }
   }
 
@@ -154,10 +178,10 @@ class NahidaliveAPI {
       if (response.statusCode == 200) {
         return response.bodyBytes;
       } else {
-        throw Exception('Failed to load album');
+        throw Exception('download failed');
       }
     } else {
-      throw Exception('Failed to load album');
+      throw Exception('Wrong download element status');
     }
   }
 }
