@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoadingRoute extends StatelessWidget {
-  static const String _destinationRoute = '/setting';
+  static const String _destinationRoute = '/';
   static final Logger logger = Logger();
 
   const LoadingRoute({super.key});

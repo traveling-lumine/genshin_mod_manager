@@ -7,6 +7,7 @@ import 'package:genshin_mod_manager/route/home_shell.dart';
 import 'package:genshin_mod_manager/route/license.dart';
 import 'package:genshin_mod_manager/route/loading.dart';
 import 'package:genshin_mod_manager/route/setting.dart';
+import 'package:genshin_mod_manager/route/welcome.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -112,6 +113,10 @@ class _MyApp extends StatelessWidget {
       ShellRoute(
         builder: (context, state, child) => HomeShell(child: child),
         routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => const WelcomeRoute(),
+          ),
           GoRoute(
             path: '/setting',
             builder: (context, state) => const SettingRoute(),
