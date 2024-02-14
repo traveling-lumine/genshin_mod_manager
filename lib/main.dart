@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/route/category.dart';
 import 'package:genshin_mod_manager/route/home_shell.dart';
 import 'package:genshin_mod_manager/route/license.dart';
@@ -18,7 +19,9 @@ const _minWindowSize = Size(600, 600);
 
 void main() async {
   await _initialize();
-  _registerErrorHandlers();
+  if (!kDebugMode) {
+    _registerErrorHandlers();
+  }
   runApp(_MyApp());
 }
 
@@ -146,6 +149,7 @@ class _MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => AppStateService(),
       child: FluentApp.router(
+        // darkTheme: FluentThemeData.dark(),
         title: 'Genshin Mod Manager',
         routerDelegate: _router.routerDelegate,
         routeInformationParser: _router.routeInformationParser,

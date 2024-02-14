@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -14,7 +15,7 @@ class NahidaliveElement {
   final String description;
   final String? arcaUrl;
   final String? virustotalUrl;
-  final List<String> tags;
+  final UnmodifiableListView<String> tags;
   final String? expirationDate;
   final String uploadDate;
   final String previewUrl;
@@ -59,7 +60,7 @@ class NahidaliveElement {
           description: description,
           arcaUrl: arcaUrl,
           virustotalUrl: virustotalUrl,
-          tags: tags.cast<String>(),
+          tags: UnmodifiableListView(tags.cast<String>()),
           expirationDate: expirationDate,
           uploadDate: uploadDate,
           previewUrl: previewUrl,

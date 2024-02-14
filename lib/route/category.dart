@@ -46,26 +46,29 @@ class CategoryRoute extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           PresetControlWidget(isLocal: true, category: category),
-          SizedBox(
-            width: 110,
-            child: RepaintBoundary(
-              child: CommandBar(
-                mainAxisAlignment: MainAxisAlignment.end,
-                primaryItems: [
-                  CommandBarButton(
-                    icon: const Icon(FluentIcons.folder_open),
-                    onPressed: () {
-                      openFolder(categoryDir);
-                    },
-                  ),
-                  CommandBarButton(
-                    icon: const Icon(FluentIcons.download),
-                    onPressed: () {
-                      final escapedCategory = Uri.encodeComponent(category);
-                      context.push('/nahidastore?category=$escapedCategory');
-                    },
-                  ),
-                ],
+          Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: SizedBox(
+              width: 56,
+              child: RepaintBoundary(
+                child: CommandBar(
+                  overflowBehavior: CommandBarOverflowBehavior.clip,
+                  primaryItems: [
+                    CommandBarButton(
+                      icon: const Icon(FluentIcons.folder_open),
+                      onPressed: () {
+                        openFolder(categoryDir);
+                      },
+                    ),
+                    CommandBarButton(
+                      icon: const Icon(FluentIcons.download),
+                      onPressed: () {
+                        final escapedCategory = Uri.encodeComponent(category);
+                        context.push('/nahidastore?category=$escapedCategory');
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

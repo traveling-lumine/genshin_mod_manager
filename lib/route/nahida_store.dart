@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/gestures.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
@@ -15,31 +14,60 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class NahidaStoreRoute extends StatelessWidget {
-  final _api = NahidaliveAPI();
+class NahidaStoreRoute extends StatefulWidget {
   final String category;
 
-  NahidaStoreRoute({super.key, required this.category});
+  const NahidaStoreRoute({super.key, required this.category});
+
+  @override
+  State<NahidaStoreRoute> createState() => _NahidaStoreRouteState();
+}
+
+class _NahidaStoreRouteState extends State<NahidaStoreRoute> {
+  final _api = NahidaliveAPI();
+  ScrollController _scrollController = ScrollController();
+  late Future<List<NahidaliveElement>> future = _api.fetchNahidaliveElements();
 
   @override
   Widget build(BuildContext context) {
     return ScaffoldPage.withPadding(
       header: PageHeader(
-        title: Text('Akasha → $category'),
+        title: Text('${widget.category} ← Akasha'),
         leading: () {
           if (context.canPop()) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: IconButton(
-                icon: const Icon(FluentIcons.back),
-                onPressed: () => context.pop(),
+              child: RepaintBoundary(
+                child: IconButton(
+                  icon: const Icon(FluentIcons.back),
+                  onPressed: () => context.pop(),
+                ),
               ),
             );
           }
         }(),
+        commandBar: RepaintBoundary(
+          child: CommandBar(
+            mainAxisAlignment: MainAxisAlignment.end,
+            primaryItems: [
+              CommandBarButton(
+                icon: const Icon(FluentIcons.refresh),
+                onPressed: () {
+                  setState(() {
+                    future = _api.fetchNahidaliveElements();
+                    final prevController = _scrollController;
+                    _scrollController = ScrollController(
+                      initialScrollOffset: prevController.offset,
+                    );
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
       ),
       content: FutureBuilder(
-        future: _api.fetchNahidaliveElements(),
+        future: future,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: ProgressRing());
@@ -48,6 +76,7 @@ class NahidaStoreRoute extends StatelessWidget {
             final data = snapshot.data!;
             return ThickScrollbar(
               child: GridView.builder(
+                controller: _scrollController,
                 gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
                   minCrossAxisExtent: 500,
                   crossAxisSpacing: 10,
@@ -55,8 +84,13 @@ class NahidaStoreRoute extends StatelessWidget {
                 ),
                 itemCount: data.length,
                 itemBuilder: (context, index) {
-                  return _StoreElement(
-                      element: data[index], api: _api, category: category);
+                  return RevertScrollbar(
+                    child: _StoreElement(
+                      element: data[index],
+                      api: _api,
+                      category: widget.category,
+                    ),
+                  );
                 },
               ),
             );
@@ -86,81 +120,186 @@ class _StoreElement extends StatelessWidget {
     final image = Image.network(
       element.previewUrl,
       fit: BoxFit.contain,
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        return GestureDetector(
+          onTap: () => showDialog(
+            context: context,
+            builder: (context) => GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              onSecondaryTap: () => Navigator.of(context).pop(),
+              child: child,
+            ),
+          ),
+          child: child,
+        );
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        }
+        final expectedTotalBytes = loadingProgress.expectedTotalBytes;
+        final value = expectedTotalBytes != null
+            ? loadingProgress.cumulativeBytesLoaded / expectedTotalBytes
+            : null;
+        return Center(
+          child: ProgressRing(
+            value: value,
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(FluentIcons.error),
+            Text('Failed to load image: ${error.runtimeType}\n$error'),
+          ],
+        );
+      },
     );
+    final primaryItems = <CommandBarItem>[];
+    final virustotalUrl = element.virustotalUrl;
+    final arcaUrl = element.arcaUrl;
+    if (virustotalUrl != null && virustotalUrl.isNotEmpty) {
+      primaryItems.add(CommandBarButton(
+        onPressed: () => launchUrl(Uri.parse(virustotalUrl)),
+        icon: const Icon(FluentIcons.shield_alert),
+      ));
+    }
+    if (arcaUrl != null && arcaUrl.isNotEmpty) {
+      primaryItems.add(CommandBarButton(
+        onPressed: () => launchUrl(Uri.parse(arcaUrl)),
+        icon: const ImageIcon(
+          AssetImage('images/arca_logo.png'),
+        ),
+      ));
+    }
+    primaryItems.add(CommandBarButton(
+      onPressed: () => showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (dialogContext) => _downloadDialog(dialogContext, context),
+      ),
+      icon: const Icon(FluentIcons.download),
+    ));
+    final double commandWidth;
+    switch (primaryItems.length) {
+      case 1:
+        commandWidth = 42;
+        break;
+      case 2:
+        commandWidth = 70;
+        break;
+      case 3:
+        commandWidth = 98;
+        break;
+      default:
+        throw ArgumentError('Too many primary items');
+    }
     return Card(
       child: Column(
         children: [
           Expanded(
             flex: 1,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        element.title,
-                        style: FluentTheme.of(context).typography.subtitle,
-                      ),
-                    ),
-                    RepaintBoundary(
-                      child: Button(
-                        onPressed: () => showDialog(
-                          context: context,
-                          barrierDismissible: true,
-                          builder: (dialogContext) =>
-                              _downloadDialog(dialogContext, context),
-                        ),
-                        child: const Icon(FluentIcons.download),
-                      ),
-                    ),
-                  ],
-                ),
-                Text(element.description),
-                if (element.tags.isNotEmpty)
-                  Text('Tags: ${element.tags.join(', ')}'),
-                if (element.arcaUrl != null)
-                  Center(
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: element.arcaUrl,
-                            style: TextStyle(
-                              color: Colors.blue,
-                              decoration: TextDecoration.underline,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap =
-                                  () => launchUrl(Uri.parse(element.arcaUrl!)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+            child: _buildDescriptionColumn(context, commandWidth, primaryItems),
           ),
           Expanded(
             flex: 2,
             child: Center(
-              child: GestureDetector(
-                onTap: () => showDialog(
-                  context: context,
-                  builder: (context) => GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    onSecondaryTap: () => Navigator.of(context).pop(),
-                    child: image,
-                  ),
-                ),
-                child: image,
-              ),
+              child: image,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDescriptionColumn(BuildContext context, double commandWidth,
+      List<CommandBarItem> primaryItems) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                element.title,
+                style: FluentTheme.of(context).typography.subtitle,
+              ),
+            ),
+            RepaintBoundary(
+              child: SizedBox(
+                width: commandWidth,
+                child: CommandBarCard(
+                  child: CommandBar(
+                    overflowBehavior: CommandBarOverflowBehavior.clip,
+                    primaryItems: primaryItems,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            child: SizedBox(
+              width: double.infinity,
+              child: Text(element.description),
+            ),
+          ),
+        ),
+        const Expanded(
+          flex: 0,
+          child: SizedBox(),
+        ),
+        if (element.tags.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Wrap(
+              runSpacing: 4,
+              children: [
+                ...element.tags.map((e) {
+                  final isBright = FluentTheme.of(context).brightness.isLight;
+                  Color color = isBright ? Colors.grey : Colors.grey[40];
+                  final nsfwTags = [
+                    'nsfw',
+                    '18+',
+                    'r18',
+                    '19',
+                    'hentai',
+                  ];
+                  if (nsfwTags.contains(e.toLowerCase())) {
+                    color = Colors.red;
+                  }
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 1,
+                    ),
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: color,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Text(
+                      e,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        const SizedBox(height: 10),
+      ],
     );
   }
 
@@ -240,11 +379,10 @@ class _StoreElement extends StatelessWidget {
       return;
     }
     if (url.status) {
-      final parse = Uri.parse(url.downloadUrl!);
       final data = await api.download(url);
       if (!context.mounted) return;
       final length = data.length;
-      final filename = parse.pathSegments.last;
+      final filename = element.title;
       if (await _downloadFile(context, filename, data)) return;
       if (!context.mounted) return;
       unawaited(displayInfoBar(
