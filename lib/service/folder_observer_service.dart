@@ -6,21 +6,16 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 
-class CategoryIconFolderObserverService with ChangeNotifier {
+abstract class _StreamObserverService extends ChangeNotifier {
   final String targetPath;
   late StreamSubscription<FileSystemEvent> _subscription;
 
-  List<File> _curFiles;
-
-  List<File> get curFiles => _curFiles;
-
-  CategoryIconFolderObserverService({required this.targetPath})
-      : _curFiles = getFilesUnder(targetPath) {
-    _subscription = Directory(targetPath).watch().listen((event) {
-      _curFiles = getFilesUnder(targetPath);
-      notifyListeners();
-    });
+  _StreamObserverService({required this.targetPath, required bool recursive}) {
+    final stream = Directory(targetPath).watch(recursive: recursive);
+    _subscription = stream.listen(listener);
   }
+
+  void listener(FileSystemEvent event);
 
   @override
   void dispose() {
@@ -29,32 +24,37 @@ class CategoryIconFolderObserverService with ChangeNotifier {
   }
 }
 
-class RecursiveObserverService with ChangeNotifier {
-  final String targetPath;
-  late StreamSubscription<FileSystemEvent> _subscription;
+class CategoryIconFolderObserverService extends _StreamObserverService {
+  List<File> _curFiles;
 
+  List<File> get curFiles => UnmodifiableListView(_curFiles);
+
+  CategoryIconFolderObserverService({required super.targetPath})
+      : _curFiles = getFilesUnder(targetPath),
+        super(recursive: false);
+
+  @override
+  void listener(FileSystemEvent event) {
+    _curFiles = getFilesUnder(targetPath);
+    notifyListeners();
+  }
+}
+
+class RecursiveObserverService extends _StreamObserverService {
   FileSystemEvent? _lastEvent;
 
   FileSystemEvent? get lastEvent => _lastEvent;
 
-  RecursiveObserverService({required this.targetPath}) {
-    _subscription =
-        Directory(targetPath).watch(recursive: true).listen((event) {
-      _lastEvent = event;
-      notifyListeners();
-    });
-  }
+  RecursiveObserverService({required super.targetPath})
+      : super(recursive: true);
 
-  void forceUpdate() {
-    _lastEvent = null;
+  @override
+  void listener(FileSystemEvent? event) {
+    _lastEvent = event;
     notifyListeners();
   }
 
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
-  }
+  void forceUpdate() => listener(null);
 }
 
 class RootWatchService with ChangeNotifier {
