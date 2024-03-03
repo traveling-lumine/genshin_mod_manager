@@ -81,6 +81,7 @@ class _NahidaStoreRouteState extends State<NahidaStoreRoute> {
                   minCrossAxisExtent: 500,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
+                  mainAxisExtent: 500,
                 ),
                 itemCount: data.length,
                 itemBuilder: (context, index) {
