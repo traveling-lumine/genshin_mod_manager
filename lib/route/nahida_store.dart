@@ -8,6 +8,7 @@ import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/tag_parser/tag_parser.dart';
 import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
 import 'package:genshin_mod_manager/upstream/akasha.dart';
 import 'package:genshin_mod_manager/widget/thick_scrollbar.dart';
@@ -27,6 +28,7 @@ class NahidaStoreRoute extends StatefulWidget {
 class _NahidaStoreRouteState extends State<NahidaStoreRoute> {
   final _api = NahidaliveAPI();
   ScrollController _scrollController = ScrollController();
+  TagParseElement? _tagFilter;
   late Future<List<NahidaliveElement>> future = _api.fetchNahidaliveElements();
 
   @override
@@ -48,20 +50,58 @@ class _NahidaStoreRouteState extends State<NahidaStoreRoute> {
           }
         }(),
         commandBar: RepaintBoundary(
-          child: CommandBar(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            primaryItems: [
-              CommandBarButton(
-                icon: const Icon(FluentIcons.refresh),
-                onPressed: () {
-                  setState(() {
-                    future = _api.fetchNahidaliveElements();
-                    final prevController = _scrollController;
-                    _scrollController = ScrollController(
-                      initialScrollOffset: prevController.offset,
-                    );
-                  });
-                },
+            children: [
+              SizedBox(
+                width: 300,
+                child: TextFormBox(
+                  autovalidateMode: AutovalidateMode.always,
+                  placeholder: 'Search tags',
+                  onChanged: (value) {
+                    try {
+                      final filter = parseTagQuery(value);
+                      setState(() {
+                        _tagFilter = filter;
+                      });
+                    } catch (e) {
+                      setState(() {
+                        _tagFilter = null;
+                      });
+                    }
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return null;
+                    try {
+                      parseTagQuery(value);
+                    } catch (e) {
+                      return e.toString();
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              SizedBox(
+                width: 42,
+                child: CommandBar(
+                  overflowBehavior: CommandBarOverflowBehavior.clip,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  primaryItems: [
+                    CommandBarButton(
+                      icon: const Icon(FluentIcons.refresh),
+                      onPressed: () {
+                        setState(() {
+                          future = _api.fetchNahidaliveElements();
+                          final prevController = _scrollController;
+                          _scrollController = ScrollController(
+                            initialScrollOffset: prevController.offset,
+                          );
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -74,7 +114,16 @@ class _NahidaStoreRouteState extends State<NahidaStoreRoute> {
             return const Center(child: ProgressRing());
           }
           if (snapshot.hasData) {
-            final data = snapshot.data!;
+            final data = snapshot.data!.where((element) {
+              final tagMap = {for (var e in element.tags) e: true};
+              try {
+                final filter = _tagFilter;
+                if (filter == null) return true;
+                return filter.evaluate(tagMap);
+              } catch (e) {
+                return true;
+              }
+            }).toList(growable: false);
             return ThickScrollbar(
               child: GridView.builder(
                 controller: _scrollController,
