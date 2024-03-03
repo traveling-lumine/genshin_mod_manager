@@ -3,110 +3,110 @@ import 'dart:io';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 
-const kShaderFixes = PathW('ShaderFixes');
+const kShaderFixes = 'ShaderFixes';
 
 void enable({
-  required Directory shaderFixesDir,
-  required PathW modPathW,
-  void Function(PathW)? onModRenameClash,
+  required String shaderFixesPath,
+  required String modPath,
+  void Function(String)? onModRenameClash,
   void Function(FileSystemException)? onShaderExists,
   void Function()? onModRenameFailed,
 }) {
-  if (!modPathW.toDirectory.existsSync()) return;
+  if (!Directory(modPath).existsSync()) return;
 
-  List<File> shaderFilenames = _getModShaders(modPathW);
-  final PathW renameTarget =
-      modPathW.dirname.join(modPathW.basename.enabledForm);
-  if (renameTarget.toDirectory.existsSync()) {
+  List<File> shaderFilenames = _getModShaders(modPath);
+  final String renameTarget =
+      modPath.pDirname.pJoin(modPath.pBasename.pEnabledForm);
+  if (Directory(renameTarget).existsSync()) {
     onModRenameClash?.call(renameTarget);
     return;
   }
   try {
-    _copyShaders(shaderFixesDir, shaderFilenames);
+    _copyShaders(shaderFixesPath, shaderFilenames);
   } on FileSystemException catch (e) {
     onShaderExists?.call(e);
     return;
   }
   try {
-    modPathW.toDirectory.renameSyncPath(renameTarget);
+    Directory(modPath).renameSync(renameTarget);
   } on PathAccessException {
     onModRenameFailed?.call();
-    _deleteShaders(shaderFixesDir, shaderFilenames);
+    _deleteShaders(shaderFixesPath, shaderFilenames);
   }
 }
 
 void disable({
-  required Directory shaderFixesDir,
-  required PathW modPathW,
-  void Function(PathW)? onModRenameClash,
+  required String shaderFixesPath,
+  required String modPathW,
+  void Function(String)? onModRenameClash,
   void Function(Object)? onShaderDeleteFailed,
   void Function()? onModRenameFailed,
 }) {
-  if (!modPathW.toDirectory.existsSync()) return;
+  if (!Directory(modPathW).existsSync()) return;
 
   List<File> shaderFilenames = _getModShaders(modPathW);
-  final PathW renameTarget =
-      modPathW.dirname.join(modPathW.basename.disabledForm);
-  if (renameTarget.toDirectory.existsSync()) {
+  final String renameTarget =
+      modPathW.pDirname.pJoin(modPathW.pBasename.pDisabledForm);
+  if (Directory(renameTarget).existsSync()) {
     onModRenameClash?.call(renameTarget);
     return;
   }
   try {
-    _deleteShaders(shaderFixesDir, shaderFilenames);
+    _deleteShaders(shaderFixesPath, shaderFilenames);
   } catch (e) {
     onShaderDeleteFailed?.call(e);
     return;
   }
   try {
-    modPathW.toDirectory.renameSyncPath(renameTarget);
+    Directory(modPathW).renameSync(renameTarget);
   } on PathAccessException {
     onModRenameFailed?.call();
-    _copyShaders(shaderFixesDir, shaderFilenames);
+    _copyShaders(shaderFixesPath, shaderFilenames);
   }
 }
 
-List<File> _getModShaders(PathW modPathW) {
+List<File> _getModShaders(String modPath) {
   final List<File> shaderFilenames = [];
-  final modShaderDir = modPathW.join(kShaderFixes).toDirectory;
+  final modShaderPath = modPath.pJoin(kShaderFixes);
   try {
-    shaderFilenames.addAll(getFilesUnder(modShaderDir));
+    shaderFilenames.addAll(getFSEUnder<File>(modShaderPath));
   } on PathNotFoundException {
     // _logger.i(e);
   }
   return shaderFilenames;
 }
 
-void _copyShaders(Directory targetDir, List<File> shaderFiles) {
+void _copyShaders(String targetPath, List<File> shaderFiles) {
   // check for existence first
   _shaderFinder(
-    targetDir,
+    targetPath,
     shaderFiles,
     (found) => throw FileSystemException(
       'Target directory is not empty',
-      found.pathW.basename.asString,
+      found.path.pBasename,
     ),
   );
 
   for (final elem in shaderFiles) {
-    final modFilename = elem.pathW.basename;
-    final moveName = targetDir.pathW.join(modFilename);
-    elem.copySyncPath(moveName);
+    final modFilename = elem.path.pBasename;
+    final moveName = targetPath.pJoin(modFilename);
+    elem.copySync(moveName);
   }
 }
 
-void _deleteShaders(Directory targetDir, List<File> shaderFiles) {
-  _shaderFinder(targetDir, shaderFiles, (found) => found.deleteSync());
+void _deleteShaders(String targetPath, List<File> shaderFiles) {
+  _shaderFinder(targetPath, shaderFiles, (found) => found.deleteSync());
 }
 
 void _shaderFinder(
-  Directory targetDir,
+  String targetPath,
   List<File> shaderFiles,
   void Function(File found) onFound,
 ) {
-  final programShadersMap = Map<PathW, File>.fromEntries(
-    getFilesUnder(targetDir).map((e) => MapEntry(e.pathW.basename, e)),
+  final programShadersMap = Map<String, File>.fromEntries(
+    getFSEUnder<File>(targetPath).map((e) => MapEntry(e.path.pBasename, e)),
   );
-  final shaderSets = shaderFiles.map((e) => e.pathW.basename).toSet();
+  final shaderSets = shaderFiles.map((e) => e.path.pBasename).toSet();
   final inter = programShadersMap.keys.toSet().intersection(shaderSets);
   for (final elem in inter) {
     final found = programShadersMap[elem]!;

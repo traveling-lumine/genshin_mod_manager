@@ -1,6 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:window_manager/window_manager.dart';
 
+const kWindowButtonWidth = 138.0;
+
 NavigationAppBar getAppbar(String text) {
   return NavigationAppBar(
     actions: const WindowButtons(),
@@ -20,9 +22,9 @@ class WindowButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const SizedBox(
-      width: 138,
+      width: kWindowButtonWidth,
       height: 50,
-      child: WindowCaption(),
+      child: RepaintBoundary(child: WindowCaption()),
     );
   }
 }

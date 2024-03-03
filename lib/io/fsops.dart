@@ -2,40 +2,40 @@ import 'dart:io';
 
 import 'package:genshin_mod_manager/extension/pathops.dart';
 
-List<Directory> getDirsUnder(Directory dir) {
-  return dir.listSync().whereType<Directory>().toList(growable: false);
+List<T> getFSEUnder<T extends FileSystemEntity>(String path) {
+  final dir = Directory(path);
+  if (!dir.existsSync()) return [];
+  return dir.listSync().whereType<T>().toList(growable: false);
 }
 
-List<File> getFilesUnder(Directory dir) {
-  return dir.listSync().whereType<File>().toList(growable: false);
-}
-
-List<File> getActiveiniFiles(Directory dir) {
-  return getFilesUnder(dir).where((element) {
-    final path = element.pathW;
-    final extension = path.extension;
-    if (extension != const PathW('.ini')) return false;
-    final filename = path.basenameWithoutExtension;
-    return filename.isEnabled;
+List<File> getActiveiniFiles(String path) {
+  return getFSEUnder<File>(path).where((element) {
+    final path = element.path;
+    final extension = path.pExtension;
+    if (!extension.pEquals('.ini')) return false;
+    final filename = path.pBNameWoExt;
+    return filename.pIsEnabled;
   }).toList(growable: false);
 }
 
 const _previewExtensions = [
-  PathW('.png'),
-  PathW('.jpg'),
-  PathW('.jpeg'),
-  PathW('.gif'),
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
 ];
 
-File? findPreviewFile(Directory dir, {PathW name = const PathW('preview')}) =>
-    findPreviewFileIn(getFilesUnder(dir), name: name);
+File? findPreviewFile(String path, {String name = 'preview'}) =>
+    findPreviewFileIn(getFSEUnder<File>(path), name: name);
 
-File? findPreviewFileIn(List<File> dir, {PathW name = const PathW('preview')}) {
+File? findPreviewFileIn(List<File> dir, {String name = 'preview'}) {
   for (final element in dir) {
-    final filename = element.pathW.basenameWithoutExtension;
-    if (filename != name) continue;
-    final ext = element.pathW.extension;
-    if (_previewExtensions.contains(ext)) return element;
+    final filename = element.path.pBNameWoExt;
+    if (!filename.pEquals(name)) continue;
+    final ext = element.path.pExtension;
+    for (final previewExt in _previewExtensions) {
+      if (ext.pEquals(previewExt)) return element;
+    }
   }
   return null;
 }
@@ -43,15 +43,21 @@ File? findPreviewFileIn(List<File> dir, {PathW name = const PathW('preview')}) {
 void runProgram(File program) {
   Process.run(
     'start',
-    ['/b', '/d', program.parent.path, '', program.pathW.basename.asString],
+    [
+      '/b',
+      '/d',
+      program.parent.path,
+      '',
+      program.path.pBasename,
+    ],
     runInShell: true,
   );
 }
 
-void openFolder(Directory dir) {
+void openFolder(String dirPath) {
   Process.start(
     'explorer',
-    [dir.path],
+    [dirPath],
     runInShell: true,
   );
 }

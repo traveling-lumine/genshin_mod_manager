@@ -1,29 +1,19 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:genshin_mod_manager/base/appbar.dart';
-import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
-import 'package:genshin_mod_manager/service/folder_observer_service.dart';
-import 'package:genshin_mod_manager/service/preset_service.dart';
-import 'package:genshin_mod_manager/window/home.dart';
+import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({super.key});
-
-  @override
-  State<LoadingScreen> createState() => _LoadingScreenState();
-}
-
-class _LoadingScreenState extends State<LoadingScreen> {
-  static const resourceDir = PathW('Resources');
+class LoadingRoute extends StatelessWidget {
+  static const String _destinationRoute = '/';
   static final Logger logger = Logger();
 
-  bool overrideBuild = false;
+  const LoadingRoute({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +23,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return FutureBuilder(
       future: initFuture,
       builder: (context, snapshot) {
-        if (overrideBuild) {
-          return _buildMain(context);
-        }
         if (snapshot.connectionState != ConnectionState.done) {
           return _buildLoading();
         }
@@ -43,7 +30,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
           logger.e('App FutureBuilder snapshot error: ${snapshot.error}');
           return _buildError(context, snapshot.error);
         }
-        return _buildMain(context);
+        SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+          context.go(_destinationRoute);
+        });
+        return _buildDone(context);
       },
     );
   }
@@ -66,7 +56,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                 ),
                 const SizedBox(width: 16),
                 Button(
-                  onPressed: () => setState(() => overrideBuild = true),
+                  onPressed: () => context.go(_destinationRoute),
                   child: const Text('Override'),
                 ),
               ],
@@ -92,41 +82,21 @@ class _LoadingScreenState extends State<LoadingScreen> {
     );
   }
 
-  Widget _buildMain(BuildContext context) {
-    final modResourcePath = PathW(Platform.resolvedExecutable)
-        .dirname
-        .join(resourceDir)
-      ..toDirectory.createSync();
-    return Selector<AppStateService, PathW>(
-      selector: (p0, p1) => p1.modRoot,
-      builder: (BuildContext context, PathW modRootValue, Widget? child) {
-        return MultiProvider(
-          key: Key(modRootValue.asString),
-          providers: [
-            ChangeNotifierProvider(
-              create: (context) => CategoryIconFolderObserverService(
-                  targetDir: modResourcePath.toDirectory),
-            ),
-            ChangeNotifierProvider(
-              create: (context) =>
-                  RecursiveObserverService(targetDir: modRootValue.toDirectory),
+  Widget _buildDone(BuildContext context) {
+    return NavigationView(
+      appBar: getAppbar("Done!"),
+      content: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Done!'),
+            const SizedBox(height: 16),
+            Button(
+              onPressed: () => context.go(_destinationRoute),
+              child: const Text('Go to Home'),
             ),
           ],
-          child: _buildHomeWindowScope(modRootValue),
-        );
-      },
-    );
-  }
-
-  Widget _buildHomeWindowScope(PathW modRootValue) {
-    return ChangeNotifierProxyProvider2<AppStateService,
-        RecursiveObserverService, PresetService>(
-      create: (context) => PresetService(),
-      update: (context, value, value2, previous) =>
-          previous!..update(value, value2),
-      child: DirWatchProvider(
-        dir: modRootValue.toDirectory,
-        child: const HomeWindow(),
+        ),
       ),
     );
   }

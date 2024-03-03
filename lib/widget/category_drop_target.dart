@@ -8,16 +8,16 @@ import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
-class FolderDropTarget extends StatelessWidget {
+class CategoryDropTarget extends StatelessWidget {
   static final Logger logger = Logger();
 
   final Widget child;
-  final PathW dirPath;
+  final String category;
 
-  const FolderDropTarget({
+  const CategoryDropTarget({
     super.key,
     required this.child,
-    required this.dirPath,
+    required this.category,
   });
 
   @override
@@ -31,21 +31,23 @@ class FolderDropTarget extends StatelessWidget {
   }
 
   void _dropFinishHandler(BuildContext context, DropDoneDetails details) {
-    final moveInsteadOfCopy = context.read<AppStateService>().moveOnDrag;
-    final List<(Directory, PathW)> queue = [];
+    final appStateService = context.read<AppStateService>();
+    final moveInsteadOfCopy = appStateService.moveOnDrag;
+    final modRoot = appStateService.modRoot.pJoin(category);
+    final List<(Directory, String)> queue = [];
     for (final xFile in details.files) {
-      final path = PathW(xFile.path);
-      if (!path.isDirectorySync) continue;
-      final dir = path.toDirectory;
-      final newPath = dirPath.join(path.basename);
-      if (newPath.isDirectorySync) {
+      final path = xFile.path;
+      if (!FileSystemEntity.isDirectorySync(path)) continue;
+      final dir = Directory(path);
+      final newPath = modRoot.pJoin(path.pBasename);
+      if (FileSystemEntity.isDirectorySync(newPath)) {
         queue.add((dir, newPath));
         continue;
       }
 
       if (moveInsteadOfCopy) {
         try {
-          dir.renameSyncPath(newPath);
+          dir.renameSync(newPath);
           logger.d('Moved $path to $newPath');
         } on FileSystemException {
           dir.copyToPath(newPath);
@@ -65,7 +67,7 @@ class FolderDropTarget extends StatelessWidget {
       builder: (context, close) {
         final joined = queue.map((e) {
           final (dir, pw) = e;
-          return "'${dir.pathW.basename}' -> '${pw.basename.asString}'";
+          return "'${dir.path.pBasename}' -> '${pw.pBasename}'";
         }).join('\n');
         return InfoBar(
           title: const Text('Folder already exists'),

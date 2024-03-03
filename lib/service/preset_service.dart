@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -40,13 +41,12 @@ class PresetService with ChangeNotifier {
   void addGlobalPreset(String name) {
     Map<String, List<String>> data = {};
     final modRoot = _appStateService!.modRoot;
-    final categoryDirs = getDirsUnder(modRoot.toDirectory);
+    final categoryDirs = getFSEUnder<Directory>(modRoot);
     for (var categoryDir in categoryDirs) {
-      final category = categoryDir.pathW.basename.asString;
-      data[category] = getDirsUnder(categoryDir)
-          .map((e) => e.pathW.basename)
-          .where((e) => e.isEnabled)
-          .map((e) => e.asString)
+      final category = categoryDir.path.pBasename;
+      data[category] = getFSEUnder<Directory>(categoryDir.path)
+          .map((e) => e.path.pBasename)
+          .where((e) => e.pIsEnabled)
           .toList(growable: false);
     }
     _curGlobal[name] = data;
@@ -55,11 +55,10 @@ class PresetService with ChangeNotifier {
 
   void addLocalPreset(String category, String name) {
     final modRoot = _appStateService!.modRoot;
-    final categoryDir = modRoot.join(PathW(category)).toDirectory;
-    List<String> data = getDirsUnder(categoryDir)
-        .map((e) => e.pathW.basename)
-        .where((e) => e.isEnabled)
-        .map((e) => e.asString)
+    final categoryDir = modRoot.pJoin(category);
+    List<String> data = getFSEUnder<Directory>(categoryDir)
+        .map((e) => e.path.pBasename)
+        .where((e) => e.pIsEnabled)
         .toList(growable: false);
     _curLocal.putIfAbsent(category, () => {})[name] = data;
     _writeBack();
@@ -93,47 +92,46 @@ class PresetService with ChangeNotifier {
 
   void _toggleGlobal(Map<String, List<String>> directives) {
     final shaderFixes =
-        _appStateService!.modExecFile.dirname.join(kShaderFixes);
+        _appStateService!.modExecFile.pDirname.pJoin(kShaderFixes);
     for (var category in directives.entries) {
       final shouldBeEnabled = category.value;
-      final categoryDir = _appStateService!.modRoot.join(PathW(category.key));
+      final categoryDir = _appStateService!.modRoot.pJoin(category.key);
       _toggleCategory(categoryDir, shouldBeEnabled, shaderFixes);
     }
   }
 
   void _toggleLocal(String category, List<String> shouldBeEnabled) {
     final shaderFixes =
-        _appStateService!.modExecFile.dirname.join(kShaderFixes);
-    final categoryDir = _appStateService!.modRoot.join(PathW(category));
+        _appStateService!.modExecFile.pDirname.pJoin(kShaderFixes);
+    final categoryDir = _appStateService!.modRoot.pJoin(category);
     _toggleCategory(categoryDir, shouldBeEnabled, shaderFixes);
   }
 
   void _toggleCategory(
-    PathW categoryDir,
+    String categoryDir,
     List<String> shouldBeEnabled,
-    PathW shaderFixes,
+    String shaderFixes,
   ) {
-    final currentEnabled = getDirsUnder(categoryDir.toDirectory)
-        .map((e) => e.pathW.basename)
-        .where((e) => e.isEnabled)
-        .map((e) => e.asString)
+    final currentEnabled = getFSEUnder<Directory>(categoryDir)
+        .map((e) => e.path.pBasename)
+        .where((e) => e.pIsEnabled)
         .toList(growable: false);
     final shouldBeOff =
         currentEnabled.where((e) => !shouldBeEnabled.contains(e));
     for (var mod in shouldBeOff) {
-      final modDir = categoryDir.join(PathW(mod));
+      final modDir = categoryDir.pJoin(mod);
       disable(
-        shaderFixesDir: shaderFixes.toDirectory,
+        shaderFixesPath: shaderFixes,
         modPathW: modDir,
       );
     }
     final shouldBeOn =
         shouldBeEnabled.where((e) => !currentEnabled.contains(e));
     for (var mod in shouldBeOn) {
-      final modDir = categoryDir.join(PathW(mod).disabledForm);
+      final modDir = categoryDir.pJoin(mod.pDisabledForm);
       enable(
-        shaderFixesDir: shaderFixes.toDirectory,
-        modPathW: modDir,
+        shaderFixesPath: shaderFixes,
+        modPath: modDir,
       );
     }
   }
