@@ -448,20 +448,9 @@ class _StoreElement extends StatelessWidget {
         },
       ));
       context.read<RecursiveObserverService>().forceUpdate();
-    } else if (url.errorCodes == "403") {
-      if (!context.mounted) return;
-      _showPasswordDialog(context);
     } else {
       if (!context.mounted) return;
-      unawaited(displayInfoBar(
-        context,
-        builder: (infoBarContext, close) => InfoBar(
-          title: const Text('Download failed'),
-          content: Text(url.toString()),
-          severity: InfoBarSeverity.error,
-          onClose: close,
-        ),
-      ));
+      _showPasswordDialog(context);
     }
   }
 

@@ -93,13 +93,11 @@ class NahidaliveElement {
 class NahidaliveDownloadElement {
   final bool status;
   final String? errorCodes;
-  final String? message;
   final String? downloadUrl;
 
   const NahidaliveDownloadElement({
     required this.status,
     this.errorCodes,
-    this.message,
     this.downloadUrl,
   });
 
@@ -116,12 +114,10 @@ class NahidaliveDownloadElement {
       {
         'status': bool status,
         'error-codes': String errorCodes,
-        'message': String message,
       } =>
         NahidaliveDownloadElement(
           status: status,
           errorCodes: errorCodes,
-          message: message,
         ),
       _ => throw const FormatException(
           'Unknown NahidaliveDownloadElement format.'),
@@ -133,7 +129,6 @@ class NahidaliveDownloadElement {
     return 'NahidaliveDownloadElement('
         'status: $status, '
         'errorCodes: $errorCodes, '
-        'message: $message, '
         'downloadUrl: $downloadUrl'
         ')';
   }
