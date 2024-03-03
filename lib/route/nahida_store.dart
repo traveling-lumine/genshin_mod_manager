@@ -418,47 +418,52 @@ class _StoreElement extends StatelessWidget {
 
   Future<bool> _downloadFile(
       BuildContext context, String filename, Uint8List data) async {
-    final catPath = context.read<AppStateService>().modRoot.pJoin(category);
-    final enabledFormDirNames = getFSEUnder<Directory>(catPath)
-        .map((e) => e.path.pBasename.pEnabledForm)
-        .toSet();
-    String destDirName = filename.pBNameWoExt.pEnabledForm;
-    while (!destDirName.pIsEnabled) {
-      destDirName = destDirName.pEnabledForm;
-    }
-    int counter = 0;
-    String noCollisionDestDirName = destDirName;
-    while (enabledFormDirNames.contains(noCollisionDestDirName)) {
-      counter++;
-      noCollisionDestDirName = '$destDirName ($counter)';
-    }
-    destDirName = noCollisionDestDirName.pDisabledForm;
-    final destDirPath = catPath.pJoin(destDirName);
-    await Directory(destDirPath).create(recursive: true);
-    try {
-      final archive = ZipDecoder().decodeBytes(data);
-      await extractArchiveToDiskAsync(archive, destDirPath, asyncWrite: true);
-    } on Exception {
-      if (!context.mounted) return true;
-      unawaited(displayInfoBar(
-        context,
-        builder: (context, close) {
-          return InfoBar(
-            title: const Text('Download failed'),
-            content: Text(
-                'Failed to extract archive: $filename decode error. Instead, the archive was saved as $filename.'),
-            severity: InfoBarSeverity.error,
-            onClose: close,
-          );
-        },
-      ));
-      try {
-        await File(catPath.pJoin(filename)).writeAsBytes(data);
-      } catch (e) {
-        print(e);
-      }
-      return true;
-    }
-    return false;
+    return await downloadFile(context, filename, data, category);
   }
+}
+
+Future<bool> downloadFile(BuildContext context, String filename, Uint8List data,
+    String category) async {
+  final catPath = context.read<AppStateService>().modRoot.pJoin(category);
+  final enabledFormDirNames = getFSEUnder<Directory>(catPath)
+      .map((e) => e.path.pBasename.pEnabledForm)
+      .toSet();
+  String destDirName = filename.pBNameWoExt.pEnabledForm;
+  while (!destDirName.pIsEnabled) {
+    destDirName = destDirName.pEnabledForm;
+  }
+  int counter = 0;
+  String noCollisionDestDirName = destDirName;
+  while (enabledFormDirNames.contains(noCollisionDestDirName)) {
+    counter++;
+    noCollisionDestDirName = '$destDirName ($counter)';
+  }
+  destDirName = noCollisionDestDirName.pDisabledForm;
+  final destDirPath = catPath.pJoin(destDirName);
+  await Directory(destDirPath).create(recursive: true);
+  try {
+    final archive = ZipDecoder().decodeBytes(data);
+    await extractArchiveToDiskAsync(archive, destDirPath, asyncWrite: true);
+  } on Exception {
+    if (!context.mounted) return true;
+    unawaited(displayInfoBar(
+      context,
+      builder: (context, close) {
+        return InfoBar(
+          title: const Text('Download failed'),
+          content: Text(
+              'Failed to extract archive: $filename decode error. Instead, the archive was saved as $filename.'),
+          severity: InfoBarSeverity.error,
+          onClose: close,
+        );
+      },
+    ));
+    try {
+      await File(catPath.pJoin(filename)).writeAsBytes(data);
+    } catch (e) {
+      print(e);
+    }
+    return true;
+  }
+  return false;
 }
