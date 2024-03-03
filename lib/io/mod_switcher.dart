@@ -69,7 +69,7 @@ List<File> _getModShaders(String modPath) {
   final List<File> shaderFilenames = [];
   final modShaderPath = modPath.pJoin(kShaderFixes);
   try {
-    shaderFilenames.addAll(getFilesUnder(modShaderPath));
+    shaderFilenames.addAll(getFSEUnder<File>(modShaderPath));
   } on PathNotFoundException {
     // _logger.i(e);
   }
@@ -104,7 +104,7 @@ void _shaderFinder(
   void Function(File found) onFound,
 ) {
   final programShadersMap = Map<String, File>.fromEntries(
-    getFilesUnder(targetPath).map((e) => MapEntry(e.path.pBasename, e)),
+    getFSEUnder<File>(targetPath).map((e) => MapEntry(e.path.pBasename, e)),
   );
   final shaderSets = shaderFiles.map((e) => e.path.pBasename).toSet();
   final inter = programShadersMap.keys.toSet().intersection(shaderSets);

@@ -107,7 +107,7 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final dirs = context.watch<DirWatchService>().curDirs
+    final dirs = context.watch<DirWatchService>().curEntities
       ..sort(
         (a, b) {
           final a2 = a.path.pBasename.pEnabledForm;

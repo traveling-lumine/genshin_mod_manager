@@ -2,20 +2,14 @@ import 'dart:io';
 
 import 'package:genshin_mod_manager/extension/pathops.dart';
 
-List<Directory> getDirsUnder(String path) {
+List<T> getFSEUnder<T extends FileSystemEntity>(String path) {
   final dir = Directory(path);
   if (!dir.existsSync()) return [];
-  return dir.listSync().whereType<Directory>().toList(growable: false);
-}
-
-List<File> getFilesUnder(String path) {
-  final dir = Directory(path);
-  if (!dir.existsSync()) return [];
-  return dir.listSync().whereType<File>().toList(growable: false);
+  return dir.listSync().whereType<T>().toList(growable: false);
 }
 
 List<File> getActiveiniFiles(String path) {
-  return getFilesUnder(path).where((element) {
+  return getFSEUnder<File>(path).where((element) {
     final path = element.path;
     final extension = path.pExtension;
     if (!extension.pEquals('.ini')) return false;
@@ -32,7 +26,7 @@ const _previewExtensions = [
 ];
 
 File? findPreviewFile(String path, {String name = 'preview'}) =>
-    findPreviewFileIn(getFilesUnder(path), name: name);
+    findPreviewFileIn(getFSEUnder<File>(path), name: name);
 
 File? findPreviewFileIn(List<File> dir, {String name = 'preview'}) {
   for (final element in dir) {

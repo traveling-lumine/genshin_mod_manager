@@ -417,8 +417,9 @@ class _StoreElement extends StatelessWidget {
   Future<bool> _downloadFile(
       BuildContext context, String filename, Uint8List data) async {
     final catPath = context.read<AppStateService>().modRoot.pJoin(category);
-    final enabledFormDirNames =
-        getDirsUnder(catPath).map((e) => e.path.pBasename.pEnabledForm).toSet();
+    final enabledFormDirNames = getFSEUnder<Directory>(catPath)
+        .map((e) => e.path.pBasename.pEnabledForm)
+        .toSet();
     String destDirName = filename.pBNameWoExt.pEnabledForm;
     while (!destDirName.pIsEnabled) {
       destDirName = destDirName.pEnabledForm;
