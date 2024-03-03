@@ -6,21 +6,16 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 
-class CategoryIconFolderObserverService with ChangeNotifier {
+abstract class _StreamObserverService extends ChangeNotifier {
   final String targetPath;
   late StreamSubscription<FileSystemEvent> _subscription;
 
-  List<File> _curFiles;
-
-  List<File> get curFiles => _curFiles;
-
-  CategoryIconFolderObserverService({required this.targetPath})
-      : _curFiles = getFilesUnder(targetPath) {
-    _subscription = Directory(targetPath).watch().listen((event) {
-      _curFiles = getFilesUnder(targetPath);
-      notifyListeners();
-    });
+  _StreamObserverService({required this.targetPath, required bool recursive}) {
+    final stream = Directory(targetPath).watch(recursive: recursive);
+    _subscription = stream.listen(listener);
   }
+
+  void listener(FileSystemEvent event);
 
   @override
   void dispose() {
@@ -29,32 +24,37 @@ class CategoryIconFolderObserverService with ChangeNotifier {
   }
 }
 
-class RecursiveObserverService with ChangeNotifier {
-  final String targetPath;
-  late StreamSubscription<FileSystemEvent> _subscription;
+class CategoryIconFolderObserverService extends _StreamObserverService {
+  List<File> _curFiles;
 
+  List<File> get curFiles => UnmodifiableListView(_curFiles);
+
+  CategoryIconFolderObserverService({required super.targetPath})
+      : _curFiles = getFSEUnder<File>(targetPath),
+        super(recursive: false);
+
+  @override
+  void listener(FileSystemEvent event) {
+    _curFiles = getFSEUnder<File>(targetPath);
+    notifyListeners();
+  }
+}
+
+class RecursiveObserverService extends _StreamObserverService {
   FileSystemEvent? _lastEvent;
 
   FileSystemEvent? get lastEvent => _lastEvent;
 
-  RecursiveObserverService({required this.targetPath}) {
-    _subscription =
-        Directory(targetPath).watch(recursive: true).listen((event) {
-      _lastEvent = event;
-      notifyListeners();
-    });
-  }
+  RecursiveObserverService({required super.targetPath})
+      : super(recursive: true);
 
-  void forceUpdate() {
-    _lastEvent = null;
+  @override
+  void listener(FileSystemEvent? event) {
+    _lastEvent = event;
     notifyListeners();
   }
 
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
-  }
+  void forceUpdate() => listener(null);
 }
 
 class RootWatchService with ChangeNotifier {
@@ -78,7 +78,7 @@ class RootWatchService with ChangeNotifier {
   bool _getDirs() {
     final before = _categories;
     try {
-      _categories = getDirsUnder(targetPath)
+      _categories = getFSEUnder<Directory>(targetPath)
           .map((e) => e.path.pBasename)
           .toList(growable: false)
         ..sort(compareNatural);
@@ -89,56 +89,38 @@ class RootWatchService with ChangeNotifier {
   }
 }
 
-class DirWatchService with ChangeNotifier {
+class FSEWatchService<T extends FileSystemEntity> extends ChangeNotifier {
   final String targetPath;
 
-  late List<Directory> _curDirs;
+  late List<T> _curEntities;
 
-  List<Directory> get curDirs => _curDirs;
+  List<T> get curEntities => _curEntities;
 
-  DirWatchService({required this.targetPath}) {
-    _getDirs();
+  FSEWatchService({required this.targetPath}) {
+    _getEntities();
   }
 
   void update(FileSystemEvent? event) {
     if (!_ifEventDirectUnder(event, targetPath)) return;
-    _getDirs();
+    _getEntities();
     notifyListeners();
   }
 
-  void _getDirs() {
+  void _getEntities() {
     try {
-      _curDirs = getDirsUnder(targetPath);
+      _curEntities = getFSEUnder<T>(targetPath);
     } on PathNotFoundException {
-      _curDirs = [];
+      _curEntities = [];
     }
   }
 }
 
-class FileWatchService with ChangeNotifier {
-  final String targetPath;
+class DirWatchService extends FSEWatchService<Directory> {
+  DirWatchService({required super.targetPath});
+}
 
-  late List<File> _curFiles;
-
-  List<File> get curFiles => _curFiles;
-
-  FileWatchService({required this.targetPath}) {
-    _getFiles();
-  }
-
-  void update(FileSystemEvent? event) {
-    if (!_ifEventDirectUnder(event, targetPath)) return;
-    _getFiles();
-    notifyListeners();
-  }
-
-  void _getFiles() {
-    try {
-      _curFiles = getFilesUnder(targetPath);
-    } on PathNotFoundException {
-      _curFiles = [];
-    }
-  }
+class FileWatchService extends FSEWatchService<File> {
+  FileWatchService({required super.targetPath});
 }
 
 bool _ifEventDirectUnder(FileSystemEvent? event, String watchedPath) {
@@ -151,5 +133,6 @@ bool _ifEventDirectUnder(FileSystemEvent? event, String watchedPath) {
       tgts.add(destination.pDirname);
     }
   }
-  return tgts.any((e) => e.pEquals(watchedPath));
+  return tgts
+      .any((e) => e.pEquals(watchedPath) | e.pEquals(watchedPath.pDirname));
 }

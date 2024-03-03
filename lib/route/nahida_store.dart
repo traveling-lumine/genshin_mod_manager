@@ -7,6 +7,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
+import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
 import 'package:genshin_mod_manager/upstream/api.dart';
 import 'package:genshin_mod_manager/widget/thick_scrollbar.dart';
@@ -397,6 +398,7 @@ class _StoreElement extends StatelessWidget {
           );
         },
       ));
+      context.read<RecursiveObserverService>().forceUpdate();
     } else if (url.errorCodes == "403") {
       if (!context.mounted) return;
       _showPasswordDialog(context);
@@ -417,8 +419,9 @@ class _StoreElement extends StatelessWidget {
   Future<bool> _downloadFile(
       BuildContext context, String filename, Uint8List data) async {
     final catPath = context.read<AppStateService>().modRoot.pJoin(category);
-    final enabledFormDirNames =
-        getDirsUnder(catPath).map((e) => e.path.pBasename.pEnabledForm).toSet();
+    final enabledFormDirNames = getFSEUnder<Directory>(catPath)
+        .map((e) => e.path.pBasename.pEnabledForm)
+        .toSet();
     String destDirName = filename.pBNameWoExt.pEnabledForm;
     while (!destDirName.pIsEnabled) {
       destDirName = destDirName.pEnabledForm;

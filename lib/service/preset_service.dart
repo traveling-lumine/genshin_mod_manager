@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -40,10 +41,10 @@ class PresetService with ChangeNotifier {
   void addGlobalPreset(String name) {
     Map<String, List<String>> data = {};
     final modRoot = _appStateService!.modRoot;
-    final categoryDirs = getDirsUnder(modRoot);
+    final categoryDirs = getFSEUnder<Directory>(modRoot);
     for (var categoryDir in categoryDirs) {
       final category = categoryDir.path.pBasename;
-      data[category] = getDirsUnder(categoryDir.path)
+      data[category] = getFSEUnder<Directory>(categoryDir.path)
           .map((e) => e.path.pBasename)
           .where((e) => e.pIsEnabled)
           .toList(growable: false);
@@ -55,7 +56,7 @@ class PresetService with ChangeNotifier {
   void addLocalPreset(String category, String name) {
     final modRoot = _appStateService!.modRoot;
     final categoryDir = modRoot.pJoin(category);
-    List<String> data = getDirsUnder(categoryDir)
+    List<String> data = getFSEUnder<Directory>(categoryDir)
         .map((e) => e.path.pBasename)
         .where((e) => e.pIsEnabled)
         .toList(growable: false);
@@ -111,7 +112,7 @@ class PresetService with ChangeNotifier {
     List<String> shouldBeEnabled,
     String shaderFixes,
   ) {
-    final currentEnabled = getDirsUnder(categoryDir)
+    final currentEnabled = getFSEUnder<Directory>(categoryDir)
         .map((e) => e.path.pBasename)
         .where((e) => e.pIsEnabled)
         .toList(growable: false);
