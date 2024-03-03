@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+const kAkashaConfigFilename = 'config.json';
 const _base = "https://nahida.live";
 
 class NahidaliveElement {
@@ -164,12 +165,17 @@ class NahidaliveAPI {
   }
 
   Future<NahidaliveDownloadElement> downloadUrl(String uuid,
-      [String? pw]) async {
+      {String? pw, String? updateCode}) async {
     final Uri uri;
-    if (pw != null) {
-      uri = Uri.parse('$_base/mods/apiv2/download?uuid=$uuid&password=$pw');
+    if (updateCode != null) {
+      uri = Uri.parse(
+          '$_base/mods/apiv2/download?uuid=$uuid&update_code=$updateCode');
     } else {
-      uri = Uri.parse('$_base/mods/apiv2/download?uuid=$uuid');
+      if (pw != null) {
+        uri = Uri.parse('$_base/mods/apiv2/download?uuid=$uuid&password=$pw');
+      } else {
+        uri = Uri.parse('$_base/mods/apiv2/download?uuid=$uuid');
+      }
     }
     final response = await client.get(uri);
     if (response.statusCode == 200) {

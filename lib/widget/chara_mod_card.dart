@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
+import 'package:genshin_mod_manager/upstream/akasha.dart';
 import 'package:genshin_mod_manager/widget/editor_text.dart';
 import 'package:genshin_mod_manager/widget/toggleable.dart';
 import 'package:logger/logger.dart';
@@ -66,6 +68,10 @@ class _CharaModCard extends StatelessWidget {
   }
 
   Widget _buildFolderHeader(BuildContext context) {
+    // find config.json
+    final File? findConfig = getFSEUnder<File>(dirPath).firstWhereOrNull(
+      (element) => element.path.pBasename.pEquals(kAkashaConfigFilename),
+    );
     return Row(
       children: [
         Expanded(
@@ -76,6 +82,26 @@ class _CharaModCard extends StatelessWidget {
             style: FluentTheme.of(context).typography.bodyStrong,
           ),
         ),
+        if (findConfig != null) ...[
+          const SizedBox(width: 4),
+          RepaintBoundary(
+            child: Button(
+              child: const Icon(FluentIcons.refresh),
+              onPressed: () {
+                displayInfoBar(
+                  context,
+                  builder: (context, close) {
+                    return InfoBar(
+                      title: const Text('Reloading config.json'),
+                      content: Text(findConfig.path),
+                      onClose: close,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
         const SizedBox(width: 4),
         RepaintBoundary(
           child: Button(

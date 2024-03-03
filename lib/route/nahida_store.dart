@@ -9,7 +9,7 @@ import 'package:genshin_mod_manager/io/fsops.dart';
 import 'package:genshin_mod_manager/service/app_state_service.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
-import 'package:genshin_mod_manager/upstream/api.dart';
+import 'package:genshin_mod_manager/upstream/akasha.dart';
 import 'package:genshin_mod_manager/widget/thick_scrollbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -366,7 +366,7 @@ class _StoreElement extends StatelessWidget {
   void _download(BuildContext context, [String? pw]) async {
     final NahidaliveDownloadElement url;
     try {
-      url = await api.downloadUrl(element.uuid, pw);
+      url = await api.downloadUrl(element.uuid, pw: pw);
     } on HttpException catch (e) {
       if (!context.mounted) return;
       unawaited(displayInfoBar(
