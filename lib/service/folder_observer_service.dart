@@ -41,6 +41,7 @@ class CategoryIconFolderObserverService extends _StreamObserverService {
 }
 
 class RecursiveObserverService extends _StreamObserverService {
+  bool _cut = false;
   FileSystemEvent? _lastEvent;
 
   FileSystemEvent? get lastEvent => _lastEvent;
@@ -50,9 +51,14 @@ class RecursiveObserverService extends _StreamObserverService {
 
   @override
   void listener(FileSystemEvent? event) {
+    if (_cut) return;
     _lastEvent = event;
     notifyListeners();
   }
+
+  void cut() => _cut = true;
+
+  void uncut() => _cut = false;
 
   void forceUpdate() => listener(null);
 }

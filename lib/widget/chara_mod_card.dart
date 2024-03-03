@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/extension/pathops.dart';
 import 'package:genshin_mod_manager/io/fsops.dart';
+import 'package:genshin_mod_manager/route/nahida_store.dart';
 import 'package:genshin_mod_manager/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
+import 'package:genshin_mod_manager/upstream/akasha.dart';
 import 'package:genshin_mod_manager/widget/editor_text.dart';
 import 'package:genshin_mod_manager/widget/toggleable.dart';
 import 'package:logger/logger.dart';
@@ -66,6 +70,10 @@ class _CharaModCard extends StatelessWidget {
   }
 
   Widget _buildFolderHeader(BuildContext context) {
+    // find config.json
+    final File? findConfig = getFSEUnder<File>(dirPath).firstWhereOrNull(
+      (element) => element.path.pBasename.pEquals(kAkashaConfigFilename),
+    );
     return Row(
       children: [
         Expanded(
@@ -76,6 +84,75 @@ class _CharaModCard extends StatelessWidget {
             style: FluentTheme.of(context).typography.bodyStrong,
           ),
         ),
+        if (findConfig != null) ...[
+          const SizedBox(width: 4),
+          RepaintBoundary(
+            child: Button(
+              child: const Icon(FluentIcons.refresh),
+              onPressed: () async {
+                try {
+                  final recursiveObserverService =
+                      context.read<RecursiveObserverService>();
+                  final fileContent = await findConfig.readAsString();
+                  final config = jsonDecode(fileContent);
+                  final uuid = config['uuid'] as String;
+                  final version = config['version'] as String;
+                  final updateCode = config['update_code'] as String;
+                  final api = NahidaliveAPI();
+                  final targetElement = await api.fetchNahidaliveElement(uuid);
+                  final upstreamVersion = targetElement.version;
+                  if (version == upstreamVersion) {
+                    if (!context.mounted) return;
+                    unawaited(displayInfoBar(
+                      context,
+                      builder: (context, close) => InfoBar(
+                        title: const Text('No update available'),
+                        content: const Text('The mod is up to date'),
+                        onClose: close,
+                      ),
+                    ));
+                    return;
+                  }
+                  final downloadElement =
+                      await api.downloadUrl(uuid, updateCode: updateCode);
+                  final download = await api.download(downloadElement);
+
+                  recursiveObserverService.cut();
+                  await Directory(dirPath).delete(recursive: true);
+                  if (!context.mounted) throw Exception('context not mounted');
+                  await downloadFile(context, targetElement.title, download,
+                      dirPath.pDirname.pBasename);
+                  if (!context.mounted) return;
+                  unawaited(displayInfoBar(
+                    context,
+                    builder: (context, close) {
+                      return InfoBar(
+                        title: const Text('Update downloaded'),
+                        content:
+                            Text('Update downloaded to ${dirPath.pDirname}'),
+                        severity: InfoBarSeverity.success,
+                        onClose: close,
+                      );
+                    },
+                  ));
+                  recursiveObserverService.uncut();
+                  recursiveObserverService.forceUpdate();
+                } catch (e) {
+                  if (!context.mounted) return;
+                  unawaited(displayInfoBar(
+                    context,
+                    builder: (context, close) => InfoBar(
+                      title: const Text('Something went wrong'),
+                      content: Text(e.toString()),
+                      severity: InfoBarSeverity.error,
+                      onClose: close,
+                    ),
+                  ));
+                }
+              },
+            ),
+          ),
+        ],
         const SizedBox(width: 4),
         RepaintBoundary(
           child: Button(
