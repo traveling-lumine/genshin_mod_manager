@@ -151,5 +151,6 @@ bool _ifEventDirectUnder(FileSystemEvent? event, String watchedPath) {
       tgts.add(destination.pDirname);
     }
   }
-  return tgts.any((e) => e.pEquals(watchedPath));
+  return tgts
+      .any((e) => e.pEquals(watchedPath) | e.pEquals(watchedPath.pDirname));
 }
