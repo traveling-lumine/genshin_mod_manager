@@ -67,6 +67,7 @@ class Token {
 }
 
 class Lexer {
+  static final literal = RegExp(r'[^&|!() ]');
   static final Map<String, TokenType> keywords = {
     '&': TokenType.and,
     '|': TokenType.or,
@@ -98,10 +99,9 @@ class Lexer {
       return Token(type);
     }
 
-    if (RegExp(r'[^&|!() ]').hasMatch(currentChar)) {
+    if (literal.hasMatch(currentChar)) {
       var start = position;
-      while (position < text.length &&
-          RegExp(r'[^&|!() ]').hasMatch(text[position])) {
+      while (position < text.length && literal.hasMatch(text[position])) {
         position++;
       }
       var value = text.substring(start, position);
