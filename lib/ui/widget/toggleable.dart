@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/extension/pathops.dart';
-import 'package:genshin_mod_manager/io/mod_switcher.dart';
-import 'package:genshin_mod_manager/service/app_state_service.dart';
+import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
+import 'package:genshin_mod_manager/domain/service/app_state_service.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 

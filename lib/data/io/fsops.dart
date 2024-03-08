@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:genshin_mod_manager/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/extension/pathops.dart';
 
 List<T> getFSEUnder<T extends FileSystemEntity>(String path) {
   final dir = Directory(path);

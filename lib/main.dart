@@ -3,16 +3,7 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/route/category.dart';
-import 'package:genshin_mod_manager/route/home_shell.dart';
-import 'package:genshin_mod_manager/route/license.dart';
-import 'package:genshin_mod_manager/route/loading.dart';
-import 'package:genshin_mod_manager/route/nahida_store.dart';
-import 'package:genshin_mod_manager/route/setting.dart';
-import 'package:genshin_mod_manager/route/welcome.dart';
-import 'package:genshin_mod_manager/service/app_state_service.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:genshin_mod_manager/ui/router.dart';
 import 'package:window_manager/window_manager.dart';
 
 const _minWindowSize = Size(600, 600);
@@ -22,7 +13,7 @@ void main() async {
   if (!kDebugMode) {
     _registerErrorHandlers();
   }
-  runApp(_MyApp());
+  runApp(MyApp());
 }
 
 Future<void> _initialize() async {
@@ -99,62 +90,5 @@ String _errorToString(FlutterErrorDetails details) {
     } catch (e) {
       return 'An error occurred';
     }
-  }
-}
-
-class _MyApp extends StatelessWidget {
-  late final _router = GoRouter(
-    debugLogDiagnostics: true,
-    initialLocation: '/loading',
-    routes: [
-      GoRoute(
-        path: '/loading',
-        builder: (context, state) => const LoadingRoute(),
-      ),
-      ShellRoute(
-        builder: (context, state, child) => HomeShell(child: child),
-        routes: [
-          GoRoute(
-            path: '/',
-            builder: (context, state) => const WelcomeRoute(),
-          ),
-          GoRoute(
-            path: '/setting',
-            builder: (context, state) => const SettingRoute(),
-          ),
-          GoRoute(
-            path: '/license',
-            builder: (context, state) => const OssLicensesRoute(),
-          ),
-          GoRoute(
-            path: '/category/:name',
-            builder: (context, state) => CategoryRoute(
-              category: state.pathParameters['name']!,
-            ),
-          ),
-          GoRoute(
-            path: '/nahidastore',
-            builder: (context, state) {
-              final category = state.uri.queryParameters['category'];
-              return NahidaStoreRoute(category: category!);
-            },
-          ),
-        ],
-      ),
-    ],
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => AppStateService(),
-      child: FluentApp.router(
-        // darkTheme: FluentThemeData.dark(),
-        title: 'Genshin Mod Manager',
-        routerDelegate: _router.routerDelegate,
-        routeInformationParser: _router.routeInformationParser,
-        routeInformationProvider: _router.routeInformationProvider,
-      ),
-    );
   }
 }

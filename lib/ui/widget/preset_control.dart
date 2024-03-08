@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/service/preset_service.dart';
-import 'package:genshin_mod_manager/third_party/fluent_ui/red_filled_button.dart';
+import 'package:genshin_mod_manager/domain/service/preset_service.dart';
+import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 

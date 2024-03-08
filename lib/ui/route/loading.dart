@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:genshin_mod_manager/base/appbar.dart';
-import 'package:genshin_mod_manager/service/app_state_service.dart';
+import 'package:genshin_mod_manager/domain/service/app_state_service.dart';
+import 'package:genshin_mod_manager/ui/widget/base/appbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';

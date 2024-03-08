@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:genshin_mod_manager/extension/pathops.dart';
-import 'package:genshin_mod_manager/io/fsops.dart';
+import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/io/fsops.dart';
 
 const kShaderFixes = 'ShaderFixes';
 

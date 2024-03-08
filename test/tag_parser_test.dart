@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genshin_mod_manager/tag_parser/tag_parser.dart';
+import 'package:genshin_mod_manager/ui/util/tag_parser/tag_parser.dart';
 
 void main() {
   group("AND operation", () {

@@ -1,13 +1,13 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/extension/pathops.dart';
-import 'package:genshin_mod_manager/io/fsops.dart';
-import 'package:genshin_mod_manager/service/app_state_service.dart';
-import 'package:genshin_mod_manager/service/folder_observer_service.dart';
-import 'package:genshin_mod_manager/third_party/min_extent_delegate.dart';
-import 'package:genshin_mod_manager/widget/category_drop_target.dart';
-import 'package:genshin_mod_manager/widget/chara_mod_card.dart';
-import 'package:genshin_mod_manager/widget/preset_control.dart';
-import 'package:genshin_mod_manager/widget/thick_scrollbar.dart';
+import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/io/fsops.dart';
+import 'package:genshin_mod_manager/domain/service/app_state_service.dart';
+import 'package:genshin_mod_manager/domain/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
+import 'package:genshin_mod_manager/ui/widget/chara_mod_card.dart';
+import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
+import 'package:genshin_mod_manager/ui/widget/thick_scrollbar.dart';
+import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_delegate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 

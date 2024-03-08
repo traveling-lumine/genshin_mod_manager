@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/extension/copy_directory.dart';
-import 'package:genshin_mod_manager/extension/pathops.dart';
-import 'package:genshin_mod_manager/service/app_state_service.dart';
+import 'package:genshin_mod_manager/data/extension/copy_directory.dart';
+import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/domain/service/app_state_service.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 

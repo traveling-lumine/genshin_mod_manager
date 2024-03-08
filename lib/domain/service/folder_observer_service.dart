@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/extension/pathops.dart';
-import 'package:genshin_mod_manager/io/fsops.dart';
+import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/io/fsops.dart';
 
 abstract class _StreamObserverService extends ChangeNotifier {
   final String targetPath;
