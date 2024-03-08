@@ -1,3 +1,6 @@
+/// A tag parser that can parse a query string and evaluate it against a set of tags.
+library;
+
 abstract class TagParseElement {
   bool evaluate(Map<String, bool> tags);
 }

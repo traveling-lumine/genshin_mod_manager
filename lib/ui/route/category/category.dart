@@ -1,10 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
-import 'package:genshin_mod_manager/domain/service/app_state_service.dart';
-import 'package:genshin_mod_manager/domain/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/ui/route/category/mod_card.dart';
+import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
+import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
-import 'package:genshin_mod_manager/ui/widget/chara_mod_card.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
 import 'package:genshin_mod_manager/ui/widget/thick_scrollbar.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_delegate.dart';
@@ -23,6 +23,7 @@ class CategoryRoute extends StatelessWidget {
   Widget build(BuildContext context) {
     final modRootPath = context.read<AppStateService>().modRoot;
     final categoryPath = modRootPath.pJoin(category);
+
     return ChangeNotifierProxyProvider<RecursiveObserverService,
         DirWatchService>(
       key: Key(category),
@@ -39,7 +40,6 @@ class CategoryRoute extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final categoryDir = context.read<AppStateService>().modRoot.pJoin(category);
     return PageHeader(
       title: Text(category),
       commandBar: Row(
@@ -57,6 +57,10 @@ class CategoryRoute extends StatelessWidget {
                     CommandBarButton(
                       icon: const Icon(FluentIcons.folder_open),
                       onPressed: () {
+                        final categoryDir = context
+                            .read<AppStateService>()
+                            .modRoot
+                            .pJoin(category);
                         openFolder(categoryDir);
                       },
                     ),
@@ -82,46 +86,47 @@ class CategoryRoute extends StatelessWidget {
       child: Selector<AppStateService, bool>(
         selector: (p0, p1) => p1.showEnabledModsFirst,
         builder: (context, enabledFirst, child) {
-          return _FolderMatchWidget(
-              key: Key(category), enabledFirst: enabledFirst);
+          return _CategoryGrid(key: Key(category), enabledFirst: enabledFirst);
         },
       ),
     );
   }
 }
 
-class _FolderMatchWidget extends StatefulWidget {
+class _CategoryGrid extends StatefulWidget {
   final bool enabledFirst;
 
-  const _FolderMatchWidget({super.key, required this.enabledFirst});
+  const _CategoryGrid({super.key, required this.enabledFirst});
 
   @override
-  State<_FolderMatchWidget> createState() => _FolderMatchWidgetState();
+  State<_CategoryGrid> createState() => _CategoryGridState();
 }
 
-class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
+class _CategoryGridState extends State<_CategoryGrid> {
   static const minCrossAxisExtent = 440.0;
   static const mainAxisExtent = 400.0;
 
-  List<CharaScope>? currentChildren;
+  List<ModCard>? currentChildren;
 
   @override
   Widget build(BuildContext context) {
     final dirs = context.watch<DirWatchService>().curEntities
       ..sort(
         (a, b) {
-          final a2 = a.path.pBasename.pEnabledForm;
-          final b2 = b.path.pBasename.pEnabledForm;
-          var compareTo = a2.toLowerCase().compareTo(b2.toLowerCase());
+          final aBase = a.path.pBasename;
+          final bBase = b.path.pBasename;
           if (widget.enabledFirst) {
-            final aEnabled = a.path.pBasename.pIsEnabled;
-            final bEnabled = b.path.pBasename.pIsEnabled;
+            final aEnabled = aBase.pIsEnabled;
+            final bEnabled = bBase.pIsEnabled;
             if (aEnabled && !bEnabled) {
               return -1;
             } else if (!aEnabled && bEnabled) {
               return 1;
             }
           }
+          final aLower = aBase.pEnabledForm.toLowerCase();
+          final bLower = bBase.pEnabledForm.toLowerCase();
+          final compareTo = aLower.compareTo(bLower);
           return compareTo;
         },
       );
@@ -129,7 +134,7 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
     if (currentChildren == null) {
       currentChildren = dirs.map((e) => _buildCharaCard(e.path)).toList();
     } else {
-      final List<CharaScope> newCurrentChildren = [];
+      final List<ModCard> newCurrentChildren = [];
       for (var i = 0; i < dirs.length; i++) {
         final dir = dirs[i];
         final idx = currentChildren!.indexWhere((e) {
@@ -157,8 +162,8 @@ class _FolderMatchWidgetState extends State<_FolderMatchWidget> {
     );
   }
 
-  CharaScope _buildCharaCard(String path) {
-    return CharaScope(
+  ModCard _buildCharaCard(String path) {
+    return ModCard(
       key: Key(path),
       path: path,
     );

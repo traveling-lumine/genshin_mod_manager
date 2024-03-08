@@ -6,7 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
-import 'package:genshin_mod_manager/domain/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 
 import 'app_state_service.dart';
 

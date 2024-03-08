@@ -7,19 +7,19 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/upstream/akasha.dart';
-import 'package:genshin_mod_manager/domain/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/ui/route/category/editor_text.dart';
+import 'package:genshin_mod_manager/ui/route/category/toggleable.dart';
 import 'package:genshin_mod_manager/ui/route/nahida_store.dart';
-import 'package:genshin_mod_manager/ui/widget/editor_text.dart';
+import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
-import 'package:genshin_mod_manager/ui/widget/toggleable.dart';
 import 'package:logger/logger.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 
-class CharaScope extends StatelessWidget {
+class ModCard extends StatelessWidget {
   final String path;
 
-  const CharaScope({
+  const ModCard({
     super.key,
     required this.path,
   });
@@ -30,22 +30,22 @@ class CharaScope extends StatelessWidget {
         FileWatchService>(
       create: (context) => FileWatchService(targetPath: path),
       update: (context, value, previous) => previous!..update(value.lastEvent),
-      child: _CharaModCard(
+      child: _ModCard(
         dirPath: path,
       ),
     );
   }
 }
 
-class _CharaModCard extends StatelessWidget {
+class _ModCard extends StatelessWidget {
   static const _minIniSectionWidth = 150.0;
   static final _logger = Logger();
 
-  final String dirPath;
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
+  final String dirPath;
 
-  _CharaModCard({required this.dirPath});
+  _ModCard({required this.dirPath});
 
   @override
   Widget build(BuildContext context) {
@@ -262,22 +262,20 @@ class _CharaModCard extends StatelessWidget {
           );
           _contextController.showFlyout(
             position: position,
-            builder: (context) {
-              return FlyoutContent(
-                child: SizedBox(
-                  width: 120,
-                  child: CommandBar(
-                    primaryItems: [
-                      CommandBarButton(
-                        icon: const Icon(FluentIcons.delete),
-                        label: const Text('Delete'),
-                        onPressed: () => _showDialog(context, previewFile),
-                      ),
-                    ],
-                  ),
+            builder: (context) => FlyoutContent(
+              child: SizedBox(
+                width: 120,
+                child: CommandBar(
+                  primaryItems: [
+                    CommandBarButton(
+                      icon: const Icon(FluentIcons.delete),
+                      label: const Text('Delete'),
+                      onPressed: () => _showDialog(context, previewFile),
+                    ),
+                  ],
                 ),
-              );
-            },
+              ),
+            ),
           );
         },
         child: FlyoutTarget(

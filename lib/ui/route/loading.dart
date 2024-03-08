@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:genshin_mod_manager/domain/service/app_state_service.dart';
-import 'package:genshin_mod_manager/ui/widget/base/appbar.dart';
+import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
+import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:window_manager/window_manager.dart';
 
 class LoadingRoute extends StatelessWidget {
   static const String _destinationRoute = '/';
@@ -100,4 +101,17 @@ class LoadingRoute extends StatelessWidget {
       ),
     );
   }
+}
+
+NavigationAppBar getAppbar(String text) {
+  return NavigationAppBar(
+    actions: const WindowButtons(),
+    automaticallyImplyLeading: false,
+    title: DragToMoveArea(
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(text),
+      ),
+    ),
+  );
 }

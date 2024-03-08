@@ -10,10 +10,10 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
-import 'package:genshin_mod_manager/domain/service/app_state_service.dart';
-import 'package:genshin_mod_manager/domain/service/folder_observer_service.dart';
-import 'package:genshin_mod_manager/domain/service/preset_service.dart';
-import 'package:genshin_mod_manager/ui/widget/base/appbar.dart';
+import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
+import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/ui/service/preset_service.dart';
+import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest_box.dart';
@@ -123,11 +123,52 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
       ),
     ];
 
+    final imageFiles =
+        context.select<CategoryIconFolderObserverService, List<File>>(
+            (value) => value.curFiles);
+    final categories = context.watch<RootWatchService>().categories;
+    final items = categories
+        .map((e) => _FolderPaneItem(
+            category: e,
+            imageFile: findPreviewFileIn(imageFiles, name: e),
+            onTap: () => context.go('/category/$e')))
+        .toList(growable: false);
+
+    final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
+          ..removeWhere((i) => i is! PaneItem || i is PaneItemAction))
+        .cast<PaneItem>();
+
+    final uri = GoRouterState.of(context).uri;
+    final currentRoute = Uri.decodeFull(uri.path);
+    final index = effectiveItems.indexWhere((e) {
+      final key = e.key;
+      if (key is! ValueKey<String>) return false;
+      return key.value == currentRoute;
+    });
+
+    final int? selected = index != -1 ? index : null;
+
+    final uriSegments = uri.pathSegments;
+    if (uriSegments.length >= 2 &&
+        uriSegments[0] == 'category' &&
+        !categories.contains(uriSegments[1])) {
+      final String destination;
+      if (categories.isNotEmpty) {
+        final index = _search(categories, uriSegments[1]);
+        destination = '/category/${categories[index]}';
+      } else {
+        destination = '/';
+      }
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        context.go(destination);
+      });
+    }
+
     return NavigationView(
       transitionBuilder: (child, animation) =>
           SuppressPageTransition(child: child),
       appBar: _buildAppbar(),
-      pane: _buildPane(context, footerItems),
+      pane: _buildPane(selected, items, footerItems),
       paneBodyBuilder: (item, body) => widget.child,
     );
   }
@@ -158,44 +199,8 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
     );
   }
 
-  NavigationPane _buildPane(
-      BuildContext context, List<NavigationPaneItem> footerItems) {
-    final imageFiles =
-        context.select<CategoryIconFolderObserverService, List<File>>(
-            (value) => value.curFiles);
-    final categories = context.watch<RootWatchService>().categories;
-    final items = categories
-        .map((e) => _FolderPaneItem(
-            category: e,
-            imageFile: findPreviewFileIn(imageFiles, name: e),
-            onTap: () => context.go('/category/$e')))
-        .toList(growable: false);
-    final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
-          ..removeWhere((i) => i is! PaneItem || i is PaneItemAction))
-        .cast<PaneItem>();
-    final uri = GoRouterState.of(context).uri;
-    final currentRoute = Uri.decodeFull(uri.path);
-    final index = effectiveItems.indexWhere((e) {
-      final key = e.key;
-      if (key is! ValueKey<String>) return false;
-      return key.value == currentRoute;
-    });
-    final int? selected = index != -1 ? index : null;
-    final uriSegments = uri.pathSegments;
-    if (uriSegments.length >= 2 &&
-        uriSegments[0] == 'category' &&
-        !categories.contains(uriSegments[1])) {
-      final String destination;
-      if (categories.isNotEmpty) {
-        final index = _search(categories, uriSegments[1]);
-        destination = '/category/${categories[index]}';
-      } else {
-        destination = '/';
-      }
-      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-        context.go(destination);
-      });
-    }
+  NavigationPane _buildPane(int? selected, List<_FolderPaneItem> items,
+      List<NavigationPaneItem> footerItems) {
     return NavigationPane(
       selected: selected,
       items: items.cast<NavigationPaneItem>(),

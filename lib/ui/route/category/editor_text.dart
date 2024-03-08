@@ -6,8 +6,10 @@ class EditorText extends StatelessWidget {
   final String section;
   final String line;
   final File file;
+  late final _lineValue = line.split('=').last.trim();
+  late final textEditingController = TextEditingController(text: _lineValue);
 
-  const EditorText({
+  EditorText({
     super.key,
     required this.section,
     required this.line,
@@ -16,19 +18,14 @@ class EditorText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String text = line.split('=').last.trim();
-    final textEditingController = TextEditingController(text: text);
-    final focusNode = FocusNode();
     return Focus(
-      focusNode: focusNode,
       onFocusChange: (event) {
         if (event) return;
-        textEditingController.text = text;
-        focusNode.unfocus();
+        textEditingController.text = _lineValue;
       },
       child: TextBox(
         controller: textEditingController,
-        onSubmitted: editIniKey,
+        onSubmitted: (value) => editIniKey(value),
       ),
     );
   }
