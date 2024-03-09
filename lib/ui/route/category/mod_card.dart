@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:archive/archive_io.dart';
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
@@ -9,7 +11,6 @@ import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
 import 'package:genshin_mod_manager/data/upstream/akasha.dart';
 import 'package:genshin_mod_manager/ui/route/category/editor_text.dart';
-import 'package:genshin_mod_manager/ui/route/nahida_store.dart';
 import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
 import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
@@ -478,4 +479,50 @@ class _ModCard extends StatelessWidget {
       ],
     );
   }
+}
+
+Future<bool> downloadFile(BuildContext context, String filename, Uint8List data,
+    String category) async {
+  final catPath = context.read<AppStateService>().modRoot.pJoin(category);
+  final enabledFormDirNames = getFSEUnder<Directory>(catPath)
+      .map((e) => e.path.pBasename.pEnabledForm)
+      .toSet();
+  String destDirName = filename.pBNameWoExt.pEnabledForm;
+  while (!destDirName.pIsEnabled) {
+    destDirName = destDirName.pEnabledForm;
+  }
+  int counter = 0;
+  String noCollisionDestDirName = destDirName;
+  while (enabledFormDirNames.contains(noCollisionDestDirName)) {
+    counter++;
+    noCollisionDestDirName = '$destDirName ($counter)';
+  }
+  destDirName = noCollisionDestDirName.pDisabledForm;
+  final destDirPath = catPath.pJoin(destDirName);
+  await Directory(destDirPath).create(recursive: true);
+  try {
+    final archive = ZipDecoder().decodeBytes(data);
+    await extractArchiveToDiskAsync(archive, destDirPath, asyncWrite: true);
+  } on Exception {
+    if (!context.mounted) return false;
+    unawaited(displayInfoBar(
+      context,
+      builder: (context, close) {
+        return InfoBar(
+          title: const Text('Download failed'),
+          content: Text('Failed to extract archive: decode error.'
+              ' Instead, the archive was saved as $filename.'),
+          severity: InfoBarSeverity.error,
+          onClose: close,
+        );
+      },
+    ));
+    try {
+      await File(catPath.pJoin(filename)).writeAsBytes(data);
+    } catch (e) {
+      print(e);
+    }
+    return false;
+  }
+  return true;
 }

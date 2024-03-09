@@ -1,9 +1,11 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/domain/entity/category.dart';
 import 'package:genshin_mod_manager/ui/route/category/category.dart';
 import 'package:genshin_mod_manager/ui/route/home_shell.dart';
 import 'package:genshin_mod_manager/ui/route/license.dart';
 import 'package:genshin_mod_manager/ui/route/loading.dart';
-import 'package:genshin_mod_manager/ui/route/nahida_store.dart';
+import 'package:genshin_mod_manager/ui/route/nahida_store/nahida_store.dart';
 import 'package:genshin_mod_manager/ui/route/setting/setting.dart';
 import 'package:genshin_mod_manager/ui/route/welcome.dart';
 import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
@@ -48,8 +50,15 @@ class MyApp extends StatelessWidget {
           GoRoute(
             path: '/nahidastore',
             builder: (context, state) {
-              final category = state.uri.queryParameters['category'];
-              return NahidaStoreRoute(category: category!);
+              final category = state.uri.queryParameters['category']!;
+              final categoryPath =
+                  context.read<AppStateService>().modRoot.pJoin(category);
+              return NahidaStoreRoute(
+                category: ModCategory(
+                  name: category,
+                  path: categoryPath,
+                ),
+              );
             },
           ),
         ],

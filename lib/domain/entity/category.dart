@@ -1,5 +1,9 @@
-class Category {
+class ModCategory {
   final String path;
+  final String name;
 
-  Category({required this.path});
+  ModCategory({
+    required this.path,
+    required this.name,
+  });
 }
