@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:genshin_mod_manager/data/constant.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
@@ -366,9 +367,7 @@ class _FolderPaneItem extends PaneItem {
 }
 
 Future<void> _checkUpdate(BuildContext context) async {
-  const baseLink =
-      'https://github.com/traveling-lumine/genshin_mod_manager/releases/latest';
-  final url = Uri.parse(baseLink);
+  final url = Uri.parse(kRepoReleases);
   final client = http.Client();
   final request = http.Request('GET', url)..followRedirects = false;
   final upstreamVersion = client.send(request).then((value) {
@@ -461,8 +460,8 @@ Future<void> _checkUpdate(BuildContext context) async {
                   child: const Text('Start'),
                   onPressed: () async {
                     context2.pop();
-                    final url =
-                        Uri.parse('$baseLink/download/GenshinModManager.zip');
+                    final url = Uri.parse(
+                        '$kRepoReleases/download/GenshinModManager.zip');
                     final response = await http.get(url);
                     final archive =
                         ZipDecoder().decodeBytes(response.bodyBytes);
