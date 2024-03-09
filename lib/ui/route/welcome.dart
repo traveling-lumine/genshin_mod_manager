@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/gestures.dart';
+import 'package:genshin_mod_manager/data/constant.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class WelcomeRoute extends StatelessWidget {
@@ -7,7 +8,6 @@ class WelcomeRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const repo = 'https://github.com/traveling-lumine/genshin_mod_manager';
     return ScaffoldPage(
       header: const PageHeader(title: Text('Welcome')),
       content: Center(
@@ -22,13 +22,13 @@ class WelcomeRoute extends StatelessWidget {
             const SizedBox(height: 16),
             RichText(
               text: TextSpan(
-                text: repo,
+                text: kRepoBase,
                 style: TextStyle(
                   color: Colors.blue,
                   decoration: TextDecoration.underline,
                 ),
                 recognizer: TapGestureRecognizer()
-                  ..onTap = () => launchUrl(Uri.parse(repo)),
+                  ..onTap = () => launchUrl(Uri.parse(kRepoBase)),
               ),
             ),
           ],

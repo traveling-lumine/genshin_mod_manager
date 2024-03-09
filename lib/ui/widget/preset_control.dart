@@ -1,7 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/ui/service/preset_service.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class PresetControlWidget extends StatelessWidget {
@@ -57,7 +56,7 @@ class PresetControlWidget extends StatelessWidget {
       actions: [
         RedFilledButton(
           onPressed: () {
-            dialogContext.pop();
+            Navigator.of(dialogContext).pop();
             if (isLocal) {
               buildContext
                   .read<PresetService>()
@@ -69,12 +68,12 @@ class PresetControlWidget extends StatelessWidget {
           child: const Text('Delete'),
         ),
         Button(
-          onPressed: dialogContext.pop,
+          onPressed: Navigator.of(dialogContext).pop,
           child: const Text('Cancel'),
         ),
         FilledButton(
           onPressed: () {
-            dialogContext.pop();
+            Navigator.of(dialogContext).pop();
             if (isLocal) {
               buildContext
                   .read<PresetService>()
@@ -115,13 +114,13 @@ class PresetControlWidget extends StatelessWidget {
       actions: [
         Button(
           onPressed: () {
-            dialogContext.pop();
+            Navigator.of(dialogContext).pop();
           },
           child: const Text('Cancel'),
         ),
         FilledButton(
           onPressed: () {
-            dialogContext.pop();
+            Navigator.of(dialogContext).pop();
             final text = _controller.text;
             _controller.clear();
             if (isLocal) {

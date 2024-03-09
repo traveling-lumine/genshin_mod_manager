@@ -36,15 +36,13 @@ class MyApp extends StatelessWidget {
           ),
           GoRoute(
             path: '/category/:name',
-            builder: (context, state) => CategoryRoute(
-              category: state.pathParameters['name']!,
-            ),
+            builder: (context, state) {
+              final category = state.pathParameters['name']!;
+              return CategoryRoute(category: category);
+            },
             redirect: (context, state) {
               final pathParameter = state.pathParameters['name'];
-              if (pathParameter == null) {
-                return '/';
-              }
-              return null;
+              return pathParameter == null ? '/' : null;
             },
           ),
           GoRoute(

@@ -23,14 +23,12 @@ class CategoryDropTarget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropTarget(
-      onDragDone: (details) {
-        _dropFinishHandler(context, details);
-      },
+      onDragDone: (details) => onDragDone(context, details),
       child: child,
     );
   }
 
-  void _dropFinishHandler(BuildContext context, DropDoneDetails details) {
+  void onDragDone(BuildContext context, DropDoneDetails details) {
     final appStateService = context.read<AppStateService>();
     final moveInsteadOfCopy = appStateService.moveOnDrag;
     final modRoot = appStateService.modRoot.pJoin(category);

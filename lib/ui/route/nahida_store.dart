@@ -10,6 +10,7 @@ import 'package:genshin_mod_manager/data/upstream/akasha.dart';
 import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
 import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/ui/util/tag_parser.dart';
+import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
 import 'package:genshin_mod_manager/ui/widget/thick_scrollbar.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_delegate.dart';
 import 'package:go_router/go_router.dart';
@@ -53,37 +54,38 @@ class _NahidaStoreRouteState extends State<NahidaStoreRoute> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              SizedBox(
-                width: 300,
-                child: TextFormBox(
-                  autovalidateMode: AutovalidateMode.always,
-                  placeholder: 'Search tags',
-                  onChanged: (value) {
-                    try {
-                      final filter = parseTagQuery(value);
-                      setState(() {
-                        _tagFilter = filter;
-                      });
-                    } catch (e) {
-                      setState(() {
-                        _tagFilter = null;
-                      });
-                    }
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return null;
-                    try {
-                      parseTagQuery(value);
-                    } catch (e) {
-                      return e.toString();
-                    }
-                    return null;
-                  },
+              Flexible(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 300),
+                  child: TextFormBox(
+                    autovalidateMode: AutovalidateMode.always,
+                    placeholder: 'Search tags',
+                    onChanged: (value) {
+                      try {
+                        final filter = parseTagQuery(value);
+                        setState(() {
+                          _tagFilter = filter;
+                        });
+                      } catch (e) {
+                        setState(() {
+                          _tagFilter = null;
+                        });
+                      }
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return null;
+                      try {
+                        parseTagQuery(value);
+                      } catch (e) {
+                        return e.toString();
+                      }
+                      return null;
+                    },
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
-              SizedBox(
-                width: 42,
+              IntrinsicCommandBarCard(
                 child: CommandBar(
                   overflowBehavior: CommandBarOverflowBehavior.clip,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -233,26 +235,12 @@ class _StoreElement extends StatelessWidget {
       ),
       icon: const Icon(FluentIcons.download),
     ));
-    final double commandWidth;
-    switch (primaryItems.length) {
-      case 1:
-        commandWidth = 42;
-        break;
-      case 2:
-        commandWidth = 70;
-        break;
-      case 3:
-        commandWidth = 98;
-        break;
-      default:
-        throw ArgumentError('Too many primary items');
-    }
     return Card(
       child: Column(
         children: [
           Expanded(
             flex: 1,
-            child: _buildDescriptionColumn(context, commandWidth, primaryItems),
+            child: _buildDescriptionColumn(context, primaryItems),
           ),
           Expanded(
             flex: 2,
@@ -265,8 +253,8 @@ class _StoreElement extends StatelessWidget {
     );
   }
 
-  Widget _buildDescriptionColumn(BuildContext context, double commandWidth,
-      List<CommandBarItem> primaryItems) {
+  Widget _buildDescriptionColumn(
+      BuildContext context, List<CommandBarItem> primaryItems) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -280,15 +268,10 @@ class _StoreElement extends StatelessWidget {
                 style: FluentTheme.of(context).typography.subtitle,
               ),
             ),
-            RepaintBoundary(
-              child: SizedBox(
-                width: commandWidth,
-                child: CommandBarCard(
-                  child: CommandBar(
-                    overflowBehavior: CommandBarOverflowBehavior.clip,
-                    primaryItems: primaryItems,
-                  ),
-                ),
+            IntrinsicCommandBarCard(
+              child: CommandBar(
+                overflowBehavior: CommandBarOverflowBehavior.clip,
+                primaryItems: primaryItems,
               ),
             ),
           ],
