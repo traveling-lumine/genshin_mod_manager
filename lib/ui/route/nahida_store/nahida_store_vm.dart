@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/akasha.dart';
-import 'package:genshin_mod_manager/domain/usecase/akasha_download.dart';
-import 'package:genshin_mod_manager/domain/usecase/akasha_refresh.dart';
+import 'package:genshin_mod_manager/domain/usecase/akasha/download.dart';
+import 'package:genshin_mod_manager/domain/usecase/akasha/refresh.dart';
 import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/ui/util/mod_writer.dart';
 

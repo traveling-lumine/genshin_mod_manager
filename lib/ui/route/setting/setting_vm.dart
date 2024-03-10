@@ -1,6 +1,6 @@
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
+import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/no_deref_file_opener.dart';
 
 abstract interface class SettingViewModel extends ChangeNotifier {

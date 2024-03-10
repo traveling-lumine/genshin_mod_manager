@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
+import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
 import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 
 abstract interface class HomeShellViewModel extends ChangeNotifier {
