@@ -1,15 +1,15 @@
 import 'dart:async';
 
-import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 AppStateService createAppStateService() {
   return _AppStateServiceImpl();
 }
 
-class _AppStateServiceImpl extends ChangeNotifier implements AppStateService {
+class _AppStateServiceImpl implements AppStateService {
   static const Duration _sharedPreferencesAwaitTime = Duration(seconds: 5);
 
   static const String _targetDirKey = 'targetDir';
@@ -28,106 +28,97 @@ class _AppStateServiceImpl extends ChangeNotifier implements AppStateService {
   Future<bool> get successfulLoad => _successfulLoad;
   late Future<bool> _successfulLoad;
 
-  @override
   set successfulLoad(Future<bool> value) {
     _successfulLoad = value;
-    notifyListeners();
   }
 
   @override
-  String get modRoot => _modRoot;
-  String _modRoot = '.';
+  Stream<String> get modRoot => _modRoot.stream;
+  final BehaviorSubject<String> _modRoot = BehaviorSubject.seeded('.');
 
   @override
-  set modRoot(String value) {
-    _sharedPreferences?.setString(_modRootKey, value);
-    _modRoot = value;
-    notifyListeners();
+  void setModRoot(String path) {
+    _sharedPreferences?.setString(_modRootKey, path);
+    _modRoot.add(path);
   }
 
   @override
-  String get modExecFile => _modExecFile;
-  String _modExecFile = '.';
+  Stream<String> get modExecFile => _modExecFile.stream;
+  final BehaviorSubject<String> _modExecFile = BehaviorSubject.seeded('.');
 
   @override
-  set modExecFile(String value) {
-    _sharedPreferences?.setString(_modExecFileKey, value);
-    _modExecFile = value;
-    notifyListeners();
+  void setModExecFile(String path) {
+    _sharedPreferences?.setString(_modExecFileKey, path);
+    _modExecFile.add(path);
   }
 
   @override
-  String get launcherFile => _launcherFile;
-  String _launcherFile = '.';
+  Stream<String> get launcherFile => _launcherFile.stream;
+  final BehaviorSubject<String> _launcherFile = BehaviorSubject.seeded('.');
 
   @override
-  set launcherFile(String value) {
-    _sharedPreferences?.setString(_launcherFileKey, value);
-    _launcherFile = value;
-    notifyListeners();
+  void setLauncherFile(String path) {
+    _sharedPreferences?.setString(_launcherFileKey, path);
+    _launcherFile.add(path);
   }
 
   @override
-  bool get runTogether => _runTogether;
-  bool _runTogether = false;
+  Stream<bool> get runTogether => _runTogether.stream;
+  final BehaviorSubject<bool> _runTogether = BehaviorSubject.seeded(false);
 
   @override
-  set runTogether(bool value) {
+  void setRunTogether(bool value) {
     _sharedPreferences?.setBool(_runTogetherKey, value);
-    _runTogether = value;
-    notifyListeners();
+    _runTogether.add(value);
   }
 
   @override
-  bool get moveOnDrag => _moveOnDrag;
-  bool _moveOnDrag = false;
+  Stream<bool> get moveOnDrag => _moveOnDrag.stream;
+  final BehaviorSubject<bool> _moveOnDrag = BehaviorSubject.seeded(false);
 
   @override
-  set moveOnDrag(bool value) {
+  void setMoveOnDrag(bool value) {
     _sharedPreferences?.setBool(_moveOnDragKey, value);
-    _moveOnDrag = value;
-    notifyListeners();
+    _moveOnDrag.add(value);
   }
 
   @override
-  bool get showFolderIcon => _showFolderIcon;
-  bool _showFolderIcon = true;
+  Stream<bool> get showFolderIcon => _showFolderIcon.stream;
+  final BehaviorSubject<bool> _showFolderIcon = BehaviorSubject.seeded(true);
 
   @override
-  set showFolderIcon(bool value) {
+  void setShowFolderIcon(bool value) {
     _sharedPreferences?.setBool(_showFolderIconKey, value);
-    _showFolderIcon = value;
-    notifyListeners();
+    _showFolderIcon.add(value);
   }
 
   @override
-  bool get showEnabledModsFirst => _showEnabledModsFirst;
-  bool _showEnabledModsFirst = false;
+  Stream<bool> get showEnabledModsFirst => _showEnabledModsFirst.stream;
+  final BehaviorSubject<bool> _showEnabledModsFirst =
+      BehaviorSubject.seeded(false);
 
   @override
-  set showEnabledModsFirst(bool value) {
+  void setShowEnabledModsFirst(bool value) {
     _sharedPreferences?.setBool(_showEnabledModsFirstKey, value);
-    _showEnabledModsFirst = value;
-    notifyListeners();
+    _showEnabledModsFirst.add(value);
   }
 
   @override
-  String get presetData => _presetData;
-  String _presetData = '123';
+  Stream<String> get presetData => _presetData.stream;
+  final BehaviorSubject<String> _presetData = BehaviorSubject.seeded('123');
 
   @override
-  set presetData(String value) {
-    _sharedPreferences?.setString(_presetDatakey, value);
-    _presetData = value;
-    notifyListeners();
+  void setPresetData(String data) {
+    _sharedPreferences?.setString(_presetDatakey, data);
+    _presetData.add(data);
   }
 
   _AppStateServiceImpl() {
-    init();
+    reload();
   }
 
   @override
-  void init() {
+  void reload() {
     final future = SharedPreferences.getInstance();
     final timeoutFuture = future.timeout(
       _sharedPreferencesAwaitTime,
@@ -146,17 +137,15 @@ class _AppStateServiceImpl extends ChangeNotifier implements AppStateService {
       final targetDir = tDirRaw ?? dotString;
 
       final mRootRaw = value.getString(_modRootKey);
-      _modRoot = mRootRaw ?? _modRoot;
-      if (_modRoot == dotString && targetDir != dotString) {
-        _modRoot = targetDir.pJoin('Mods');
-        _sharedPreferences?.setString(_modRootKey, _modRoot);
+      if (mRootRaw != null) _modRoot.add(mRootRaw);
+      if (_modRoot.valueOrNull == dotString && targetDir != dotString) {
+        setModRoot(targetDir.pJoin('Mods'));
       }
 
       final mExecRaw = value.getString(_modExecFileKey);
-      _modExecFile = mExecRaw ?? _modExecFile;
-      if (_modExecFile == dotString && targetDir != dotString) {
-        _modExecFile = targetDir.pJoin('3DMigoto Loader.exe');
-        _sharedPreferences?.setString(_modExecFileKey, _modExecFile);
+      if (mExecRaw != null) _modExecFile.add(mExecRaw);
+      if (_modExecFile.valueOrNull == dotString && targetDir != dotString) {
+        setModExecFile(targetDir.pJoin('3DMigoto Loader.exe'));
       }
 
       if (targetDir != dotString) {
@@ -164,20 +153,25 @@ class _AppStateServiceImpl extends ChangeNotifier implements AppStateService {
       }
 
       final lFileRaw = value.getString(_launcherFileKey);
-      _launcherFile = lFileRaw ?? _launcherFile;
+      if (lFileRaw != null) _launcherFile.add(lFileRaw);
 
-      _runTogether = value.getBool(_runTogetherKey) ?? _runTogether;
+      final runTogetherRaw = value.getBool(_runTogetherKey);
+      if (runTogetherRaw != null) _runTogether.add(runTogetherRaw);
 
-      _moveOnDrag = value.getBool(_moveOnDragKey) ?? _moveOnDrag;
+      final moveOnDragRaw = value.getBool(_moveOnDragKey);
+      if (moveOnDragRaw != null) _moveOnDrag.add(moveOnDragRaw);
 
-      _showFolderIcon = value.getBool(_showFolderIconKey) ?? _showFolderIcon;
+      final showFolderIconRaw = value.getBool(_showFolderIconKey);
+      if (showFolderIconRaw != null) _showFolderIcon.add(showFolderIconRaw);
 
-      _showEnabledModsFirst =
-          value.getBool(_showEnabledModsFirstKey) ?? _showEnabledModsFirst;
+      final showEnabledModsFirstRaw = value.getBool(_showEnabledModsFirstKey);
+      if (showEnabledModsFirstRaw != null) {
+        _showEnabledModsFirst.add(showEnabledModsFirstRaw);
+      }
 
-      _presetData = value.getString(_presetDatakey) ?? _presetData;
+      final presetDataRaw = value.getString(_presetDatakey);
+      if (presetDataRaw != null) _presetData.add(presetDataRaw);
 
-      notifyListeners();
       return true;
     });
   }

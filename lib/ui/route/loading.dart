@@ -47,7 +47,7 @@ class LoadingRoute extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Button(
-                  onPressed: () => context.read<AppStateService>().init(),
+                  onPressed: () => context.read<AppStateService>().reload(),
                   child: const Text('Retry'),
                 ),
                 const SizedBox(width: 16),

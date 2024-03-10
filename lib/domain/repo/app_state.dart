@@ -1,23 +1,37 @@
-import 'package:flutter/foundation.dart';
+abstract interface class AppStateService {
+  Future<bool> get successfulLoad;
 
-abstract interface class AppStateService extends ChangeNotifier {
-  abstract Future<bool> successfulLoad;
+  Stream<String> get modRoot;
 
-  abstract String modRoot;
+  Stream<String> get modExecFile;
 
-  abstract String modExecFile;
+  Stream<String> get launcherFile;
 
-  abstract String launcherFile;
+  Stream<bool> get runTogether;
 
-  abstract bool runTogether;
+  Stream<bool> get moveOnDrag;
 
-  abstract bool moveOnDrag;
+  Stream<bool> get showFolderIcon;
 
-  abstract bool showFolderIcon;
+  Stream<bool> get showEnabledModsFirst;
 
-  abstract bool showEnabledModsFirst;
+  Stream<String> get presetData;
 
-  abstract String presetData;
+  void reload();
 
-  void init();
+  void setModRoot(String path);
+
+  void setModExecFile(String path);
+
+  void setLauncherFile(String path);
+
+  void setRunTogether(bool value);
+
+  void setMoveOnDrag(bool value);
+
+  void setShowFolderIcon(bool value);
+
+  void setShowEnabledModsFirst(bool value);
+
+  void setPresetData(String data);
 }

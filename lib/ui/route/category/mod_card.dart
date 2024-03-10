@@ -12,7 +12,7 @@ import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/data/repo/filesystem.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:genshin_mod_manager/domain/repo/filesystem.dart';
+import 'package:genshin_mod_manager/domain/repo/fs_watch.dart';
 import 'package:genshin_mod_manager/ui/route/category/editor_text.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
 import 'package:logger/logger.dart';
@@ -152,7 +152,7 @@ class _ModCard extends StatelessWidget {
               onPressed: () async {
                 try {
                   final recursiveObserverService =
-                      context.read<RecursiveFSWatchService>();
+                      context.read<RecursiveFileSystemWatcher>();
                   final fileContent = await findConfig.readAsString();
                   final config = jsonDecode(fileContent);
                   final uuid = config['uuid'] as String;

@@ -5,9 +5,7 @@ class Mod {
 
   @override
   String toString() {
-    return 'Mod('
-        'path: $path'
-        ')';
+    return 'Mod(path: $path)';
   }
 
   @override

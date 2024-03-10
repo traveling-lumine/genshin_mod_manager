@@ -12,7 +12,7 @@ import 'package:genshin_mod_manager/data/repo/filesystem.dart';
 import 'package:genshin_mod_manager/data/repo/preset.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:genshin_mod_manager/domain/repo/filesystem.dart';
+import 'package:genshin_mod_manager/domain/repo/fs_watch.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/home_shell/home_shell_vm.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
@@ -52,8 +52,8 @@ class HomeShell extends StatelessWidget {
           ),
           dispose: (context, value) => value.dispose(),
         ),
-        ChangeNotifierProxyProvider2<AppStateService, RecursiveFSWatchService,
-            PresetService>(
+        ChangeNotifierProxyProvider2<AppStateService,
+            RecursiveFileSystemWatcher, PresetService>(
           create: (context) => PresetService(),
           update: (context, value, value2, previous) =>
               previous!..update(value, value2),

@@ -1,19 +1,19 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
-import 'package:genshin_mod_manager/domain/repo/filesystem.dart';
+import 'package:genshin_mod_manager/domain/repo/fs_watch.dart';
+import 'package:genshin_mod_manager/domain/repo/proxy_fs_watcher.dart';
+import 'package:rxdart/rxdart.dart';
 
-FSWatchService createFileSystemWatchService({
+FileSystemWatcher createFileSystemWatchService({
   required String targetPath,
 }) {
   return _FileSystemWatchServiceImpl(targetPath: targetPath);
 }
 
-class _FileSystemWatchServiceImpl implements FSWatchService {
+class _FileSystemWatchServiceImpl implements FileSystemWatcher {
   @override
   // TODO: implement event
   Stream<FileSystemEvent?> get event => throw UnimplementedError();
@@ -30,13 +30,13 @@ class _FileSystemWatchServiceImpl implements FSWatchService {
   }
 }
 
-RecursiveFSWatchService createRecursiveFileSystemWatchService({
+RecursiveFileSystemWatcher createRecursiveFileSystemWatchService({
   required String targetPath,
 }) {
   return _RecursiveFSWatchServiceImpl(targetPath: targetPath);
 }
 
-class _RecursiveFSWatchServiceImpl implements RecursiveFSWatchService {
+class _RecursiveFSWatchServiceImpl implements RecursiveFileSystemWatcher {
   final StreamController<FileSystemEvent?> _streamController =
       StreamController.broadcast();
   late final StreamSubscription<FileSystemEvent> _subscription;
@@ -74,39 +74,40 @@ class _RecursiveFSWatchServiceImpl implements RecursiveFSWatchService {
   void forceUpdate() => _streamController.add(null);
 }
 
-RelayFSEWatchService<T> createRelayFSEWatchService<T extends FileSystemEntity>({
-  required RecursiveFSWatchService host,
+ProxyFileSystemWatcher<T>
+    createRelayFSEWatchService<T extends FileSystemEntity>({
+  required RecursiveFileSystemWatcher host,
   required String targetPath,
 }) {
-  return RelayFSEWatchServiceImpl<T>(
+  return _ProxyFileSystemWatcherImpl<T>(
     host: host,
     targetPath: targetPath,
   );
 }
 
-class RelayFSEWatchServiceImpl<T extends FileSystemEntity>
-    extends ChangeNotifier implements RelayFSEWatchService<T> {
-  late StreamSubscription<FileSystemEvent?> _subscription;
-
+class _ProxyFileSystemWatcherImpl<T extends FileSystemEntity>
+    implements ProxyFileSystemWatcher<T> {
   @override
-  List<T> get entities => UnmodifiableListView(_entities);
-  List<T> _entities;
+  Stream<List<T>> get entity => _entityStream.stream;
+  final BehaviorSubject<List<T>> _entityStream;
 
-  RelayFSEWatchServiceImpl({
-    required RecursiveFSWatchService host,
+  _ProxyFileSystemWatcherImpl({
+    required RecursiveFileSystemWatcher host,
     required String targetPath,
-  }) : _entities = getFSEUnder<T>(targetPath) {
-    _subscription = host.event.listen((event) {
-      if (!_ifEventDirectUnder(event, targetPath)) return;
-      _entities = getFSEUnder<T>(targetPath);
-      notifyListeners();
-    });
+  }) : _entityStream = BehaviorSubject.seeded(getFSEUnder<T>(targetPath)) {
+    _createStream(targetPath, host).pipe(_entityStream);
   }
 
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
+  Stream<List<T>> _createStream(
+    String targetPath,
+    RecursiveFileSystemWatcher host,
+  ) async* {
+    yield getFSEUnder<T>(targetPath);
+    await for (var event in host.event) {
+      if (!_ifEventDirectUnder(event, targetPath)) continue;
+      final fseUnder = getFSEUnder<T>(targetPath);
+      yield fseUnder;
+    }
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
+import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/category/category_vm.dart';
 import 'package:genshin_mod_manager/ui/route/category/mod_card.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
@@ -71,10 +72,8 @@ class _CategoryRoute extends StatelessWidget {
                 ),
                 CommandBarButton(
                   icon: const Icon(FluentIcons.download),
-                  onPressed: () {
-                    final escapedCategory = Uri.encodeComponent(category.name);
-                    context.push('/nahidastore?category=$escapedCategory');
-                  },
+                  onPressed: () =>
+                      context.push(kNahidaStoreRoute, extra: category),
                 ),
               ],
             ),

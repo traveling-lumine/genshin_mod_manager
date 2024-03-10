@@ -8,7 +8,7 @@ import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/repo/folder_observer.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:genshin_mod_manager/domain/repo/filesystem.dart';
+import 'package:genshin_mod_manager/domain/repo/fs_watch.dart';
 
 abstract interface class HomeShellViewModel extends ChangeNotifier {
   List<ModCategory> get modCategories;
@@ -26,7 +26,7 @@ abstract interface class HomeShellViewModel extends ChangeNotifier {
 
 HomeShellViewModel createViewModel({
   required AppStateService appStateService,
-  required RecursiveFSWatchService recursiveObserverService,
+  required RecursiveFileSystemWatcher recursiveObserverService,
 }) {
   return _HomeShellViewModelImpl(
     appStateService: appStateService,
@@ -38,7 +38,7 @@ class _HomeShellViewModelImpl extends ChangeNotifier
     implements HomeShellViewModel {
   final AppStateService _appStateService;
   final CategoryIconFolderObserverService _categoryIconFolderObserverService;
-  final RecursiveFSWatchService _recursiveObserverService;
+  final RecursiveFileSystemWatcher _recursiveObserverService;
   final RootWatchService _rootWatchService;
 
   late final StreamSubscription<FileSystemEvent?> _subscription;
@@ -57,7 +57,7 @@ class _HomeShellViewModelImpl extends ChangeNotifier
 
   _HomeShellViewModelImpl({
     required AppStateService appStateService,
-    required RecursiveFSWatchService recursiveObserverService,
+    required RecursiveFileSystemWatcher recursiveObserverService,
   })  : _appStateService = appStateService,
         _categoryIconFolderObserverService = CategoryIconFolderObserverService(
           targetPath: appStateService.modRoot,

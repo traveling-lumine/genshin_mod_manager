@@ -1,8 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/repo/app_state.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/category/category.dart';
 import 'package:genshin_mod_manager/ui/route/home_shell/home_shell.dart';
@@ -41,27 +39,13 @@ class MyApp extends StatelessWidget {
           ),
           GoRoute(
             path: kCategoryRoute,
-            builder: (context, state) {
-              final ModCategory extra = state.extra as ModCategory;
-              return CategoryRoute(category: extra);
-            },
-            redirect: (context, state) {
-              return state.extra is ModCategory ? null : kHomeRoute;
-            },
+            builder: (context, state) =>
+                CategoryRoute(category: state.extra as ModCategory),
           ),
           GoRoute(
             path: kNahidaStoreRoute,
-            builder: (context, state) {
-              final category = state.uri.queryParameters['category']!;
-              final categoryPath =
-                  context.read<AppStateService>().modRoot.pJoin(category);
-              return NahidaStoreRoute(
-                category: ModCategory(
-                  name: category,
-                  path: categoryPath,
-                ),
-              );
-            },
+            builder: (context, state) =>
+                NahidaStoreRoute(category: state.extra as ModCategory),
           ),
         ],
       ),
@@ -72,7 +56,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return Provider(
       create: (context) => createAppStateService(),
       child: FluentApp.router(
         title: 'Genshin Mod Manager',

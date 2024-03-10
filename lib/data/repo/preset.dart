@@ -8,17 +8,18 @@ import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:genshin_mod_manager/domain/repo/filesystem.dart';
+import 'package:genshin_mod_manager/domain/repo/fs_watch.dart';
 
 class PresetService with ChangeNotifier {
   AppStateService? _appStateService;
-  RecursiveFSWatchService? _observerService;
+  RecursiveFileSystemWatcher? _observerService;
   Map<String, Map<String, List<String>>> _curGlobal = {};
   Map<String, Map<String, List<String>>> _curLocal = {};
 
   PresetService();
 
-  void update(AppStateService data, RecursiveFSWatchService observerService) {
+  void update(
+      AppStateService data, RecursiveFileSystemWatcher observerService) {
     _appStateService = data;
     _observerService = observerService;
     if (_shouldUpdate(data.presetData)) {

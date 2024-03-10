@@ -83,40 +83,40 @@ class _SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
   void onModRootSelect() {
     final dir = DirectoryPicker().getDirectory();
     if (dir == null) return;
-    _appStateService.modRoot = dir.path;
+    _appStateService.setModRoot(dir.path);
   }
 
   @override
   void onModExecSelect() {
     final file = OpenNoDereferenceFilePicker().getFile();
     if (file == null) return;
-    _appStateService.modExecFile = file.path;
+    _appStateService.setModExecFile(file.path);
   }
 
   @override
   void onLauncherSelect() {
     final file = OpenNoDereferenceFilePicker().getFile();
     if (file == null) return;
-    _appStateService.launcherFile = file.path;
+    _appStateService.setLauncherFile(file.path);
   }
 
   @override
   void onRunTogetherChanged(bool value) {
-    _appStateService.runTogether = value;
+    _appStateService.setRunTogether(value);
   }
 
   @override
   void onMoveOnDragChanged(bool value) {
-    _appStateService.moveOnDrag = value;
+    _appStateService.setMoveOnDrag(value);
   }
 
   @override
   void onShowFolderIconChanged(bool value) {
-    _appStateService.showFolderIcon = value;
+    _appStateService.setShowFolderIcon(value);
   }
 
   @override
   void onShowEnabledModsFirstChanged(bool value) {
-    _appStateService.showEnabledModsFirst = value;
+    _appStateService.setShowEnabledModsFirst(value);
   }
 }
