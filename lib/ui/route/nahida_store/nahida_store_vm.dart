@@ -6,6 +6,7 @@ import 'package:genshin_mod_manager/domain/entity/category.dart';
 import 'package:genshin_mod_manager/domain/repo/akasha.dart';
 import 'package:genshin_mod_manager/domain/usecase/akasha_download.dart';
 import 'package:genshin_mod_manager/domain/usecase/akasha_refresh.dart';
+import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/ui/util/mod_writer.dart';
 
 abstract interface class NahidaStoreViewModel extends ChangeNotifier {
@@ -28,13 +29,20 @@ abstract interface class NahidaStoreViewModel extends ChangeNotifier {
   });
 }
 
-NahidaStoreViewModel getViewModel({required NahidaliveAPI api}) {
-  return _NahidaStoreViewModelImpl(api: api);
+NahidaStoreViewModel createViewModel({
+  required NahidaliveAPI api,
+  required RecursiveObserverService observer,
+}) {
+  return _NahidaStoreViewModelImpl(
+    api: api,
+    observer: observer,
+  );
 }
 
 final class _NahidaStoreViewModelImpl extends ChangeNotifier
     implements NahidaStoreViewModel {
   final NahidaliveAPI _api;
+  final RecursiveObserverService _observer;
 
   Future<String?> Function()? _onPasswordRequired;
   void Function(HttpException)? _onApiException;
@@ -51,8 +59,10 @@ final class _NahidaStoreViewModelImpl extends ChangeNotifier
     notifyListeners();
   }
 
-  _NahidaStoreViewModelImpl({required NahidaliveAPI api})
+  _NahidaStoreViewModelImpl(
+      {required NahidaliveAPI api, required RecursiveObserverService observer})
       : _api = api,
+        _observer = observer,
         _elements = api.fetchNahidaliveElements();
 
   @override
@@ -73,9 +83,9 @@ final class _NahidaStoreViewModelImpl extends ChangeNotifier
         category: category,
         pw: pw,
       ).call();
-      _onDownloadComplete?.call(element);
     } on HttpException catch (e) {
       _onApiException?.call(e);
+      return;
     } on WrongPasswordException {
       final password = await _onPasswordRequired?.call();
       if (password == null) return;
@@ -86,7 +96,10 @@ final class _NahidaStoreViewModelImpl extends ChangeNotifier
       );
     } on ModZipExtractionException catch (e) {
       _onExtractFail?.call(category, element.title, e.data);
+      return;
     }
+    _onDownloadComplete?.call(element);
+    _observer.forceUpdate();
   }
 
   @override

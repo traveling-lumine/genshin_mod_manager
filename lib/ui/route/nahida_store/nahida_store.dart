@@ -29,7 +29,10 @@ class NahidaStoreRoute extends StatelessWidget {
       providers: [
         Provider<NahidaliveAPI>(create: (context) => getNahidaliveAPI()),
         ChangeNotifierProvider<NahidaStoreViewModel>(
-          create: (context) => getViewModel(api: context.read<NahidaliveAPI>()),
+          create: (context) => createViewModel(
+            api: context.read<NahidaliveAPI>(),
+            observer: context.read<RecursiveObserverService>(),
+          ),
         ),
       ],
       child: _NahidaStoreRoute(category: category),
@@ -56,59 +59,73 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
     super.initState();
     final vm = context.read<NahidaStoreViewModel>();
     vm.registerDownloadCallbacks(
-      onApiException: (e) => displayInfoBarInContext(
-        context,
-        title: const Text('Download failed'),
-        content: Text('${e.uri}'),
-        severity: InfoBarSeverity.error,
-      ),
+      onApiException: (e) {
+        if (!mounted) return;
+        displayInfoBarInContext(
+          context,
+          title: const Text('Download failed'),
+          content: Text('${e.uri}'),
+          severity: InfoBarSeverity.error,
+        );
+      },
       onDownloadComplete: (element) {
+        if (!mounted) return;
         displayInfoBarInContext(
           context,
           title: Text('Downloaded ${element.title}'),
           severity: InfoBarSeverity.success,
         );
-        context.read<RecursiveObserverService>().forceUpdate();
       },
-      onPasswordRequired: () => showDialog(
-        context: context,
-        builder: (dialogContext) => ContentDialog(
-          title: const Text('Enter password'),
-          content: SizedBox(
-            height: 40,
-            child: TextBox(
-              autofocus: true,
-              controller: _textEditingController,
-              placeholder: 'Password',
-              onSubmitted: (value) =>
-                  Navigator.of(dialogContext).pop(_textEditingController.text),
+      onPasswordRequired: () {
+        if (!mounted) return Future(() => null);
+        return showDialog(
+          context: context,
+          builder: (dialogContext) => ContentDialog(
+            title: const Text('Enter password'),
+            content: SizedBox(
+              height: 40,
+              child: TextBox(
+                autofocus: true,
+                controller: _textEditingController,
+                placeholder: 'Password',
+                onSubmitted: (value) => Navigator.of(dialogContext)
+                    .pop(_textEditingController.text),
+              ),
             ),
+            actions: [
+              Button(
+                onPressed: Navigator.of(dialogContext).pop,
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(dialogContext)
+                    .pop(_textEditingController.text),
+                child: const Text('Download'),
+              ),
+            ],
           ),
-          actions: [
-            Button(
-              onPressed: Navigator.of(dialogContext).pop,
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () =>
-                  Navigator.of(dialogContext).pop(_textEditingController.text),
-              child: const Text('Download'),
-            ),
-          ],
-        ),
-      ),
+        );
+      },
       onExtractFail: (category, modName, data) async {
-        unawaited(displayInfoBarInContext(
-          context,
-          title: const Text('Download failed'),
-          content: Text('Failed to extract archive: decode error.'
-              ' Instead, the archive was saved as $modName.'),
-          severity: InfoBarSeverity.error,
-        ));
+        if (mounted) {
+          unawaited(displayInfoBarInContext(
+            context,
+            title: const Text('Download failed'),
+            content: Text('Failed to extract archive: decode error.'
+                ' Instead, the archive was saved as $modName.'),
+            severity: InfoBarSeverity.error,
+          ));
+        }
         try {
           await File(category.path.pJoin(modName)).writeAsBytes(data);
         } catch (e) {
-          // duh
+          if (!mounted) return;
+          unawaited(displayInfoBarInContext(
+            context,
+            title: const Text('Write failed'),
+            content: Text('Failed to write archive $modName: $e'),
+            severity: InfoBarSeverity.error,
+          ));
         }
       },
     );
@@ -118,8 +135,6 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
   void dispose() {
     _textEditingController.dispose();
     _scrollController.dispose();
-    final vm = context.read<NahidaStoreViewModel>();
-    vm.registerDownloadCallbacks(); // clear callbacks
     super.dispose();
   }
 

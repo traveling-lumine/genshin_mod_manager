@@ -21,8 +21,8 @@ class CategoryRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<CategoryRouteViewModel>(
-      create: (context) => CategoryRouteViewModelImpl(
+    return ChangeNotifierProvider(
+      create: (context) => createCategoryRouteViewModel(
         appStateService: context.read<AppStateService>(),
         rootObserverService: context.read<RecursiveObserverService>(),
         category: category,

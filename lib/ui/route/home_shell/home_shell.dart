@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:genshin_mod_manager/data/constant.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
+import 'package:genshin_mod_manager/ui/route/home_shell/home_shell_vm.dart';
 import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
 import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/ui/service/preset_service.dart';
@@ -66,6 +67,7 @@ class HomeShell extends StatelessWidget {
           update: (context, value, previous) =>
               previous!..update(value.lastEvent),
         ),
+        ChangeNotifierProvider(create: (context) => createViewModel()),
       ],
       child: _HomeShell(child: child),
     );

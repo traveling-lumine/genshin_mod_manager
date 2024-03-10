@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
@@ -13,7 +13,19 @@ abstract interface class CategoryRouteViewModel extends ChangeNotifier {
   void onFolderOpen();
 }
 
-class CategoryRouteViewModelImpl extends ChangeNotifier
+CategoryRouteViewModel createCategoryRouteViewModel({
+  required AppStateService appStateService,
+  required RecursiveObserverService rootObserverService,
+  required String category,
+}) {
+  return _CategoryRouteViewModelImpl(
+    appStateService: appStateService,
+    rootObserverService: rootObserverService,
+    category: category,
+  );
+}
+
+class _CategoryRouteViewModelImpl extends ChangeNotifier
     implements CategoryRouteViewModel {
   final AppStateService _appStateService;
   final RecursiveObserverService _rootObserverService;
@@ -35,7 +47,7 @@ class CategoryRouteViewModelImpl extends ChangeNotifier
     notifyListeners();
   }
 
-  CategoryRouteViewModelImpl({
+  _CategoryRouteViewModelImpl({
     required AppStateService appStateService,
     required RecursiveObserverService rootObserverService,
     required String category,
