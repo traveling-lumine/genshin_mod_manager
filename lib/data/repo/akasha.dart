@@ -13,7 +13,7 @@ const _kAkashaApi = '$kAkashaBase/mods/apiv2';
 const _kAkashaDownload = '$_kAkashaApi/download';
 const _kAkashaList = '$_kAkashaApi/list';
 
-NahidaliveAPI getNahidaliveAPI() {
+NahidaliveAPI createNahidaliveAPI() {
   return _NahidaliveAPIImpl();
 }
 

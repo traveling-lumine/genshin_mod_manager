@@ -41,7 +41,7 @@ class HomeShell extends StatelessWidget {
         Platform.resolvedExecutable.pDirname.pJoin(resourceDir);
     Directory(resourcePath).createSync(recursive: true);
     final modRootPath =
-        context.select<AppStateService, String>((value) => value.modRoot);
+        context.select((AppStateService value) => value.modRoot);
     return MultiProvider(
       key: Key(modRootPath),
       providers: [

@@ -5,7 +5,7 @@ import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-AppStateService getAppStateService() {
+AppStateService createAppStateService() {
   return AppStateServiceImpl();
 }
 

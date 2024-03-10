@@ -156,7 +156,7 @@ class _ModCard extends StatelessWidget {
                   final uuid = config['uuid'] as String;
                   final version = config['version'] as String;
                   final updateCode = config['update_code'] as String;
-                  final api = getNahidaliveAPI();
+                  final api = createNahidaliveAPI();
                   final targetElement = await api.fetchNahidaliveElement(uuid);
                   final upstreamVersion = targetElement.version;
                   if (version == upstreamVersion) {

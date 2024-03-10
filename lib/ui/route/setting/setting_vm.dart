@@ -33,7 +33,13 @@ abstract interface class SettingViewModel extends ChangeNotifier {
   void onShowEnabledModsFirstChanged(bool value);
 }
 
-class SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
+SettingViewModel createSettingViewModel({
+  required AppStateService appStateService,
+}) {
+  return _SettingViewModelImpl(appStateService: appStateService);
+}
+
+class _SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
   final AppStateService _appStateService;
 
   @override
@@ -57,7 +63,7 @@ class SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
   @override
   get showFolderIcon => _appStateService.showFolderIcon;
 
-  SettingViewModelImpl({
+  _SettingViewModelImpl({
     required AppStateService appStateService,
   }) : _appStateService = appStateService {
     _appStateService.addListener(appStateListener);

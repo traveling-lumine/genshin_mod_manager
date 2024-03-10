@@ -1,5 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/setting/setting_vm.dart';
 import 'package:go_router/go_router.dart';
@@ -13,11 +12,10 @@ class SettingRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<SettingViewModel>(
-      create: (context) {
-        final appStateService = context.read<AppStateService>();
-        return SettingViewModelImpl(appStateService: appStateService);
-      },
+    return ChangeNotifierProvider(
+      create: (context) => createSettingViewModel(
+        appStateService: context.read(),
+      ),
       child: const _SettingRoute(),
     );
   }

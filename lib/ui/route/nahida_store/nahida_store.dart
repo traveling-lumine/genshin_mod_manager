@@ -6,7 +6,6 @@ import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/repo/akasha.dart';
 import 'package:genshin_mod_manager/ui/route/nahida_store/nahida_store_vm.dart';
 import 'package:genshin_mod_manager/ui/route/nahida_store/store_element.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
@@ -26,8 +25,8 @@ class NahidaStoreRoute extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<NahidaliveAPI>(create: (context) => getNahidaliveAPI()),
-        ChangeNotifierProvider<NahidaStoreViewModel>(
+        Provider(create: (context) => createNahidaliveAPI()),
+        ChangeNotifierProvider(
           create: (context) => createViewModel(
             api: context.read(),
             observer: context.read(),

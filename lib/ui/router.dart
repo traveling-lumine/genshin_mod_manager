@@ -73,7 +73,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => getAppStateService(),
+      create: (context) => createAppStateService(),
       child: FluentApp.router(
         title: 'Genshin Mod Manager',
         routerDelegate: _router.routerDelegate,
