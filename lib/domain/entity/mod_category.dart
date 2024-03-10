@@ -15,6 +15,20 @@ class ModCategory {
   String toString() {
     return 'ModCategory(path: $path, name: $name, iconPath: $iconPath)';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ModCategory &&
+        other.path == path &&
+        other.name == name &&
+        other.iconPath == iconPath;
+  }
+
+  @override
+  int get hashCode {
+    return path.hashCode ^ name.hashCode ^ iconPath.hashCode;
+  }
 }
 
 class ModCategoryCodec extends Codec<Object?, Object?> {

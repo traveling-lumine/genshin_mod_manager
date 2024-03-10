@@ -1,12 +1,14 @@
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
+import 'package:genshin_mod_manager/data/repo/filesystem.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
-import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/domain/repo/app_state.dart';
+import 'package:genshin_mod_manager/domain/repo/filesystem.dart';
 
 abstract interface class CategoryRouteViewModel extends ChangeNotifier {
   List<Mod> get modPaths;
@@ -16,7 +18,7 @@ abstract interface class CategoryRouteViewModel extends ChangeNotifier {
 
 CategoryRouteViewModel createCategoryRouteViewModel({
   required AppStateService appStateService,
-  required RecursiveObserverService rootObserverService,
+  required RecursiveFSWatchService rootObserverService,
   required ModCategory category,
 }) {
   return _CategoryRouteViewModelImpl(
@@ -28,59 +30,50 @@ CategoryRouteViewModel createCategoryRouteViewModel({
 
 class _CategoryRouteViewModelImpl extends ChangeNotifier
     implements CategoryRouteViewModel {
+  final RelayFSEWatchService<Directory> _dirWatchService;
   final AppStateService _appStateService;
-  final RecursiveObserverService _rootObserverService;
   final ModCategory _category;
-  late final DirWatchService _dirWatchService;
-
-  List<Mod> _modPaths = [];
 
   @override
   List<Mod> get modPaths => UnmodifiableListView(_modPaths);
+  late List<Mod> _modPaths;
 
   @override
   void onFolderOpen() {
     openFolder(_category.path);
   }
 
-  set modPaths(List<Mod> value) {
-    _modPaths = value;
-    notifyListeners();
-  }
-
   _CategoryRouteViewModelImpl({
     required AppStateService appStateService,
-    required RecursiveObserverService rootObserverService,
+    required RecursiveFSWatchService rootObserverService,
     required ModCategory category,
   })  : _category = category,
-        _rootObserverService = rootObserverService,
-        _appStateService = appStateService {
-    final categoryPath = _category.path;
-    _dirWatchService = DirWatchService(targetPath: categoryPath);
-    _appStateService.addListener(appStateServiceUpdate);
-    _rootObserverService.addListener(rootObserverServiceUpdate);
-    updateModPaths();
+        _appStateService = appStateService,
+        _dirWatchService = createRelayFSEWatchService<Directory>(
+          targetPath: category.path,
+          host: rootObserverService,
+        ) {
+    _getModList();
+    _dirWatchService.addListener(_listener);
+    _appStateService.addListener(_listener);
   }
 
   @override
   void dispose() {
-    _appStateService.removeListener(appStateServiceUpdate);
-    _rootObserverService.removeListener(rootObserverServiceUpdate);
+    _appStateService.removeListener(_listener);
+    _dirWatchService.removeListener(_listener);
+    _dirWatchService.dispose();
     super.dispose();
   }
 
-  void appStateServiceUpdate() {
-    updateModPaths();
+  void _listener() {
+    _getModList();
+    notifyListeners();
   }
 
-  void rootObserverServiceUpdate() {
-    _dirWatchService.update(_rootObserverService.lastEvent);
-    updateModPaths();
-  }
-
-  void updateModPaths() {
+  void _getModList() {
     final enabledFirst = _appStateService.showEnabledModsFirst;
-    modPaths = _dirWatchService.curEntities
+    _modPaths = _dirWatchService.entities
         .map((e) => Mod(path: e.path))
         .toList(growable: false)
       ..sort(

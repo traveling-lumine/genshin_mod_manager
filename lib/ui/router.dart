@@ -1,8 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
-import 'package:genshin_mod_manager/data/repo/app_state_service.dart';
+import 'package:genshin_mod_manager/data/repo/app_state.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
+import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/category/category.dart';
 import 'package:genshin_mod_manager/ui/route/home_shell/home_shell.dart';

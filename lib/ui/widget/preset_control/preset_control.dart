@@ -1,15 +1,12 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/ui/service/preset_service.dart';
+import 'package:genshin_mod_manager/ui/widget/preset_control/preset_control_vm.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
 import 'package:provider/provider.dart';
 
 class PresetControlWidget extends StatelessWidget {
-  final _controller = TextEditingController();
   final bool isLocal;
   final ModCategory? category;
-
-  String get _localPreset => isLocal ? 'Local' : 'Global';
 
   PresetControlWidget({
     super.key,
@@ -17,8 +14,46 @@ class PresetControlWidget extends StatelessWidget {
     this.category,
   }) {
     if (isLocal && category == null) {
-      throw ArgumentError.notNull('category');
+      throw ArgumentError.notNull('category for local preset control');
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) {
+        if (isLocal) {
+          return createLocalPresetControlViewModel(
+            presetService: context.read(),
+            category: category!,
+          );
+        } else {
+          return createGlobalPresetControlViewModel(
+            presetService: context.read(),
+          );
+        }
+      },
+      child: _PresetControlWidget(prefix: isLocal ? 'Local' : 'Global'),
+    );
+  }
+}
+
+class _PresetControlWidget extends StatefulWidget {
+  final String prefix;
+
+  const _PresetControlWidget({required this.prefix});
+
+  @override
+  State<_PresetControlWidget> createState() => _PresetControlWidgetState();
+}
+
+class _PresetControlWidgetState extends State<_PresetControlWidget> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -34,15 +69,14 @@ class PresetControlWidget extends StatelessWidget {
   }
 
   Widget _buildComboBox() {
-    return Selector<PresetService, List<String>>(
-      selector: (p0, p1) =>
-          isLocal ? p1.getLocalPresets(category!) : p1.getGlobalPresets(),
+    return Selector(
+      selector: (_, PresetControlViewModel vm) => vm.presets,
       builder: (context, value, child) => RepaintBoundary(
         child: ComboBox(
           items: value
               .map((e) => ComboBoxItem(value: e, child: Text(e)))
               .toList(growable: false),
-          placeholder: Text('$_localPreset Preset...'),
+          placeholder: Text('${widget.prefix} Preset...'),
           onChanged: (value) => showDialog(
             barrierDismissible: true,
             context: context,
@@ -55,20 +89,15 @@ class PresetControlWidget extends StatelessWidget {
 
   ContentDialog _presetDialog(
       String name, BuildContext dialogContext, BuildContext buildContext) {
+    final vm = context.read<PresetControlViewModel>();
     return ContentDialog(
-      title: Text('Apply $_localPreset Preset?'),
+      title: Text('Apply ${widget.prefix} Preset?'),
       content: Text('Preset name: $name'),
       actions: [
         RedFilledButton(
           onPressed: () {
             Navigator.of(dialogContext).pop();
-            if (isLocal) {
-              buildContext
-                  .read<PresetService>()
-                  .removeLocalPreset(category!, name);
-            } else {
-              buildContext.read<PresetService>().removeGlobalPreset(name);
-            }
+            vm.removePreset(name);
           },
           child: const Text('Delete'),
         ),
@@ -79,13 +108,7 @@ class PresetControlWidget extends StatelessWidget {
         FilledButton(
           onPressed: () {
             Navigator.of(dialogContext).pop();
-            if (isLocal) {
-              buildContext
-                  .read<PresetService>()
-                  .setLocalPreset(category!, name);
-            } else {
-              buildContext.read<PresetService>().setGlobalPreset(name);
-            }
+            vm.setPreset(name);
           },
           child: const Text('Apply'),
         ),
@@ -107,8 +130,9 @@ class PresetControlWidget extends StatelessWidget {
   }
 
   Widget _addDialog(BuildContext dialogContext, BuildContext buildContext) {
+    final vm = context.read<PresetControlViewModel>();
     return ContentDialog(
-      title: Text('Add $_localPreset Preset'),
+      title: Text('Add ${widget.prefix} Preset'),
       content: SizedBox(
         height: 40,
         child: TextBox(
@@ -118,9 +142,7 @@ class PresetControlWidget extends StatelessWidget {
       ),
       actions: [
         Button(
-          onPressed: () {
-            Navigator.of(dialogContext).pop();
-          },
+          onPressed: Navigator.of(dialogContext).pop,
           child: const Text('Cancel'),
         ),
         FilledButton(
@@ -128,13 +150,7 @@ class PresetControlWidget extends StatelessWidget {
             Navigator.of(dialogContext).pop();
             final text = _controller.text;
             _controller.clear();
-            if (isLocal) {
-              buildContext
-                  .read<PresetService>()
-                  .addLocalPreset(category!, text);
-            } else {
-              buildContext.read<PresetService>().addGlobalPreset(text);
-            }
+            vm.addPreset(text);
           },
           child: const Text('Add'),
         ),

@@ -1,12 +1,14 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
+import 'package:genshin_mod_manager/data/repo/folder_observer.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
-import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
+import 'package:genshin_mod_manager/domain/repo/app_state.dart';
+import 'package:genshin_mod_manager/domain/repo/filesystem.dart';
 
 abstract interface class HomeShellViewModel extends ChangeNotifier {
   List<ModCategory> get modCategories;
@@ -24,7 +26,7 @@ abstract interface class HomeShellViewModel extends ChangeNotifier {
 
 HomeShellViewModel createViewModel({
   required AppStateService appStateService,
-  required RecursiveObserverService recursiveObserverService,
+  required RecursiveFSWatchService recursiveObserverService,
 }) {
   return _HomeShellViewModelImpl(
     appStateService: appStateService,
@@ -36,8 +38,10 @@ class _HomeShellViewModelImpl extends ChangeNotifier
     implements HomeShellViewModel {
   final AppStateService _appStateService;
   final CategoryIconFolderObserverService _categoryIconFolderObserverService;
-  final RecursiveObserverService _recursiveObserverService;
+  final RecursiveFSWatchService _recursiveObserverService;
   final RootWatchService _rootWatchService;
+
+  late final StreamSubscription<FileSystemEvent?> _subscription;
 
   @override
   List<ModCategory> get modCategories => UnmodifiableListView(_modCategories);
@@ -53,7 +57,7 @@ class _HomeShellViewModelImpl extends ChangeNotifier
 
   _HomeShellViewModelImpl({
     required AppStateService appStateService,
-    required RecursiveObserverService recursiveObserverService,
+    required RecursiveFSWatchService recursiveObserverService,
   })  : _appStateService = appStateService,
         _categoryIconFolderObserverService = CategoryIconFolderObserverService(
           targetPath: appStateService.modRoot,
@@ -64,7 +68,7 @@ class _HomeShellViewModelImpl extends ChangeNotifier
         ) {
     _appStateService.addListener(_onAppState);
     _categoryIconFolderObserverService.addListener(_onCategoryIconFolder);
-    _recursiveObserverService.addListener(_onRecursive);
+    _subscription = _recursiveObserverService.event.listen(_onRecursive);
     _rootWatchService.addListener(_onRoot);
   }
 
@@ -72,7 +76,7 @@ class _HomeShellViewModelImpl extends ChangeNotifier
   void dispose() {
     _appStateService.removeListener(_onAppState);
     _categoryIconFolderObserverService.removeListener(_onCategoryIconFolder);
-    _recursiveObserverService.addListener(_onRecursive);
+    _subscription.cancel();
     _rootWatchService.removeListener(_onRoot);
     super.dispose();
   }
@@ -94,6 +98,10 @@ class _HomeShellViewModelImpl extends ChangeNotifier
     runProgram(File(path));
   }
 
+  void _onRecursive(FileSystemEvent? event) {
+    _rootWatchService.update(event);
+  }
+
   void _onAppState() {
     _modCategories = _getModCategories();
     _runTogether = _appStateService.runTogether;
@@ -104,10 +112,6 @@ class _HomeShellViewModelImpl extends ChangeNotifier
   void _onCategoryIconFolder() {
     _modCategories = _getModCategories();
     notifyListeners();
-  }
-
-  void _onRecursive() {
-    _rootWatchService.update(_recursiveObserverService.lastEvent);
   }
 
   void _onRoot() {

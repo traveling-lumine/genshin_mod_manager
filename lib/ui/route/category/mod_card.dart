@@ -10,9 +10,10 @@ import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
+import 'package:genshin_mod_manager/data/repo/filesystem.dart';
+import 'package:genshin_mod_manager/domain/repo/app_state.dart';
+import 'package:genshin_mod_manager/domain/repo/filesystem.dart';
 import 'package:genshin_mod_manager/ui/route/category/editor_text.dart';
-import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
 import 'package:logger/logger.dart';
 import 'package:pasteboard/pasteboard.dart';
@@ -27,10 +28,11 @@ class ModCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProxyProvider<RecursiveObserverService,
-        FileWatchService>(
-      create: (context) => FileWatchService(targetPath: path),
-      update: (context, value, previous) => previous!..update(value.lastEvent),
+    return ChangeNotifierProvider(
+      create: (context) => createRelayFSEWatchService<File>(
+        targetPath: path,
+        host: context.read(),
+      ),
       child: _ModCard(
         dirPath: path,
       ),
@@ -150,7 +152,7 @@ class _ModCard extends StatelessWidget {
               onPressed: () async {
                 try {
                   final recursiveObserverService =
-                      context.read<RecursiveObserverService>();
+                      context.read<RecursiveFSWatchService>();
                   final fileContent = await findConfig.readAsString();
                   final config = jsonDecode(fileContent);
                   final uuid = config['uuid'] as String;
@@ -244,46 +246,46 @@ class _ModCard extends StatelessWidget {
   }
 
   Widget _buildDesc(BuildContext context, BoxConstraints constraints) {
-    final v = context.watch<FileWatchService>().curEntities;
+    final v = context.watch<RelayFSEWatchService<File>>().entities;
     final previewFile = findPreviewFileIn(v);
-    if (previewFile == null) {
-      return Expanded(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(FluentIcons.unknown),
-            const SizedBox(height: 4),
-            RepaintBoundary(
-              child: Button(
-                onPressed: () async {
-                  final image = await Pasteboard.image;
-                  if (image == null) {
-                    _logger.d('No image found in clipboard');
-                    return;
-                  }
-                  final filePath = dirPath.pJoin('preview.png');
-                  await File(filePath).writeAsBytes(image);
-                  if (!context.mounted) return;
-                  await displayInfoBar(
-                    context,
-                    builder: (_, close) {
-                      return InfoBar(
-                        title: const Text('Image pasted'),
-                        content: Text('to $filePath'),
-                        onClose: close,
-                      );
-                    },
-                  );
-                  _logger.d('Image pasted to $filePath');
-                },
-                child: const Text('Paste'),
-              ),
-            )
-          ],
-        ),
-      );
+    if (previewFile != null) {
+      return _buildImageDesc(context, constraints, previewFile);
     }
-    return _buildImageDesc(context, constraints, previewFile);
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(FluentIcons.unknown),
+          const SizedBox(height: 4),
+          RepaintBoundary(
+            child: Button(
+              onPressed: () async {
+                final image = await Pasteboard.image;
+                if (image == null) {
+                  _logger.d('No image found in clipboard');
+                  return;
+                }
+                final filePath = dirPath.pJoin('preview.png');
+                await File(filePath).writeAsBytes(image);
+                if (!context.mounted) return;
+                await displayInfoBar(
+                  context,
+                  builder: (_, close) {
+                    return InfoBar(
+                      title: const Text('Image pasted'),
+                      content: Text('to $filePath'),
+                      onClose: close,
+                    );
+                  },
+                );
+                _logger.d('Image pasted to $filePath');
+              },
+              child: const Text('Paste'),
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   Widget _buildImageDesc(

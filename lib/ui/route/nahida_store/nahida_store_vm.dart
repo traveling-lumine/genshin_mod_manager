@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/akasha.dart';
+import 'package:genshin_mod_manager/domain/repo/filesystem.dart';
 import 'package:genshin_mod_manager/domain/usecase/akasha/download.dart';
 import 'package:genshin_mod_manager/domain/usecase/akasha/refresh.dart';
-import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/ui/util/mod_writer.dart';
 
 abstract interface class NahidaStoreViewModel extends ChangeNotifier {
@@ -31,7 +31,7 @@ abstract interface class NahidaStoreViewModel extends ChangeNotifier {
 
 NahidaStoreViewModel createViewModel({
   required NahidaliveAPI api,
-  required RecursiveObserverService observer,
+  required RecursiveFSWatchService observer,
 }) {
   return _NahidaStoreViewModelImpl(
     api: api,
@@ -42,7 +42,7 @@ NahidaStoreViewModel createViewModel({
 final class _NahidaStoreViewModelImpl extends ChangeNotifier
     implements NahidaStoreViewModel {
   final NahidaliveAPI _api;
-  final RecursiveObserverService _observer;
+  final RecursiveFSWatchService _observer;
 
   Future<String?> Function()? _onPasswordRequired;
   void Function(HttpException)? _onApiException;
@@ -59,9 +59,10 @@ final class _NahidaStoreViewModelImpl extends ChangeNotifier
     notifyListeners();
   }
 
-  _NahidaStoreViewModelImpl(
-      {required NahidaliveAPI api, required RecursiveObserverService observer})
-      : _api = api,
+  _NahidaStoreViewModelImpl({
+    required NahidaliveAPI api,
+    required RecursiveFSWatchService observer,
+  })  : _api = api,
         _observer = observer,
         _elements = api.fetchNahidaliveElements();
 

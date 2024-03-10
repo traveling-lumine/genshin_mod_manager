@@ -8,16 +8,17 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:genshin_mod_manager/data/constant.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/repo/filesystem.dart';
+import 'package:genshin_mod_manager/data/repo/preset.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
+import 'package:genshin_mod_manager/domain/repo/app_state.dart';
+import 'package:genshin_mod_manager/domain/repo/filesystem.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/home_shell/home_shell_vm.dart';
-import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
-import 'package:genshin_mod_manager/ui/service/preset_service.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
-import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
+import 'package:genshin_mod_manager/ui/widget/preset_control/preset_control.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
 import 'package:go_router/go_router.dart';
@@ -26,6 +27,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
+
+const _kRepoReleases = '$kRepoBase/releases/latest';
 
 class HomeShell extends StatelessWidget {
   static const resourceDir = 'Resources';
@@ -43,12 +46,13 @@ class HomeShell extends StatelessWidget {
     return MultiProvider(
       key: Key(modRootPath),
       providers: [
-        ChangeNotifierProvider(
-          create: (context) => RecursiveObserverService(
+        Provider(
+          create: (context) => createRecursiveFileSystemWatchService(
             targetPath: modRootPath,
           ),
+          dispose: (context, value) => value.dispose(),
         ),
-        ChangeNotifierProxyProvider2<AppStateService, RecursiveObserverService,
+        ChangeNotifierProxyProvider2<AppStateService, RecursiveFSWatchService,
             PresetService>(
           create: (context) => PresetService(),
           update: (context, value, value2, previous) =>
@@ -149,7 +153,7 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
     final uriSegments = uri.pathSegments;
     if (uriSegments.length == 1 &&
         uriSegments[0] == 'category' &&
-        !categories.any((e) => e.name == currentRouteExtra)) {
+        !categories.any((e) => e == currentRouteExtra)) {
       final String destination;
       final ModCategory? extra;
       if (categories.isNotEmpty) {
@@ -195,7 +199,7 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
                 decoration: TextDecoration.underline,
               ),
               recognizer: TapGestureRecognizer()
-                ..onTap = () => launchUrl(Uri.parse(kRepoReleases)),
+                ..onTap = () => launchUrl(Uri.parse(_kRepoReleases)),
             ),
             const TextSpan(text: ' to open link.'),
           ],
@@ -429,7 +433,7 @@ class _FolderPaneItem extends PaneItem {
 }
 
 Future<String?> _shouldUpdate(BuildContext context) async {
-  final url = Uri.parse(kRepoReleases);
+  final url = Uri.parse(_kRepoReleases);
   List<String?> versions = await _getVersions(url);
   final upVersion = versions[0];
   final curVersion = versions[1];
@@ -468,7 +472,7 @@ bool _compareVersions(String upVersion, String curVersion) {
 }
 
 Future<void> _runUpdateScript() async {
-  final url = Uri.parse('$kRepoReleases/download/GenshinModManager.zip');
+  final url = Uri.parse('$_kRepoReleases/download/GenshinModManager.zip');
   final response = await http.get(url);
   final archive = ZipDecoder().decodeBytes(response.bodyBytes);
   await extractArchiveToDiskAsync(archive, Directory.current.path,

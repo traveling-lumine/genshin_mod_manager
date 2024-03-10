@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
+import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 AppStateService createAppStateService() {
-  return AppStateServiceImpl();
+  return _AppStateServiceImpl();
 }
 
-class AppStateServiceImpl extends ChangeNotifier implements AppStateService {
+class _AppStateServiceImpl extends ChangeNotifier implements AppStateService {
   static const Duration _sharedPreferencesAwaitTime = Duration(seconds: 5);
 
   static const String _targetDirKey = 'targetDir';
@@ -122,7 +122,7 @@ class AppStateServiceImpl extends ChangeNotifier implements AppStateService {
     notifyListeners();
   }
 
-  AppStateServiceImpl() {
+  _AppStateServiceImpl() {
     init();
   }
 

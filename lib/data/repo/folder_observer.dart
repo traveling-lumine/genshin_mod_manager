@@ -40,29 +40,6 @@ class CategoryIconFolderObserverService extends _StreamObserverService {
   }
 }
 
-class RecursiveObserverService extends _StreamObserverService {
-  bool _cut = false;
-  FileSystemEvent? _lastEvent;
-
-  FileSystemEvent? get lastEvent => _lastEvent;
-
-  RecursiveObserverService({required super.targetPath})
-      : super(recursive: true);
-
-  @override
-  void listener(FileSystemEvent? event) {
-    if (_cut) return;
-    _lastEvent = event;
-    notifyListeners();
-  }
-
-  void cut() => _cut = true;
-
-  void uncut() => _cut = false;
-
-  void forceUpdate() => listener(null);
-}
-
 class RootWatchService with ChangeNotifier {
   final _listEquality = const ListEquality();
   final String targetPath;
@@ -93,40 +70,6 @@ class RootWatchService with ChangeNotifier {
     }
     return _listEquality.equals(before, _categories);
   }
-}
-
-class FSEWatchService<T extends FileSystemEntity> extends ChangeNotifier {
-  final String targetPath;
-
-  late List<T> _curEntities;
-
-  List<T> get curEntities => _curEntities;
-
-  FSEWatchService({required this.targetPath}) {
-    _getEntities();
-  }
-
-  void update(FileSystemEvent? event) {
-    if (!_ifEventDirectUnder(event, targetPath)) return;
-    _getEntities();
-    notifyListeners();
-  }
-
-  void _getEntities() {
-    try {
-      _curEntities = getFSEUnder<T>(targetPath);
-    } on PathNotFoundException {
-      _curEntities = [];
-    }
-  }
-}
-
-class DirWatchService extends FSEWatchService<Directory> {
-  DirWatchService({required super.targetPath});
-}
-
-class FileWatchService extends FSEWatchService<File> {
-  FileWatchService({required super.targetPath});
 }
 
 bool _ifEventDirectUnder(FileSystemEvent? event, String watchedPath) {

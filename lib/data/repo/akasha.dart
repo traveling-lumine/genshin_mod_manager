@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:genshin_mod_manager/data/constant.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/repo/akasha.dart';
 import 'package:http/http.dart' as http;
 
 const kAkashaConfigFilename = 'config.json';
-const _kAkashaApi = '$kAkashaBase/mods/apiv2';
+const _kAkashaBase = "https://nahida.live";
+const _kAkashaApi = '$_kAkashaBase/mods/apiv2';
 const _kAkashaDownload = '$_kAkashaApi/download';
 const _kAkashaList = '$_kAkashaApi/list';
 

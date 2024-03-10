@@ -46,6 +46,52 @@ class NahidaliveElement {
         'koreaOnly: $koreaOnly'
         ')';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    // tag list equality check
+    if (other is! NahidaliveElement) return false;
+    bool tagsEqual = true;
+    if (tags.length != other.tags.length) {
+      tagsEqual = false;
+    } else {
+      for (int i = 0; i < tags.length; i++) {
+        if (tags[i] != other.tags[i]) {
+          tagsEqual = false;
+          break;
+        }
+      }
+    }
+    return other.uuid == uuid &&
+        other.version == version &&
+        other.sha256 == sha256 &&
+        other.title == title &&
+        other.description == description &&
+        other.arcaUrl == arcaUrl &&
+        other.virustotalUrl == virustotalUrl &&
+        tagsEqual &&
+        other.expirationDate == expirationDate &&
+        other.uploadDate == uploadDate &&
+        other.previewUrl == previewUrl &&
+        other.koreaOnly == koreaOnly;
+  }
+
+  @override
+  int get hashCode {
+    return uuid.hashCode ^
+        version.hashCode ^
+        sha256.hashCode ^
+        title.hashCode ^
+        description.hashCode ^
+        arcaUrl.hashCode ^
+        virustotalUrl.hashCode ^
+        tags.hashCode ^
+        expirationDate.hashCode ^
+        uploadDate.hashCode ^
+        previewUrl.hashCode ^
+        koreaOnly.hashCode;
+  }
 }
 
 class NahidaliveDownloadElement {
@@ -66,5 +112,19 @@ class NahidaliveDownloadElement {
         'errorCodes: $errorCodes, '
         'downloadUrl: $downloadUrl'
         ')';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is NahidaliveDownloadElement &&
+        other.status == status &&
+        other.errorCodes == errorCodes &&
+        other.downloadUrl == downloadUrl;
+  }
+
+  @override
+  int get hashCode {
+    return status.hashCode ^ errorCodes.hashCode ^ downloadUrl.hashCode;
   }
 }

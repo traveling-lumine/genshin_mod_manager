@@ -5,7 +5,7 @@ import 'package:genshin_mod_manager/ui/route/category/category_vm.dart';
 import 'package:genshin_mod_manager/ui/route/category/mod_card.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
-import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
+import 'package:genshin_mod_manager/ui/widget/preset_control/preset_control.dart';
 import 'package:genshin_mod_manager/ui/widget/thick_scrollbar.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_delegate.dart';
 import 'package:go_router/go_router.dart';
@@ -56,7 +56,10 @@ class _CategoryRoute extends StatelessWidget {
       commandBar: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          PresetControlWidget(isLocal: true, category: category),
+          PresetControlWidget(
+            isLocal: true,
+            category: category,
+          ),
           const SizedBox(width: 16),
           IntrinsicCommandBarCard(
             child: CommandBar(
