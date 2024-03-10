@@ -9,7 +9,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
-import 'package:genshin_mod_manager/data/upstream/akasha.dart';
+import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/ui/route/category/editor_text.dart';
 import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
 import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
@@ -156,7 +156,7 @@ class _ModCard extends StatelessWidget {
                   final uuid = config['uuid'] as String;
                   final version = config['version'] as String;
                   final updateCode = config['update_code'] as String;
-                  final api = NahidaliveAPI();
+                  final api = getNahidaliveAPI();
                   final targetElement = await api.fetchNahidaliveElement(uuid);
                   final upstreamVersion = targetElement.version;
                   if (version == upstreamVersion) {
@@ -520,7 +520,7 @@ Future<bool> downloadFile(BuildContext context, String filename, Uint8List data,
     try {
       await File(catPath.pJoin(filename)).writeAsBytes(data);
     } catch (e) {
-      print(e);
+      // duh
     }
     return false;
   }

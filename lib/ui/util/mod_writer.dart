@@ -6,31 +6,34 @@ import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/domain/entity/category.dart';
 
-Future<bool> writeModToCategory({
+class ModZipExtractionException implements Exception {
+  final Uint8List data;
+
+  const ModZipExtractionException({required this.data});
+}
+
+Future<void> writeModToCategory({
   required ModCategory category,
   required String modName,
   required Uint8List data,
-  void Function()? onExtractFail,
 }) async {
-  final destDirName = getNonCollidingModName(category, modName).pDisabledForm;
+  final destDirName = _getNonCollidingModName(category, modName).pDisabledForm;
   final destDirPath = category.path.pJoin(destDirName);
   await Directory(destDirPath).create(recursive: true);
   try {
     final archive = ZipDecoder().decodeBytes(data);
     await extractArchiveToDiskAsync(archive, destDirPath, asyncWrite: true);
   } on Exception {
-    if (onExtractFail != null) onExtractFail();
-    return false;
+    throw ModZipExtractionException(data: data);
   }
-  return true;
 }
 
-String getNonCollidingModName(ModCategory category, String name) {
-  final enabledModName = getEnabledNameRecursive(name);
-  return getNonCollidingName(category, enabledModName);
+String _getNonCollidingModName(ModCategory category, String name) {
+  final enabledModName = _getEnabledNameRecursive(name);
+  return _getNonCollidingName(category, enabledModName);
 }
 
-String getEnabledNameRecursive(String name) {
+String _getEnabledNameRecursive(String name) {
   String destDirName = name.pEnabledForm;
   while (!destDirName.pIsEnabled) {
     destDirName = destDirName.pEnabledForm;
@@ -38,7 +41,7 @@ String getEnabledNameRecursive(String name) {
   return destDirName;
 }
 
-String getNonCollidingName(ModCategory category, String destDirName) {
+String _getNonCollidingName(ModCategory category, String destDirName) {
   final enabledFormDirNames = getFSEUnder<Directory>(category.path)
       .map((e) => e.path.pBasename.pEnabledForm)
       .toSet();
