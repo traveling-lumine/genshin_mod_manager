@@ -40,6 +40,18 @@ File? findPreviewFileIn(List<File> dir, {String name = 'preview'}) {
   return null;
 }
 
+String? findPreviewFileInString(List<String> dir, {String name = 'preview'}) {
+  for (final element in dir) {
+    final filename = element.pBNameWoExt;
+    if (!filename.pEquals(name)) continue;
+    final ext = element.pExtension;
+    for (final previewExt in _previewExtensions) {
+      if (ext.pEquals(previewExt)) return element;
+    }
+  }
+  return null;
+}
+
 void runProgram(File program) {
   Process.run(
     'start',

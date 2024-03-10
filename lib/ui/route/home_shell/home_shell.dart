@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
@@ -10,11 +10,12 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:genshin_mod_manager/data/constant.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
-import 'package:genshin_mod_manager/data/io/fsops.dart';
+import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/route/home_shell/home_shell_vm.dart';
 import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
 import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/ui/service/preset_service.dart';
+import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
@@ -22,7 +23,6 @@ import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -67,7 +67,12 @@ class HomeShell extends StatelessWidget {
           update: (context, value, previous) =>
               previous!..update(value.lastEvent),
         ),
-        ChangeNotifierProvider(create: (context) => createViewModel()),
+        ChangeNotifierProvider(
+          create: (context) => createViewModel(
+            appStateService: context.read(),
+            recursiveObserverService: context.read(),
+          ),
+        ),
       ],
       child: _HomeShell(child: child),
     );
@@ -86,13 +91,13 @@ class _HomeShell extends StatefulWidget {
 class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
     with WindowListener {
   static const _navigationPaneOpenWidth = 270.0;
-  static final _logger = Logger();
 
   bool updateDisplayed = false;
 
   @override
   void onWindowFocus() {
-    context.read<RecursiveObserverService>().forceUpdate();
+    final vm = context.read<HomeShellViewModel>();
+    vm.onWindowFocus();
   }
 
   @override
@@ -111,14 +116,18 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
   Widget build(BuildContext context) {
     if (!updateDisplayed) {
       updateDisplayed = true;
-      _checkUpdate(context);
+      _shouldUpdate(context).then((value) {
+        if (value == null) return;
+        if (!context.mounted) return;
+        return _displayUpdateInfoBar(value);
+      });
     }
 
     final footerItems = [
       PaneItemSeparator(),
       ..._buildPaneItemActions(),
       PaneItem(
-        key: const ValueKey('/setting'),
+        key: const Key('/setting'),
         icon: const Icon(FluentIcons.settings),
         title: const Text('Settings'),
         body: const SizedBox.shrink(),
@@ -126,16 +135,16 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
       ),
     ];
 
-    final imageFiles =
-        context.select<CategoryIconFolderObserverService, List<File>>(
-            (value) => value.curFiles);
-    final categories = context.watch<RootWatchService>().categories;
-    final items = categories
-        .map((e) => _FolderPaneItem(
-            category: e,
-            imageFile: findPreviewFileIn(imageFiles, name: e),
-            onTap: () => context.go('/category/$e')))
-        .toList(growable: false);
+    final categories =
+        context.select((HomeShellViewModel vm) => vm.modCategories);
+    final items = categories.map((e) {
+      final iconPath = e.iconPath;
+      final name = e.name;
+      return _FolderPaneItem(
+          category: name,
+          imageFile: iconPath != null ? File(iconPath) : null,
+          onTap: () => context.go('/category/$name'));
+    }).toList(growable: false);
 
     final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
           ..removeWhere((i) => i is! PaneItem || i is PaneItemAction))
@@ -154,11 +163,11 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
     final uriSegments = uri.pathSegments;
     if (uriSegments.length >= 2 &&
         uriSegments[0] == 'category' &&
-        !categories.contains(uriSegments[1])) {
+        !categories.any((e) => e.name == uriSegments[1])) {
       final String destination;
       if (categories.isNotEmpty) {
         final index = _search(categories, uriSegments[1]);
-        destination = '/category/${categories[index]}';
+        destination = '/category/${categories[index].name}';
       } else {
         destination = '/';
       }
@@ -173,6 +182,79 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
       appBar: _buildAppbar(),
       pane: _buildPane(selected, items, footerItems),
       paneBodyBuilder: (item, body) => widget.child,
+    );
+  }
+
+  void _displayUpdateInfoBar(String newVersion) {
+    displayInfoBarInContext(
+      context,
+      duration: const Duration(minutes: 1),
+      title: RichText(
+        text: TextSpan(
+          style: DefaultTextStyle.of(context).style,
+          children: [
+            const TextSpan(text: 'New version available: '),
+            TextSpan(
+              text: newVersion,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const TextSpan(text: '. Click '),
+            TextSpan(
+              text: 'here',
+              style: TextStyle(
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => launchUrl(Uri.parse(kRepoReleases)),
+            ),
+            const TextSpan(text: ' to open link.'),
+          ],
+        ),
+      ),
+      action: FilledButton(
+        onPressed: () => showDialog(
+          context: context,
+          builder: (dialogContext) => ContentDialog(
+            title: const Text('Start auto update?'),
+            content: RichText(
+              textAlign: TextAlign.justify,
+              text: TextSpan(
+                style: DefaultTextStyle.of(context).style,
+                children: [
+                  const TextSpan(
+                    text:
+                        'This will download the latest version and replace the current one.'
+                        ' This feature is experimental and may not work as expected.\n',
+                    // justify
+                  ),
+                  TextSpan(
+                    text:
+                        'Please backup your mods and resources before proceeding.\n'
+                        'DELETION OF UNRELATED FILES IS POSSIBLE.',
+                    style: TextStyle(
+                        color: Colors.red, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              Button(
+                onPressed: Navigator.of(dialogContext).pop,
+                child: const Text('Cancel'),
+              ),
+              RedFilledButton(
+                child: const Text('Start'),
+                onPressed: () async {
+                  Navigator.of(dialogContext).pop();
+                  await _runUpdateScript();
+                },
+              ),
+            ],
+          ),
+        ),
+        child: const Text('Auto update'),
+      ),
     );
   }
 
@@ -219,16 +301,13 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
 
   List<PaneItemAction> _buildPaneItemActions() {
     const icon = Icon(FluentIcons.user_window);
-    return context.select<AppStateService, bool>((value) => value.runTogether)
+    return context.select((HomeShellViewModel vm) => vm.runTogether)
         ? [
             PaneItemAction(
               key: const ValueKey('<run_both>'),
               icon: icon,
               title: const Text('Run 3d migoto & launcher'),
-              onTap: () {
-                _runMigoto();
-                _runLauncher();
-              },
+              onTap: _runBoth,
             ),
           ]
         : [
@@ -236,15 +315,34 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
               key: const ValueKey('<run_migoto>'),
               icon: icon,
               title: const Text('Run 3d migoto'),
-              onTap: () => _runMigoto(),
+              onTap: _runMigoto,
             ),
             PaneItemAction(
               key: const ValueKey('<run_launcher>'),
               icon: icon,
               title: const Text('Run launcher'),
-              onTap: () => _runLauncher(),
+              onTap: _runLauncher,
             ),
           ];
+  }
+
+  void _runLauncher() {
+    final vm = context.read<HomeShellViewModel>();
+    vm.runLauncher();
+  }
+
+  void _runBoth() {
+    _runMigoto();
+    _runLauncher();
+  }
+
+  void _runMigoto() {
+    final vm = context.read<HomeShellViewModel>();
+    vm.runMigoto();
+    displayInfoBarInContext(
+      context,
+      title: const Text('Ran 3d migoto'),
+    );
   }
 
   Widget _buildAutoSuggestBox(
@@ -271,35 +369,14 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
       },
     );
   }
-
-  void _runMigoto() {
-    final path = context.read<AppStateService>().modExecFile;
-    runProgram(File(path));
-    displayInfoBar(
-      context,
-      builder: (context, close) {
-        return InfoBar(
-          title: const Text('Ran 3d migoto'),
-          onClose: close,
-        );
-      },
-    );
-    _logger.t('Ran 3d migoto $path');
-  }
-
-  void _runLauncher() {
-    final launcher = context.read<AppStateService>().launcherFile;
-    runProgram(File(launcher));
-    _logger.t('Ran launcher $launcher');
-  }
 }
 
 class _FolderPaneItem extends PaneItem {
   static const maxIconWidth = 80.0;
 
   static Widget _getIcon(File? imageFile) {
-    return Selector<AppStateService, bool>(
-      selector: (p0, p1) => p1.showFolderIcon,
+    return Selector<HomeShellViewModel, bool>(
+      selector: (context, value) => value.showFolderIcon,
       builder: (context, value, child) =>
           value ? _buildImage(imageFile) : const Icon(FluentIcons.folder_open),
     );
@@ -368,8 +445,16 @@ class _FolderPaneItem extends PaneItem {
   }
 }
 
-Future<void> _checkUpdate(BuildContext context) async {
+Future<String?> _shouldUpdate(BuildContext context) async {
   final url = Uri.parse(kRepoReleases);
+  List<String?> versions = await _getVersions(url);
+  final upVersion = versions[0];
+  final curVersion = versions[1];
+  if (upVersion == null || curVersion == null) return null;
+  return _compareVersions(upVersion, curVersion) ? upVersion : null;
+}
+
+Future<List<String?>> _getVersions(Uri url) async {
   final client = http.Client();
   final request = http.Request('GET', url)..followRedirects = false;
   final upstreamVersion = client.send(request).then((value) {
@@ -381,11 +466,10 @@ Future<void> _checkUpdate(BuildContext context) async {
   });
   final currentVersion =
       PackageInfo.fromPlatform().then((value) => value.version);
-  final List<String?> versions =
-      await Future.wait([upstreamVersion, currentVersion]);
-  final upVersion = versions[0];
-  final curVersion = versions[1];
-  if (upVersion == null || curVersion == null) return;
+  return await Future.wait([upstreamVersion, currentVersion]);
+}
+
+bool _compareVersions(String upVersion, String curVersion) {
   final upstream = upVersion.split('.').map(int.parse).toList(growable: false);
   final current = curVersion.split('.').map(int.parse).toList(growable: false);
   bool shouldUpdate = false;
@@ -397,144 +481,59 @@ Future<void> _checkUpdate(BuildContext context) async {
       break;
     }
   }
-  if (!shouldUpdate) return;
-  if (!context.mounted) return;
-  unawaited(displayInfoBar(
-    context,
-    duration: const Duration(minutes: 1),
-    builder: (_, close) => InfoBar(
-      title: RichText(
-        text: TextSpan(
-          style: DefaultTextStyle.of(context).style,
-          children: [
-            const TextSpan(text: 'New version available: '),
-            TextSpan(
-              text: upVersion,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const TextSpan(text: '. Click '),
-            TextSpan(
-              text: 'here',
-              style: TextStyle(
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
-              ),
-              recognizer: TapGestureRecognizer()..onTap = () => launchUrl(url),
-            ),
-            const TextSpan(text: ' to open link.'),
-          ],
-        ),
-      ),
-      action: FilledButton(
-        onPressed: () async {
-          unawaited(showDialog(
-            context: context,
-            builder: (context2) => ContentDialog(
-              title: const Text('Start auto update?'),
-              content: RichText(
-                textAlign: TextAlign.justify,
-                text: TextSpan(
-                  style: DefaultTextStyle.of(context).style,
-                  children: [
-                    const TextSpan(
-                      text:
-                          'This will download the latest version and replace the current one.'
-                          ' This feature is experimental and may not work as expected.\n',
-                      // justify
-                    ),
-                    TextSpan(
-                      text:
-                          'Please backup your mods and resources before proceeding.\nDELETION OF UNRELATED FILES IS POSSIBLE.',
-                      style: TextStyle(
-                          color: Colors.red, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                Button(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    context2.pop();
-                  },
-                ),
-                RedFilledButton(
-                  child: const Text('Start'),
-                  onPressed: () async {
-                    context2.pop();
-                    final url = Uri.parse(
-                        '$kRepoReleases/download/GenshinModManager.zip');
-                    final response = await http.get(url);
-                    final archive =
-                        ZipDecoder().decodeBytes(response.bodyBytes);
-                    for (final aFile in archive) {
-                      final path = '${Directory.current.path}/${aFile.name}';
-                      if (aFile.isFile) {
-                        await File(path).writeAsBytes(aFile.content);
-                      } else {
-                        Directory(path).createSync(recursive: true);
-                      }
-                    }
-                    const teeScript = "call update.cmd > update.log 2>&1\n"
-                        "if %errorlevel% == 1 (\n"
-                        "    echo Maybe not in the mod manager folder? Exiting for safety.\n"
-                        "	   pause\n"
-                        ")\n"
-                        "if %errorlevel% == 2 (\n"
-                        "    echo Failed to download data! Go to the link and install manually.\n"
-                        "	   pause\n"
-                        ")\n"
-                        "del update.cmd\n"
-                        "start /b cmd /c del tee.cmd\n";
-                    const updateScript = "setlocal\n"
-                        "echo update script running\n"
-                        "set \"sourceFolder=GenshinModManager\"\n"
-                        "if not exist \"genshin_mod_manager.exe\" (\n"
-                        "    exit /b 1\n"
-                        ")\n"
-                        "if not exist %sourceFolder% (\n"
-                        "    exit /b 2\n"
-                        ")\n"
-                        "echo So it's good to go. Let's update.\n"
-                        "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"tee.cmd update.cmd update.log error.log\"') do del \"%%i\"\n"
-                        "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources %sourceFolder%\"') do rd /s /q \"%%i\"\n"
-                        "for /f \"delims=\" %%i in ('dir /b \"%sourceFolder%\"') do move /y \"%sourceFolder%\\%%i\" .\n"
-                        "rd /s /q %sourceFolder%\n"
-                        "start genshin_mod_manager.exe\n"
-                        "endlocal\n";
-                    await File('tee.cmd').writeAsString(teeScript);
-                    await File('update.cmd').writeAsString(updateScript);
-                    unawaited(Process.run(
-                      'start',
-                      [
-                        'cmd',
-                        '/c',
-                        'timeout /t 3 && call tee.cmd',
-                      ],
-                      runInShell: true,
-                    ));
-                    await Future.delayed(const Duration(milliseconds: 200));
-                    exit(0);
-                  },
-                ),
-              ],
-            ),
-          ));
-        },
-        child: const Text('Auto update'),
-      ),
-      onClose: close,
-    ),
-  ));
+  return shouldUpdate;
 }
 
-int _search(List<String> categories, String uriSegment) {
+Future<void> _runUpdateScript() async {
+  final url = Uri.parse('$kRepoReleases/download/GenshinModManager.zip');
+  final response = await http.get(url);
+  final archive = ZipDecoder().decodeBytes(response.bodyBytes);
+  await extractArchiveToDiskAsync(archive, Directory.current.path,
+      asyncWrite: true);
+  const updateScript = "setlocal\n"
+      "echo update script running\n"
+      "set \"sourceFolder=GenshinModManager\"\n"
+      "if not exist \"genshin_mod_manager.exe\" (\n"
+      "    echo Maybe not in the mod manager folder? Exiting for safety.\n"
+      "    pause\n"
+      "    start cmd /c del update.cmd\n"
+      "    exit /b 1\n"
+      ")\n"
+      "if not exist %sourceFolder% (\n"
+      "    echo Failed to download data! Go to the link and install manually.\n"
+      "    pause\n"
+      "    start cmd /c del update.cmd\n"
+      "    exit /b 2\n"
+      ")\n"
+      "echo So it's good to go. Let's update.\n"
+      "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd update.log error.log\"') do del \"%%i\"\n"
+      "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources %sourceFolder%\"') do rd /s /q \"%%i\"\n"
+      "for /f \"delims=\" %%i in ('dir /b \"%sourceFolder%\"') do move /y \"%sourceFolder%\\%%i\" .\n"
+      "rd /s /q %sourceFolder%\n"
+      "start /b genshin_mod_manager.exe\n"
+      "start cmd /c del update.cmd\n"
+      "endlocal\n";
+  await File('update.cmd').writeAsString(updateScript);
+  unawaited(Process.run(
+    'start',
+    [
+      'cmd',
+      '/c',
+      'timeout /t 3 && call update.cmd > update.log',
+    ],
+    runInShell: true,
+  ));
+  await Future.delayed(const Duration(milliseconds: 200));
+  exit(0);
+}
+
+int _search(List<ModCategory> categories, String uriSegment) {
   final length = categories.length;
   int lo = 0;
   int hi = length;
   while (lo < hi) {
     int mid = lo + ((hi - lo) >> 1);
-    if (compareNatural(categories[mid], uriSegment) < 0) {
+    if (compareNatural(categories[mid].name, uriSegment) < 0) {
       lo = mid + 1;
     } else {
       hi = mid;

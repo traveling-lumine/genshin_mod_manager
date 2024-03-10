@@ -1,5 +1,5 @@
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
-import 'package:genshin_mod_manager/domain/entity/category.dart';
+import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/akasha.dart';
 import 'package:genshin_mod_manager/ui/util/mod_writer.dart';
 

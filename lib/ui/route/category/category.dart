@@ -2,8 +2,6 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/ui/route/category/category_vm.dart';
 import 'package:genshin_mod_manager/ui/route/category/mod_card.dart';
-import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
-import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
@@ -23,8 +21,8 @@ class CategoryRoute extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => createCategoryRouteViewModel(
-        appStateService: context.read<AppStateService>(),
-        rootObserverService: context.read<RecursiveObserverService>(),
+        appStateService: context.read(),
+        rootObserverService: context.read(),
         category: category,
       ),
       child: _CategoryRoute(category: category),

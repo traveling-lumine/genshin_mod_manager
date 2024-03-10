@@ -5,11 +5,10 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
-import 'package:genshin_mod_manager/domain/entity/category.dart';
+import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/akasha.dart';
 import 'package:genshin_mod_manager/ui/route/nahida_store/nahida_store_vm.dart';
 import 'package:genshin_mod_manager/ui/route/nahida_store/store_element.dart';
-import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/util/tag_parser.dart';
 import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
@@ -30,8 +29,8 @@ class NahidaStoreRoute extends StatelessWidget {
         Provider<NahidaliveAPI>(create: (context) => getNahidaliveAPI()),
         ChangeNotifierProvider<NahidaStoreViewModel>(
           create: (context) => createViewModel(
-            api: context.read<NahidaliveAPI>(),
-            observer: context.read<RecursiveObserverService>(),
+            api: context.read(),
+            observer: context.read(),
           ),
         ),
       ],
