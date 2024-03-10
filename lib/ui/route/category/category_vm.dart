@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
+import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
 import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 
@@ -16,7 +17,7 @@ abstract interface class CategoryRouteViewModel extends ChangeNotifier {
 CategoryRouteViewModel createCategoryRouteViewModel({
   required AppStateService appStateService,
   required RecursiveObserverService rootObserverService,
-  required String category,
+  required ModCategory category,
 }) {
   return _CategoryRouteViewModelImpl(
     appStateService: appStateService,
@@ -29,7 +30,7 @@ class _CategoryRouteViewModelImpl extends ChangeNotifier
     implements CategoryRouteViewModel {
   final AppStateService _appStateService;
   final RecursiveObserverService _rootObserverService;
-  final String _category;
+  final ModCategory _category;
   late final DirWatchService _dirWatchService;
 
   List<Mod> _modPaths = [];
@@ -39,7 +40,7 @@ class _CategoryRouteViewModelImpl extends ChangeNotifier
 
   @override
   void onFolderOpen() {
-    openFolder(_appStateService.modRoot.pJoin(_category));
+    openFolder(_category.path);
   }
 
   set modPaths(List<Mod> value) {
@@ -50,12 +51,11 @@ class _CategoryRouteViewModelImpl extends ChangeNotifier
   _CategoryRouteViewModelImpl({
     required AppStateService appStateService,
     required RecursiveObserverService rootObserverService,
-    required String category,
+    required ModCategory category,
   })  : _category = category,
         _rootObserverService = rootObserverService,
         _appStateService = appStateService {
-    final modRootPath = _appStateService.modRoot;
-    final categoryPath = modRootPath.pJoin(_category);
+    final categoryPath = _category.path;
     _dirWatchService = DirWatchService(targetPath: categoryPath);
     _appStateService.addListener(appStateServiceUpdate);
     _rootObserverService.addListener(rootObserverServiceUpdate);

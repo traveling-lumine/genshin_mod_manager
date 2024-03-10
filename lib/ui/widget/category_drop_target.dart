@@ -4,6 +4,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/copy_directory.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +13,7 @@ class CategoryDropTarget extends StatelessWidget {
   static final Logger logger = Logger();
 
   final Widget child;
-  final String category;
+  final ModCategory category;
 
   const CategoryDropTarget({
     super.key,
@@ -29,9 +30,8 @@ class CategoryDropTarget extends StatelessWidget {
   }
 
   void onDragDone(BuildContext context, DropDoneDetails details) {
-    final appStateService = context.read<AppStateService>();
-    final moveInsteadOfCopy = appStateService.moveOnDrag;
-    final modRoot = appStateService.modRoot.pJoin(category);
+    final moveInsteadOfCopy = context.read<AppStateService>().moveOnDrag;
+    final modRoot = category.path;
     final List<(Directory, String)> queue = [];
     for (final xFile in details.files) {
       final path = xFile.path;

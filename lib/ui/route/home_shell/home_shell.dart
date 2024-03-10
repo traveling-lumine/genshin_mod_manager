@@ -4,10 +4,8 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:genshin_mod_manager/data/constant.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
@@ -128,40 +126,42 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
         context.select((HomeShellViewModel vm) => vm.modCategories);
     final items = categories.map((e) {
       final iconPath = e.iconPath;
-      final name = e.name;
       return _FolderPaneItem(
-          category: name,
+          category: e,
           imageFile: iconPath != null ? File(iconPath) : null,
-          onTap: () => context.go('$kCategoryRoute/$name'));
+          onTap: () => context.go(kCategoryRoute, extra: e));
     }).toList(growable: false);
 
     final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
           ..removeWhere((i) => i is! PaneItem || i is PaneItemAction))
         .cast<PaneItem>();
 
-    final uri = GoRouterState.of(context).uri;
-    final currentRoute = Uri.decodeFull(uri.path);
+    final currentRouteExtra = GoRouterState.of(context).extra;
     final index = effectiveItems.indexWhere((e) {
       final key = e.key;
-      if (key is! ValueKey<String>) return false;
-      return key.value == currentRoute;
+      if (key is! ValueKey<ModCategory>) return false;
+      return key.value == currentRouteExtra;
     });
 
     final int? selected = index != -1 ? index : null;
 
+    final uri = GoRouterState.of(context).uri;
     final uriSegments = uri.pathSegments;
-    if (uriSegments.length >= 2 &&
+    if (uriSegments.length == 1 &&
         uriSegments[0] == 'category' &&
-        !categories.any((e) => e.name == uriSegments[1])) {
+        !categories.any((e) => e.name == currentRouteExtra)) {
       final String destination;
+      final ModCategory? extra;
       if (categories.isNotEmpty) {
-        final index = _search(categories, uriSegments[1]);
-        destination = '$kCategoryRoute/${categories[index].name}';
+        final index = _search(categories, currentRouteExtra as ModCategory);
+        destination = kCategoryRoute;
+        extra = categories[index];
       } else {
         destination = kHomeRoute;
+        extra = null;
       }
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-        context.go(destination);
+        context.go(destination, extra: extra);
       });
     }
 
@@ -340,21 +340,21 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
       items: items
           .map((e) => AutoSuggestBoxItem2(
                 value: e.key,
-                label: e.category,
-                onSelected: () => context.go('$kCategoryRoute/${e.category}'),
+                label: e.category.name,
+                onSelected: () => context.go(kCategoryRoute, extra: e.category),
               ))
           .toList(growable: false),
       trailingIcon: const Icon(FluentIcons.search),
       onSubmissionFailed: (text) {
         if (text.isEmpty) return;
-        text = '$kCategoryRoute/$text';
         final index = items.indexWhere((_FolderPaneItem e) {
-          final name = (e.key as ValueKey<String>).value.toLowerCase();
+          final name =
+              (e.key as ValueKey<ModCategory>).value.name.toLowerCase();
           return name.startsWith(text.toLowerCase());
         });
         if (index == -1) return;
         final category = items[index].category;
-        context.go('$kCategoryRoute/$category');
+        context.go(kCategoryRoute, extra: category);
       },
     );
   }
@@ -391,16 +391,16 @@ class _FolderPaneItem extends PaneItem {
     );
   }
 
-  String category;
+  ModCategory category;
 
   _FolderPaneItem({
     required this.category,
     super.onTap,
     File? imageFile,
   }) : super(
-          key: Key('$kCategoryRoute/$category'),
+          key: ValueKey(category),
           title: Text(
-            category,
+            category.name,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           icon: _getIcon(imageFile),
@@ -425,12 +425,6 @@ class _FolderPaneItem extends PaneItem {
         autofocus: autofocus,
       ),
     );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(StringProperty('category', category));
   }
 }
 
@@ -516,13 +510,13 @@ Future<void> _runUpdateScript() async {
   exit(0);
 }
 
-int _search(List<ModCategory> categories, String uriSegment) {
+int _search(List<ModCategory> categories, ModCategory category) {
   final length = categories.length;
   int lo = 0;
   int hi = length;
   while (lo < hi) {
     int mid = lo + ((hi - lo) >> 1);
-    if (compareNatural(categories[mid].name, uriSegment) < 0) {
+    if (compareNatural(categories[mid].name, category.name) < 0) {
       lo = mid + 1;
     } else {
       hi = mid;

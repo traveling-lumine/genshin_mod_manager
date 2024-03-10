@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
+import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/route/category/category_vm.dart';
 import 'package:genshin_mod_manager/ui/route/category/mod_card.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
@@ -11,11 +12,11 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class CategoryRoute extends StatelessWidget {
-  final String category;
+  final ModCategory category;
 
   CategoryRoute({
     required this.category,
-  }) : super(key: Key(category));
+  }) : super(key: Key(category.name));
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,7 @@ class CategoryRoute extends StatelessWidget {
 class _CategoryRoute extends StatelessWidget {
   static const minCrossAxisExtent = 440.0;
   static const mainAxisExtent = 400.0;
-  final String category;
+  final ModCategory category;
 
   const _CategoryRoute({required this.category});
 
@@ -51,7 +52,7 @@ class _CategoryRoute extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     final viewModel = context.read<CategoryRouteViewModel>();
     return PageHeader(
-      title: Text(category),
+      title: Text(category.name),
       commandBar: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -68,7 +69,7 @@ class _CategoryRoute extends StatelessWidget {
                 CommandBarButton(
                   icon: const Icon(FluentIcons.download),
                   onPressed: () {
-                    final escapedCategory = Uri.encodeComponent(category);
+                    final escapedCategory = Uri.encodeComponent(category.name);
                     context.push('/nahidastore?category=$escapedCategory');
                   },
                 ),

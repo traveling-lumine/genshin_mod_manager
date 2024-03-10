@@ -6,6 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
+import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state_service.dart';
 import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
 
@@ -29,9 +30,9 @@ class PresetService with ChangeNotifier {
     return _curGlobal.keys.toList(growable: false);
   }
 
-  List<String> getLocalPresets(String category) {
+  List<String> getLocalPresets(ModCategory category) {
     try {
-      return _curLocal[category]!.keys.toList(growable: false);
+      return _curLocal[category.name]!.keys.toList(growable: false);
     } catch (e) {
       return [];
     }
@@ -52,14 +53,13 @@ class PresetService with ChangeNotifier {
     _writeBack();
   }
 
-  void addLocalPreset(String category, String name) {
-    final modRoot = _appStateService!.modRoot;
-    final categoryDir = modRoot.pJoin(category);
+  void addLocalPreset(ModCategory category, String name) {
+    final categoryDir = category.path;
     List<String> data = getFSEUnder<Directory>(categoryDir)
         .map((e) => e.path.pBasename)
         .where((e) => e.pIsEnabled)
         .toList(growable: false);
-    _curLocal.putIfAbsent(category, () => {})[name] = data;
+    _curLocal.putIfAbsent(category.name, () => {})[name] = data;
     _writeBack();
   }
 
@@ -68,8 +68,8 @@ class PresetService with ChangeNotifier {
     _writeBack();
   }
 
-  void removeLocalPreset(String category, String name) {
-    _curLocal[category]?.remove(name);
+  void removeLocalPreset(ModCategory category, String name) {
+    _curLocal[category.name]?.remove(name);
     _writeBack();
   }
 
@@ -80,8 +80,8 @@ class PresetService with ChangeNotifier {
     _observerService!.forceUpdate();
   }
 
-  void setLocalPreset(String category, String name) {
-    final locCat = _curLocal[category];
+  void setLocalPreset(ModCategory category, String name) {
+    final locCat = _curLocal[category.name];
     if (locCat == null) return;
     final directives = locCat[name];
     if (directives == null) return;
@@ -99,10 +99,10 @@ class PresetService with ChangeNotifier {
     }
   }
 
-  void _toggleLocal(String category, List<String> shouldBeEnabled) {
+  void _toggleLocal(ModCategory category, List<String> shouldBeEnabled) {
     final shaderFixes =
         _appStateService!.modExecFile.pDirname.pJoin(kShaderFixes);
-    final categoryDir = _appStateService!.modRoot.pJoin(category);
+    final categoryDir = category.path;
     _toggleCategory(categoryDir, shouldBeEnabled, shaderFixes);
   }
 

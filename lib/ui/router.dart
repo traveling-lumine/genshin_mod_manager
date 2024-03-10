@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
   late final _router = GoRouter(
     debugLogDiagnostics: true,
     initialLocation: kLoadingRoute,
+    extraCodec: const ModCategoryCodec(),
     routes: [
       GoRoute(
         path: kLoadingRoute,
@@ -39,14 +40,13 @@ class MyApp extends StatelessWidget {
             builder: (context, state) => const OssLicensesRoute(),
           ),
           GoRoute(
-            path: '$kCategoryRoute/:name',
+            path: kCategoryRoute,
             builder: (context, state) {
-              final category = state.pathParameters['name']!;
-              return CategoryRoute(category: category);
+              final ModCategory extra = state.extra as ModCategory;
+              return CategoryRoute(category: extra);
             },
             redirect: (context, state) {
-              final pathParameter = state.pathParameters['name'];
-              return pathParameter == null ? kHomeRoute : null;
+              return state.extra is ModCategory ? null : kHomeRoute;
             },
           ),
           GoRoute(

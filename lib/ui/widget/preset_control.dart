@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/service/preset_service.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
 import 'package:provider/provider.dart';
@@ -6,11 +7,15 @@ import 'package:provider/provider.dart';
 class PresetControlWidget extends StatelessWidget {
   final _controller = TextEditingController();
   final bool isLocal;
-  final String? category;
+  final ModCategory? category;
 
   String get _localPreset => isLocal ? 'Local' : 'Global';
 
-  PresetControlWidget({super.key, required this.isLocal, this.category}) {
+  PresetControlWidget({
+    super.key,
+    required this.isLocal,
+    this.category,
+  }) {
     if (isLocal && category == null) {
       throw ArgumentError.notNull('category');
     }
