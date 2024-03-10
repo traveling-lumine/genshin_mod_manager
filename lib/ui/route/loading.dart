@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
 import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:go_router/go_router.dart';
@@ -11,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 class LoadingRoute extends StatelessWidget {
-  static const String _destinationRoute = '/';
+  static const String _destinationRoute = kHomeRoute;
   static final Logger logger = Logger();
 
   const LoadingRoute({super.key});

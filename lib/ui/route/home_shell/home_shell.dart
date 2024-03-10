@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:genshin_mod_manager/data/constant.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
+import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/home_shell/home_shell_vm.dart';
 import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
 import 'package:genshin_mod_manager/ui/service/folder_observer_service.dart';
@@ -45,11 +46,6 @@ class HomeShell extends StatelessWidget {
       key: Key(modRootPath),
       providers: [
         ChangeNotifierProvider(
-          create: (context) => CategoryIconFolderObserverService(
-            targetPath: resourcePath,
-          ),
-        ),
-        ChangeNotifierProvider(
           create: (context) => RecursiveObserverService(
             targetPath: modRootPath,
           ),
@@ -59,13 +55,6 @@ class HomeShell extends StatelessWidget {
           create: (context) => PresetService(),
           update: (context, value, value2, previous) =>
               previous!..update(value, value2),
-        ),
-        ChangeNotifierProxyProvider<RecursiveObserverService, RootWatchService>(
-          create: (context) => RootWatchService(
-            targetPath: modRootPath,
-          ),
-          update: (context, value, previous) =>
-              previous!..update(value.lastEvent),
         ),
         ChangeNotifierProvider(
           create: (context) => createViewModel(
@@ -127,11 +116,11 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
       PaneItemSeparator(),
       ..._buildPaneItemActions(),
       PaneItem(
-        key: const Key('/setting'),
+        key: const Key(kSettingRoute),
         icon: const Icon(FluentIcons.settings),
         title: const Text('Settings'),
         body: const SizedBox.shrink(),
-        onTap: () => context.go('/setting'),
+        onTap: () => context.go(kSettingRoute),
       ),
     ];
 
@@ -143,7 +132,7 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
       return _FolderPaneItem(
           category: name,
           imageFile: iconPath != null ? File(iconPath) : null,
-          onTap: () => context.go('/category/$name'));
+          onTap: () => context.go('$kCategoryRoute/$name'));
     }).toList(growable: false);
 
     final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
@@ -167,9 +156,9 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
       final String destination;
       if (categories.isNotEmpty) {
         final index = _search(categories, uriSegments[1]);
-        destination = '/category/${categories[index].name}';
+        destination = '$kCategoryRoute/${categories[index].name}';
       } else {
-        destination = '/';
+        destination = kHomeRoute;
       }
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         context.go(destination);
@@ -352,20 +341,20 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
           .map((e) => AutoSuggestBoxItem2(
                 value: e.key,
                 label: e.category,
-                onSelected: () => context.go('/category/${e.category}'),
+                onSelected: () => context.go('$kCategoryRoute/${e.category}'),
               ))
           .toList(growable: false),
       trailingIcon: const Icon(FluentIcons.search),
       onSubmissionFailed: (text) {
         if (text.isEmpty) return;
-        text = '/category/$text';
+        text = '$kCategoryRoute/$text';
         final index = items.indexWhere((_FolderPaneItem e) {
           final name = (e.key as ValueKey<String>).value.toLowerCase();
           return name.startsWith(text.toLowerCase());
         });
         if (index == -1) return;
         final category = items[index].category;
-        context.go('/category/$category');
+        context.go('$kCategoryRoute/$category');
       },
     );
   }
@@ -409,7 +398,7 @@ class _FolderPaneItem extends PaneItem {
     super.onTap,
     File? imageFile,
   }) : super(
-          key: Key('/category/$category'),
+          key: Key('$kCategoryRoute/$category'),
           title: Text(
             category,
             style: const TextStyle(fontWeight: FontWeight.bold),

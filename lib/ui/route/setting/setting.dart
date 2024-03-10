@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/setting/setting_vm.dart';
 import 'package:genshin_mod_manager/ui/service/app_state_service.dart';
 import 'package:go_router/go_router.dart';
@@ -81,7 +82,7 @@ class _SettingRoute extends StatelessWidget {
               ),
               RepaintBoundary(
                 child: Button(
-                  onPressed: () => context.push('/license'),
+                  onPressed: () => context.push(kLicenseRoute),
                   child: const Text('View'),
                 ),
               )

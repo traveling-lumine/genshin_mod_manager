@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
+import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/category/category.dart';
 import 'package:genshin_mod_manager/ui/route/home_shell/home_shell.dart';
 import 'package:genshin_mod_manager/ui/route/license.dart';
@@ -15,40 +16,40 @@ import 'package:provider/provider.dart';
 class MyApp extends StatelessWidget {
   late final _router = GoRouter(
     debugLogDiagnostics: true,
-    initialLocation: '/loading',
+    initialLocation: kLoadingRoute,
     routes: [
       GoRoute(
-        path: '/loading',
+        path: kLoadingRoute,
         builder: (context, state) => const LoadingRoute(),
       ),
       ShellRoute(
         builder: (context, state, child) => HomeShell(child: child),
         routes: [
           GoRoute(
-            path: '/',
+            path: kHomeRoute,
             builder: (context, state) => const WelcomeRoute(),
           ),
           GoRoute(
-            path: '/setting',
+            path: kSettingRoute,
             builder: (context, state) => const SettingRoute(),
           ),
           GoRoute(
-            path: '/license',
+            path: kLicenseRoute,
             builder: (context, state) => const OssLicensesRoute(),
           ),
           GoRoute(
-            path: '/category/:name',
+            path: '$kCategoryRoute/:name',
             builder: (context, state) {
               final category = state.pathParameters['name']!;
               return CategoryRoute(category: category);
             },
             redirect: (context, state) {
               final pathParameter = state.pathParameters['name'];
-              return pathParameter == null ? '/' : null;
+              return pathParameter == null ? kHomeRoute : null;
             },
           ),
           GoRoute(
-            path: '/nahidastore',
+            path: kNahidaStoreRoute,
             builder: (context, state) {
               final category = state.uri.queryParameters['category']!;
               final categoryPath =
