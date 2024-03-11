@@ -5,12 +5,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
-import 'package:genshin_mod_manager/data/repo/folder_observer.dart';
+import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:genshin_mod_manager/domain/repo/fs_watch.dart';
+import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
+import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
+import 'package:rxdart/rxdart.dart';
 
-abstract interface class HomeShellViewModel extends ChangeNotifier {
+abstract interface class HomeShellViewModel implements BaseViewModel {
   List<ModCategory> get modCategories;
 
   bool get runTogether;
@@ -26,115 +28,114 @@ abstract interface class HomeShellViewModel extends ChangeNotifier {
 
 HomeShellViewModel createViewModel({
   required AppStateService appStateService,
-  required RecursiveFileSystemWatcher recursiveObserverService,
+  required RecursiveFileSystemWatcher recursiveFileSystemWatcher,
 }) {
   return _HomeShellViewModelImpl(
     appStateService: appStateService,
-    recursiveObserverService: recursiveObserverService,
+    recursiveFileSystemWatcher: recursiveFileSystemWatcher,
+    categoryIconFolderObserverService: createFSEntityWatcher<File>(
+      targetPath: appStateService.modRoot.latest,
+    ),
+    rootWatchService: createFSEntityWatcher<Directory>(
+      targetPath: appStateService.modRoot.latest,
+    ),
   );
 }
 
 class _HomeShellViewModelImpl extends ChangeNotifier
     implements HomeShellViewModel {
-  final AppStateService _appStateService;
-  final CategoryIconFolderObserverService _categoryIconFolderObserverService;
-  final RecursiveFileSystemWatcher _recursiveObserverService;
-  final RootWatchService _rootWatchService;
+  late final StreamSubscription<List<ModCategory>> _modCategoriesSubscription;
+  late final StreamSubscription<bool> _runTogetherSubscription;
+  late final StreamSubscription<bool> _showFolderIconSubscription;
 
-  late final StreamSubscription<FileSystemEvent?> _subscription;
+  final AppStateService appStateService;
+  final RecursiveFileSystemWatcher recursiveFileSystemWatcher;
+  final FSEntityWatcher<Directory> rootWatchService;
+  final FSEntityWatcher<File> categoryIconFolderObserverService;
 
   @override
   List<ModCategory> get modCategories => UnmodifiableListView(_modCategories);
-  late List<ModCategory> _modCategories = _getModCategories();
+  List<ModCategory> _modCategories;
 
   @override
   bool get runTogether => _runTogether;
-  late bool _runTogether = _appStateService.runTogether;
+  bool _runTogether;
 
   @override
   bool get showFolderIcon => _showFolderIcon;
-  late bool _showFolderIcon = _appStateService.showFolderIcon;
+  bool _showFolderIcon;
 
   _HomeShellViewModelImpl({
-    required AppStateService appStateService,
-    required RecursiveFileSystemWatcher recursiveObserverService,
-  })  : _appStateService = appStateService,
-        _categoryIconFolderObserverService = CategoryIconFolderObserverService(
-          targetPath: appStateService.modRoot,
-        ),
-        _recursiveObserverService = recursiveObserverService,
-        _rootWatchService = RootWatchService(
-          targetPath: appStateService.modRoot,
+    required this.appStateService,
+    required this.recursiveFileSystemWatcher,
+    required this.rootWatchService,
+    required this.categoryIconFolderObserverService,
+  })  : _runTogether = appStateService.runTogether.latest,
+        _showFolderIcon = appStateService.showFolderIcon.latest,
+        _modCategories = _getCategories(
+          rootWatchService.entity.latest,
+          categoryIconFolderObserverService.entity.latest,
+          appStateService.modRoot.latest,
         ) {
-    _appStateService.addListener(_onAppState);
-    _categoryIconFolderObserverService.addListener(_onCategoryIconFolder);
-    _subscription = _recursiveObserverService.event.listen(_onRecursive);
-    _rootWatchService.addListener(_onRoot);
+    _modCategoriesSubscription = CombineLatestStream.combine3(
+      rootWatchService.entity.stream,
+      categoryIconFolderObserverService.entity.stream,
+      appStateService.modRoot.stream,
+      _getCategories,
+    ).listen((event) {
+      _modCategories = event;
+      notifyListeners();
+    });
+
+    _runTogetherSubscription =
+        appStateService.runTogether.stream.listen((event) {
+      _runTogether = event;
+      notifyListeners();
+    });
+
+    _showFolderIconSubscription =
+        appStateService.showFolderIcon.stream.listen((event) {
+      _showFolderIcon = event;
+      notifyListeners();
+    });
   }
 
   @override
   void dispose() {
-    _appStateService.removeListener(_onAppState);
-    _categoryIconFolderObserverService.removeListener(_onCategoryIconFolder);
-    _subscription.cancel();
-    _rootWatchService.removeListener(_onRoot);
+    _showFolderIconSubscription.cancel();
+    _runTogetherSubscription.cancel();
+    _modCategoriesSubscription.cancel();
+    rootWatchService.dispose();
+    categoryIconFolderObserverService.dispose();
     super.dispose();
   }
 
   @override
   void onWindowFocus() {
-    _recursiveObserverService.forceUpdate();
+    recursiveFileSystemWatcher.forceUpdate();
   }
 
   @override
   void runLauncher() {
-    final launcher = _appStateService.launcherFile;
+    final launcher = appStateService.launcherFile.latest;
     runProgram(File(launcher));
   }
 
   @override
   void runMigoto() {
-    final path = _appStateService.modExecFile;
+    final path = appStateService.modExecFile.latest;
     runProgram(File(path));
   }
 
-  void _onRecursive(FileSystemEvent? event) {
-    _rootWatchService.update(event);
-  }
-
-  void _onAppState() {
-    _modCategories = _getModCategories();
-    _runTogether = _appStateService.runTogether;
-    _showFolderIcon = _appStateService.showFolderIcon;
-    notifyListeners();
-  }
-
-  void _onCategoryIconFolder() {
-    _modCategories = _getModCategories();
-    notifyListeners();
-  }
-
-  void _onRoot() {
-    _modCategories = _getModCategories();
-    notifyListeners();
-  }
-
-  List<ModCategory> _getModCategories() {
-    final imageFiles = _categoryIconFolderObserverService.curFiles
-        .map((e) => e.path)
-        .toList(growable: false);
-    final categories = _rootWatchService.categories;
-    final modRoot = _appStateService.modRoot;
-    var list = categories.map(
-      (e) {
-        final imageFilePath = findPreviewFileInString(imageFiles, name: e);
-        return ModCategory(
-          path: modRoot.pJoin(e),
-          name: e,
-          iconPath: imageFilePath,
-        );
-      },
-    ).toList(growable: false);
-    return list;
+  static List<ModCategory> _getCategories(
+      List<Directory> root, List<File> icons, String modRoot) {
+    return root.map((e) => e.path).map((e) {
+      final imageFile = findPreviewFileIn(icons, name: e);
+      return ModCategory(
+        path: e,
+        name: e.pBasename,
+        iconPath: imageFile?.path,
+      );
+    }).toList(growable: false);
   }
 }

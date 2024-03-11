@@ -10,9 +10,9 @@ import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
-import 'package:genshin_mod_manager/data/repo/filesystem.dart';
+import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:genshin_mod_manager/domain/repo/fs_watch.dart';
+import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/ui/route/category/editor_text.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
 import 'package:logger/logger.dart';
@@ -28,11 +28,12 @@ class ModCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => createRelayFSEWatchService<File>(
+    return Provider(
+      create: (context) => createProxyFSEntityWatcher<File>(
         targetPath: path,
-        host: context.read(),
+        watcher: context.read(),
       ),
+      dispose: (context, value) => value.dispose(),
       child: _ModCard(
         dirPath: path,
       ),
@@ -77,6 +78,7 @@ class _ModCard extends StatelessWidget {
     var shaderFixesPath = context
         .read<AppStateService>()
         .modExecFile
+        .latest
         .pDirname
         .pJoin(kShaderFixes);
     if (isEnabled) {
@@ -246,7 +248,7 @@ class _ModCard extends StatelessWidget {
   }
 
   Widget _buildDesc(BuildContext context, BoxConstraints constraints) {
-    final v = context.watch<RelayFSEWatchService<File>>().entities;
+    final v = context.watch<FSEntityWatcher<File>>().entity.latest;
     final previewFile = findPreviewFileIn(v);
     if (previewFile != null) {
       return _buildImageDesc(context, constraints, previewFile);
@@ -485,7 +487,8 @@ class _ModCard extends StatelessWidget {
 
 Future<bool> downloadFile(BuildContext context, String filename, Uint8List data,
     String category) async {
-  final catPath = context.read<AppStateService>().modRoot.pJoin(category);
+  final catPath =
+      context.read<AppStateService>().modRoot.latest.pJoin(category);
   final enabledFormDirNames = getFSEUnder<Directory>(catPath)
       .map((e) => e.path.pBasename.pEnabledForm)
       .toSet();

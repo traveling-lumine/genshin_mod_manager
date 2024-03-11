@@ -1,28 +1,29 @@
-import 'package:filepicker_windows/filepicker_windows.dart';
+import 'dart:async';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:genshin_mod_manager/ui/widget/third_party/flutter/no_deref_file_opener.dart';
+import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
 
-abstract interface class SettingViewModel extends ChangeNotifier {
-  get modRoot => null;
+abstract interface class SettingViewModel implements BaseViewModel {
+  String get modRoot;
 
-  get modExecFile => null;
+  String get modExecFile;
 
-  get launcherFile => null;
+  String get launcherFile;
 
-  get runTogether => null;
+  bool get runTogether;
 
-  get moveOnDrag => null;
+  bool get moveOnDrag;
 
-  get showFolderIcon => null;
+  bool get showFolderIcon;
 
-  get showEnabledModsFirst => null;
+  bool get showEnabledModsFirst;
 
-  void onModRootSelect();
+  void onModRootSelect(String path);
 
-  void onModExecSelect();
+  void onModExecSelect(String path);
 
-  void onLauncherSelect();
+  void onLauncherSelect(String path);
 
   void onRunTogetherChanged(bool value);
 
@@ -40,83 +41,119 @@ SettingViewModel createSettingViewModel({
 }
 
 class _SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
-  final AppStateService _appStateService;
+  late final StreamSubscription<String> _modRootSubscription;
+  late final StreamSubscription<String> _modExecFileSubscription;
+  late final StreamSubscription<String> _launcherFileSubscription;
+  late final StreamSubscription<bool> _moveOnDragSubscription;
+  late final StreamSubscription<bool> _runTogetherSubscription;
+  late final StreamSubscription<bool> _showFolderIconSubscription;
+  late final StreamSubscription<bool> _showEnabledModsFirstSubscription;
+
+  final AppStateService appStateService;
 
   @override
-  get modRoot => _appStateService.modRoot;
+  late String modRoot = appStateService.modRoot.latest;
 
   @override
-  get modExecFile => _appStateService.modExecFile;
+  late String modExecFile = appStateService.modExecFile.latest;
 
   @override
-  get launcherFile => _appStateService.launcherFile;
+  late String launcherFile = appStateService.launcherFile.latest;
 
   @override
-  get moveOnDrag => _appStateService.moveOnDrag;
+  late bool moveOnDrag = appStateService.moveOnDrag.latest;
 
   @override
-  get runTogether => _appStateService.runTogether;
+  late bool runTogether = appStateService.runTogether.latest;
 
   @override
-  get showEnabledModsFirst => _appStateService.showEnabledModsFirst;
+  late bool showEnabledModsFirst = appStateService.showEnabledModsFirst.latest;
 
   @override
-  get showFolderIcon => _appStateService.showFolderIcon;
+  late bool showFolderIcon = appStateService.showFolderIcon.latest;
 
   _SettingViewModelImpl({
-    required AppStateService appStateService,
-  }) : _appStateService = appStateService {
-    _appStateService.addListener(appStateListener);
-  }
-
-  void appStateListener() {
-    notifyListeners();
+    required this.appStateService,
+  }) {
+    _modRootSubscription = appStateService.modRoot.stream.listen((event) {
+      modRoot = event;
+      notifyListeners();
+    });
+    _modExecFileSubscription =
+        appStateService.modExecFile.stream.listen((event) {
+      modExecFile = event;
+      notifyListeners();
+    });
+    _launcherFileSubscription =
+        appStateService.launcherFile.stream.listen((event) {
+      launcherFile = event;
+      notifyListeners();
+    });
+    _moveOnDragSubscription = appStateService.moveOnDrag.stream.listen((event) {
+      moveOnDrag = event;
+      notifyListeners();
+    });
+    _runTogetherSubscription =
+        appStateService.runTogether.stream.listen((event) {
+      runTogether = event;
+      notifyListeners();
+    });
+    _showFolderIconSubscription =
+        appStateService.showFolderIcon.stream.listen((event) {
+      showFolderIcon = event;
+      notifyListeners();
+    });
+    _showEnabledModsFirstSubscription =
+        appStateService.showEnabledModsFirst.stream.listen((event) {
+      showEnabledModsFirst = event;
+      notifyListeners();
+    });
   }
 
   @override
   void dispose() {
-    _appStateService.removeListener(appStateListener);
+    _showEnabledModsFirstSubscription.cancel();
+    _showFolderIconSubscription.cancel();
+    _runTogetherSubscription.cancel();
+    _moveOnDragSubscription.cancel();
+    _launcherFileSubscription.cancel();
+    _modExecFileSubscription.cancel();
+    _modRootSubscription.cancel();
     super.dispose();
   }
 
   @override
-  void onModRootSelect() {
-    final dir = DirectoryPicker().getDirectory();
-    if (dir == null) return;
-    _appStateService.setModRoot(dir.path);
+  void onModRootSelect(String path) {
+    appStateService.setModRoot(path);
   }
 
   @override
-  void onModExecSelect() {
-    final file = OpenNoDereferenceFilePicker().getFile();
-    if (file == null) return;
-    _appStateService.setModExecFile(file.path);
+  void onModExecSelect(path) {
+    appStateService.setModExecFile(path);
   }
 
   @override
-  void onLauncherSelect() {
-    final file = OpenNoDereferenceFilePicker().getFile();
-    if (file == null) return;
-    _appStateService.setLauncherFile(file.path);
+  void onLauncherSelect(path) {
+    appStateService.setLauncherFile(path);
   }
 
   @override
   void onRunTogetherChanged(bool value) {
-    _appStateService.setRunTogether(value);
+    appStateService.setRunTogether(value);
   }
 
   @override
   void onMoveOnDragChanged(bool value) {
-    _appStateService.setMoveOnDrag(value);
+    appStateService.setMoveOnDrag(value);
   }
 
   @override
   void onShowFolderIconChanged(bool value) {
-    _appStateService.setShowFolderIcon(value);
+    appStateService.setShowFolderIcon(value);
   }
 
   @override
   void onShowEnabledModsFirstChanged(bool value) {
-    _appStateService.setShowEnabledModsFirst(value);
+    appStateService.setShowEnabledModsFirst(value);
   }
 }

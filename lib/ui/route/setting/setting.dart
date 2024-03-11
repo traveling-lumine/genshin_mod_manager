@@ -1,6 +1,8 @@
+import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/setting/setting_vm.dart';
+import 'package:genshin_mod_manager/ui/widget/third_party/flutter/no_deref_file_opener.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -34,19 +36,31 @@ class _SettingRoute extends StatelessWidget {
           title: 'Select mod root folder',
           icon: FluentIcons.folder_open,
           selector: (value) => value.modRoot,
-          onPressed: vm.onModRootSelect,
+          onPressed: () {
+            final dir = DirectoryPicker().getDirectory();
+            if (dir == null) return;
+            vm.onModRootSelect(dir.path);
+          },
         ),
         _PathSelectItem(
           title: 'Select 3D Migoto executable',
           icon: FluentIcons.document_management,
           selector: (value) => value.modExecFile,
-          onPressed: vm.onModExecSelect,
+          onPressed: () {
+            final file = OpenNoDereferenceFilePicker().getFile();
+            if (file == null) return;
+            vm.onModExecSelect(file.path);
+          },
         ),
         _PathSelectItem(
           title: 'Select launcher',
           icon: FluentIcons.document_management,
           selector: (value) => value.launcherFile,
-          onPressed: vm.onLauncherSelect,
+          onPressed: () {
+            final file = OpenNoDereferenceFilePicker().getFile();
+            if (file == null) return;
+            vm.onLauncherSelect(file.path);
+          },
         ),
         _SwitchItem(
           text: 'Run 3d migoto and launcher using one button',

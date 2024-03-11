@@ -1,21 +1,24 @@
-abstract interface class AppStateService {
+import 'package:genshin_mod_manager/domain/repo/disposable.dart';
+import 'package:genshin_mod_manager/domain/repo/latest_stream.dart';
+
+abstract interface class AppStateService implements Disposable {
   Future<bool> get successfulLoad;
 
-  Stream<String> get modRoot;
+  LatestStream<String> get modRoot;
 
-  Stream<String> get modExecFile;
+  LatestStream<String> get modExecFile;
 
-  Stream<String> get launcherFile;
+  LatestStream<String> get launcherFile;
 
-  Stream<bool> get runTogether;
+  LatestStream<bool> get runTogether;
 
-  Stream<bool> get moveOnDrag;
+  LatestStream<bool> get moveOnDrag;
 
-  Stream<bool> get showFolderIcon;
+  LatestStream<bool> get showFolderIcon;
 
-  Stream<bool> get showEnabledModsFirst;
+  LatestStream<bool> get showEnabledModsFirst;
 
-  Stream<String> get presetData;
+  LatestStream<String> get presetData;
 
   void reload();
 

@@ -4,12 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/akasha.dart';
-import 'package:genshin_mod_manager/domain/repo/fs_watch.dart';
+import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/domain/usecase/akasha/download.dart';
 import 'package:genshin_mod_manager/domain/usecase/akasha/refresh.dart';
 import 'package:genshin_mod_manager/ui/util/mod_writer.dart';
+import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
 
-abstract interface class NahidaStoreViewModel extends ChangeNotifier {
+abstract interface class NahidaStoreViewModel implements BaseViewModel {
   Future<List<NahidaliveElement>> get elements;
 
   void onRefresh();
@@ -41,18 +42,17 @@ NahidaStoreViewModel createViewModel({
 
 final class _NahidaStoreViewModelImpl extends ChangeNotifier
     implements NahidaStoreViewModel {
-  final NahidaliveAPI _api;
-  final RecursiveFileSystemWatcher _observer;
+  final NahidaliveAPI api;
+  final RecursiveFileSystemWatcher observer;
 
   Future<String?> Function()? _onPasswordRequired;
   void Function(HttpException)? _onApiException;
   void Function(NahidaliveElement)? _onDownloadComplete;
   void Function(ModCategory, String, Uint8List)? _onExtractFail;
 
-  Future<List<NahidaliveElement>> _elements;
-
   @override
   Future<List<NahidaliveElement>> get elements => _elements;
+  Future<List<NahidaliveElement>> _elements;
 
   set elements(Future<List<NahidaliveElement>> value) {
     _elements = value;
@@ -60,15 +60,13 @@ final class _NahidaStoreViewModelImpl extends ChangeNotifier
   }
 
   _NahidaStoreViewModelImpl({
-    required NahidaliveAPI api,
-    required RecursiveFileSystemWatcher observer,
-  })  : _api = api,
-        _observer = observer,
-        _elements = api.fetchNahidaliveElements();
+    required this.api,
+    required this.observer,
+  }) : _elements = api.fetchNahidaliveElements();
 
   @override
   void onRefresh() {
-    elements = AkashaRefreshUseCase(api: _api).call();
+    elements = AkashaRefreshUseCase(api: api).call();
   }
 
   @override
@@ -79,7 +77,7 @@ final class _NahidaStoreViewModelImpl extends ChangeNotifier
   }) async {
     try {
       await AkashaDownloadUseCase(
-        api: _api,
+        api: api,
         element: element,
         category: category,
         pw: pw,
@@ -100,7 +98,7 @@ final class _NahidaStoreViewModelImpl extends ChangeNotifier
       return;
     }
     _onDownloadComplete?.call(element);
-    _observer.forceUpdate();
+    observer.forceUpdate();
   }
 
   @override

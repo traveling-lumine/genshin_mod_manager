@@ -58,6 +58,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Provider(
       create: (context) => createAppStateService(),
+      dispose: (context, value) => value.dispose(),
       child: FluentApp.router(
         title: 'Genshin Mod Manager',
         routerDelegate: _router.routerDelegate,

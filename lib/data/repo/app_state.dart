@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/util.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
+import 'package:genshin_mod_manager/domain/repo/latest_stream.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,7 +35,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  Stream<String> get modRoot => _modRoot.stream;
+  LatestStream<String> get modRoot => vS2LS(_modRoot.stream);
   final BehaviorSubject<String> _modRoot = BehaviorSubject.seeded('.');
 
   @override
@@ -43,7 +45,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  Stream<String> get modExecFile => _modExecFile.stream;
+  LatestStream<String> get modExecFile => vS2LS(_modExecFile.stream);
   final BehaviorSubject<String> _modExecFile = BehaviorSubject.seeded('.');
 
   @override
@@ -53,7 +55,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  Stream<String> get launcherFile => _launcherFile.stream;
+  LatestStream<String> get launcherFile => vS2LS(_launcherFile.stream);
   final BehaviorSubject<String> _launcherFile = BehaviorSubject.seeded('.');
 
   @override
@@ -63,7 +65,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  Stream<bool> get runTogether => _runTogether.stream;
+  LatestStream<bool> get runTogether => vS2LS(_runTogether.stream);
   final BehaviorSubject<bool> _runTogether = BehaviorSubject.seeded(false);
 
   @override
@@ -73,7 +75,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  Stream<bool> get moveOnDrag => _moveOnDrag.stream;
+  LatestStream<bool> get moveOnDrag => vS2LS(_moveOnDrag.stream);
   final BehaviorSubject<bool> _moveOnDrag = BehaviorSubject.seeded(false);
 
   @override
@@ -83,7 +85,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  Stream<bool> get showFolderIcon => _showFolderIcon.stream;
+  LatestStream<bool> get showFolderIcon => vS2LS(_showFolderIcon.stream);
   final BehaviorSubject<bool> _showFolderIcon = BehaviorSubject.seeded(true);
 
   @override
@@ -93,7 +95,8 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  Stream<bool> get showEnabledModsFirst => _showEnabledModsFirst.stream;
+  LatestStream<bool> get showEnabledModsFirst =>
+      vS2LS(_showEnabledModsFirst.stream);
   final BehaviorSubject<bool> _showEnabledModsFirst =
       BehaviorSubject.seeded(false);
 
@@ -104,7 +107,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  Stream<String> get presetData => _presetData.stream;
+  LatestStream<String> get presetData => vS2LS(_presetData.stream);
   final BehaviorSubject<String> _presetData = BehaviorSubject.seeded('123');
 
   @override
@@ -115,6 +118,18 @@ class _AppStateServiceImpl implements AppStateService {
 
   _AppStateServiceImpl() {
     reload();
+  }
+
+  @override
+  void dispose() {
+    _modRoot.close();
+    _modExecFile.close();
+    _launcherFile.close();
+    _runTogether.close();
+    _moveOnDrag.close();
+    _showFolderIcon.close();
+    _showEnabledModsFirst.close();
+    _presetData.close();
   }
 
   @override

@@ -8,11 +8,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:genshin_mod_manager/data/constant.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
-import 'package:genshin_mod_manager/data/repo/filesystem.dart';
+import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/data/repo/preset.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:genshin_mod_manager/domain/repo/fs_watch.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/home_shell/home_shell_vm.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
@@ -41,27 +40,27 @@ class HomeShell extends StatelessWidget {
     final resourcePath =
         Platform.resolvedExecutable.pDirname.pJoin(resourceDir);
     Directory(resourcePath).createSync(recursive: true);
-    final modRootPath =
-        context.select((AppStateService value) => value.modRoot);
+    final modRootPath = context.read<AppStateService>().modRoot;
     return MultiProvider(
-      key: Key(modRootPath),
+      key: Key(modRootPath.latest),
       providers: [
         Provider(
-          create: (context) => createRecursiveFileSystemWatchService(
-            targetPath: modRootPath,
+          create: (context) => createRecursiveFileSystemWatcher(
+            targetPath: modRootPath.latest,
           ),
           dispose: (context, value) => value.dispose(),
         ),
-        ChangeNotifierProxyProvider2<AppStateService,
-            RecursiveFileSystemWatcher, PresetService>(
-          create: (context) => PresetService(),
-          update: (context, value, value2, previous) =>
-              previous!..update(value, value2),
+        Provider(
+          create: (context) => createPresetService(
+            appStateService: context.read(),
+            observerService: context.read(),
+          ),
+          dispose: (context, value) => value.dispose(),
         ),
         ChangeNotifierProvider(
           create: (context) => createViewModel(
             appStateService: context.read(),
-            recursiveObserverService: context.read(),
+            recursiveFileSystemWatcher: context.read(),
           ),
         ),
       ],

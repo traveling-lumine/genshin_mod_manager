@@ -4,28 +4,25 @@ import 'package:genshin_mod_manager/domain/repo/akasha.dart';
 import 'package:genshin_mod_manager/ui/util/mod_writer.dart';
 
 final class AkashaDownloadUseCase {
-  final NahidaliveAPI _api;
-  final NahidaliveElement _element;
-  final ModCategory _category;
-  final String? _pw;
+  final NahidaliveAPI api;
+  final NahidaliveElement element;
+  final ModCategory category;
+  final String? pw;
 
   AkashaDownloadUseCase({
-    required NahidaliveAPI api,
-    required NahidaliveElement element,
-    required ModCategory category,
-    String? pw,
-  })  : _api = api,
-        _element = element,
-        _category = category,
-        _pw = pw;
+    required this.api,
+    required this.element,
+    required this.category,
+    this.pw,
+  });
 
   Future<void> call() async {
-    final url = await _api.downloadUrl(_element.uuid, pw: _pw); // HttpException
+    final url = await api.downloadUrl(element.uuid, pw: pw); // HttpException
     if (!url.status) throw const WrongPasswordException();
-    final data = await _api.download(url);
+    final data = await api.download(url);
     await writeModToCategory(
-      category: _category,
-      modName: _element.title,
+      category: category,
+      modName: element.title,
       data: data,
     ); // ModZipExtractionException
   }

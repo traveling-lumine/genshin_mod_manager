@@ -1,47 +1,90 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
-import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
+import 'package:genshin_mod_manager/data/util.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:genshin_mod_manager/domain/repo/fs_watch.dart';
+import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
+import 'package:genshin_mod_manager/domain/repo/latest_stream.dart';
+import 'package:genshin_mod_manager/domain/repo/preset.dart';
+import 'package:rxdart/subjects.dart';
 
-class PresetService with ChangeNotifier {
-  AppStateService? _appStateService;
-  RecursiveFileSystemWatcher? _observerService;
-  Map<String, Map<String, List<String>>> _curGlobal = {};
-  Map<String, Map<String, List<String>>> _curLocal = {};
+PresetService createPresetService({
+  required AppStateService appStateService,
+  required RecursiveFileSystemWatcher observerService,
+}) {
+  return _PresetServiceImpl(
+    appStateService: appStateService,
+    observerService: observerService,
+  );
+}
 
-  PresetService();
+class _PresetServiceImpl implements PresetService {
+  late final StreamSubscription<String> _subscription;
 
-  void update(
-      AppStateService data, RecursiveFileSystemWatcher observerService) {
-    _appStateService = data;
-    _observerService = observerService;
-    if (_shouldUpdate(data.presetData)) {
-      _update(data.presetData);
+  final AppStateService appStateService;
+  final RecursiveFileSystemWatcher observerService;
+
+  late Map<String, Map<String, List<String>>> _curGlobal;
+  late Map<String, Map<String, List<String>>> _curLocal;
+
+  @override
+  LatestStream<List<String>> get globalPresets => vS2LS(_globalPresets.stream);
+  final _globalPresets = BehaviorSubject<List<String>>();
+
+  @override
+  LatestStream<List<String>> getLocalPresets(ModCategory category) {
+    final stream = _localPresets.putIfAbsent(
+      category.name,
+      () => BehaviorSubject.seeded([]),
+    );
+    return vS2LS(stream.stream);
+  }
+
+  final _localPresets = <String, BehaviorSubject<List<String>>>{};
+
+  _PresetServiceImpl({
+    required this.appStateService,
+    required this.observerService,
+  }) {
+    final decoded = jsonDecode(appStateService.presetData.latest);
+    _curGlobal = _parseMap(decoded['global']);
+    _curLocal = _parseMap(decoded['local']);
+
+    _subscription = appStateService.presetData.stream.listen((event) {
+      final decoded = jsonDecode(event);
+      _curGlobal = _parseMap(decoded['global']);
+      _curLocal = _parseMap(decoded['local']);
+      _globalPresets.add(_curGlobal.keys.toList());
+      for (final category in _curLocal.entries) {
+        final stream = _localPresets[category.key];
+        if (stream != null) {
+          stream.add(category.value.keys.toList());
+        } else {
+          _localPresets[category.key] =
+              BehaviorSubject.seeded(category.value.keys.toList());
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _globalPresets.close();
+    for (final e in _localPresets.entries) {
+      e.value.close();
     }
+    _subscription.cancel();
   }
 
-  List<String> getGlobalPresets() {
-    return _curGlobal.keys.toList(growable: false);
-  }
-
-  List<String> getLocalPresets(ModCategory category) {
-    try {
-      return _curLocal[category.name]!.keys.toList(growable: false);
-    } catch (e) {
-      return [];
-    }
-  }
-
+  @override
   void addGlobalPreset(String name) {
     Map<String, List<String>> data = {};
-    final modRoot = _appStateService!.modRoot;
+    final modRoot = appStateService.modRoot.latest;
     final categoryDirs = getFSEUnder<Directory>(modRoot);
     for (var categoryDir in categoryDirs) {
       final category = categoryDir.path.pBasename;
@@ -54,6 +97,7 @@ class PresetService with ChangeNotifier {
     _writeBack();
   }
 
+  @override
   void addLocalPreset(ModCategory category, String name) {
     final categoryDir = category.path;
     List<String> data = getFSEUnder<Directory>(categoryDir)
@@ -64,62 +108,68 @@ class PresetService with ChangeNotifier {
     _writeBack();
   }
 
+  @override
   void removeGlobalPreset(String name) {
     _curGlobal.remove(name);
     _writeBack();
   }
 
+  @override
   void removeLocalPreset(ModCategory category, String name) {
-    _curLocal[category.name]?.remove(name);
+    final localPreset = _curLocal[category.name];
+    if (localPreset == null) return;
+    localPreset.remove(name);
     _writeBack();
   }
 
+  void _writeBack() {
+    final data = {
+      'global': _curGlobal,
+      'local': _curLocal,
+    };
+    final encoded = jsonEncode(data);
+    appStateService.setPresetData(encoded);
+  }
+
+  @override
   void setGlobalPreset(String name) {
     final directives = _curGlobal[name];
     if (directives == null) return;
     _toggleGlobal(directives);
-    _observerService!.forceUpdate();
+    observerService.forceUpdate();
   }
 
+  @override
   void setLocalPreset(ModCategory category, String name) {
-    final locCat = _curLocal[category.name];
-    if (locCat == null) return;
-    final directives = locCat[name];
+    final directives = _curLocal[category.name]?[name];
     if (directives == null) return;
-    _toggleLocal(category, directives);
-    _observerService!.forceUpdate();
+    _toggleLocal(category.path, directives);
+    observerService.forceUpdate();
   }
 
   void _toggleGlobal(Map<String, List<String>> directives) {
-    final shaderFixes =
-        _appStateService!.modExecFile.pDirname.pJoin(kShaderFixes);
-    for (var category in directives.entries) {
+    for (final category in directives.entries) {
       final shouldBeEnabled = category.value;
-      final categoryDir = _appStateService!.modRoot.pJoin(category.key);
-      _toggleCategory(categoryDir, shouldBeEnabled, shaderFixes);
+      final categoryDir = appStateService.modRoot.latest.pJoin(category.key);
+      _toggleCategory(categoryDir, shouldBeEnabled);
     }
   }
 
-  void _toggleLocal(ModCategory category, List<String> shouldBeEnabled) {
-    final shaderFixes =
-        _appStateService!.modExecFile.pDirname.pJoin(kShaderFixes);
-    final categoryDir = category.path;
-    _toggleCategory(categoryDir, shouldBeEnabled, shaderFixes);
+  void _toggleLocal(String categoryPath, List<String> shouldBeEnabled) {
+    _toggleCategory(categoryPath, shouldBeEnabled);
   }
 
-  void _toggleCategory(
-    String categoryDir,
-    List<String> shouldBeEnabled,
-    String shaderFixes,
-  ) {
-    final currentEnabled = getFSEUnder<Directory>(categoryDir)
+  void _toggleCategory(String categoryPath, List<String> shouldBeEnabled) {
+    final shaderFixes =
+        appStateService.modExecFile.latest.pDirname.pJoin(kShaderFixes);
+    final currentEnabled = getFSEUnder<Directory>(categoryPath)
         .map((e) => e.path.pBasename)
         .where((e) => e.pIsEnabled)
         .toList(growable: false);
     final shouldBeOff =
         currentEnabled.where((e) => !shouldBeEnabled.contains(e));
     for (var mod in shouldBeOff) {
-      final modDir = categoryDir.pJoin(mod);
+      final modDir = categoryPath.pJoin(mod);
       disable(
         shaderFixesPath: shaderFixes,
         modPathW: modDir,
@@ -128,7 +178,7 @@ class PresetService with ChangeNotifier {
     final shouldBeOn =
         shouldBeEnabled.where((e) => !currentEnabled.contains(e));
     for (var mod in shouldBeOn) {
-      final modDir = categoryDir.pJoin(mod.pDisabledForm);
+      final modDir = categoryPath.pJoin(mod.pDisabledForm);
       enable(
         shaderFixesPath: shaderFixes,
         modPath: modDir,
@@ -136,81 +186,36 @@ class PresetService with ChangeNotifier {
     }
   }
 
-  void _writeBack() {
-    final presetData = _getStringRepresentation();
-    final appStateService = _appStateService!;
-
-    notifyListeners();
-
-    if (appStateService.presetData != presetData) {
-      appStateService.presetData = presetData;
-    }
-  }
-
-  bool _shouldUpdate(String prevString) {
-    var bool = prevString != _getStringRepresentation();
-    return bool;
-  }
-
-  String _getStringRepresentation() {
-    return jsonEncode({
-      'global': _curGlobal,
-      'local': _curLocal,
-    });
-  }
-
-  void _update(String presetData) {
-    bool doUpdate = false;
-    dynamic data;
-    try {
-      data = jsonDecode(presetData);
-    } catch (e) {
-      return;
-    }
-    const equality = DeepCollectionEquality();
-    try {
-      final parsedGlobal = _parseMap(data['global']);
-      final globalDiffers = !equality.equals(parsedGlobal, _curGlobal);
-      if (globalDiffers) {
-        _curGlobal = parsedGlobal;
-        doUpdate = true;
-      }
-    } catch (e) {
-      // do nothing
-    }
-    try {
-      final parsedLocal = _parseMap(data['local']);
-      final localDiffers = !equality.equals(parsedLocal, _curLocal);
-      if (localDiffers) {
-        _curLocal = parsedLocal;
-        doUpdate = true;
-      }
-    } catch (e) {
-      // do nothing
-    }
-    if (doUpdate) {
-      notifyListeners();
-    }
-  }
-
   Map<String, Map<String, List<String>>> _parseMap(dynamic data) {
-    final Map<String, Map<String, List<String>>> parsedGlobal = {};
+    final Map<String, Map<String, List<String>>> parsed = {};
     data.forEach((k, v) {
-      if (k is! String) return;
-      if (v is! Map) return;
-      final Map<String, List<String>> b = {};
-      v.forEach((k, v) {
-        if (k is! String) return;
-        if (v is! List) return;
-        final List<String> c = [];
-        for (final e in v) {
-          if (e is! String) continue;
-          c.add(e);
-        }
-        b[k] = c;
-      });
-      parsedGlobal[k] = b;
+      final forEachCategory = _forEachPreset(k, v);
+      if (forEachCategory == null) return;
+      parsed[k] = forEachCategory;
     });
-    return parsedGlobal;
+    return parsed;
+  }
+
+  Map<String, List<String>>? _forEachPreset(k, v) {
+    if (k is! String) return null;
+    if (v is! Map) return null;
+    final Map<String, List<String>> b = {};
+    v.forEach((k, v) {
+      final forEachCategory = _forEachCategory(k, v);
+      if (forEachCategory == null) return;
+      b[k] = forEachCategory;
+    });
+    return b;
+  }
+
+  List<String>? _forEachCategory(k, v) {
+    if (k is! String) return null;
+    if (v is! List) return null;
+    final List<String> c = [];
+    for (final e in v) {
+      if (e is! String) continue;
+      c.add(e);
+    }
+    return c;
   }
 }
