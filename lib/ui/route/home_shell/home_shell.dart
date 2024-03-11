@@ -19,7 +19,6 @@ import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control/preset_control.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest_box.dart';
-import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
@@ -235,12 +234,15 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
                 onPressed: Navigator.of(dialogContext).pop,
                 child: const Text('Cancel'),
               ),
-              RedFilledButton(
-                child: const Text('Start'),
-                onPressed: () async {
-                  Navigator.of(dialogContext).pop();
-                  await _runUpdateScript();
-                },
+              FluentTheme(
+                data: FluentThemeData(accentColor: Colors.red),
+                child: FilledButton(
+                  child: const Text('Start'),
+                  onPressed: () async {
+                    Navigator.of(dialogContext).pop();
+                    await _runUpdateScript();
+                  },
+                ),
               ),
             ],
           ),

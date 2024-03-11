@@ -1,7 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control/preset_control_vm.dart';
-import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
 import 'package:provider/provider.dart';
 
 class PresetControlWidget extends StatelessWidget {
@@ -94,12 +93,15 @@ class _PresetControlWidgetState extends State<_PresetControlWidget> {
       title: Text('Apply ${widget.prefix} Preset?'),
       content: Text('Preset name: $name'),
       actions: [
-        RedFilledButton(
-          onPressed: () {
-            Navigator.of(dialogContext).pop();
-            vm.removePreset(name);
-          },
-          child: const Text('Delete'),
+        FluentTheme(
+          data: FluentTheme.of(buildContext).copyWith(accentColor: Colors.red),
+          child: FilledButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              vm.removePreset(name);
+            },
+            child: const Text('Delete'),
+          ),
         ),
         Button(
           onPressed: Navigator.of(dialogContext).pop,

@@ -14,7 +14,6 @@ import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/ui/route/category/editor_text.dart';
-import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/red_filled_button.dart';
 import 'package:logger/logger.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
@@ -369,22 +368,25 @@ class _ModCard extends StatelessWidget {
               Navigator.of(context).pop();
             },
           ),
-          RedFilledButton(
-            onPressed: () {
-              previewFile.deleteSync();
-              Navigator.of(context2).pop();
-              Navigator.of(context).pop();
-              displayInfoBar(
-                context,
-                builder: (context, close) => InfoBar(
-                  title: const Text('Preview deleted'),
-                  content: Text('Preview deleted from ${previewFile.path}'),
-                  severity: InfoBarSeverity.warning,
-                  onClose: close,
-                ),
-              );
-            },
-            child: const Text('Delete'),
+          FluentTheme(
+            data: FluentTheme.of(context).copyWith(accentColor: Colors.red),
+            child: FilledButton(
+              onPressed: () {
+                previewFile.deleteSync();
+                Navigator.of(context2).pop();
+                Navigator.of(context).pop();
+                displayInfoBar(
+                  context,
+                  builder: (context, close) => InfoBar(
+                    title: const Text('Preview deleted'),
+                    content: Text('Preview deleted from ${previewFile.path}'),
+                    severity: InfoBarSeverity.warning,
+                    onClose: close,
+                  ),
+                );
+              },
+              child: const Text('Delete'),
+            ),
           ),
         ],
       ),
