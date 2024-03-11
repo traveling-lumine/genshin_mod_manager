@@ -27,9 +27,13 @@ class _GlobalPresetControlViewModelImpl extends ChangeNotifier
   late final StreamSubscription<List<String>> _subscription;
   final PresetService presetService;
 
+  @override
+  List<String> get presets => UnmodifiableListView(_presets);
+  List<String> _presets;
+
   _GlobalPresetControlViewModelImpl({
     required this.presetService,
-  }) {
+  }) : _presets = presetService.globalPresets.latest {
     _subscription = presetService.globalPresets.stream.listen((value) {
       _presets = value;
       notifyListeners();
@@ -41,10 +45,6 @@ class _GlobalPresetControlViewModelImpl extends ChangeNotifier
     _subscription.cancel();
     super.dispose();
   }
-
-  @override
-  List<String> get presets => UnmodifiableListView(_presets);
-  List<String> _presets = [];
 
   @override
   void setPreset(String name) {
@@ -78,10 +78,14 @@ class _LocalPresetControlViewModelImpl extends ChangeNotifier
   final PresetService presetService;
   final ModCategory category;
 
+  @override
+  List<String> get presets => UnmodifiableListView(_presets);
+  List<String> _presets;
+
   _LocalPresetControlViewModelImpl({
     required this.presetService,
     required this.category,
-  }) {
+  }) : _presets = presetService.getLocalPresets(category).latest {
     _subscription =
         presetService.getLocalPresets(category).stream.listen((value) {
       _presets = value;
@@ -94,10 +98,6 @@ class _LocalPresetControlViewModelImpl extends ChangeNotifier
     _subscription.cancel();
     super.dispose();
   }
-
-  @override
-  List<String> get presets => UnmodifiableListView(_presets);
-  List<String> _presets = [];
 
   @override
   void setPreset(String name) {

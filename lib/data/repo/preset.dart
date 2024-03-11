@@ -34,7 +34,7 @@ class _PresetServiceImpl implements PresetService {
 
   @override
   LatestStream<List<String>> get globalPresets => vS2LS(_globalPresets.stream);
-  final _globalPresets = BehaviorSubject<List<String>>();
+  final _globalPresets = BehaviorSubject<List<String>>.seeded([]);
 
   @override
   LatestStream<List<String>> getLocalPresets(ModCategory category) {

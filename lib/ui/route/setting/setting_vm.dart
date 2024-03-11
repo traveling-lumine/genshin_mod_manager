@@ -52,29 +52,35 @@ class _SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
   final AppStateService appStateService;
 
   @override
-  late String modRoot = appStateService.modRoot.latest;
+  String modRoot;
 
   @override
-  late String modExecFile = appStateService.modExecFile.latest;
+  String modExecFile;
 
   @override
-  late String launcherFile = appStateService.launcherFile.latest;
+  String launcherFile;
 
   @override
-  late bool moveOnDrag = appStateService.moveOnDrag.latest;
+  bool moveOnDrag;
 
   @override
-  late bool runTogether = appStateService.runTogether.latest;
+  bool runTogether;
 
   @override
-  late bool showEnabledModsFirst = appStateService.showEnabledModsFirst.latest;
+  bool showEnabledModsFirst;
 
   @override
-  late bool showFolderIcon = appStateService.showFolderIcon.latest;
+  bool showFolderIcon;
 
   _SettingViewModelImpl({
     required this.appStateService,
-  }) {
+  })  : modRoot = appStateService.modRoot.latest,
+        modExecFile = appStateService.modExecFile.latest,
+        launcherFile = appStateService.launcherFile.latest,
+        moveOnDrag = appStateService.moveOnDrag.latest,
+        runTogether = appStateService.runTogether.latest,
+        showFolderIcon = appStateService.showFolderIcon.latest,
+        showEnabledModsFirst = appStateService.showEnabledModsFirst.latest {
     _modRootSubscription = appStateService.modRoot.stream.listen((event) {
       modRoot = event;
       notifyListeners();

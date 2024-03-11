@@ -28,32 +28,33 @@ CategoryRouteViewModel createCategoryRouteViewModel({
     appStateService: appStateService,
     rootObserverService: rootObserverService,
     category: category,
+    fseWatchService: createProxyFSEntityWatcher<Directory>(
+      targetPath: category.path,
+      watcher: rootObserverService,
+    ),
   );
 }
 
 class _CategoryRouteViewModelImpl extends ChangeNotifier
     implements CategoryRouteViewModel {
+  final FSEntityWatcher<Directory> fseWatchService;
   final ModCategory category;
 
-  StreamSubscription<List<Mod>>? _modPathsSubscription;
+  late final StreamSubscription<List<Mod>> _modPathsSubscription;
 
   @override
   List<Mod> get modPaths => UnmodifiableListView(_modPaths);
-  late List<Mod> _modPaths;
+  List<Mod> _modPaths;
 
   _CategoryRouteViewModelImpl({
     required AppStateService appStateService,
     required RecursiveFileSystemWatcher rootObserverService,
     required this.category,
-  }) {
-    final fseWatchService = createProxyFSEntityWatcher<Directory>(
-      targetPath: category.path,
-      watcher: rootObserverService,
-    );
-    _modPaths = _getModPaths(
-      appStateService.showEnabledModsFirst.latest,
-      fseWatchService.entity.latest,
-    );
+    required this.fseWatchService,
+  }) : _modPaths = _getModPaths(
+          appStateService.showEnabledModsFirst.latest,
+          fseWatchService.entity.latest,
+        ) {
     _modPathsSubscription = CombineLatestStream.combine2(
       appStateService.showEnabledModsFirst.stream,
       fseWatchService.entity.stream,
@@ -64,7 +65,20 @@ class _CategoryRouteViewModelImpl extends ChangeNotifier
     });
   }
 
-  List<Mod> _getModPaths(bool showEnabledModsFirst, List<Directory> entity) {
+  @override
+  void dispose() {
+    _modPathsSubscription.cancel();
+    fseWatchService.dispose();
+    super.dispose();
+  }
+
+  @override
+  void onFolderOpen() {
+    openFolder(category.path);
+  }
+
+  static List<Mod> _getModPaths(
+      bool showEnabledModsFirst, List<Directory> entity) {
     return entity.map((e) => Mod(path: e.path)).toList(growable: false)
       ..sort(
         (a, b) {
@@ -84,16 +98,5 @@ class _CategoryRouteViewModelImpl extends ChangeNotifier
           return aLower.compareTo(bLower);
         },
       );
-  }
-
-  @override
-  void dispose() {
-    _modPathsSubscription?.cancel();
-    super.dispose();
-  }
-
-  @override
-  void onFolderOpen() {
-    openFolder(category.path);
   }
 }
