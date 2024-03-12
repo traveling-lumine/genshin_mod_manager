@@ -28,7 +28,7 @@ class ModCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Provider(
-      create: (context) => createProxyFSEntityWatcher<File>(
+      create: (context) => createFSEPathsWatcher<File>(
         targetPath: path,
         watcher: context.read(),
       ),
@@ -247,10 +247,10 @@ class _ModCard extends StatelessWidget {
   }
 
   Widget _buildDesc(BuildContext context, BoxConstraints constraints) {
-    final v = context.watch<FSEntityWatcher<File>>().entity.latest;
-    final previewFile = findPreviewFileIn(v);
+    final v = context.watch<FSEPathsWatcher>().paths.latest;
+    final previewFile = findPreviewFileInString(v);
     if (previewFile != null) {
-      return _buildImageDesc(context, constraints, previewFile);
+      return _buildImageDesc(context, constraints, File(previewFile));
     }
     return Expanded(
       child: Column(

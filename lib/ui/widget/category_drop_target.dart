@@ -6,6 +6,7 @@ import 'package:genshin_mod_manager/data/extension/copy_directory.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
+import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
@@ -60,21 +61,15 @@ class CategoryDropTarget extends StatelessWidget {
     final method = moveInsteadOfCopy ? 'moved' : 'copied';
     if (queue.isEmpty) return;
 
-    displayInfoBar(
+    displayInfoBarInContext(
       context,
-      builder: (context, close) {
-        final joined = queue.map((e) {
-          final (dir, pw) = e;
-          return "'${dir.path.pBasename}' -> '${pw.pBasename}'";
-        }).join('\n');
-        return InfoBar(
-          title: const Text('Folder already exists'),
-          content: Text(
-              'The following folders already exist and were not $method: \n$joined'),
-          severity: InfoBarSeverity.warning,
-          onClose: close,
-        );
-      },
+      title: const Text('Folder already exists'),
+      content:
+          Text('The following folders already exist and were not $method: \n'
+              '${queue.map(
+                    (e) => "'${e.$1.path.pBasename}' -> '${e.$2.pBasename}'",
+                  ).join('\n')}'),
+      severity: InfoBarSeverity.warning,
     );
   }
 }

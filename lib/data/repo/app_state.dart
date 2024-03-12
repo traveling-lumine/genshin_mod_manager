@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
-import 'package:genshin_mod_manager/data/util.dart';
+import 'package:genshin_mod_manager/data/latest_stream.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/domain/repo/latest_stream.dart';
 import 'package:rxdart/rxdart.dart';

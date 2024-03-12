@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
-import 'package:genshin_mod_manager/data/util.dart';
+import 'package:genshin_mod_manager/data/latest_stream.dart';
+import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/domain/repo/latest_stream.dart';
 import 'package:rxdart/rxdart.dart';
@@ -42,69 +44,117 @@ class _RecursiveFileSystemWatcherImpl implements RecursiveFileSystemWatcher {
   void forceUpdate() => _subject.add(null);
 }
 
-FSEntityWatcher<T> createFSEntityWatcher<T extends FileSystemEntity>({
+FSEPathsWatcher createCategoryIconWatcher({
   required String targetPath,
 }) {
-  return _FSEntityWatcherImpl<T>(
+  return _CategoryIconWatcherImpl(
     targetPath: targetPath,
   );
 }
 
-class _FSEntityWatcherImpl<T extends FileSystemEntity>
-    implements FSEntityWatcher<T> {
-  late final StreamSubscription<FileSystemEvent> _subscription;
+class _CategoryIconWatcherImpl implements FSEPathsWatcher {
+  late final StreamSubscription<FileSystemEvent?> _subscription;
 
   @override
-  LatestStream<List<T>> get entity => vS2LS(_entityStream.stream);
-  final BehaviorSubject<List<T>> _entityStream;
+  LatestStream<List<String>> get paths => vS2LS(_pathsStream.stream);
+  final BehaviorSubject<List<String>> _pathsStream;
 
-  _FSEntityWatcherImpl({
+  _CategoryIconWatcherImpl({
     required String targetPath,
-  }) : _entityStream = BehaviorSubject.seeded(getFSEUnder<T>(targetPath)) {
+  }) : _pathsStream = BehaviorSubject.seeded(_getPaths(targetPath)) {
     _subscription = Directory(targetPath)
-        .watch(recursive: false)
+        .watch()
         .where((event) => _ifEventDirectUnder(event, targetPath))
-        .listen((event) => _entityStream.add(getFSEUnder<T>(targetPath)));
+        .listen((event) => _pathsStream.add(_getPaths(targetPath)));
   }
 
   @override
   void dispose() {
-    _entityStream.close();
+    _pathsStream.close();
     _subscription.cancel();
+  }
+
+  static List<String> _getPaths(String targetPath) {
+    return List.unmodifiable(getFSEUnder<File>(targetPath).map((e) => e.path));
   }
 }
 
-FSEntityWatcher<T> createProxyFSEntityWatcher<T extends FileSystemEntity>({
+FSEPathsWatcher createFSEPathsWatcher<T extends FileSystemEntity>({
   required String targetPath,
   required RecursiveFileSystemWatcher watcher,
 }) {
-  return _ProxyFSEntityWatcherImpl<T>(
+  return _FSEPathsWatcherImpl<T>(
     targetPath: targetPath,
     watcher: watcher,
   );
 }
 
-class _ProxyFSEntityWatcherImpl<T extends FileSystemEntity>
-    implements FSEntityWatcher<T> {
+class _FSEPathsWatcherImpl<T extends FileSystemEntity>
+    implements FSEPathsWatcher {
   late final StreamSubscription<FileSystemEvent?> _subscription;
 
   @override
-  LatestStream<List<T>> get entity => vS2LS(_entityStream.stream);
-  final BehaviorSubject<List<T>> _entityStream;
+  LatestStream<List<String>> get paths => vS2LS(_paths.stream);
+  final BehaviorSubject<List<String>> _paths;
 
-  _ProxyFSEntityWatcherImpl({
+  _FSEPathsWatcherImpl({
     required String targetPath,
     required RecursiveFileSystemWatcher watcher,
-  }) : _entityStream = BehaviorSubject.seeded(getFSEUnder<T>(targetPath)) {
+  }) : _paths = BehaviorSubject.seeded(_getPaths(targetPath)) {
     _subscription = watcher.event.stream
         .where((event) => _ifEventDirectUnder(event, targetPath))
-        .listen((event) => _entityStream.add(getFSEUnder<T>(targetPath)));
+        .listen((event) => _paths.add(_getPaths(targetPath)));
   }
 
   @override
   void dispose() {
-    _entityStream.close();
+    _paths.close();
     _subscription.cancel();
+  }
+
+  static List<String> _getPaths<T extends FileSystemEntity>(
+          String targetPath) =>
+      List.unmodifiable(getFSEUnder<T>(targetPath).map((e) => e.path));
+}
+
+ModsWatcher createModFoldersWatcher({
+  required String targetPath,
+  required RecursiveFileSystemWatcher watcher,
+}) {
+  return _ModFoldersWatcherImpl(
+    targetPath: targetPath,
+    watcher: watcher,
+  );
+}
+
+class _ModFoldersWatcherImpl implements ModsWatcher {
+  late final StreamSubscription<FileSystemEvent?> _subscription;
+
+  @override
+  LatestStream<List<Mod>> get mods => vS2LS(_pathsStream.stream);
+  final BehaviorSubject<List<Mod>> _pathsStream;
+
+  _ModFoldersWatcherImpl({
+    required String targetPath,
+    required RecursiveFileSystemWatcher watcher,
+  }) : _pathsStream = BehaviorSubject.seeded(_getPaths(targetPath)) {
+    _subscription = watcher.event.stream
+        .where((event) => _ifEventDirectUnder(event, targetPath))
+        .listen((event) => _pathsStream.add(_getPaths(targetPath)));
+  }
+
+  @override
+  void dispose() {
+    _pathsStream.close();
+    _subscription.cancel();
+  }
+
+  static List<Mod> _getPaths(String targetPath) {
+    return UnmodifiableListView(
+      getFSEUnder<Directory>(targetPath)
+          .map((e) => Mod(path: e.path))
+          .toList(growable: false),
+    );
   }
 }
 

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
@@ -28,7 +27,7 @@ CategoryRouteViewModel createCategoryRouteViewModel({
     appStateService: appStateService,
     rootObserverService: rootObserverService,
     category: category,
-    fseWatchService: createProxyFSEntityWatcher<Directory>(
+    modFoldersWatcher: createModFoldersWatcher(
       targetPath: category.path,
       watcher: rootObserverService,
     ),
@@ -37,7 +36,7 @@ CategoryRouteViewModel createCategoryRouteViewModel({
 
 class _CategoryRouteViewModelImpl extends ChangeNotifier
     implements CategoryRouteViewModel {
-  final FSEntityWatcher<Directory> fseWatchService;
+  final ModsWatcher modFoldersWatcher;
   final ModCategory category;
 
   late final StreamSubscription<List<Mod>> _modPathsSubscription;
@@ -50,14 +49,14 @@ class _CategoryRouteViewModelImpl extends ChangeNotifier
     required AppStateService appStateService,
     required RecursiveFileSystemWatcher rootObserverService,
     required this.category,
-    required this.fseWatchService,
+    required this.modFoldersWatcher,
   }) : _modPaths = _getModPaths(
           appStateService.showEnabledModsFirst.latest,
-          fseWatchService.entity.latest,
+          modFoldersWatcher.mods.latest,
         ) {
     _modPathsSubscription = CombineLatestStream.combine2(
       appStateService.showEnabledModsFirst.stream,
-      fseWatchService.entity.stream,
+      modFoldersWatcher.mods.stream,
       _getModPaths,
     ).listen((value) {
       _modPaths = value;
@@ -68,7 +67,7 @@ class _CategoryRouteViewModelImpl extends ChangeNotifier
   @override
   void dispose() {
     _modPathsSubscription.cancel();
-    fseWatchService.dispose();
+    modFoldersWatcher.dispose();
     super.dispose();
   }
 
@@ -77,9 +76,8 @@ class _CategoryRouteViewModelImpl extends ChangeNotifier
     openFolder(category.path);
   }
 
-  static List<Mod> _getModPaths(
-      bool showEnabledModsFirst, List<Directory> entity) {
-    return entity.map((e) => Mod(path: e.path)).toList(growable: false)
+  static List<Mod> _getModPaths(bool showEnabledModsFirst, List<Mod> entity) {
+    return entity
       ..sort(
         (a, b) {
           final aBase = a.path.pBasename;

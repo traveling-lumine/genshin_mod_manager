@@ -33,10 +33,11 @@ HomeShellViewModel createViewModel({
   return _HomeShellViewModelImpl(
     appStateService: appStateService,
     recursiveFileSystemWatcher: recursiveFileSystemWatcher,
-    categoryIconFolderObserverService: createFSEntityWatcher<File>(
+    rootWatchService: createFSEPathsWatcher<Directory>(
       targetPath: appStateService.modRoot.latest,
+      watcher: recursiveFileSystemWatcher,
     ),
-    rootWatchService: createFSEntityWatcher<Directory>(
+    categoryIconFolderObserverService: createCategoryIconWatcher(
       targetPath: appStateService.modRoot.latest,
     ),
   );
@@ -50,8 +51,8 @@ class _HomeShellViewModelImpl extends ChangeNotifier
 
   final AppStateService appStateService;
   final RecursiveFileSystemWatcher recursiveFileSystemWatcher;
-  final FSEntityWatcher<Directory> rootWatchService;
-  final FSEntityWatcher<File> categoryIconFolderObserverService;
+  final FSEPathsWatcher rootWatchService;
+  final FSEPathsWatcher categoryIconFolderObserverService;
 
   @override
   List<ModCategory> get modCategories => UnmodifiableListView(_modCategories);
@@ -73,13 +74,13 @@ class _HomeShellViewModelImpl extends ChangeNotifier
   })  : _runTogether = appStateService.runTogether.latest,
         _showFolderIcon = appStateService.showFolderIcon.latest,
         _modCategories = _getCategories(
-          rootWatchService.entity.latest,
-          categoryIconFolderObserverService.entity.latest,
+          rootWatchService.paths.latest,
+          categoryIconFolderObserverService.paths.latest,
           appStateService.modRoot.latest,
         ) {
     _modCategoriesSubscription = CombineLatestStream.combine3(
-      rootWatchService.entity.stream,
-      categoryIconFolderObserverService.entity.stream,
+      rootWatchService.paths.stream,
+      categoryIconFolderObserverService.paths.stream,
       appStateService.modRoot.stream,
       _getCategories,
     ).listen((event) {
@@ -128,14 +129,14 @@ class _HomeShellViewModelImpl extends ChangeNotifier
   }
 
   static List<ModCategory> _getCategories(
-      List<Directory> root, List<File> icons, String modRoot) {
-    return root.map((e) => e.path).map((e) {
-      final imageFile = findPreviewFileIn(icons, name: e);
+      List<String> root, List<String> icons, String modRoot) {
+    return List.unmodifiable(root.map((e) {
+      final imageFile = findPreviewFileInString(icons, name: e);
       return ModCategory(
         path: e,
         name: e.pBasename,
-        iconPath: imageFile?.path,
+        iconPath: imageFile,
       );
-    }).toList(growable: false);
+    }));
   }
 }

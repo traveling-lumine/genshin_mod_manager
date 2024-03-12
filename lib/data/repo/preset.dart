@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
-import 'package:genshin_mod_manager/data/util.dart';
+import 'package:genshin_mod_manager/data/latest_stream.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
@@ -58,14 +58,14 @@ class _PresetServiceImpl implements PresetService {
   })  : _curGlobal = latestGlobal,
         _curLocal = latestLocal,
         _globalPresets = BehaviorSubject<List<String>>.seeded(
-          latestGlobal.keys.toList(growable: false),
+          List.unmodifiable(latestGlobal.keys),
         ),
         _localPresets = Map.fromEntries(
           latestLocal.entries.map(
             (e) => MapEntry(
               e.key,
               BehaviorSubject.seeded(
-                e.value.keys.toList(growable: false),
+                List.unmodifiable(e.value.keys),
               ),
             ),
           ),
@@ -74,14 +74,15 @@ class _PresetServiceImpl implements PresetService {
       final decoded = jsonDecode(event);
       _curGlobal = _parseMap(decoded['global']);
       _curLocal = _parseMap(decoded['local']);
-      _globalPresets.add(_curGlobal.keys.toList());
+      _globalPresets.add(List.unmodifiable(_curGlobal.keys));
       for (final category in _curLocal.entries) {
         final stream = _localPresets[category.key];
         if (stream != null) {
-          stream.add(category.value.keys.toList(growable: false));
+          stream.add(List.unmodifiable(category.value.keys));
         } else {
           _localPresets[category.key] = BehaviorSubject.seeded(
-              category.value.keys.toList(growable: false));
+            List.unmodifiable(category.value.keys),
+          );
         }
       }
     });

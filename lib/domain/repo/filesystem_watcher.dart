@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/repo/disposable.dart';
 import 'package:genshin_mod_manager/domain/repo/latest_stream.dart';
 
@@ -15,7 +16,10 @@ abstract interface class RecursiveFileSystemWatcher extends FSEventWatcher {
   void forceUpdate();
 }
 
-abstract interface class FSEntityWatcher<T extends FileSystemEntity>
-    implements Disposable {
-  LatestStream<List<T>> get entity;
+abstract interface class FSEPathsWatcher implements Disposable {
+  LatestStream<List<String>> get paths;
+}
+
+abstract interface class ModsWatcher implements Disposable {
+  LatestStream<List<Mod>> get mods;
 }
