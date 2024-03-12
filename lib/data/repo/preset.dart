@@ -17,9 +17,12 @@ PresetService createPresetService({
   required AppStateService appStateService,
   required RecursiveFileSystemWatcher observerService,
 }) {
+  final decoded = jsonDecode(appStateService.presetData.latest);
   return _PresetServiceImpl(
     appStateService: appStateService,
     observerService: observerService,
+    latestGlobal: _parseMap(decoded['global']),
+    latestLocal: _parseMap(decoded['local']),
   );
 }
 
@@ -29,12 +32,12 @@ class _PresetServiceImpl implements PresetService {
   final AppStateService appStateService;
   final RecursiveFileSystemWatcher observerService;
 
-  late Map<String, Map<String, List<String>>> _curGlobal;
-  late Map<String, Map<String, List<String>>> _curLocal;
+  Map<String, Map<String, List<String>>> _curGlobal;
+  Map<String, Map<String, List<String>>> _curLocal;
 
   @override
   LatestStream<List<String>> get globalPresets => vS2LS(_globalPresets.stream);
-  final _globalPresets = BehaviorSubject<List<String>>.seeded([]);
+  final BehaviorSubject<List<String>> _globalPresets;
 
   @override
   LatestStream<List<String>> getLocalPresets(ModCategory category) {
@@ -45,16 +48,28 @@ class _PresetServiceImpl implements PresetService {
     return vS2LS(stream.stream);
   }
 
-  final _localPresets = <String, BehaviorSubject<List<String>>>{};
+  final Map<String, BehaviorSubject<List<String>>> _localPresets;
 
   _PresetServiceImpl({
     required this.appStateService,
     required this.observerService,
-  }) {
-    final decoded = jsonDecode(appStateService.presetData.latest);
-    _curGlobal = _parseMap(decoded['global']);
-    _curLocal = _parseMap(decoded['local']);
-
+    required Map<String, Map<String, List<String>>> latestGlobal,
+    required Map<String, Map<String, List<String>>> latestLocal,
+  })  : _curGlobal = latestGlobal,
+        _curLocal = latestLocal,
+        _globalPresets = BehaviorSubject<List<String>>.seeded(
+          latestGlobal.keys.toList(growable: false),
+        ),
+        _localPresets = Map.fromEntries(
+          latestLocal.entries.map(
+            (e) => MapEntry(
+              e.key,
+              BehaviorSubject.seeded(
+                e.value.keys.toList(growable: false),
+              ),
+            ),
+          ),
+        ) {
     _subscription = appStateService.presetData.stream.listen((event) {
       final decoded = jsonDecode(event);
       _curGlobal = _parseMap(decoded['global']);
@@ -63,10 +78,10 @@ class _PresetServiceImpl implements PresetService {
       for (final category in _curLocal.entries) {
         final stream = _localPresets[category.key];
         if (stream != null) {
-          stream.add(category.value.keys.toList());
+          stream.add(category.value.keys.toList(growable: false));
         } else {
-          _localPresets[category.key] =
-              BehaviorSubject.seeded(category.value.keys.toList());
+          _localPresets[category.key] = BehaviorSubject.seeded(
+              category.value.keys.toList(growable: false));
         }
       }
     });
@@ -75,8 +90,8 @@ class _PresetServiceImpl implements PresetService {
   @override
   void dispose() {
     _globalPresets.close();
-    for (final e in _localPresets.entries) {
-      e.value.close();
+    for (final e in _localPresets.values) {
+      e.close();
     }
     _subscription.cancel();
   }
@@ -185,37 +200,37 @@ class _PresetServiceImpl implements PresetService {
       );
     }
   }
+}
 
-  Map<String, Map<String, List<String>>> _parseMap(dynamic data) {
-    final Map<String, Map<String, List<String>>> parsed = {};
-    data.forEach((k, v) {
-      final forEachCategory = _forEachPreset(k, v);
-      if (forEachCategory == null) return;
-      parsed[k] = forEachCategory;
-    });
-    return parsed;
-  }
+Map<String, Map<String, List<String>>> _parseMap(dynamic data) {
+  final Map<String, Map<String, List<String>>> parsed = {};
+  data.forEach((k, v) {
+    final forEachCategory = _forEachPreset(k, v);
+    if (forEachCategory == null) return;
+    parsed[k] = forEachCategory;
+  });
+  return parsed;
+}
 
-  Map<String, List<String>>? _forEachPreset(k, v) {
-    if (k is! String) return null;
-    if (v is! Map) return null;
-    final Map<String, List<String>> b = {};
-    v.forEach((k, v) {
-      final forEachCategory = _forEachCategory(k, v);
-      if (forEachCategory == null) return;
-      b[k] = forEachCategory;
-    });
-    return b;
-  }
+Map<String, List<String>>? _forEachPreset(k, v) {
+  if (k is! String) return null;
+  if (v is! Map) return null;
+  final Map<String, List<String>> b = {};
+  v.forEach((k, v) {
+    final forEachCategory = _forEachCategory(k, v);
+    if (forEachCategory == null) return;
+    b[k] = forEachCategory;
+  });
+  return b;
+}
 
-  List<String>? _forEachCategory(k, v) {
-    if (k is! String) return null;
-    if (v is! List) return null;
-    final List<String> c = [];
-    for (final e in v) {
-      if (e is! String) continue;
-      c.add(e);
-    }
-    return c;
+List<String>? _forEachCategory(k, v) {
+  if (k is! String) return null;
+  if (v is! List) return null;
+  final List<String> c = [];
+  for (final e in v) {
+    if (e is! String) continue;
+    c.add(e);
   }
+  return c;
 }
