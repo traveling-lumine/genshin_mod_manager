@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/data/mod_writer.dart';
+import 'package:genshin_mod_manager/data/repo/mod_writer.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/akasha.dart';
@@ -75,11 +75,12 @@ final class _NahidaStoreViewModelImpl extends ChangeNotifier
     required ModCategory category,
     String? pw,
   }) async {
+    final writer = createModWriter(category: category);
     try {
       await AkashaDownloadUseCase(
         api: api,
         element: element,
-        category: category,
+        writer: writer,
         pw: pw,
       ).call();
     } on HttpException catch (e) {
