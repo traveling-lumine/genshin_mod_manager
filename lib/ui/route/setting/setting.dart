@@ -124,7 +124,7 @@ class _SettingRoute extends StatelessWidget {
 
 class _PathSelectItem extends StatelessWidget {
   final String title;
-  final String Function(SettingViewModel vm) selector;
+  final String? Function(SettingViewModel vm) selector;
   final IconData icon;
   final VoidCallback onPressed;
 
@@ -150,14 +150,12 @@ class _PathSelectItem extends StatelessWidget {
                   style: FluentTheme.of(context).typography.bodyLarge,
                 ),
                 const SizedBox(height: 4),
-                Selector<SettingViewModel, String>(
-                  selector: (context, vm) => selector(vm),
-                  builder: (context, value, child) {
-                    return Text(
-                      value,
-                      style: FluentTheme.of(context).typography.caption,
-                    );
-                  },
+                Selector(
+                  selector: (context, SettingViewModel vm) => selector(vm),
+                  builder: (context, value, child) => Text(
+                    value ?? 'Loading...',
+                    style: FluentTheme.of(context).typography.caption,
+                  ),
                 ),
               ],
             ),
@@ -176,7 +174,7 @@ class _PathSelectItem extends StatelessWidget {
 
 class _SwitchItem extends StatelessWidget {
   final String text;
-  final bool Function(SettingViewModel vm) selector;
+  final bool? Function(SettingViewModel vm) selector;
   final void Function(bool value) onChanged;
 
   const _SwitchItem({
@@ -197,9 +195,12 @@ class _SwitchItem extends StatelessWidget {
               style: FluentTheme.of(context).typography.bodyLarge,
             ),
           ),
-          Selector<SettingViewModel, bool>(
-            selector: (context, vm) => selector(vm),
+          Selector(
+            selector: (context, SettingViewModel vm) => selector(vm),
             builder: (context, value, child) {
+              if (value == null) {
+                return const Text('Loading...');
+              }
               return RepaintBoundary(
                 child: ToggleSwitch(
                   checked: value,

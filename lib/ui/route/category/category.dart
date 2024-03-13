@@ -1,5 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/category/category_vm.dart';
@@ -85,11 +84,13 @@ class _CategoryRoute extends StatelessWidget {
 
   Widget _buildContent() {
     return ThickScrollbar(
-      child: Selector<CategoryRouteViewModel, List<Mod>>(
-        selector: (p0, p1) => p1.modPaths,
+      child: Selector(
+        selector: (context, CategoryRouteViewModel vm) => vm.modPaths,
         builder: (context, value, child) {
-          final children =
-              value.map((e) => ModCard(path: e.path)).toList(growable: false);
+          if (value == null) {
+            return const Center(child: ProgressRing());
+          }
+          final children = value.map((e) => ModCard(path: e.path)).toList();
           return GridView.builder(
             padding: const EdgeInsets.all(8),
             gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(

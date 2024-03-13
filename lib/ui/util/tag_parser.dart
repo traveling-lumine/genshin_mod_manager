@@ -90,24 +90,24 @@ class Lexer {
       return null;
     }
 
-    var currentChar = text[position];
+    final currentChar = text[position];
     if (currentChar.trim().isEmpty) {
       position++;
       return nextToken(); // Skip whitespace
     }
 
     if (keywords.containsKey(currentChar)) {
-      var type = keywords[currentChar]!;
+      final type = keywords[currentChar]!;
       position++;
       return Token(type);
     }
 
     if (literal.hasMatch(currentChar)) {
-      var start = position;
+      final start = position;
       while (position < text.length && literal.hasMatch(text[position])) {
         position++;
       }
-      var value = text.substring(start, position);
+      final value = text.substring(start, position);
       return Token(TokenType.literal, value);
     }
 
@@ -133,7 +133,7 @@ class Parser {
   }
 
   TagParseElement parse() {
-    var result = expression();
+    final result = expression();
     if (currentToken != null) {
       throw Exception('Unexpected input after expression');
     }
@@ -143,7 +143,7 @@ class Parser {
   TagParseElement expression() => orClause();
 
   TagParseElement orClause() {
-    var nodes = [andClause()];
+    final nodes = [andClause()];
 
     while (currentToken?.type == TokenType.or) {
       eat(TokenType.or);
@@ -158,7 +158,7 @@ class Parser {
   }
 
   TagParseElement andClause() {
-    var nodes = [notClause()];
+    final nodes = [notClause()];
 
     while (currentToken?.type == TokenType.and) {
       eat(TokenType.and);
@@ -184,11 +184,11 @@ class Parser {
   TagParseElement primary() {
     if (currentToken?.type == TokenType.lParen) {
       eat(TokenType.lParen);
-      var node = expression();
+      final node = expression();
       eat(TokenType.rParen);
       return Parenthesis(node);
     } else if (currentToken?.type == TokenType.literal) {
-      var token = currentToken!;
+      final token = currentToken!;
       eat(TokenType.literal);
       return Literal(token.value!);
     } else {
@@ -198,7 +198,7 @@ class Parser {
 }
 
 TagParseElement parseTagQuery(String query) {
-  var lexer = Lexer(query);
-  var parser = Parser(lexer);
+  final lexer = Lexer(query);
+  final parser = Parser(lexer);
   return parser.parse();
 }

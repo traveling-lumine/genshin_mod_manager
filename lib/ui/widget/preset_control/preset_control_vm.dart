@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
@@ -7,7 +6,7 @@ import 'package:genshin_mod_manager/domain/repo/preset.dart';
 import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
 
 abstract interface class PresetControlViewModel implements BaseViewModel {
-  List<String> get presets;
+  List<String>? get presets;
 
   void setPreset(String name);
 
@@ -28,8 +27,8 @@ class _GlobalPresetControlViewModelImpl extends ChangeNotifier
   final PresetService presetService;
 
   @override
-  List<String> get presets => UnmodifiableListView(_presets);
-  List<String> _presets;
+  List<String>? get presets => _presets;
+  List<String>? _presets;
 
   _GlobalPresetControlViewModelImpl({
     required this.presetService,
@@ -79,8 +78,8 @@ class _LocalPresetControlViewModelImpl extends ChangeNotifier
   final ModCategory category;
 
   @override
-  List<String> get presets => UnmodifiableListView(_presets);
-  List<String> _presets;
+  List<String>? get presets => _presets;
+  List<String>? _presets;
 
   _LocalPresetControlViewModelImpl({
     required this.presetService,

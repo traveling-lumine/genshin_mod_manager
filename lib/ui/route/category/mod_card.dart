@@ -14,6 +14,8 @@ import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/ui/route/category/editor_text.dart';
+import 'package:genshin_mod_manager/ui/route/category/mod_card_vm.dart';
+import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:logger/logger.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
@@ -27,15 +29,20 @@ class ModCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Provider(
-      create: (context) => createFSEPathsWatcher<File>(
-        targetPath: path,
-        watcher: context.read(),
-      ),
-      dispose: (context, value) => value.dispose(),
-      child: _ModCard(
-        dirPath: path,
-      ),
+    return MultiProvider(
+      providers: [
+        Provider(
+          create: (context) => createFSEPathsWatcher<File>(
+            targetPath: path,
+            watcher: context.read(),
+          ),
+          dispose: (context, value) => value.dispose(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => createModCardViewModel(),
+        ),
+      ],
+      child: _ModCard(dirPath: path),
     );
   }
 }
@@ -62,7 +69,15 @@ class _ModCard extends StatelessWidget {
         child: FocusTraversalGroup(
           child: Column(
             children: [
-              _buildFolderHeader(context),
+              FutureBuilder(
+                future: getFSEUnder<File>(dirPath),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return Text('Loading...');
+                  }
+                  return _buildFolderHeader(context, data);
+                },
+              ),
               const SizedBox(height: 4),
               _buildFolderContent(context),
             ],
@@ -70,35 +85,6 @@ class _ModCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void onTap(BuildContext context) {
-    final isEnabled = dirPath.pBasename.pIsEnabled;
-    var shaderFixesPath = context
-        .read<AppStateService>()
-        .modExecFile
-        .latest
-        .pDirname
-        .pJoin(kShaderFixes);
-    if (isEnabled) {
-      disable(
-        shaderFixesPath: shaderFixesPath,
-        modPathW: dirPath,
-        onModRenameClash: (p0) => showDirectoryExists(context, p0),
-        onShaderDeleteFailed: (e) =>
-            errorDialog(context, 'Failed to delete files in ShaderFixes: $e'),
-        onModRenameFailed: () => buildErrorDialog(context),
-      );
-    } else {
-      enable(
-        shaderFixesPath: shaderFixesPath,
-        modPath: dirPath,
-        onModRenameClash: (p0) => showDirectoryExists(context, p0),
-        onShaderExists: (e) =>
-            errorDialog(context, '${e.path} already exists!'),
-        onModRenameFailed: () => buildErrorDialog(context),
-      );
-    }
   }
 
   void buildErrorDialog(BuildContext context) {
@@ -130,9 +116,9 @@ class _ModCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFolderHeader(BuildContext context) {
+  Widget _buildFolderHeader(BuildContext context, List<File> files) {
     // find config.json
-    final File? findConfig = getFSEUnder<File>(dirPath).firstWhereOrNull(
+    final File? findConfig = files.firstWhereOrNull(
       (element) => element.path.pBasename.pEquals(kAkashaConfigFilename),
     );
     return Row(
@@ -151,65 +137,7 @@ class _ModCard extends StatelessWidget {
             child: Button(
               child: const Icon(FluentIcons.refresh),
               onPressed: () async {
-                try {
-                  final recursiveObserverService =
-                      context.read<RecursiveFileSystemWatcher>();
-                  final fileContent = await findConfig.readAsString();
-                  final config = jsonDecode(fileContent);
-                  final uuid = config['uuid'] as String;
-                  final version = config['version'] as String;
-                  final updateCode = config['update_code'] as String;
-                  final api = createNahidaliveAPI();
-                  final targetElement = await api.fetchNahidaliveElement(uuid);
-                  final upstreamVersion = targetElement.version;
-                  if (version == upstreamVersion) {
-                    if (!context.mounted) return;
-                    unawaited(displayInfoBar(
-                      context,
-                      builder: (context, close) => InfoBar(
-                        title: const Text('No update available'),
-                        content: const Text('The mod is up to date'),
-                        onClose: close,
-                      ),
-                    ));
-                    return;
-                  }
-                  final downloadElement =
-                      await api.downloadUrl(uuid, updateCode: updateCode);
-                  final download = await api.download(downloadElement);
-
-                  recursiveObserverService.cut();
-                  await Directory(dirPath).delete(recursive: true);
-                  if (!context.mounted) throw Exception('context not mounted');
-                  await downloadFile(context, targetElement.title, download,
-                      dirPath.pDirname.pBasename);
-                  if (!context.mounted) return;
-                  unawaited(displayInfoBar(
-                    context,
-                    builder: (context, close) {
-                      return InfoBar(
-                        title: const Text('Update downloaded'),
-                        content:
-                            Text('Update downloaded to ${dirPath.pDirname}'),
-                        severity: InfoBarSeverity.success,
-                        onClose: close,
-                      );
-                    },
-                  ));
-                  recursiveObserverService.uncut();
-                  recursiveObserverService.forceUpdate();
-                } catch (e) {
-                  if (!context.mounted) return;
-                  unawaited(displayInfoBar(
-                    context,
-                    builder: (context, close) => InfoBar(
-                      title: const Text('Something went wrong'),
-                      content: Text(e.toString()),
-                      severity: InfoBarSeverity.error,
-                      onClose: close,
-                    ),
-                  ));
-                }
+                await _onRefresh(context, findConfig);
               },
             ),
           ),
@@ -233,7 +161,7 @@ class _ModCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildDesc(context, constraints),
+              Expanded(child: _buildDesc(context, constraints)),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Divider(direction: Axis.vertical),
@@ -252,40 +180,38 @@ class _ModCard extends StatelessWidget {
     if (previewFile != null) {
       return _buildImageDesc(context, constraints, File(previewFile));
     }
-    return Expanded(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(FluentIcons.unknown),
-          const SizedBox(height: 4),
-          RepaintBoundary(
-            child: Button(
-              onPressed: () async {
-                final image = await Pasteboard.image;
-                if (image == null) {
-                  _logger.d('No image found in clipboard');
-                  return;
-                }
-                final filePath = dirPath.pJoin('preview.png');
-                await File(filePath).writeAsBytes(image);
-                if (!context.mounted) return;
-                await displayInfoBar(
-                  context,
-                  builder: (_, close) {
-                    return InfoBar(
-                      title: const Text('Image pasted'),
-                      content: Text('to $filePath'),
-                      onClose: close,
-                    );
-                  },
-                );
-                _logger.d('Image pasted to $filePath');
-              },
-              child: const Text('Paste'),
-            ),
-          )
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(FluentIcons.unknown),
+        const SizedBox(height: 4),
+        RepaintBoundary(
+          child: Button(
+            onPressed: () async {
+              final image = await Pasteboard.image;
+              if (image == null) {
+                _logger.d('No image found in clipboard');
+                return;
+              }
+              final filePath = dirPath.pJoin('preview.png');
+              await File(filePath).writeAsBytes(image);
+              if (!context.mounted) return;
+              await displayInfoBar(
+                context,
+                builder: (_, close) {
+                  return InfoBar(
+                    title: const Text('Image pasted'),
+                    content: Text('to $filePath'),
+                    onClose: close,
+                  );
+                },
+              );
+              _logger.d('Image pasted to $filePath');
+            },
+            child: const Text('Paste'),
+          ),
+        )
+      ],
     );
   }
 
@@ -302,8 +228,8 @@ class _ModCard extends StatelessWidget {
             builder: (context) {
               // add touch to close
               return GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                onSecondaryTap: () => Navigator.of(context).pop(),
+                onTap: Navigator.of(context).pop,
+                onSecondaryTap: Navigator.of(context).pop,
                 child: Image.memory(
                   previewFile.readAsBytesSync(),
                   fit: BoxFit.contain,
@@ -348,47 +274,6 @@ class _ModCard extends StatelessWidget {
             filterQuality: FilterQuality.medium,
           ),
         ),
-      ),
-    );
-  }
-
-  void _showDialog(BuildContext context, File previewFile) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context2) => ContentDialog(
-        title: const Text('Delete preview image?'),
-        content:
-            const Text('Are you sure you want to delete the preview image?'),
-        actions: [
-          Button(
-            child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.of(context2).pop();
-              Navigator.of(context).pop();
-            },
-          ),
-          FluentTheme(
-            data: FluentTheme.of(context).copyWith(accentColor: Colors.red),
-            child: FilledButton(
-              onPressed: () {
-                previewFile.deleteSync();
-                Navigator.of(context2).pop();
-                Navigator.of(context).pop();
-                displayInfoBar(
-                  context,
-                  builder: (context, close) => InfoBar(
-                    title: const Text('Preview deleted'),
-                    content: Text('Preview deleted from ${previewFile.path}'),
-                    severity: InfoBarSeverity.warning,
-                    onClose: close,
-                  ),
-                );
-              },
-              child: const Text('Delete'),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -485,13 +370,134 @@ class _ModCard extends StatelessWidget {
       ],
     );
   }
+
+  void _showDialog(BuildContext context, File previewFile) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context2) => ContentDialog(
+        title: const Text('Delete preview image?'),
+        content:
+            const Text('Are you sure you want to delete the preview image?'),
+        actions: [
+          Button(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context2).pop();
+              Navigator.of(context).pop();
+            },
+          ),
+          FluentTheme(
+            data: FluentTheme.of(context).copyWith(accentColor: Colors.red),
+            child: FilledButton(
+              onPressed: () {
+                previewFile.deleteSync();
+                Navigator.of(context2).pop();
+                Navigator.of(context).pop();
+                displayInfoBar(
+                  context,
+                  builder: (context, close) => InfoBar(
+                    title: const Text('Preview deleted'),
+                    content: Text('Preview deleted from ${previewFile.path}'),
+                    severity: InfoBarSeverity.warning,
+                    onClose: close,
+                  ),
+                );
+              },
+              child: const Text('Delete'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _onRefresh(BuildContext context, File findConfig) async {
+    try {
+      final recursiveObserverService =
+          context.read<RecursiveFileSystemWatcher>();
+      final fileContent = await findConfig.readAsString();
+      final config = jsonDecode(fileContent);
+      final uuid = config['uuid'] as String;
+      final version = config['version'] as String;
+      final updateCode = config['update_code'] as String;
+      final api = createNahidaliveAPI();
+      final targetElement = await api.fetchNahidaliveElement(uuid);
+      final upstreamVersion = targetElement.version;
+      if (version == upstreamVersion) {
+        if (!context.mounted) return;
+        unawaited(displayInfoBarInContext(
+          context,
+          title: const Text('No update available'),
+          content: const Text('The mod is up to date'),
+        ));
+        return;
+      }
+      final downloadElement =
+          await api.downloadUrl(uuid, updateCode: updateCode);
+      final download = await api.download(downloadElement);
+
+      recursiveObserverService.cut();
+      await Directory(dirPath).delete(recursive: true);
+      if (!context.mounted) throw Exception('context not mounted');
+      await downloadFile(
+          context, targetElement.title, download, dirPath.pDirname.pBasename);
+      if (!context.mounted) return;
+      unawaited(displayInfoBarInContext(
+        context,
+        title: const Text('Update downloaded'),
+        content: Text('Update downloaded to ${dirPath.pDirname}'),
+        severity: InfoBarSeverity.success,
+      ));
+      recursiveObserverService.uncut();
+      recursiveObserverService.forceUpdate();
+    } catch (e) {
+      if (!context.mounted) return;
+      unawaited(displayInfoBarInContext(
+        context,
+        title: const Text('Something went wrong'),
+        content: Text(e.toString()),
+        severity: InfoBarSeverity.error,
+      ));
+    }
+  }
+
+  void onTap(BuildContext context) {
+    final isEnabled = dirPath.pBasename.pIsEnabled;
+    final shaderFixesPath = context
+        .read<AppStateService>()
+        .modExecFile
+        .latest
+        .pDirname
+        .pJoin(kShaderFixes);
+    if (isEnabled) {
+      disable(
+        shaderFixesPath: shaderFixesPath,
+        modPathW: dirPath,
+        onModRenameClash: (p0) => showDirectoryExists(context, p0),
+        onShaderDeleteFailed: (e) =>
+            errorDialog(context, 'Failed to delete files in ShaderFixes: $e'),
+        onModRenameFailed: () => buildErrorDialog(context),
+      );
+    } else {
+      enable(
+        shaderFixesPath: shaderFixesPath,
+        modPath: dirPath,
+        onModRenameClash: (p0) => showDirectoryExists(context, p0),
+        onShaderExists: (e) =>
+            errorDialog(context, '${e.path} already exists!'),
+        onModRenameFailed: () => buildErrorDialog(context),
+      );
+    }
+  }
 }
 
 Future<bool> downloadFile(BuildContext context, String filename, Uint8List data,
     String category) async {
-  final catPath =
-      context.read<AppStateService>().modRoot.latest.pJoin(category);
-  final enabledFormDirNames = getFSEUnder<Directory>(catPath)
+  final modRoot = context.read<AppStateService>().modRoot.latest;
+  if (modRoot == null) return false;
+  final catPath = modRoot.pJoin(category);
+  final enabledFormDirNames = (await getFSEUnder<Directory>(catPath))
       .map((e) => e.path.pBasename.pEnabledForm)
       .toSet();
   String destDirName = filename.pBNameWoExt.pEnabledForm;

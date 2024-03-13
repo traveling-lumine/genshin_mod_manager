@@ -70,19 +70,27 @@ class _PresetControlWidgetState extends State<_PresetControlWidget> {
   Widget _buildComboBox() {
     return Selector(
       selector: (_, PresetControlViewModel vm) => vm.presets,
-      builder: (context, value, child) => RepaintBoundary(
-        child: ComboBox(
-          items: value
-              .map((e) => ComboBoxItem(value: e, child: Text(e)))
-              .toList(growable: false),
-          placeholder: Text('${widget.prefix} Preset...'),
-          onChanged: (value) => showDialog(
-            barrierDismissible: true,
-            context: context,
-            builder: (context2) => _presetDialog(value!, context2, context),
+      builder: (context, value, child) {
+        final String text;
+        if (value != null) {
+          text = '${widget.prefix} Preset...';
+        } else {
+          text = 'Grabbing ${widget.prefix} Presets...';
+        }
+        return RepaintBoundary(
+          child: ComboBox(
+            items: value
+                ?.map((e) => ComboBoxItem(value: e, child: Text(e)))
+                .toList(),
+            placeholder: Text(text),
+            onChanged: (value) => showDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (context2) => _presetDialog(value!, context2, context),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

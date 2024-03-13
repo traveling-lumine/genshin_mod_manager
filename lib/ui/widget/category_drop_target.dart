@@ -32,6 +32,7 @@ class CategoryDropTarget extends StatelessWidget {
 
   void onDragDone(BuildContext context, DropDoneDetails details) {
     final moveInsteadOfCopy = context.read<AppStateService>().moveOnDrag.latest;
+    if (moveInsteadOfCopy == null) return;
     final modRoot = category.path;
     final List<(Directory, String)> queue = [];
     for (final xFile in details.files) {

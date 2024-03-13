@@ -240,7 +240,7 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
             }
             if (snapshot.hasData) {
               final data = snapshot.data!.where((element) {
-                final tagMap = {for (var e in element.tags) e: true};
+                final tagMap = {for (final e in element.tags) e: true};
                 try {
                   final filter = _tagFilter;
                   if (filter == null) return true;
@@ -248,7 +248,7 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
                 } catch (e) {
                   return true;
                 }
-              }).toList(growable: false);
+              }).toList();
               return ThickScrollbar(
                 child: GridView.builder(
                   controller: _scrollController,

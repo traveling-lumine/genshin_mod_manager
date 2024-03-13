@@ -5,16 +5,16 @@ import 'package:genshin_mod_manager/data/io/fsops.dart';
 
 const kShaderFixes = 'ShaderFixes';
 
-void enable({
+Future<void> enable({
   required String shaderFixesPath,
   required String modPath,
   void Function(String)? onModRenameClash,
   void Function(FileSystemException)? onShaderExists,
   void Function()? onModRenameFailed,
-}) {
+}) async {
   if (!Directory(modPath).existsSync()) return;
 
-  List<File> shaderFilenames = _getModShaders(modPath);
+  List<File> shaderFilenames = await _getModShaders(modPath);
   final String renameTarget =
       modPath.pDirname.pJoin(modPath.pBasename.pEnabledForm);
   if (Directory(renameTarget).existsSync()) {
@@ -35,16 +35,16 @@ void enable({
   }
 }
 
-void disable({
+Future<void> disable({
   required String shaderFixesPath,
   required String modPathW,
   void Function(String)? onModRenameClash,
   void Function(Object)? onShaderDeleteFailed,
   void Function()? onModRenameFailed,
-}) {
+}) async {
   if (!Directory(modPathW).existsSync()) return;
 
-  List<File> shaderFilenames = _getModShaders(modPathW);
+  List<File> shaderFilenames = await _getModShaders(modPathW);
   final String renameTarget =
       modPathW.pDirname.pJoin(modPathW.pBasename.pDisabledForm);
   if (Directory(renameTarget).existsSync()) {
@@ -65,11 +65,12 @@ void disable({
   }
 }
 
-List<File> _getModShaders(String modPath) {
+Future<List<File>> _getModShaders(String modPath) async {
   final List<File> shaderFilenames = [];
   final modShaderPath = modPath.pJoin(kShaderFixes);
   try {
-    shaderFilenames.addAll(getFSEUnder<File>(modShaderPath));
+    final fseUnder = await getFSEUnder<File>(modShaderPath);
+    shaderFilenames.addAll(fseUnder);
   } on PathNotFoundException {
     // _logger.i(e);
   }
@@ -98,13 +99,14 @@ void _deleteShaders(String targetPath, List<File> shaderFiles) {
   _shaderFinder(targetPath, shaderFiles, (found) => found.deleteSync());
 }
 
-void _shaderFinder(
+Future<void> _shaderFinder(
   String targetPath,
   List<File> shaderFiles,
   void Function(File found) onFound,
-) {
+) async {
   final programShadersMap = Map<String, File>.fromEntries(
-    getFSEUnder<File>(targetPath).map((e) => MapEntry(e.path.pBasename, e)),
+    (await getFSEUnder<File>(targetPath))
+        .map((e) => MapEntry(e.path.pBasename, e)),
   );
   final shaderSets = shaderFiles.map((e) => e.path.pBasename).toSet();
   final inter = programShadersMap.keys.toSet().intersection(shaderSets);

@@ -4,8 +4,8 @@
 /// The equality for distinct should be deep.
 ///
 /// Not sure this is a good idea.
-abstract interface class LatestStream<T> {
-  T get latest;
+abstract interface class LatestStream<T extends Object> {
+  T? get latest;
 
   Stream<T> get stream;
 }

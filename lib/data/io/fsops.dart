@@ -1,21 +1,24 @@
 import 'dart:io';
 
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:rxdart/rxdart.dart';
 
-List<T> getFSEUnder<T extends FileSystemEntity>(String path) {
+Future<List<T>> getFSEUnder<T extends FileSystemEntity>(String path) async {
   final dir = Directory(path);
-  if (!dir.existsSync()) return [];
-  return dir.listSync().whereType<T>().toList(growable: false);
+  if (!await dir.exists()) return [];
+  final res = await dir.list().whereType<T>().toList();
+  return List.unmodifiable(res);
 }
 
-List<File> getActiveiniFiles(String path) {
-  return getFSEUnder<File>(path).where((element) {
+Future<List<File>> getActiveiniFiles(String path) async {
+  final fseUnder = await getFSEUnder<File>(path);
+  return List.unmodifiable(fseUnder.where((element) {
     final path = element.path;
     final extension = path.pExtension;
     if (!extension.pEquals('.ini')) return false;
     final filename = path.pBNameWoExt;
     return filename.pIsEnabled;
-  }).toList(growable: false);
+  }));
 }
 
 const _previewExtensions = [
@@ -24,21 +27,6 @@ const _previewExtensions = [
   '.jpeg',
   '.gif',
 ];
-
-File? findPreviewFile(String path, {String name = 'preview'}) =>
-    findPreviewFileIn(getFSEUnder<File>(path), name: name);
-
-File? findPreviewFileIn(List<File> dir, {String name = 'preview'}) {
-  for (final element in dir) {
-    final filename = element.path.pBNameWoExt;
-    if (!filename.pEquals(name)) continue;
-    final ext = element.path.pExtension;
-    for (final previewExt in _previewExtensions) {
-      if (ext.pEquals(previewExt)) return element;
-    }
-  }
-  return null;
-}
 
 String? findPreviewFileInString(List<String> dir, {String name = 'preview'}) {
   for (final element in dir) {
@@ -53,23 +41,11 @@ String? findPreviewFileInString(List<String> dir, {String name = 'preview'}) {
 }
 
 void runProgram(File program) {
-  Process.run(
-    'start',
-    [
-      '/b',
-      '/d',
-      program.parent.path,
-      '',
-      program.path.pBasename,
-    ],
-    runInShell: true,
-  );
+  final pwd = program.parent.path;
+  final pName = program.path.pBasename;
+  Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
 }
 
 void openFolder(String dirPath) {
-  Process.start(
-    'explorer',
-    [dirPath],
-    runInShell: true,
-  );
+  Process.start('explorer', [dirPath], runInShell: true);
 }

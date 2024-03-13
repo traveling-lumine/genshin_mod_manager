@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/extension/pathops.dart';
@@ -13,7 +12,7 @@ import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
 import 'package:rxdart/streams.dart';
 
 abstract interface class CategoryRouteViewModel implements BaseViewModel {
-  List<Mod> get modPaths;
+  List<Mod>? get modPaths;
 
   void onFolderOpen();
 }
@@ -42,24 +41,20 @@ class _CategoryRouteViewModelImpl extends ChangeNotifier
   late final StreamSubscription<List<Mod>> _modPathsSubscription;
 
   @override
-  List<Mod> get modPaths => UnmodifiableListView(_modPaths);
-  List<Mod> _modPaths;
+  List<Mod>? modPaths;
 
   _CategoryRouteViewModelImpl({
     required AppStateService appStateService,
     required RecursiveFileSystemWatcher rootObserverService,
     required this.category,
     required this.modFoldersWatcher,
-  }) : _modPaths = _getModPaths(
-          appStateService.showEnabledModsFirst.latest,
-          modFoldersWatcher.mods.latest,
-        ) {
+  }) {
     _modPathsSubscription = CombineLatestStream.combine2(
       appStateService.showEnabledModsFirst.stream,
       modFoldersWatcher.mods.stream,
       _getModPaths,
     ).listen((value) {
-      _modPaths = value;
+      modPaths = value;
       notifyListeners();
     });
   }
@@ -77,7 +72,7 @@ class _CategoryRouteViewModelImpl extends ChangeNotifier
   }
 
   static List<Mod> _getModPaths(bool showEnabledModsFirst, List<Mod> entity) {
-    return entity
+    final list = List.of(entity, growable: false)
       ..sort(
         (a, b) {
           final aBase = a.path.pBasename;
@@ -96,5 +91,6 @@ class _CategoryRouteViewModelImpl extends ChangeNotifier
           return aLower.compareTo(bLower);
         },
       );
+    return List.unmodifiable(list);
   }
 }

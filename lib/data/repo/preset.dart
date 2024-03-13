@@ -17,12 +17,9 @@ PresetService createPresetService({
   required AppStateService appStateService,
   required RecursiveFileSystemWatcher observerService,
 }) {
-  final decoded = jsonDecode(appStateService.presetData.latest);
   return _PresetServiceImpl(
     appStateService: appStateService,
     observerService: observerService,
-    latestGlobal: _parseMap(decoded['global']),
-    latestLocal: _parseMap(decoded['local']),
   );
 }
 
@@ -32,12 +29,12 @@ class _PresetServiceImpl implements PresetService {
   final AppStateService appStateService;
   final RecursiveFileSystemWatcher observerService;
 
-  Map<String, Map<String, List<String>>> _curGlobal;
-  Map<String, Map<String, List<String>>> _curLocal;
+  var _curGlobal = <String, Map<String, List<String>>>{};
+  var _curLocal = <String, Map<String, List<String>>>{};
 
   @override
   LatestStream<List<String>> get globalPresets => vS2LS(_globalPresets.stream);
-  final BehaviorSubject<List<String>> _globalPresets;
+  final _globalPresets = BehaviorSubject<List<String>>();
 
   @override
   LatestStream<List<String>> getLocalPresets(ModCategory category) {
@@ -48,28 +45,12 @@ class _PresetServiceImpl implements PresetService {
     return vS2LS(stream.stream);
   }
 
-  final Map<String, BehaviorSubject<List<String>>> _localPresets;
+  final _localPresets = <String, BehaviorSubject<List<String>>>{};
 
   _PresetServiceImpl({
     required this.appStateService,
     required this.observerService,
-    required Map<String, Map<String, List<String>>> latestGlobal,
-    required Map<String, Map<String, List<String>>> latestLocal,
-  })  : _curGlobal = latestGlobal,
-        _curLocal = latestLocal,
-        _globalPresets = BehaviorSubject<List<String>>.seeded(
-          List.unmodifiable(latestGlobal.keys),
-        ),
-        _localPresets = Map.fromEntries(
-          latestLocal.entries.map(
-            (e) => MapEntry(
-              e.key,
-              BehaviorSubject.seeded(
-                List.unmodifiable(e.value.keys),
-              ),
-            ),
-          ),
-        ) {
+  }) {
     _subscription = appStateService.presetData.stream.listen((event) {
       final decoded = jsonDecode(event);
       _curGlobal = _parseMap(decoded['global']);
@@ -98,28 +79,29 @@ class _PresetServiceImpl implements PresetService {
   }
 
   @override
-  void addGlobalPreset(String name) {
+  Future<void> addGlobalPreset(String name) async {
     Map<String, List<String>> data = {};
     final modRoot = appStateService.modRoot.latest;
-    final categoryDirs = getFSEUnder<Directory>(modRoot);
-    for (var categoryDir in categoryDirs) {
+    if (modRoot == null) return;
+    final categoryDirs = await getFSEUnder<Directory>(modRoot);
+    for (final categoryDir in categoryDirs) {
       final category = categoryDir.path.pBasename;
-      data[category] = getFSEUnder<Directory>(categoryDir.path)
+      data[category] = (await getFSEUnder<Directory>(categoryDir.path))
           .map((e) => e.path.pBasename)
           .where((e) => e.pIsEnabled)
-          .toList(growable: false);
+          .toList();
     }
     _curGlobal[name] = data;
     _writeBack();
   }
 
   @override
-  void addLocalPreset(ModCategory category, String name) {
+  Future<void> addLocalPreset(ModCategory category, String name) async {
     final categoryDir = category.path;
-    List<String> data = getFSEUnder<Directory>(categoryDir)
+    List<String> data = (await getFSEUnder<Directory>(categoryDir))
         .map((e) => e.path.pBasename)
         .where((e) => e.pIsEnabled)
-        .toList(growable: false);
+        .toList();
     _curLocal.putIfAbsent(category.name, () => {})[name] = data;
     _writeBack();
   }
@@ -166,7 +148,9 @@ class _PresetServiceImpl implements PresetService {
   void _toggleGlobal(Map<String, List<String>> directives) {
     for (final category in directives.entries) {
       final shouldBeEnabled = category.value;
-      final categoryDir = appStateService.modRoot.latest.pJoin(category.key);
+      final latest2 = appStateService.modRoot.latest;
+      if (latest2 == null) return;
+      final categoryDir = latest2.pJoin(category.key);
       _toggleCategory(categoryDir, shouldBeEnabled);
     }
   }
@@ -175,31 +159,37 @@ class _PresetServiceImpl implements PresetService {
     _toggleCategory(categoryPath, shouldBeEnabled);
   }
 
-  void _toggleCategory(String categoryPath, List<String> shouldBeEnabled) {
-    final shaderFixes =
-        appStateService.modExecFile.latest.pDirname.pJoin(kShaderFixes);
-    final currentEnabled = getFSEUnder<Directory>(categoryPath)
+  Future<void> _toggleCategory(
+      String categoryPath, List<String> shouldBeEnabled) async {
+    final latest2 = appStateService.modExecFile.latest;
+    if (latest2 == null) return;
+    final shaderFixes = latest2.pDirname.pJoin(kShaderFixes);
+    final currentEnabled = (await getFSEUnder<Directory>(categoryPath))
         .map((e) => e.path.pBasename)
         .where((e) => e.pIsEnabled)
-        .toList(growable: false);
+        .toList();
     final shouldBeOff =
         currentEnabled.where((e) => !shouldBeEnabled.contains(e));
-    for (var mod in shouldBeOff) {
+    final futures = <Future>[];
+    for (final mod in shouldBeOff) {
       final modDir = categoryPath.pJoin(mod);
-      disable(
+      final future = disable(
         shaderFixesPath: shaderFixes,
         modPathW: modDir,
       );
+      futures.add(future);
     }
     final shouldBeOn =
         shouldBeEnabled.where((e) => !currentEnabled.contains(e));
-    for (var mod in shouldBeOn) {
+    for (final mod in shouldBeOn) {
       final modDir = categoryPath.pJoin(mod.pDisabledForm);
-      enable(
+      final future = enable(
         shaderFixesPath: shaderFixes,
         modPath: modDir,
       );
+      futures.add(future);
     }
+    await Future.wait(futures);
   }
 }
 

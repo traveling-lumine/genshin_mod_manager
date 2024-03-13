@@ -28,7 +28,7 @@ class _ModWriterImpl implements ModWriter {
     required Uint8List data,
   }) async {
     final destDirName =
-        _getNonCollidingModName(category, modName).pDisabledForm;
+        (await _getNonCollidingModName(category, modName)).pDisabledForm;
     final destDirPath = category.path.pJoin(destDirName);
     await Directory(destDirPath).create(recursive: true);
     try {
@@ -46,9 +46,10 @@ class ModZipExtractionException implements Exception {
   const ModZipExtractionException({required this.data});
 }
 
-String _getNonCollidingModName(ModCategory category, String name) {
+Future<String> _getNonCollidingModName(
+    ModCategory category, String name) async {
   final enabledModName = _getEnabledNameRecursive(name);
-  return _getNonCollidingName(category, enabledModName);
+  return await _getNonCollidingName(category, enabledModName);
 }
 
 String _getEnabledNameRecursive(String name) {
@@ -59,8 +60,9 @@ String _getEnabledNameRecursive(String name) {
   return destDirName;
 }
 
-String _getNonCollidingName(ModCategory category, String destDirName) {
-  final enabledFormDirNames = getFSEUnder<Directory>(category.path)
+Future<String> _getNonCollidingName(
+    ModCategory category, String destDirName) async {
+  final enabledFormDirNames = (await getFSEUnder<Directory>(category.path))
       .map((e) => e.path.pBasename.pEnabledForm)
       .toSet();
   int counter = 0;

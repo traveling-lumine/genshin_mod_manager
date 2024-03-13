@@ -5,19 +5,19 @@ import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
 
 abstract interface class SettingViewModel implements BaseViewModel {
-  String get modRoot;
+  String? get modRoot;
 
-  String get modExecFile;
+  String? get modExecFile;
 
-  String get launcherFile;
+  String? get launcherFile;
 
-  bool get runTogether;
+  bool? get runTogether;
 
-  bool get moveOnDrag;
+  bool? get moveOnDrag;
 
-  bool get showFolderIcon;
+  bool? get showFolderIcon;
 
-  bool get showEnabledModsFirst;
+  bool? get showEnabledModsFirst;
 
   void onModRootSelect(String path);
 
@@ -52,25 +52,25 @@ class _SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
   final AppStateService appStateService;
 
   @override
-  String modRoot;
+  String? modRoot;
 
   @override
-  String modExecFile;
+  String? modExecFile;
 
   @override
-  String launcherFile;
+  String? launcherFile;
 
   @override
-  bool moveOnDrag;
+  bool? moveOnDrag;
 
   @override
-  bool runTogether;
+  bool? runTogether;
 
   @override
-  bool showEnabledModsFirst;
+  bool? showEnabledModsFirst;
 
   @override
-  bool showFolderIcon;
+  bool? showFolderIcon;
 
   _SettingViewModelImpl({
     required this.appStateService,

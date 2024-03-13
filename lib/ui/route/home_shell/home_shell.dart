@@ -14,6 +14,7 @@ import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/home_shell/home_shell_vm.dart';
+import 'package:genshin_mod_manager/ui/route/loading.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
@@ -39,31 +40,50 @@ class HomeShell extends StatelessWidget {
     final resourcePath =
         Platform.resolvedExecutable.pDirname.pJoin(resourceDir);
     Directory(resourcePath).createSync(recursive: true);
-    final modRootPath = context.read<AppStateService>().modRoot;
-    return MultiProvider(
-      key: Key(modRootPath.latest),
-      providers: [
-        Provider(
-          create: (context) => createRecursiveFileSystemWatcher(
-            targetPath: modRootPath.latest,
-          ),
-          dispose: (context, value) => value.dispose(),
-        ),
-        Provider(
-          create: (context) => createPresetService(
-            appStateService: context.read(),
-            observerService: context.read(),
-          ),
-          dispose: (context, value) => value.dispose(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => createViewModel(
-            appStateService: context.read(),
-            recursiveFileSystemWatcher: context.read(),
-          ),
-        ),
-      ],
-      child: _HomeShell(child: child),
+    return StreamBuilder(
+      stream: context.read<AppStateService>().modRoot.stream,
+      builder: (context, snapshot) {
+        if (snapshot.data == null) {
+          return NavigationView(
+            appBar: getAppbar("Reading modRoot..."),
+            content: const Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ProgressRing(),
+                  Text('Reading modRoot...'),
+                ],
+              ),
+            ),
+          );
+        }
+        final modRoot = snapshot.data!;
+        return MultiProvider(
+          key: Key(modRoot),
+          providers: [
+            Provider(
+              create: (context) => createRecursiveFileSystemWatcher(
+                targetPath: modRoot,
+              ),
+              dispose: (context, value) => value.dispose(),
+            ),
+            Provider(
+              create: (context) => createPresetService(
+                appStateService: context.read(),
+                observerService: context.read(),
+              ),
+              dispose: (context, value) => value.dispose(),
+            ),
+            ChangeNotifierProvider(
+              create: (context) => createViewModel(
+                appStateService: context.read(),
+                recursiveFileSystemWatcher: context.read(),
+              ),
+            ),
+          ],
+          child: _HomeShell(child: child),
+        );
+      },
     );
   }
 }
@@ -126,13 +146,27 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
 
     final categories =
         context.select((HomeShellViewModel vm) => vm.modCategories);
+    if (categories == null) {
+      return NavigationView(
+        appBar: getAppbar("Reading categories..."),
+        content: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ProgressRing(),
+              Text('Reading categories...'),
+            ],
+          ),
+        ),
+      );
+    }
     final items = categories.map((e) {
       final iconPath = e.iconPath;
       return _FolderPaneItem(
           category: e,
           imageFile: iconPath != null ? File(iconPath) : null,
           onTap: () => context.go(kCategoryRoute, extra: e));
-    }).toList(growable: false);
+    }).toList();
 
     final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
           ..removeWhere((i) => i is! PaneItem || i is PaneItemAction))
@@ -295,7 +329,9 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
 
   List<PaneItemAction> _buildPaneItemActions() {
     const icon = Icon(FluentIcons.user_window);
-    return context.select((HomeShellViewModel vm) => vm.runTogether)
+    final select = context.select((HomeShellViewModel vm) => vm.runTogether);
+    if (select == null) return const [];
+    return select
         ? [
             PaneItemAction(
               key: const ValueKey('<run_both>'),
@@ -348,7 +384,7 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
                 label: e.category.name,
                 onSelected: () => context.go(kCategoryRoute, extra: e.category),
               ))
-          .toList(growable: false),
+          .toList(),
       trailingIcon: const Icon(FluentIcons.search),
       onSubmissionFailed: (text) {
         if (text.isEmpty) return;
@@ -369,10 +405,14 @@ class _FolderPaneItem extends PaneItem {
   static const maxIconWidth = 80.0;
 
   static Widget _getIcon(File? imageFile) {
-    return Selector<HomeShellViewModel, bool>(
-      selector: (context, value) => value.showFolderIcon,
-      builder: (context, value, child) =>
-          value ? _buildImage(imageFile) : const Icon(FluentIcons.folder_open),
+    return Selector(
+      selector: (context, HomeShellViewModel vm) => vm.showFolderIcon,
+      builder: (context, value, child) {
+        if (value == null) return const ProgressRing();
+        return value
+            ? _buildImage(imageFile)
+            : const Icon(FluentIcons.folder_open);
+      },
     );
   }
 
@@ -458,8 +498,8 @@ Future<List<String?>> _getVersions(Uri url) async {
 }
 
 bool _compareVersions(String upVersion, String curVersion) {
-  final upstream = upVersion.split('.').map(int.parse).toList(growable: false);
-  final current = curVersion.split('.').map(int.parse).toList(growable: false);
+  final upstream = upVersion.split('.').map(int.parse).toList();
+  final current = curVersion.split('.').map(int.parse).toList();
   bool shouldUpdate = false;
   for (var i = 0; i < 3; i++) {
     if (upstream[i] > current[i]) {

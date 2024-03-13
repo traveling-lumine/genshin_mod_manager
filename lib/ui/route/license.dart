@@ -34,14 +34,14 @@ class OssLicensesRoute extends StatelessWidget {
   static Future<List<Package>> loadLicenses() async {
     // merging non-dart dependency list using LicenseRegistry.
     final lm = <String, List<String>>{};
-    await for (var l in LicenseRegistry.licenses) {
-      for (var p in l.packages) {
+    await for (final l in LicenseRegistry.licenses) {
+      for (final p in l.packages) {
         final lp = lm.putIfAbsent(p, () => []);
         lp.addAll(l.paragraphs.map((p) => p.text));
       }
     }
     final licenses = ossLicenses.where((e) => e.isDirectDependency).toList();
-    // for (var key in lm.keys) {
+    // for (final key in lm.keys) {
     //   licenses.add(Package(
     //     name: key,
     //     description: '',

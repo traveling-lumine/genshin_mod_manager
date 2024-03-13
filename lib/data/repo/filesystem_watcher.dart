@@ -20,8 +20,8 @@ class _RecursiveFileSystemWatcherImpl implements RecursiveFileSystemWatcher {
   late final StreamSubscription<FileSystemEvent> _subscription;
 
   @override
-  LatestStream<FileSystemEvent?> get event => vS2LS(_subject.stream);
-  final _subject = BehaviorSubject<FileSystemEvent?>.seeded(null);
+  LatestStream<FileSystemEvent> get event => vS2LS(_subject.stream);
+  final _subject = BehaviorSubject<FileSystemEvent>();
 
   _RecursiveFileSystemWatcherImpl({required String targetPath}) {
     _subscription =
@@ -41,7 +41,7 @@ class _RecursiveFileSystemWatcherImpl implements RecursiveFileSystemWatcher {
   void uncut() => _subscription.resume();
 
   @override
-  void forceUpdate() => _subject.add(null);
+  void forceUpdate() => throw UnimplementedError();
 }
 
 FSEPathsWatcher createCategoryIconWatcher({
@@ -53,19 +53,20 @@ FSEPathsWatcher createCategoryIconWatcher({
 }
 
 class _CategoryIconWatcherImpl implements FSEPathsWatcher {
-  late final StreamSubscription<FileSystemEvent?> _subscription;
+  late final StreamSubscription<List<String>> _subscription;
 
   @override
   LatestStream<List<String>> get paths => vS2LS(_pathsStream.stream);
-  final BehaviorSubject<List<String>> _pathsStream;
+  final _pathsStream = BehaviorSubject<List<String>>();
 
   _CategoryIconWatcherImpl({
     required String targetPath,
-  }) : _pathsStream = BehaviorSubject.seeded(_getPaths(targetPath)) {
+  }) {
     _subscription = Directory(targetPath)
         .watch()
         .where((event) => _ifEventDirectUnder(event, targetPath))
-        .listen((event) => _pathsStream.add(_getPaths(targetPath)));
+        .asyncMap((event) => _getPaths(targetPath))
+        .listen((event) => _pathsStream.add(event));
   }
 
   @override
@@ -74,8 +75,9 @@ class _CategoryIconWatcherImpl implements FSEPathsWatcher {
     _subscription.cancel();
   }
 
-  static List<String> _getPaths(String targetPath) {
-    return List.unmodifiable(getFSEUnder<File>(targetPath).map((e) => e.path));
+  static Future<List<String>> _getPaths(String targetPath) async {
+    return List.unmodifiable(
+        (await getFSEUnder<File>(targetPath)).map((e) => e.path));
   }
 }
 
@@ -91,19 +93,20 @@ FSEPathsWatcher createFSEPathsWatcher<T extends FileSystemEntity>({
 
 class _FSEPathsWatcherImpl<T extends FileSystemEntity>
     implements FSEPathsWatcher {
-  late final StreamSubscription<FileSystemEvent?> _subscription;
+  late final StreamSubscription<List<String>> _subscription;
 
   @override
   LatestStream<List<String>> get paths => vS2LS(_paths.stream);
-  final BehaviorSubject<List<String>> _paths;
+  final BehaviorSubject<List<String>> _paths = BehaviorSubject<List<String>>();
 
   _FSEPathsWatcherImpl({
     required String targetPath,
     required RecursiveFileSystemWatcher watcher,
-  }) : _paths = BehaviorSubject.seeded(_getPaths(targetPath)) {
+  }) {
     _subscription = watcher.event.stream
         .where((event) => _ifEventDirectUnder(event, targetPath))
-        .listen((event) => _paths.add(_getPaths(targetPath)));
+        .asyncMap((event) => _getPaths(targetPath))
+        .listen((event) => _paths.add(event));
   }
 
   @override
@@ -112,9 +115,9 @@ class _FSEPathsWatcherImpl<T extends FileSystemEntity>
     _subscription.cancel();
   }
 
-  static List<String> _getPaths<T extends FileSystemEntity>(
-          String targetPath) =>
-      List.unmodifiable(getFSEUnder<T>(targetPath).map((e) => e.path));
+  static Future<List<String>> _getPaths<T extends FileSystemEntity>(
+          String targetPath) async =>
+      List.unmodifiable((await getFSEUnder<T>(targetPath)).map((e) => e.path));
 }
 
 ModsWatcher createModFoldersWatcher({
@@ -128,19 +131,20 @@ ModsWatcher createModFoldersWatcher({
 }
 
 class _ModFoldersWatcherImpl implements ModsWatcher {
-  late final StreamSubscription<FileSystemEvent?> _subscription;
+  late final StreamSubscription<List<Mod>> _subscription;
 
   @override
   LatestStream<List<Mod>> get mods => vS2LS(_pathsStream.stream);
-  final BehaviorSubject<List<Mod>> _pathsStream;
+  final _pathsStream = BehaviorSubject<List<Mod>>();
 
   _ModFoldersWatcherImpl({
     required String targetPath,
     required RecursiveFileSystemWatcher watcher,
-  }) : _pathsStream = BehaviorSubject.seeded(_getPaths(targetPath)) {
+  }) {
     _subscription = watcher.event.stream
         .where((event) => _ifEventDirectUnder(event, targetPath))
-        .listen((event) => _pathsStream.add(_getPaths(targetPath)));
+        .asyncMap((event) => _getPaths(targetPath))
+        .listen((event) => _pathsStream.add(event));
   }
 
   @override
@@ -149,20 +153,20 @@ class _ModFoldersWatcherImpl implements ModsWatcher {
     _subscription.cancel();
   }
 
-  static List<Mod> _getPaths(String targetPath) {
+  static Future<List<Mod>> _getPaths(String targetPath) async {
     return UnmodifiableListView(
-      getFSEUnder<Directory>(targetPath)
+      (await getFSEUnder<Directory>(targetPath))
           .map((e) => Mod(path: e.path))
-          .toList(growable: false),
+          .toList(),
     );
   }
 }
 
-bool _ifEventDirectUnder(FileSystemEvent? event, String watchedPath) {
-  if (event == null) return true;
+bool _ifEventDirectUnder(FileSystemEvent event, String watchedPath) {
+  // if (event == null) return true;
   final tgts = [event.path, event.path.pDirname];
   if (event is FileSystemMoveEvent) {
-    var destination = event.destination;
+    final destination = event.destination;
     if (destination != null) {
       tgts.add(destination);
       tgts.add(destination.pDirname);

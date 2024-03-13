@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -13,11 +12,11 @@ import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
 import 'package:rxdart/rxdart.dart';
 
 abstract interface class HomeShellViewModel implements BaseViewModel {
-  List<ModCategory> get modCategories;
+  List<ModCategory>? get modCategories;
 
-  bool get runTogether;
+  bool? get runTogether;
 
-  bool get showFolderIcon;
+  bool? get showFolderIcon;
 
   void onWindowFocus();
 
@@ -33,59 +32,60 @@ HomeShellViewModel createViewModel({
   return _HomeShellViewModelImpl(
     appStateService: appStateService,
     recursiveFileSystemWatcher: recursiveFileSystemWatcher,
-    rootWatchService: createFSEPathsWatcher<Directory>(
-      targetPath: appStateService.modRoot.latest,
-      watcher: recursiveFileSystemWatcher,
-    ),
-    categoryIconFolderObserverService: createCategoryIconWatcher(
-      targetPath: appStateService.modRoot.latest,
-    ),
   );
 }
 
 class _HomeShellViewModelImpl extends ChangeNotifier
     implements HomeShellViewModel {
-  late final StreamSubscription<List<ModCategory>> _modCategoriesSubscription;
   late final StreamSubscription<bool> _runTogetherSubscription;
   late final StreamSubscription<bool> _showFolderIconSubscription;
+  late final StreamSubscription<String> _asmr;
 
   final AppStateService appStateService;
   final RecursiveFileSystemWatcher recursiveFileSystemWatcher;
-  final FSEPathsWatcher rootWatchService;
-  final FSEPathsWatcher categoryIconFolderObserverService;
+
+  FSEPathsWatcher? _modsWatchService;
+  FSEPathsWatcher? _categoryIconFolderObserverService;
+  StreamSubscription<List<ModCategory>>? _modCategoriesSubscription;
 
   @override
-  List<ModCategory> get modCategories => UnmodifiableListView(_modCategories);
-  List<ModCategory> _modCategories;
+  List<ModCategory>? get modCategories => _modCategories;
+  List<ModCategory>? _modCategories;
 
   @override
-  bool get runTogether => _runTogether;
-  bool _runTogether;
+  bool? get runTogether => _runTogether;
+  bool? _runTogether;
 
   @override
-  bool get showFolderIcon => _showFolderIcon;
-  bool _showFolderIcon;
+  bool? get showFolderIcon => _showFolderIcon;
+  bool? _showFolderIcon;
 
   _HomeShellViewModelImpl({
     required this.appStateService,
     required this.recursiveFileSystemWatcher,
-    required this.rootWatchService,
-    required this.categoryIconFolderObserverService,
-  })  : _runTogether = appStateService.runTogether.latest,
-        _showFolderIcon = appStateService.showFolderIcon.latest,
-        _modCategories = _getCategories(
-          rootWatchService.paths.latest,
-          categoryIconFolderObserverService.paths.latest,
-          appStateService.modRoot.latest,
-        ) {
-    _modCategoriesSubscription = CombineLatestStream.combine3(
-      rootWatchService.paths.stream,
-      categoryIconFolderObserverService.paths.stream,
-      appStateService.modRoot.stream,
-      _getCategories,
-    ).listen((event) {
-      _modCategories = event;
-      notifyListeners();
+  }) {
+    _asmr = appStateService.modRoot.stream.listen((event) {
+      final modsWatchService = createFSEPathsWatcher<Directory>(
+        targetPath: event,
+        watcher: recursiveFileSystemWatcher,
+      );
+      _modsWatchService?.dispose();
+      _modsWatchService = modsWatchService;
+      final categoryIconFolderObserverService = createCategoryIconWatcher(
+        targetPath: event,
+      );
+      _categoryIconFolderObserverService?.dispose();
+      _categoryIconFolderObserverService = categoryIconFolderObserverService;
+      _modCategoriesSubscription?.cancel();
+      _modCategoriesSubscription = CombineLatestStream.combine3(
+        modsWatchService.paths.stream,
+        categoryIconFolderObserverService.paths.stream,
+        appStateService.modRoot.stream,
+        _getCategories,
+      ).listen((event) {
+        _modCategories = event;
+        notifyListeners();
+      });
     });
 
     _runTogetherSubscription =
@@ -105,9 +105,10 @@ class _HomeShellViewModelImpl extends ChangeNotifier
   void dispose() {
     _showFolderIconSubscription.cancel();
     _runTogetherSubscription.cancel();
-    _modCategoriesSubscription.cancel();
-    rootWatchService.dispose();
-    categoryIconFolderObserverService.dispose();
+    _modsWatchService?.dispose();
+    _categoryIconFolderObserverService?.dispose();
+    _modCategoriesSubscription?.cancel();
+    _asmr.cancel();
     super.dispose();
   }
 
@@ -119,12 +120,14 @@ class _HomeShellViewModelImpl extends ChangeNotifier
   @override
   void runLauncher() {
     final launcher = appStateService.launcherFile.latest;
+    if (launcher == null) return;
     runProgram(File(launcher));
   }
 
   @override
   void runMigoto() {
     final path = appStateService.modExecFile.latest;
+    if (path == null) return;
     runProgram(File(path));
   }
 
