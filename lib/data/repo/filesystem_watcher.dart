@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/latest_stream.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
+import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/domain/repo/latest_stream.dart';
 import 'package:rxdart/rxdart.dart';
@@ -120,30 +121,32 @@ class _FSEPathsWatcherImpl<T extends FileSystemEntity>
       List.unmodifiable((await getFSEUnder<T>(targetPath)).map((e) => e.path));
 }
 
-ModsWatcher createModFoldersWatcher({
-  required String targetPath,
+ModsWatcher createModsWatcher({
+  required ModCategory category,
   required RecursiveFileSystemWatcher watcher,
 }) {
-  return _ModFoldersWatcherImpl(
-    targetPath: targetPath,
+  return _ModsWatcherImpl(
+    category: category,
     watcher: watcher,
   );
 }
 
-class _ModFoldersWatcherImpl implements ModsWatcher {
+class _ModsWatcherImpl implements ModsWatcher {
+  final ModCategory category;
+
   late final StreamSubscription<List<Mod>> _subscription;
 
   @override
   LatestStream<List<Mod>> get mods => vS2LS(_pathsStream.stream);
   final _pathsStream = BehaviorSubject<List<Mod>>();
 
-  _ModFoldersWatcherImpl({
-    required String targetPath,
+  _ModsWatcherImpl({
+    required this.category,
     required RecursiveFileSystemWatcher watcher,
   }) {
     _subscription = watcher.event.stream
-        .where((event) => _ifEventDirectUnder(event, targetPath))
-        .asyncMap((event) => _getPaths(targetPath))
+        .where(_shouldTake)
+        .asyncMap(_getMods)
         .listen((event) => _pathsStream.add(event));
   }
 
@@ -153,12 +156,12 @@ class _ModFoldersWatcherImpl implements ModsWatcher {
     _subscription.cancel();
   }
 
-  static Future<List<Mod>> _getPaths(String targetPath) async {
-    return UnmodifiableListView(
-      (await getFSEUnder<Directory>(targetPath))
-          .map((e) => Mod(path: e.path))
-          .toList(),
-    );
+  Future<List<Mod>> _getMods(FileSystemEvent _) async {
+    return await getMods(category);
+  }
+
+  bool _shouldTake(FileSystemEvent event) {
+    return true;
   }
 }
 

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';

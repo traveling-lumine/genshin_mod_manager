@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
 
 extension CopyDirectory on Directory {
   void copyToPath(String dest) {

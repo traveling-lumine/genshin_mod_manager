@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
-import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/mod_writer.dart';

@@ -90,7 +90,7 @@ class _CategoryRoute extends StatelessWidget {
           if (value == null) {
             return const Center(child: ProgressRing());
           }
-          final children = value.map((e) => ModCard(path: e.path)).toList();
+          final children = value.map((e) => ModCard(mod: e)).toList();
           return GridView.builder(
             padding: const EdgeInsets.all(8),
             gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(

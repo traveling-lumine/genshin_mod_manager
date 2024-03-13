@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 
 const kShaderFixes = 'ShaderFixes';
@@ -16,7 +16,7 @@ Future<void> enable({
 
   List<File> shaderFilenames = await _getModShaders(modPath);
   final String renameTarget =
-      modPath.pDirname.pJoin(modPath.pBasename.pEnabledForm);
+      modPath.pEnabledForm;
   if (Directory(renameTarget).existsSync()) {
     onModRenameClash?.call(renameTarget);
     return;
@@ -45,8 +45,7 @@ Future<void> disable({
   if (!Directory(modPathW).existsSync()) return;
 
   List<File> shaderFilenames = await _getModShaders(modPathW);
-  final String renameTarget =
-      modPathW.pDirname.pJoin(modPathW.pBasename.pDisabledForm);
+  final String renameTarget = modPathW.pDisabledForm;
   if (Directory(renameTarget).existsSync()) {
     onModRenameClash?.call(renameTarget);
     return;

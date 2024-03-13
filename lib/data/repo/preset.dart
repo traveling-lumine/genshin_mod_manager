@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
 import 'package:genshin_mod_manager/data/latest_stream.dart';

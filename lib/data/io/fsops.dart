@@ -1,24 +1,49 @@
+import 'dart:collection';
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
+import 'package:genshin_mod_manager/domain/entity/mod.dart';
+import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
+import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:rxdart/rxdart.dart';
 
-Future<List<T>> getFSEUnder<T extends FileSystemEntity>(String path) async {
-  final dir = Directory(path);
+Future<List<ModCategory>> getCategories(AppStateService service) async {
+  final root = service.modRoot.latest;
+  if (root == null) return [];
+  final dir = Directory(root);
   if (!await dir.exists()) return [];
-  final res = await dir.list().whereType<T>().toList();
-  return List.unmodifiable(res);
+  final res = await dir.list().whereType<Directory>().map((event) {
+    final path = event.path;
+    return ModCategory(
+      path: path,
+      name: path.pBasename,
+    );
+  }).toList();
+  return UnmodifiableListView(res);
 }
 
-Future<List<File>> getActiveiniFiles(String path) async {
-  final fseUnder = await getFSEUnder<File>(path);
-  return List.unmodifiable(fseUnder.where((element) {
+Future<List<Mod>> getMods(ModCategory category) async {
+  final root = category.path;
+  final res = await Directory(root).list().whereType<Directory>().map((event) {
+    final path = event.path;
+    return Mod(
+      path: path,
+      displayName: path.pEnabledForm.pBasename,
+      isEnabled: path.pIsEnabled,
+    );
+  }).toList();
+  return UnmodifiableListView(res);
+}
+
+Future<List<File>> getActiveIniFiles(Mod mod) async {
+  final res =
+      await Directory(mod.path).list().whereType<File>().where((element) {
     final path = element.path;
     final extension = path.pExtension;
     if (!extension.pEquals('.ini')) return false;
-    final filename = path.pBNameWoExt;
-    return filename.pIsEnabled;
-  }));
+    return path.pBasename.pIsEnabled;
+  }).toList();
+  return List.unmodifiable(res);
 }
 
 const _previewExtensions = [

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
@@ -26,8 +26,8 @@ CategoryRouteViewModel createCategoryRouteViewModel({
     appStateService: appStateService,
     rootObserverService: rootObserverService,
     category: category,
-    modFoldersWatcher: createModFoldersWatcher(
-      targetPath: category.path,
+    modFoldersWatcher: createModsWatcher(
+      category: category.path,
       watcher: rootObserverService,
     ),
   );

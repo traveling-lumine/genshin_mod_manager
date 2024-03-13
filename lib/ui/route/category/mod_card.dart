@@ -1,16 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:archive/archive_io.dart';
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/data/extension/pathops.dart';
+import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
+import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/ui/route/category/editor_text.dart';
@@ -21,11 +20,11 @@ import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 
 class ModCard extends StatelessWidget {
-  final String path;
+  final Mod mod;
 
   ModCard({
-    required this.path,
-  }) : super(key: Key(path));
+    required this.mod,
+  }) : super(key: Key(mod.path));
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +32,7 @@ class ModCard extends StatelessWidget {
       providers: [
         Provider(
           create: (context) => createFSEPathsWatcher<File>(
-            targetPath: path,
+            targetPath: mod.path,
             watcher: context.read(),
           ),
           dispose: (context, value) => value.dispose(),
@@ -42,7 +41,7 @@ class ModCard extends StatelessWidget {
           create: (context) => createModCardViewModel(),
         ),
       ],
-      child: _ModCard(dirPath: path),
+      child: _ModCard(mod: mod),
     );
   }
 }
@@ -53,16 +52,16 @@ class _ModCard extends StatelessWidget {
 
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
-  final String dirPath;
+  final Mod mod;
 
-  _ModCard({required this.dirPath});
+  _ModCard({required this.mod});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onTap(context),
+      onTap: () => _onToggle(context),
       child: Card(
-        backgroundColor: dirPath.pBasename.pIsEnabled
+        backgroundColor: mod.isEnabled
             ? Colors.green.lightest
             : Colors.red.lightest.withOpacity(0.5),
         padding: const EdgeInsets.all(6),
@@ -70,10 +69,10 @@ class _ModCard extends StatelessWidget {
           child: Column(
             children: [
               FutureBuilder(
-                future: getFSEUnder<File>(dirPath),
+                future: getFSEUnder<File>(mod),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
-                    return Text('Loading...');
+                    return const Text('Loading...');
                   }
                   return _buildFolderHeader(context, data);
                 },
@@ -125,7 +124,7 @@ class _ModCard extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            dirPath.pBasename.pEnabledForm,
+            mod.displayName,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: FluentTheme.of(context).typography.bodyStrong,
@@ -146,7 +145,7 @@ class _ModCard extends StatelessWidget {
         RepaintBoundary(
           child: Button(
             child: const Icon(FluentIcons.folder_open),
-            onPressed: () => openFolder(dirPath),
+            onPressed: () => openFolder(mod.path),
           ),
         ),
       ],
@@ -193,7 +192,7 @@ class _ModCard extends StatelessWidget {
                 _logger.d('No image found in clipboard');
                 return;
               }
-              final filePath = dirPath.pJoin('preview.png');
+              final filePath = mod.path.pJoin('preview.png');
               await File(filePath).writeAsBytes(image);
               if (!context.mounted) return;
               await displayInfoBar(
@@ -296,7 +295,7 @@ class _ModCard extends StatelessWidget {
   }
 
   List<Widget> allFilesToWidget() {
-    final allFiles = getActiveiniFiles(dirPath);
+    final allFiles = getActiveiniFiles(mod.path);
     final List<Widget> alliniFile = [];
     for (final file in allFiles) {
       alliniFile.add(buildIniHeader(file));
@@ -438,15 +437,15 @@ class _ModCard extends StatelessWidget {
       final download = await api.download(downloadElement);
 
       recursiveObserverService.cut();
-      await Directory(dirPath).delete(recursive: true);
+      await Directory(mod).delete(recursive: true);
       if (!context.mounted) throw Exception('context not mounted');
       await downloadFile(
-          context, targetElement.title, download, dirPath.pDirname.pBasename);
+          context, targetElement.title, download, mod.pDirname.pBasename);
       if (!context.mounted) return;
       unawaited(displayInfoBarInContext(
         context,
         title: const Text('Update downloaded'),
-        content: Text('Update downloaded to ${dirPath.pDirname}'),
+        content: Text('Update downloaded to ${mod.pDirname}'),
         severity: InfoBarSeverity.success,
       ));
       recursiveObserverService.uncut();
@@ -462,8 +461,8 @@ class _ModCard extends StatelessWidget {
     }
   }
 
-  void onTap(BuildContext context) {
-    final isEnabled = dirPath.pBasename.pIsEnabled;
+  void _onToggle(BuildContext context) {
+    final isEnabled = mod.pBasename.pIsEnabled;
     final shaderFixesPath = context
         .read<AppStateService>()
         .modExecFile
@@ -473,7 +472,7 @@ class _ModCard extends StatelessWidget {
     if (isEnabled) {
       disable(
         shaderFixesPath: shaderFixesPath,
-        modPathW: dirPath,
+        modPathW: mod,
         onModRenameClash: (p0) => showDirectoryExists(context, p0),
         onShaderDeleteFailed: (e) =>
             errorDialog(context, 'Failed to delete files in ShaderFixes: $e'),
@@ -482,7 +481,7 @@ class _ModCard extends StatelessWidget {
     } else {
       enable(
         shaderFixesPath: shaderFixesPath,
-        modPath: dirPath,
+        modPath: mod,
         onModRenameClash: (p0) => showDirectoryExists(context, p0),
         onShaderExists: (e) =>
             errorDialog(context, '${e.path} already exists!'),
@@ -490,52 +489,4 @@ class _ModCard extends StatelessWidget {
       );
     }
   }
-}
-
-Future<bool> downloadFile(BuildContext context, String filename, Uint8List data,
-    String category) async {
-  final modRoot = context.read<AppStateService>().modRoot.latest;
-  if (modRoot == null) return false;
-  final catPath = modRoot.pJoin(category);
-  final enabledFormDirNames = (await getFSEUnder<Directory>(catPath))
-      .map((e) => e.path.pBasename.pEnabledForm)
-      .toSet();
-  String destDirName = filename.pBNameWoExt.pEnabledForm;
-  while (!destDirName.pIsEnabled) {
-    destDirName = destDirName.pEnabledForm;
-  }
-  int counter = 0;
-  String noCollisionDestDirName = destDirName;
-  while (enabledFormDirNames.contains(noCollisionDestDirName)) {
-    counter++;
-    noCollisionDestDirName = '$destDirName ($counter)';
-  }
-  destDirName = noCollisionDestDirName.pDisabledForm;
-  final destDirPath = catPath.pJoin(destDirName);
-  await Directory(destDirPath).create(recursive: true);
-  try {
-    final archive = ZipDecoder().decodeBytes(data);
-    await extractArchiveToDiskAsync(archive, destDirPath, asyncWrite: true);
-  } on Exception {
-    if (!context.mounted) return false;
-    unawaited(displayInfoBar(
-      context,
-      builder: (context, close) {
-        return InfoBar(
-          title: const Text('Download failed'),
-          content: Text('Failed to extract archive: decode error.'
-              ' Instead, the archive was saved as $filename.'),
-          severity: InfoBarSeverity.error,
-          onClose: close,
-        );
-      },
-    ));
-    try {
-      await File(catPath.pJoin(filename)).writeAsBytes(data);
-    } catch (e) {
-      // duh
-    }
-    return false;
-  }
-  return true;
 }

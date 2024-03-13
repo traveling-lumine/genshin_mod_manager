@@ -3,7 +3,7 @@ import 'package:path/path.dart' as p;
 const _disabledHeader = 'DISABLED';
 const _disabledHeaderLength = _disabledHeader.length;
 
-extension PathOps on String {
+extension PathOpString on String {
   String get pBasename => p.basename(this);
 
   String get pDirname => p.dirname(this);
@@ -12,16 +12,22 @@ extension PathOps on String {
 
   String get pBNameWoExt => p.basenameWithoutExtension(this);
 
-  bool get pIsEnabled => !startsWith(_disabledHeader);
+  bool get pIsEnabled => !pBasename.startsWith(_disabledHeader);
 
   String get pEnabledForm {
-    if (!pIsEnabled) return substring(_disabledHeaderLength).trimLeft();
-    return this;
+    var baseName = pBasename;
+    while (!baseName.pIsEnabled) {
+      baseName = baseName.substring(_disabledHeaderLength).trimLeft();
+    }
+    return pDirname.pJoin(baseName);
   }
 
   String get pDisabledForm {
-    if (pIsEnabled) return '$_disabledHeader ${trimLeft()}';
-    return this;
+    var baseName = pBasename;
+    if (baseName.pIsEnabled) {
+      baseName = '$_disabledHeader ${baseName.trimLeft()}';
+    }
+    return pDirname.pJoin(baseName);
   }
 
   bool pEquals(String other) => p.equals(this, other);
