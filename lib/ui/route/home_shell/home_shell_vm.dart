@@ -42,12 +42,12 @@ class _HomeShellViewModelImpl extends ChangeNotifier
     required this.recursiveFileSystemWatcher,
   }) {
     _asmr = appStateService.modRoot.stream.listen((final event) {
-      final modsWatchService = createFSEPathsWatcher<Directory>(
+      final categoryWatcher = createFSEPathsWatcher<Directory>(
         targetPath: event,
         watcher: recursiveFileSystemWatcher,
       );
-      _modsWatchService?.dispose();
-      _modsWatchService = modsWatchService;
+      _categoryWatcher?.dispose();
+      _categoryWatcher = categoryWatcher;
       final categoryIconFolderObserverService = createCategoryIconWatcher(
         targetPath: event,
       );
@@ -55,7 +55,7 @@ class _HomeShellViewModelImpl extends ChangeNotifier
       _categoryIconFolderObserverService = categoryIconFolderObserverService;
       unawaited(_modCategoriesSubscription?.cancel());
       _modCategoriesSubscription = CombineLatestStream.combine3(
-        modsWatchService.paths.stream,
+        categoryWatcher.paths.stream,
         categoryIconFolderObserverService.paths.stream,
         appStateService.modRoot.stream,
         _getCategories,
@@ -85,7 +85,7 @@ class _HomeShellViewModelImpl extends ChangeNotifier
   final AppStateService appStateService;
   final RecursiveFileSystemWatcher recursiveFileSystemWatcher;
 
-  FSEPathsWatcher? _modsWatchService;
+  FSEPathsWatcher? _categoryWatcher;
   FSEPathsWatcher? _categoryIconFolderObserverService;
   StreamSubscription<List<ModCategory>>? _modCategoriesSubscription;
 
@@ -105,7 +105,7 @@ class _HomeShellViewModelImpl extends ChangeNotifier
   void dispose() {
     _showFolderIconSubscription.cancel();
     _runTogetherSubscription.cancel();
-    _modsWatchService?.dispose();
+    _categoryWatcher?.dispose();
     _categoryIconFolderObserverService?.dispose();
     _modCategoriesSubscription?.cancel();
     _asmr.cancel();

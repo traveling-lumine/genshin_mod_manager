@@ -106,24 +106,27 @@ class _FSEPathsWatcherImpl<T extends FileSystemEntity>
     required this.targetPath,
     required final RecursiveFileSystemWatcher watcher,
   }) {
-    _subscription = watcher.event.stream
-        .where((final event) => _ifEventDirectUnder2(event, targetPath))
-        .asyncMap(_getPaths)
-        .listen(_paths.add);
+    unawaited(getUnder<T>(targetPath).then((value) {
+      _paths.add(List.unmodifiable(value.map((final e) => e.path)));
+      _subscription = watcher.event.stream
+          .where((final event) => _ifEventDirectUnder2(event, targetPath))
+          .asyncMap(_getPaths)
+          .listen(_paths.add);
+    }));
   }
 
   String targetPath;
 
-  late final StreamSubscription<List<String>> _subscription;
+  StreamSubscription<List<String>>? _subscription;
 
   @override
   LatestStream<List<String>> get paths => vS2LS(_paths.stream);
-  final BehaviorSubject<List<String>> _paths = BehaviorSubject<List<String>>();
+  final _paths = BehaviorSubject<List<String>>();
 
   @override
   void dispose() {
     unawaited(_paths.close());
-    unawaited(_subscription.cancel());
+    unawaited(_subscription?.cancel());
   }
 
   Future<List<String>> _getPaths(
