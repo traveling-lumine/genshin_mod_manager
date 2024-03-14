@@ -1,11 +1,10 @@
-import 'dart:io';
-
+import 'package:genshin_mod_manager/domain/entity/fs_event.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/repo/disposable.dart';
 import 'package:genshin_mod_manager/domain/repo/latest_stream.dart';
 
 abstract interface class RecursiveFileSystemWatcher implements Disposable {
-  LatestStream<FileSystemEvent> get event;
+  LatestStream<FSEvent> get event;
 
   void cut();
 

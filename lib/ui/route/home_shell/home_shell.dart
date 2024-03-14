@@ -150,7 +150,8 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
     ];
 
     final categories = context.select<HomeShellViewModel, List<ModCategory>?>(
-        (final vm) => vm.modCategories);
+      (final vm) => vm.modCategories,
+    );
     if (categories == null) {
       return NavigationView(
         appBar: getAppbar("Reading categories..."),
@@ -379,10 +380,12 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
 
   void _runMigoto() {
     context.read<HomeShellViewModel>().runMigoto();
-    unawaited(displayInfoBarInContext(
-      context,
-      title: const Text('Ran 3d migoto'),
-    ));
+    unawaited(
+      displayInfoBarInContext(
+        context,
+        title: const Text('Ran 3d migoto'),
+      ),
+    );
   }
 
   Widget _buildAutoSuggestBox(

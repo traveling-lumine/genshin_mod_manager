@@ -195,18 +195,15 @@ class _ModCard extends StatelessWidget {
           onTapUp: (final details) {
             showDialog(
               context: context,
-              builder: (final context) {
-                // add touch to close
-                return GestureDetector(
-                  onTap: Navigator.of(context).pop,
-                  onSecondaryTap: Navigator.of(context).pop,
-                  child: Image.memory(
-                    previewFile.readAsBytesSync(),
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.medium,
-                  ),
-                );
-              },
+              builder: (final context) => GestureDetector(
+                onTap: Navigator.of(context).pop,
+                onSecondaryTap: Navigator.of(context).pop,
+                child: Image.file(
+                  previewFile,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.medium,
+                ),
+              ),
             );
           },
           onSecondaryTapUp: (final details) {
@@ -219,7 +216,7 @@ class _ModCard extends StatelessWidget {
               details.localPosition,
               ancestor: Navigator.of(context).context.findRenderObject(),
             );
-            _contextController.showFlyout(
+            unawaited(_contextController.showFlyout(
               position: position,
               builder: (final context) => FlyoutContent(
                 child: SizedBox(
@@ -235,13 +232,13 @@ class _ModCard extends StatelessWidget {
                   ),
                 ),
               ),
-            );
+            ));
           },
           child: FlyoutTarget(
             controller: _contextController,
             key: _contextAttachKey,
-            child: Image.memory(
-              previewFile.readAsBytesSync(),
+            child: Image.file(
+              previewFile,
               fit: BoxFit.contain,
               filterQuality: FilterQuality.medium,
             ),
@@ -323,6 +320,7 @@ class _ModCard extends StatelessWidget {
           }
           return Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: rowElements,
           );
         },

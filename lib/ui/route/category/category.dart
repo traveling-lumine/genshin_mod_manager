@@ -89,20 +89,45 @@ class _CategoryRoute extends StatelessWidget {
         child: Selector<CategoryRouteViewModel, List<Mod>?>(
           selector: (final context, final vm) => vm.modPaths,
           builder: (final context, final value, final child) {
-            if (value == null) {
-              return const Center(child: ProgressRing());
-            }
-            final children = value.map((final e) => ModCard(mod: e)).toList();
-            return GridView.builder(
-              padding: const EdgeInsets.all(8),
-              gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
-                minCrossAxisExtent: minCrossAxisExtent,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                mainAxisExtent: mainAxisExtent,
+            final children =
+                value?.map((final e) => ModCard(mod: e)).toList() ?? [];
+            return LayoutBuilder(
+              builder: (final context, final constraints) => AnimatedCrossFade(
+                duration: const Duration(milliseconds: 300),
+                firstChild: ConstrainedBox(
+                  constraints: constraints,
+                  child: const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ProgressRing(),
+                        SizedBox(height: 16),
+                        Text('Loading...'),
+                      ],
+                    ),
+                  ),
+                ),
+                secondChild: ConstrainedBox(
+                  constraints: constraints,
+                  child: GridView.builder(
+                    padding: const EdgeInsets.all(8),
+                    gridDelegate:
+                        const SliverGridDelegateWithMinCrossAxisExtent(
+                      minCrossAxisExtent: minCrossAxisExtent,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      mainAxisExtent: mainAxisExtent,
+                    ),
+                    itemCount: children.length,
+                    itemBuilder: (final context, final index) =>
+                        children[index],
+                  ),
+                ),
+                crossFadeState: value == null
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
               ),
-              itemCount: children.length,
-              itemBuilder: (final context, final index) => children[index],
             );
           },
         ),

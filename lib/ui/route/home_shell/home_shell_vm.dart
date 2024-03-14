@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
@@ -28,14 +29,14 @@ abstract interface class HomeShellViewModel implements BaseViewModel {
 HomeShellViewModel createViewModel({
   required final AppStateService appStateService,
   required final RecursiveFileSystemWatcher recursiveFileSystemWatcher,
-}) => _HomeShellViewModelImpl(
-    appStateService: appStateService,
-    recursiveFileSystemWatcher: recursiveFileSystemWatcher,
-  );
+}) =>
+    _HomeShellViewModelImpl(
+      appStateService: appStateService,
+      recursiveFileSystemWatcher: recursiveFileSystemWatcher,
+    );
 
 class _HomeShellViewModelImpl extends ChangeNotifier
     implements HomeShellViewModel {
-
   _HomeShellViewModelImpl({
     required this.appStateService,
     required this.recursiveFileSystemWatcher,
@@ -52,14 +53,14 @@ class _HomeShellViewModelImpl extends ChangeNotifier
       );
       _categoryIconFolderObserverService?.dispose();
       _categoryIconFolderObserverService = categoryIconFolderObserverService;
-      _modCategoriesSubscription?.cancel();
+      unawaited(_modCategoriesSubscription?.cancel());
       _modCategoriesSubscription = CombineLatestStream.combine3(
         modsWatchService.paths.stream,
         categoryIconFolderObserverService.paths.stream,
         appStateService.modRoot.stream,
         _getCategories,
       ).listen((final event) {
-        _modCategories = event;
+        _modCategories = event..sort((a, b) => compareNatural(a.name, b.name));
         notifyListeners();
       });
     });
@@ -76,6 +77,7 @@ class _HomeShellViewModelImpl extends ChangeNotifier
       notifyListeners();
     });
   }
+
   late final StreamSubscription<bool> _runTogetherSubscription;
   late final StreamSubscription<bool> _showFolderIconSubscription;
   late final StreamSubscription<String> _asmr;
@@ -130,12 +132,16 @@ class _HomeShellViewModelImpl extends ChangeNotifier
   }
 
   static List<ModCategory> _getCategories(
-      final List<String> root, final List<String> icons, final String modRoot,) => List.unmodifiable(root.map((final e) {
-      final imageFile = findPreviewFileInString(icons, name: e);
-      return ModCategory(
-        path: e,
-        name: e.pBasename,
-        iconPath: imageFile,
-      );
-    }),);
+    final List<String> root,
+    final List<String> icons,
+    final String modRoot,
+  ) =>
+      root.map((final catPath) {
+        final imageFile = findPreviewFileInString(icons, name: catPath);
+        return ModCategory(
+          path: catPath,
+          name: catPath.pBasename,
+          iconPath: imageFile,
+        );
+      }).toList(growable: false);
 }
