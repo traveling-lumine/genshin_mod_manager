@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
@@ -7,12 +8,16 @@ import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:rxdart/rxdart.dart';
 
-Future<List<ModCategory>> getCategories(AppStateService service) async {
+Future<List<ModCategory>> getCategories(final AppStateService service) async {
   final root = service.modRoot.latest;
-  if (root == null) return [];
+  if (root == null) {
+    return [];
+  }
   final dir = Directory(root);
-  if (!await dir.exists()) return [];
-  final res = await dir.list().whereType<Directory>().map((event) {
+  if (!dir.existsSync()) {
+    return [];
+  }
+  final res = await dir.list().whereType<Directory>().map((final event) {
     final path = event.path;
     return ModCategory(
       path: path,
@@ -22,9 +27,10 @@ Future<List<ModCategory>> getCategories(AppStateService service) async {
   return UnmodifiableListView(res);
 }
 
-Future<List<Mod>> getMods(ModCategory category) async {
+Future<List<Mod>> getMods(final ModCategory category) async {
   final root = category.path;
-  final res = await Directory(root).list().whereType<Directory>().map((event) {
+  final res =
+      await Directory(root).list().whereType<Directory>().map((final event) {
     final path = event.path;
     return Mod(
       path: path,
@@ -35,15 +41,26 @@ Future<List<Mod>> getMods(ModCategory category) async {
   return UnmodifiableListView(res);
 }
 
-Future<List<File>> getActiveIniFiles(Mod mod) async {
+Future<List<File>> getActiveIniFiles(final Mod mod) async {
   final res =
-      await Directory(mod.path).list().whereType<File>().where((element) {
+      await Directory(mod.path).list().whereType<File>().where((final element) {
     final path = element.path;
     final extension = path.pExtension;
-    if (!extension.pEquals('.ini')) return false;
+    if (!extension.pEquals('.ini')) {
+      return false;
+    }
     return path.pBasename.pIsEnabled;
   }).toList();
   return List.unmodifiable(res);
+}
+
+Future<List<T>> getUnder<T extends FileSystemEntity>(final String path) async {
+  final dir = Directory(path);
+  if (!dir.existsSync()) {
+    return [];
+  }
+  final res = await dir.list().whereType<T>().toList();
+  return UnmodifiableListView(res);
 }
 
 const _previewExtensions = [
@@ -53,24 +70,33 @@ const _previewExtensions = [
   '.gif',
 ];
 
-String? findPreviewFileInString(List<String> dir, {String name = 'preview'}) {
+String? findPreviewFileInString(
+  final List<String> dir, {
+  final String name = 'preview',
+}) {
   for (final element in dir) {
     final filename = element.pBNameWoExt;
-    if (!filename.pEquals(name)) continue;
+    if (!filename.pEquals(name)) {
+      continue;
+    }
     final ext = element.pExtension;
     for (final previewExt in _previewExtensions) {
-      if (ext.pEquals(previewExt)) return element;
+      if (ext.pEquals(previewExt)) {
+        return element;
+      }
     }
   }
   return null;
 }
 
-void runProgram(File program) {
+void runProgram(final File program) {
   final pwd = program.parent.path;
   final pName = program.path.pBasename;
-  Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
+  unawaited(
+    Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true),
+  );
 }
 
-void openFolder(String dirPath) {
-  Process.start('explorer', [dirPath], runInShell: true);
+void openFolder(final String dirPath) {
+  unawaited(Process.start('explorer', [dirPath], runInShell: true));
 }

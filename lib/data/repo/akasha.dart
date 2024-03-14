@@ -7,15 +7,15 @@ import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/repo/akasha.dart';
 import 'package:http/http.dart' as http;
 
+/// The filename of Akasha's configuration file.
 const kAkashaConfigFilename = 'config.json';
 const _kAkashaBase = "https://nahida.live";
 const _kAkashaApi = '$_kAkashaBase/mods/apiv2';
 const _kAkashaDownload = '$_kAkashaApi/download';
 const _kAkashaList = '$_kAkashaApi/list';
 
-NahidaliveAPI createNahidaliveAPI() {
-  return _NahidaliveAPIImpl();
-}
+/// Creates a new [NahidaliveAPI] instance.
+NahidaliveAPI createNahidaliveAPI() => _NahidaliveAPIImpl();
 
 class _NahidaliveAPIImpl implements NahidaliveAPI {
   final _client = http.Client();
@@ -32,7 +32,7 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
   }
 
   @override
-  Future<NahidaliveElement> fetchNahidaliveElement(String uuid) async {
+  Future<NahidaliveElement> fetchNahidaliveElement(final String uuid) async {
     final response = await _client.get(Uri.parse('$_kAkashaList?uuid=$uuid'));
     if (response.statusCode == 200) {
       return _neFromJson(jsonDecode(response.body));
@@ -42,8 +42,11 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
   }
 
   @override
-  Future<NahidaliveDownloadElement> downloadUrl(String uuid,
-      {String? pw, String? updateCode}) async {
+  Future<NahidaliveDownloadElement> downloadUrl(
+    final String uuid, {
+    final String? pw,
+    final String? updateCode,
+  }) async {
     final Uri uri;
     if (updateCode != null) {
       uri = Uri.parse('$_kAkashaDownload?uuid=$uuid&update_code=$updateCode');
@@ -63,7 +66,9 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
   }
 
   @override
-  Future<Uint8List> download(NahidaliveDownloadElement downloadElement) async {
+  Future<Uint8List> download(
+    final NahidaliveDownloadElement downloadElement,
+  ) async {
     if (downloadElement.status) {
       final response =
           await _client.get(Uri.parse(downloadElement.downloadUrl!));
@@ -78,59 +83,57 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
   }
 }
 
-NahidaliveElement _neFromJson(dynamic json) {
-  return switch (json) {
-    {
-      'uuid': String uuid,
-      'version': String version,
-      'sha256': String sha256,
-      'title': String title,
-      'description': String description,
-      'arca_url': String? arcaUrl,
-      'virustotal_url': String? virustotalUrl,
-      'tags': List<dynamic> tags,
-      'expiration_date': String? expirationDate,
-      'upload_date': String uploadDate,
-      'preview_url': String previewUrl,
-      'koreaonly': bool koreaonly,
-    } =>
-      NahidaliveElement(
-        uuid: uuid,
-        version: version,
-        sha256: sha256,
-        title: title,
-        description: description,
-        arcaUrl: arcaUrl,
-        virustotalUrl: virustotalUrl,
-        tags: UnmodifiableListView(tags.cast<String>()),
-        expirationDate: expirationDate,
-        uploadDate: uploadDate,
-        previewUrl: previewUrl,
-        koreaOnly: koreaonly,
-      ),
-    _ => throw const FormatException('Unknown NahidaliveElement format.'),
-  };
-}
+NahidaliveElement _neFromJson(final json) => switch (json) {
+      {
+        'uuid': final String uuid,
+        'version': final String version,
+        'sha256': final String sha256,
+        'title': final String title,
+        'description': final String description,
+        'arca_url': final String? arcaUrl,
+        'virustotal_url': final String? virustotalUrl,
+        'tags': final List<dynamic> tags,
+        'expiration_date': final String? expirationDate,
+        'upload_date': final String uploadDate,
+        'preview_url': final String previewUrl,
+        'koreaonly': final bool koreaonly,
+      } =>
+        NahidaliveElement(
+          uuid: uuid,
+          version: version,
+          sha256: sha256,
+          title: title,
+          description: description,
+          arcaUrl: arcaUrl,
+          virustotalUrl: virustotalUrl,
+          tags: UnmodifiableListView(tags.cast<String>()),
+          expirationDate: expirationDate,
+          uploadDate: uploadDate,
+          previewUrl: previewUrl,
+          koreaOnly: koreaonly,
+        ),
+      _ => throw const FormatException('Unknown NahidaliveElement format.'),
+    };
 
-NahidaliveDownloadElement _ndeFromJson(Map<String, dynamic> json) {
-  return switch (json) {
-    {
-      'status': bool status,
-      'download_url': String downloadUrl,
-    } =>
-      NahidaliveDownloadElement(
-        status: status,
-        downloadUrl: downloadUrl,
-      ),
-    {
-      'status': bool status,
-      'error-codes': String errorCodes,
-    } =>
-      NahidaliveDownloadElement(
-        status: status,
-        errorCodes: errorCodes,
-      ),
-    _ =>
-      throw FormatException('Unknown NahidaliveDownloadElement format: $json'),
-  };
-}
+NahidaliveDownloadElement _ndeFromJson(final Map<String, dynamic> json) =>
+    switch (json) {
+      {
+        'status': final bool status,
+        'download_url': final String downloadUrl,
+      } =>
+        NahidaliveDownloadElement(
+          status: status,
+          downloadUrl: downloadUrl,
+        ),
+      {
+        'status': final bool status,
+        'error-codes': final String errorCodes,
+      } =>
+        NahidaliveDownloadElement(
+          status: status,
+          errorCodes: errorCodes,
+        ),
+      _ => throw FormatException(
+          'Unknown NahidaliveDownloadElement format: $json',
+        ),
+    };

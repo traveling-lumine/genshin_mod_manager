@@ -27,23 +27,21 @@ class ModCard extends StatelessWidget {
   }) : super(key: Key(mod.path));
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider(
-          create: (context) => createFSEPathsWatcher<File>(
-            targetPath: mod.path,
-            watcher: context.read(),
+  Widget build(final BuildContext context) => MultiProvider(
+        providers: [
+          Provider(
+            create: (final context) => createFSEPathsWatcher<File>(
+              targetPath: mod.path,
+              watcher: context.read(),
+            ),
+            dispose: (final context, final value) => value.dispose(),
           ),
-          dispose: (context, value) => value.dispose(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => createModCardViewModel(),
-        ),
-      ],
-      child: _ModCard(mod: mod),
-    );
-  }
+          ChangeNotifierProvider(
+            create: (final context) => createModCardViewModel(),
+          ),
+        ],
+        child: _ModCard(mod: mod),
+      );
 }
 
 class _ModCard extends StatelessWidget {
@@ -57,52 +55,50 @@ class _ModCard extends StatelessWidget {
   _ModCard({required this.mod});
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _onToggle(context),
-      child: Card(
-        backgroundColor: mod.isEnabled
-            ? Colors.green.lightest
-            : Colors.red.lightest.withOpacity(0.5),
-        padding: const EdgeInsets.all(6),
-        child: FocusTraversalGroup(
-          child: Column(
-            children: [
-              FutureBuilder(
-                future: getFSEUnder<File>(mod),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState != ConnectionState.done) {
-                    return const Text('Loading...');
-                  }
-                  return _buildFolderHeader(context, data);
-                },
-              ),
-              const SizedBox(height: 4),
-              _buildFolderContent(context),
-            ],
+  Widget build(final BuildContext context) => GestureDetector(
+        onTap: () => _onToggle(context),
+        child: Card(
+          backgroundColor: mod.isEnabled
+              ? Colors.green.lightest
+              : Colors.red.lightest.withOpacity(0.5),
+          padding: const EdgeInsets.all(6),
+          child: FocusTraversalGroup(
+            child: Column(
+              children: [
+                FutureBuilder(
+                  // ignore: discarded_futures
+                  future: getUnder<File>(mod.path),
+                  builder: (final context, final snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return const Text('Loading...');
+                    }
+                    return _buildFolderHeader(context, data);
+                  },
+                ),
+                const SizedBox(height: 4),
+                _buildFolderContent(context),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 
-  void buildErrorDialog(BuildContext context) {
-    return errorDialog(
-      context,
-      'Failed to rename folder.'
-      ' Check if the ShaderFixes folder is open in explorer,'
-      ' and close it if it is.',
-    );
-  }
+  void buildErrorDialog(final BuildContext context) => errorDialog(
+        context,
+        'Failed to rename folder.'
+        ' Check if the ShaderFixes folder is open in explorer,'
+        ' and close it if it is.',
+      );
 
-  void showDirectoryExists(BuildContext context, String renameTarget) {
+  void showDirectoryExists(
+      final BuildContext context, final String renameTarget) {
     errorDialog(context, '${renameTarget.pBasename} directory already exists!');
   }
 
-  void errorDialog(BuildContext context, String text) {
+  void errorDialog(final BuildContext context, final String text) {
     showDialog(
       context: context,
-      builder: (context) => ContentDialog(
+      builder: (final context) => ContentDialog(
         title: const Text('Error'),
         content: Text(text),
         actions: [
@@ -115,10 +111,11 @@ class _ModCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFolderHeader(BuildContext context, List<File> files) {
+  Widget _buildFolderHeader(
+      final BuildContext context, final List<File> files) {
     // find config.json
     final File? findConfig = files.firstWhereOrNull(
-      (element) => element.path.pBasename.pEquals(kAkashaConfigFilename),
+      (final element) => element.path.pBasename.pEquals(kAkashaConfigFilename),
     );
     return Row(
       children: [
@@ -152,28 +149,28 @@ class _ModCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFolderContent(BuildContext context) {
-    return Expanded(
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(child: _buildDesc(context, constraints)),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Divider(direction: Axis.vertical),
-              ),
-              buildIni(),
-            ],
-          );
-        },
-      ),
-    );
-  }
+  Widget _buildFolderContent(final BuildContext context) => Expanded(
+        child: LayoutBuilder(
+          builder:
+              (final BuildContext context, final BoxConstraints constraints) {
+            return Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Expanded(child: _buildDesc(context, constraints)),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Divider(direction: Axis.vertical),
+                ),
+                buildIni(),
+              ],
+            );
+          },
+        ),
+      );
 
-  Widget _buildDesc(BuildContext context, BoxConstraints constraints) {
+  Widget _buildDesc(
+      final BuildContext context, final BoxConstraints constraints) {
     final v = context.watch<FSEPathsWatcher>().paths.latest;
     final previewFile = findPreviewFileInString(v);
     if (previewFile != null) {
@@ -197,13 +194,11 @@ class _ModCard extends StatelessWidget {
               if (!context.mounted) return;
               await displayInfoBar(
                 context,
-                builder: (_, close) {
-                  return InfoBar(
-                    title: const Text('Image pasted'),
-                    content: Text('to $filePath'),
-                    onClose: close,
-                  );
-                },
+                builder: (final _, final close) => InfoBar(
+                  title: const Text('Image pasted'),
+                  content: Text('to $filePath'),
+                  onClose: close,
+                ),
               );
               _logger.d('Image pasted to $filePath');
             },
@@ -214,68 +209,67 @@ class _ModCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImageDesc(
-      BuildContext context, BoxConstraints constraints, File previewFile) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: constraints.maxWidth - _minIniSectionWidth,
-      ),
-      child: GestureDetector(
-        onTapUp: (details) {
-          showDialog(
-            context: context,
-            builder: (context) {
-              // add touch to close
-              return GestureDetector(
-                onTap: Navigator.of(context).pop,
-                onSecondaryTap: Navigator.of(context).pop,
-                child: Image.memory(
-                  previewFile.readAsBytesSync(),
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.medium,
-                ),
-              );
-            },
-          );
-        },
-        onSecondaryTapUp: (details) {
-          final targetContext = _contextAttachKey.currentContext;
-          if (targetContext == null) return;
-          final box = targetContext.findRenderObject() as RenderBox;
-          final position = box.localToGlobal(
-            details.localPosition,
-            ancestor: Navigator.of(context).context.findRenderObject(),
-          );
-          _contextController.showFlyout(
-            position: position,
-            builder: (context) => FlyoutContent(
-              child: SizedBox(
-                width: 120,
-                child: CommandBar(
-                  primaryItems: [
-                    CommandBarButton(
-                      icon: const Icon(FluentIcons.delete),
-                      label: const Text('Delete'),
-                      onPressed: () => _showDialog(context, previewFile),
-                    ),
-                  ],
+  Widget _buildImageDesc(final BuildContext context,
+          final BoxConstraints constraints, final File previewFile) =>
+      ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: constraints.maxWidth - _minIniSectionWidth,
+        ),
+        child: GestureDetector(
+          onTapUp: (final details) {
+            showDialog(
+              context: context,
+              builder: (final context) {
+                // add touch to close
+                return GestureDetector(
+                  onTap: Navigator.of(context).pop,
+                  onSecondaryTap: Navigator.of(context).pop,
+                  child: Image.memory(
+                    previewFile.readAsBytesSync(),
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.medium,
+                  ),
+                );
+              },
+            );
+          },
+          onSecondaryTapUp: (final details) {
+            final targetContext = _contextAttachKey.currentContext;
+            if (targetContext == null) return;
+            final box = targetContext.findRenderObject() as RenderBox;
+            final position = box.localToGlobal(
+              details.localPosition,
+              ancestor: Navigator.of(context).context.findRenderObject(),
+            );
+            _contextController.showFlyout(
+              position: position,
+              builder: (final context) => FlyoutContent(
+                child: SizedBox(
+                  width: 120,
+                  child: CommandBar(
+                    primaryItems: [
+                      CommandBarButton(
+                        icon: const Icon(FluentIcons.delete),
+                        label: const Text('Delete'),
+                        onPressed: () => _showDialog(context, previewFile),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+            );
+          },
+          child: FlyoutTarget(
+            controller: _contextController,
+            key: _contextAttachKey,
+            child: Image.memory(
+              previewFile.readAsBytesSync(),
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.medium,
             ),
-          );
-        },
-        child: FlyoutTarget(
-          controller: _contextController,
-          key: _contextAttachKey,
-          child: Image.memory(
-            previewFile.readAsBytesSync(),
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.medium,
           ),
         ),
-      ),
-    );
-  }
+      );
 
   Widget buildIni() {
     final alliniFile = allFilesToWidget();
@@ -303,7 +297,7 @@ class _ModCard extends StatelessWidget {
       bool metSection = false;
       file
           .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true))
-          .forEach((line) {
+          .forEach((final line) {
         if (line.startsWith('[')) {
           metSection = false;
         }
@@ -328,7 +322,7 @@ class _ModCard extends StatelessWidget {
     return alliniFile;
   }
 
-  Widget buildIniHeader(File iniFile) {
+  Widget buildIniHeader(final File iniFile) {
     final basenameString = iniFile.path.pBasename;
     return Row(
       children: [
@@ -354,27 +348,26 @@ class _ModCard extends StatelessWidget {
     );
   }
 
-  Widget buildIniFieldEditor(
-      String data, String section, String line, File file) {
-    return Row(
-      children: [
-        Text(data),
-        Expanded(
-          child: EditorText(
-            section: section,
-            line: line,
-            file: file,
+  Widget buildIniFieldEditor(final String data, final String section,
+          final String line, final File file) =>
+      Row(
+        children: [
+          Text(data),
+          Expanded(
+            child: EditorText(
+              section: section,
+              line: line,
+              file: file,
+            ),
           ),
-        ),
-      ],
-    );
-  }
+        ],
+      );
 
-  void _showDialog(BuildContext context, File previewFile) {
+  void _showDialog(final BuildContext context, final File previewFile) {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context2) => ContentDialog(
+      builder: (final context2) => ContentDialog(
         title: const Text('Delete preview image?'),
         content:
             const Text('Are you sure you want to delete the preview image?'),
@@ -395,7 +388,7 @@ class _ModCard extends StatelessWidget {
                 Navigator.of(context).pop();
                 displayInfoBar(
                   context,
-                  builder: (context, close) => InfoBar(
+                  builder: (final context, final close) => InfoBar(
                     title: const Text('Preview deleted'),
                     content: Text('Preview deleted from ${previewFile.path}'),
                     severity: InfoBarSeverity.warning,
@@ -411,7 +404,8 @@ class _ModCard extends StatelessWidget {
     );
   }
 
-  Future<void> _onRefresh(BuildContext context, File findConfig) async {
+  Future<void> _onRefresh(
+      final BuildContext context, final File findConfig) async {
     try {
       final recursiveObserverService =
           context.read<RecursiveFileSystemWatcher>();
@@ -461,7 +455,7 @@ class _ModCard extends StatelessWidget {
     }
   }
 
-  void _onToggle(BuildContext context) {
+  void _onToggle(final BuildContext context) {
     final isEnabled = mod.pBasename.pIsEnabled;
     final shaderFixesPath = context
         .read<AppStateService>()
@@ -473,8 +467,8 @@ class _ModCard extends StatelessWidget {
       disable(
         shaderFixesPath: shaderFixesPath,
         modPathW: mod,
-        onModRenameClash: (p0) => showDirectoryExists(context, p0),
-        onShaderDeleteFailed: (e) =>
+        onModRenameClash: (final p0) => showDirectoryExists(context, p0),
+        onShaderDeleteFailed: (final e) =>
             errorDialog(context, 'Failed to delete files in ShaderFixes: $e'),
         onModRenameFailed: () => buildErrorDialog(context),
       );
@@ -482,8 +476,8 @@ class _ModCard extends StatelessWidget {
       enable(
         shaderFixesPath: shaderFixesPath,
         modPath: mod,
-        onModRenameClash: (p0) => showDirectoryExists(context, p0),
-        onShaderExists: (e) =>
+        onModRenameClash: (final p0) => showDirectoryExists(context, p0),
+        onShaderExists: (final e) =>
             errorDialog(context, '${e.path} already exists!'),
         onModRenameFailed: () => buildErrorDialog(context),
       );

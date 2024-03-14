@@ -8,7 +8,7 @@ import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/mod_writer.dart';
 
 ModWriter createModWriter({
-  required ModCategory category,
+  required final ModCategory category,
 }) {
   return _ModWriterImpl(
     category: category,
@@ -24,8 +24,8 @@ class _ModWriterImpl implements ModWriter {
 
   @override
   Future<void> write({
-    required String modName,
-    required Uint8List data,
+    required final String modName,
+    required final Uint8List data,
   }) async {
     final destDirName =
         (await _getNonCollidingModName(category, modName)).pDisabledForm;
@@ -47,12 +47,14 @@ class ModZipExtractionException implements Exception {
 }
 
 Future<String> _getNonCollidingModName(
-    ModCategory category, String name) async {
+  final ModCategory category,
+  final String name,
+) async {
   final enabledModName = _getEnabledNameRecursive(name);
   return await _getNonCollidingName(category, enabledModName);
 }
 
-String _getEnabledNameRecursive(String name) {
+String _getEnabledNameRecursive(final String name) {
   String destDirName = name.pEnabledForm;
   while (!destDirName.pIsEnabled) {
     destDirName = destDirName.pEnabledForm;
@@ -61,9 +63,11 @@ String _getEnabledNameRecursive(String name) {
 }
 
 Future<String> _getNonCollidingName(
-    ModCategory category, String destDirName) async {
-  final enabledFormDirNames = (await getFSEUnder<Directory>(category.path))
-      .map((e) => e.path.pBasename.pEnabledForm)
+  final ModCategory category,
+  final String destDirName,
+) async {
+  final enabledFormDirNames = (await getUnder<Directory>(category.path))
+      .map((final e) => e.path.pBasename.pEnabledForm)
       .toSet();
   int counter = 0;
   String noCollisionDestDirName = destDirName;

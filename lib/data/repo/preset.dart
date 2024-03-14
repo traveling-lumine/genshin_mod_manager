@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
 import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
-import 'package:genshin_mod_manager/data/latest_stream.dart';
+import 'package:genshin_mod_manager/data/mapper/latest_stream.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
@@ -14,8 +14,8 @@ import 'package:genshin_mod_manager/domain/repo/preset.dart';
 import 'package:rxdart/subjects.dart';
 
 PresetService createPresetService({
-  required AppStateService appStateService,
-  required RecursiveFileSystemWatcher observerService,
+  required final AppStateService appStateService,
+  required final RecursiveFileSystemWatcher observerService,
 }) {
   return _PresetServiceImpl(
     appStateService: appStateService,
@@ -37,7 +37,7 @@ class _PresetServiceImpl implements PresetService {
   final _globalPresets = BehaviorSubject<List<String>>();
 
   @override
-  LatestStream<List<String>> getLocalPresets(ModCategory category) {
+  LatestStream<List<String>> getLocalPresets(final ModCategory category) {
     final stream = _localPresets.putIfAbsent(
       category.name,
       () => BehaviorSubject.seeded([]),
@@ -51,7 +51,7 @@ class _PresetServiceImpl implements PresetService {
     required this.appStateService,
     required this.observerService,
   }) {
-    _subscription = appStateService.presetData.stream.listen((event) {
+    _subscription = appStateService.presetData.stream.listen((final event) {
       final decoded = jsonDecode(event);
       _curGlobal = _parseMap(decoded['global']);
       _curLocal = _parseMap(decoded['local']);
@@ -79,16 +79,18 @@ class _PresetServiceImpl implements PresetService {
   }
 
   @override
-  Future<void> addGlobalPreset(String name) async {
+  Future<void> addGlobalPreset(final String name) async {
     Map<String, List<String>> data = {};
     final modRoot = appStateService.modRoot.latest;
-    if (modRoot == null) return;
-    final categoryDirs = await getFSEUnder<Directory>(modRoot);
+    if (modRoot == null) {
+      return;
+    }
+    final categoryDirs = await getUnder<Directory>(modRoot);
     for (final categoryDir in categoryDirs) {
       final category = categoryDir.path.pBasename;
-      data[category] = (await getFSEUnder<Directory>(categoryDir.path))
-          .map((e) => e.path.pBasename)
-          .where((e) => e.pIsEnabled)
+      data[category] = (await getUnder<Directory>(categoryDir.path))
+          .map((final e) => e.path.pBasename)
+          .where((final e) => e.pIsEnabled)
           .toList();
     }
     _curGlobal[name] = data;
@@ -96,26 +98,31 @@ class _PresetServiceImpl implements PresetService {
   }
 
   @override
-  Future<void> addLocalPreset(ModCategory category, String name) async {
+  Future<void> addLocalPreset(
+    final ModCategory category,
+    final String name,
+  ) async {
     final categoryDir = category.path;
-    List<String> data = (await getFSEUnder<Directory>(categoryDir))
-        .map((e) => e.path.pBasename)
-        .where((e) => e.pIsEnabled)
+    List<String> data = (await getUnder<Directory>(categoryDir))
+        .map((final e) => e.path.pBasename)
+        .where((final e) => e.pIsEnabled)
         .toList();
     _curLocal.putIfAbsent(category.name, () => {})[name] = data;
     _writeBack();
   }
 
   @override
-  void removeGlobalPreset(String name) {
+  void removeGlobalPreset(final String name) {
     _curGlobal.remove(name);
     _writeBack();
   }
 
   @override
-  void removeLocalPreset(ModCategory category, String name) {
+  void removeLocalPreset(final ModCategory category, final String name) {
     final localPreset = _curLocal[category.name];
-    if (localPreset == null) return;
+    if (localPreset == null) {
+      return;
+    }
     localPreset.remove(name);
     _writeBack();
   }
@@ -130,46 +137,59 @@ class _PresetServiceImpl implements PresetService {
   }
 
   @override
-  void setGlobalPreset(String name) {
+  void setGlobalPreset(final String name) {
     final directives = _curGlobal[name];
-    if (directives == null) return;
+    if (directives == null) {
+      return;
+    }
     _toggleGlobal(directives);
     observerService.forceUpdate();
   }
 
   @override
-  void setLocalPreset(ModCategory category, String name) {
+  void setLocalPreset(final ModCategory category, final String name) {
     final directives = _curLocal[category.name]?[name];
-    if (directives == null) return;
+    if (directives == null) {
+      return;
+    }
     _toggleLocal(category.path, directives);
     observerService.forceUpdate();
   }
 
-  void _toggleGlobal(Map<String, List<String>> directives) {
+  void _toggleGlobal(final Map<String, List<String>> directives) {
     for (final category in directives.entries) {
       final shouldBeEnabled = category.value;
       final latest2 = appStateService.modRoot.latest;
-      if (latest2 == null) return;
+      if (latest2 == null) {
+        return;
+      }
       final categoryDir = latest2.pJoin(category.key);
       _toggleCategory(categoryDir, shouldBeEnabled);
     }
   }
 
-  void _toggleLocal(String categoryPath, List<String> shouldBeEnabled) {
+  void _toggleLocal(
+    final String categoryPath,
+    final List<String> shouldBeEnabled,
+  ) {
     _toggleCategory(categoryPath, shouldBeEnabled);
   }
 
   Future<void> _toggleCategory(
-      String categoryPath, List<String> shouldBeEnabled) async {
+    final String categoryPath,
+    final List<String> shouldBeEnabled,
+  ) async {
     final latest2 = appStateService.modExecFile.latest;
-    if (latest2 == null) return;
+    if (latest2 == null) {
+      return;
+    }
     final shaderFixes = latest2.pDirname.pJoin(kShaderFixes);
-    final currentEnabled = (await getFSEUnder<Directory>(categoryPath))
-        .map((e) => e.path.pBasename)
-        .where((e) => e.pIsEnabled)
+    final currentEnabled = (await getUnder<Directory>(categoryPath))
+        .map((final e) => e.path.pBasename)
+        .where((final e) => e.pIsEnabled)
         .toList();
     final shouldBeOff =
-        currentEnabled.where((e) => !shouldBeEnabled.contains(e));
+        currentEnabled.where((final e) => !shouldBeEnabled.contains(e));
     final futures = <Future>[];
     for (final mod in shouldBeOff) {
       final modDir = categoryPath.pJoin(mod);
@@ -180,7 +200,7 @@ class _PresetServiceImpl implements PresetService {
       futures.add(future);
     }
     final shouldBeOn =
-        shouldBeEnabled.where((e) => !currentEnabled.contains(e));
+        shouldBeEnabled.where((final e) => !currentEnabled.contains(e));
     for (final mod in shouldBeOn) {
       final modDir = categoryPath.pJoin(mod.pDisabledForm);
       final future = enable(
@@ -193,34 +213,48 @@ class _PresetServiceImpl implements PresetService {
   }
 }
 
-Map<String, Map<String, List<String>>> _parseMap(dynamic data) {
+Map<String, Map<String, List<String>>> _parseMap(final dynamic data) {
   final Map<String, Map<String, List<String>>> parsed = {};
-  data.forEach((k, v) {
+  data.forEach((final k, final v) {
     final forEachCategory = _forEachPreset(k, v);
-    if (forEachCategory == null) return;
+    if (forEachCategory == null) {
+      return;
+    }
     parsed[k] = forEachCategory;
   });
   return parsed;
 }
 
-Map<String, List<String>>? _forEachPreset(k, v) {
-  if (k is! String) return null;
-  if (v is! Map) return null;
+Map<String, List<String>>? _forEachPreset(final k, final v) {
+  if (k is! String) {
+    return null;
+  }
+  if (v is! Map) {
+    return null;
+  }
   final Map<String, List<String>> b = {};
-  v.forEach((k, v) {
+  v.forEach((final k, final v) {
     final forEachCategory = _forEachCategory(k, v);
-    if (forEachCategory == null) return;
+    if (forEachCategory == null) {
+      return;
+    }
     b[k] = forEachCategory;
   });
   return b;
 }
 
-List<String>? _forEachCategory(k, v) {
-  if (k is! String) return null;
-  if (v is! List) return null;
+List<String>? _forEachCategory(final k, final v) {
+  if (k is! String) {
+    return null;
+  }
+  if (v is! List) {
+    return null;
+  }
   final List<String> c = [];
   for (final e in v) {
-    if (e is! String) continue;
+    if (e is! String) {
+      continue;
+    }
     c.add(e);
   }
   return c;
