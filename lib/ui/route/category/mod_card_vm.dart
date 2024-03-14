@@ -24,6 +24,7 @@ class _ModCardViewModelImpl extends ChangeNotifier implements ModCardViewModel {
     required final FSEPathsWatcher fsePathsWatcher,
   }) {
     fsePathsWatcher.paths.stream.listen((final event) {
+      print(event);
       _paths = event;
       configPath = _paths?.firstWhereOrNull(
         (final file) => file.pBasename.pEquals(kAkashaConfigFilename),
