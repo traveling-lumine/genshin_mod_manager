@@ -40,9 +40,7 @@ class _FSEPathsWatcherImpl<T extends FileSystemEntity>
   Future<List<String>> _getPaths(
     final FSEvent event,
   ) async =>
-      List.unmodifiable(
-        (await getUnder<T>(targetPath)).map((final e) => e.path),
-      );
+      getUnder<T>(targetPath);
 
   bool _ifEventDirectUnder2(
     final FSEvent event,

@@ -25,7 +25,7 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
     final response = await _client.get(Uri.parse(_kAkashaList));
     if (response.statusCode == 200) {
       final List<dynamic> body = jsonDecode(response.body);
-      return List.unmodifiable(body.map(_neFromJson));
+      return body.map(_neFromJson).toList();
     } else {
       throw Exception('fetch list failed');
     }

@@ -45,15 +45,14 @@ Future<List<Mod>> getMods(final ModCategory category) async {
 }
 
 /// Returns active ini paths from the given [paths].
-List<String> getActiveIniPaths(final List<String> paths) => List.unmodifiable(
-      paths.where((final path) {
-        final extension = path.pExtension;
-        if (!extension.pEquals('.ini')) {
-          return false;
-        }
-        return path.pBasename.pIsEnabled;
-      }),
-    );
+List<String> getActiveIniPaths(final List<String> paths) =>
+    paths.where((final path) {
+      final extension = path.pExtension;
+      if (!extension.pEquals('.ini')) {
+        return false;
+      }
+      return path.pBasename.pIsEnabled;
+    }).toList();
 
 /// Returns a String path list under the given [path].
 Future<List<String>> getUnder<T extends FileSystemEntity>(
@@ -64,7 +63,7 @@ Future<List<String>> getUnder<T extends FileSystemEntity>(
     return [];
   }
   final res =
-      await dir.list().whereType<T>().map((final event) => event.path).toList();
+      dir.listSync().whereType<T>().map((final event) => event.path).toList();
   return res;
 }
 

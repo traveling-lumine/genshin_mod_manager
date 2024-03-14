@@ -32,6 +32,5 @@ class _CategoryIconWatcherImpl implements FSEPathsWatcher {
     unawaited(_subscription.cancel());
   }
 
-  Future<List<String>> _getPaths() async =>
-      (await getUnder<File>(targetPath)).map((final e) => e.path).toList();
+  Future<List<String>> _getPaths() => getUnder<File>(targetPath);
 }

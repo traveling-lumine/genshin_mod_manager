@@ -31,15 +31,15 @@ class _PresetServiceImpl implements PresetService {
       final decoded = jsonDecode(event);
       _curGlobal = _parseMap(decoded['global']);
       _curLocal = _parseMap(decoded['local']);
-      _globalPresets.add(List.unmodifiable(_curGlobal.keys));
+      _globalPresets.add(_curGlobal.keys.toList());
       for (final category in _curLocal.entries) {
+        // ignore: close_sinks
         final stream = _localPresets[category.key];
         if (stream != null) {
-          stream.add(List.unmodifiable(category.value.keys));
+          stream.add(category.value.keys.toList());
         } else {
-          _localPresets[category.key] = BehaviorSubject.seeded(
-            List.unmodifiable(category.value.keys),
-          );
+          _localPresets[category.key] =
+              BehaviorSubject.seeded(category.value.keys.toList());
         }
       }
     });
@@ -59,6 +59,7 @@ class _PresetServiceImpl implements PresetService {
 
   @override
   LatestStream<List<String>> getLocalPresets(final ModCategory category) {
+    // ignore: close_sinks
     final stream = _localPresets.putIfAbsent(
       category.name,
       () => BehaviorSubject.seeded([]),
@@ -70,11 +71,11 @@ class _PresetServiceImpl implements PresetService {
 
   @override
   void dispose() {
-    _globalPresets.close();
+    unawaited(_globalPresets.close());
     for (final e in _localPresets.values) {
-      e.close();
+      unawaited(e.close());
     }
-    _subscription.cancel();
+    unawaited(_subscription.cancel());
   }
 
   @override
@@ -184,8 +185,8 @@ class _PresetServiceImpl implements PresetService {
     }
     final shaderFixes = latest2.pDirname.pJoin(kShaderFixes);
     final currentEnabled = (await getUnder<Directory>(categoryPath))
-        .map((final e) => e.pBasename)
         .where((final e) => e.pIsEnabled)
+        .map((final e) => e.pBasename)
         .toList();
     final shouldBeOff =
         currentEnabled.where((final e) => !shouldBeEnabled.contains(e));

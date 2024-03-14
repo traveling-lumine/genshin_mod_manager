@@ -249,6 +249,9 @@ class _ModCard extends StatelessWidget {
   Widget buildIni() => Selector<ModCardViewModel, List<String>?>(
         selector: (final context, final vm) => vm.iniPaths,
         builder: (final context, final value, final child) {
+          if (value == null) {
+            return const Center(child: ProgressRing());
+          }
           final alliniFile = allFilesToWidget(value);
           return Expanded(
             child: alliniFile.isNotEmpty

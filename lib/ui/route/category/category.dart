@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
@@ -13,10 +15,14 @@ import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_del
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+/// A route that displays a category of mods.
 class CategoryRoute extends StatelessWidget {
+  /// Creates a new [CategoryRoute] instance.
   CategoryRoute({
     required this.category,
   }) : super(key: Key(category.name));
+
+  /// The category to display.
   final ModCategory category;
 
   @override
@@ -74,8 +80,9 @@ class _CategoryRoute extends StatelessWidget {
                 ),
                 CommandBarButton(
                   icon: const Icon(FluentIcons.download),
-                  onPressed: () =>
-                      context.push(kNahidaStoreRoute, extra: category),
+                  onPressed: () => unawaited(
+                    context.push(kNahidaStoreRoute, extra: category),
+                  ),
                 ),
               ],
             ),
@@ -93,7 +100,7 @@ class _CategoryRoute extends StatelessWidget {
                 value?.map((final e) => ModCard(mod: e)).toList() ?? [];
             return LayoutBuilder(
               builder: (final context, final constraints) => AnimatedCrossFade(
-                duration: const Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 500),
                 firstChild: ConstrainedBox(
                   constraints: constraints,
                   child: const Center(
