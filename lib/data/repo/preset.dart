@@ -16,13 +16,13 @@ import 'package:rxdart/subjects.dart';
 PresetService createPresetService({
   required final AppStateService appStateService,
   required final RecursiveFileSystemWatcher observerService,
-}) => _PresetServiceImpl(
-    appStateService: appStateService,
-    observerService: observerService,
-  );
+}) =>
+    _PresetServiceImpl(
+      appStateService: appStateService,
+      observerService: observerService,
+    );
 
 class _PresetServiceImpl implements PresetService {
-
   _PresetServiceImpl({
     required this.appStateService,
     required this.observerService,
@@ -44,6 +44,7 @@ class _PresetServiceImpl implements PresetService {
       }
     });
   }
+
   late final StreamSubscription<String> _subscription;
 
   final AppStateService appStateService;
@@ -85,9 +86,9 @@ class _PresetServiceImpl implements PresetService {
     }
     final categoryDirs = await getUnder<Directory>(modRoot);
     for (final categoryDir in categoryDirs) {
-      final category = categoryDir.path.pBasename;
-      data[category] = (await getUnder<Directory>(categoryDir.path))
-          .map((final e) => e.path.pBasename)
+      final category = categoryDir.pBasename;
+      data[category] = (await getUnder<Directory>(categoryDir))
+          .map((final e) => e.pBasename)
           .where((final e) => e.pIsEnabled)
           .toList();
     }
@@ -102,7 +103,7 @@ class _PresetServiceImpl implements PresetService {
   ) async {
     final categoryDir = category.path;
     final data = (await getUnder<Directory>(categoryDir))
-        .map((final e) => e.path.pBasename)
+        .map((final e) => e.pBasename)
         .where((final e) => e.pIsEnabled)
         .toList();
     _curLocal.putIfAbsent(category.name, () => {})[name] = data;
@@ -162,7 +163,7 @@ class _PresetServiceImpl implements PresetService {
         return;
       }
       final categoryDir = latest2.pJoin(category.key);
-      _toggleCategory(categoryDir, shouldBeEnabled);
+      unawaited(_toggleCategory(categoryDir, shouldBeEnabled));
     }
   }
 
@@ -170,7 +171,7 @@ class _PresetServiceImpl implements PresetService {
     final String categoryPath,
     final List<String> shouldBeEnabled,
   ) {
-    _toggleCategory(categoryPath, shouldBeEnabled);
+    unawaited(_toggleCategory(categoryPath, shouldBeEnabled));
   }
 
   Future<void> _toggleCategory(
@@ -183,7 +184,7 @@ class _PresetServiceImpl implements PresetService {
     }
     final shaderFixes = latest2.pDirname.pJoin(kShaderFixes);
     final currentEnabled = (await getUnder<Directory>(categoryPath))
-        .map((final e) => e.path.pBasename)
+        .map((final e) => e.pBasename)
         .where((final e) => e.pIsEnabled)
         .toList();
     final shouldBeOff =

@@ -8,6 +8,7 @@ import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:rxdart/rxdart.dart';
 
+/// Returns [ModCategory] list from the mod root obtained from [service].
 Future<List<ModCategory>> getCategories(final AppStateService service) async {
   final root = service.modRoot.latest;
   if (root == null) {
@@ -27,6 +28,7 @@ Future<List<ModCategory>> getCategories(final AppStateService service) async {
   return UnmodifiableListView(res);
 }
 
+/// Returns a [Mod] list from the given [category].
 Future<List<Mod>> getMods(final ModCategory category) async {
   final root = category.path;
   final res =
@@ -42,7 +44,8 @@ Future<List<Mod>> getMods(final ModCategory category) async {
   return UnmodifiableListView(res);
 }
 
-List<String> getActiveIniFiles(final List<String> paths) => List.unmodifiable(
+/// Returns active ini paths from the given [paths].
+List<String> getActiveIniPaths(final List<String> paths) => List.unmodifiable(
       paths.where((final path) {
         final extension = path.pExtension;
         if (!extension.pEquals('.ini')) {
@@ -52,13 +55,17 @@ List<String> getActiveIniFiles(final List<String> paths) => List.unmodifiable(
       }),
     );
 
-Future<List<T>> getUnder<T extends FileSystemEntity>(final String path) async {
+/// Returns a String path list under the given [path].
+Future<List<String>> getUnder<T extends FileSystemEntity>(
+  final String path,
+) async {
   final dir = Directory(path);
   if (!dir.existsSync()) {
     return [];
   }
-  final res = await dir.list().whereType<T>().toList();
-  return UnmodifiableListView(res);
+  final res =
+      await dir.list().whereType<T>().map((final event) => event.path).toList();
+  return res;
 }
 
 const _previewExtensions = [
@@ -68,11 +75,13 @@ const _previewExtensions = [
   '.gif',
 ];
 
+/// In the [paths] list, find a file path that has a [name],
+/// ignoring extensions.
 String? findPreviewFileInString(
-  final List<String> dir, {
+  final List<String> paths, {
   final String name = 'preview',
 }) {
-  for (final element in dir) {
+  for (final element in paths) {
     final filename = element.pBNameWoExt;
     if (!filename.pEquals(name)) {
       continue;
@@ -87,6 +96,7 @@ String? findPreviewFileInString(
   return null;
 }
 
+/// Runs a [program] by default method.
 void runProgram(final File program) {
   final pwd = program.parent.path;
   final pName = program.path.pBasename;
@@ -95,6 +105,7 @@ void runProgram(final File program) {
   );
 }
 
-void openFolder(final String dirPath) {
-  unawaited(Process.start('explorer', [dirPath], runInShell: true));
+/// Opens a folder at [path].
+void openFolder(final String path) {
+  unawaited(Process.start('explorer', [path], runInShell: true));
 }

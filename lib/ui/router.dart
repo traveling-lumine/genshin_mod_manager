@@ -13,9 +13,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class MyApp extends StatelessWidget {
-
   MyApp({super.key});
-  late final _router = GoRouter(
+
+  final _router = GoRouter(
     debugLogDiagnostics: true,
     initialLocation: kLoadingRoute,
     extraCodec: const ModCategoryCodec(),
@@ -25,7 +25,8 @@ class MyApp extends StatelessWidget {
         builder: (final context, final state) => const LoadingRoute(),
       ),
       ShellRoute(
-        builder: (final context, final state, final child) => HomeShell(child: child),
+        builder: (final context, final state, final child) =>
+            HomeShell(child: child),
         routes: [
           GoRoute(
             path: kHomeRoute,
@@ -56,13 +57,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) => Provider(
-      create: (final context) => createAppStateService(),
-      dispose: (final context, final value) => value.dispose(),
-      child: FluentApp.router(
-        title: 'Genshin Mod Manager',
-        routerDelegate: _router.routerDelegate,
-        routeInformationParser: _router.routeInformationParser,
-        routeInformationProvider: _router.routeInformationProvider,
-      ),
-    );
+        create: (final context) => createAppStateService(),
+        dispose: (final context, final value) => value.dispose(),
+        child: FluentApp.router(
+          title: 'Genshin Mod Manager',
+          routerDelegate: _router.routerDelegate,
+          routeInformationParser: _router.routeInformationParser,
+          routeInformationProvider: _router.routeInformationProvider,
+        ),
+      );
 }

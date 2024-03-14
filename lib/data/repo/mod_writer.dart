@@ -7,17 +7,22 @@ import 'package:genshin_mod_manager/data/io/fsops.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/mod_writer.dart';
 
-ModWriter createModWriter({
-  required final ModCategory category,
-}) => _ModWriterImpl(
-    category: category,
-  );
+/// Exception thrown when a mod zip extraction fails.
+class ModZipExtractionException implements Exception {
+  /// Default constructor.
+  const ModZipExtractionException({required this.data});
+
+  /// The data that failed to extract.
+  final Uint8List data;
+}
+
+/// Writes mods to [category] directory.
+ModWriter createModWriter({required final ModCategory category}) =>
+    _ModWriterImpl(category: category);
 
 class _ModWriterImpl implements ModWriter {
+  _ModWriterImpl({required this.category});
 
-  _ModWriterImpl({
-    required this.category,
-  });
   final ModCategory category;
 
   @override
@@ -25,8 +30,7 @@ class _ModWriterImpl implements ModWriter {
     required final String modName,
     required final Uint8List data,
   }) async {
-    final destDirName =
-        (await _getNonCollidingModName(category, modName)).pDisabledForm;
+    final destDirName = await _getNonCollidingModName(category, modName);
     final destDirPath = category.path.pJoin(destDirName);
     await Directory(destDirPath).create(recursive: true);
     try {
@@ -38,34 +42,18 @@ class _ModWriterImpl implements ModWriter {
   }
 }
 
-class ModZipExtractionException implements Exception {
-
-  const ModZipExtractionException({required this.data});
-  final Uint8List data;
-}
-
 Future<String> _getNonCollidingModName(
   final ModCategory category,
   final String name,
-) async {
-  final enabledModName = _getEnabledNameRecursive(name);
-  return await _getNonCollidingName(category, enabledModName);
-}
-
-String _getEnabledNameRecursive(final String name) {
-  var destDirName = name.pEnabledForm;
-  while (!destDirName.pIsEnabled) {
-    destDirName = destDirName.pEnabledForm;
-  }
-  return destDirName;
-}
+) =>
+    _getNonCollidingName(category, name.pEnabledForm);
 
 Future<String> _getNonCollidingName(
   final ModCategory category,
   final String destDirName,
 ) async {
   final enabledFormDirNames = (await getUnder<Directory>(category.path))
-      .map((final e) => e.path.pBasename.pEnabledForm)
+      .map((final e) => e.pDisabledForm.pBasename)
       .toSet();
   var counter = 0;
   var noCollisionDestDirName = destDirName;

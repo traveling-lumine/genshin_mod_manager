@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
@@ -75,7 +77,7 @@ class _PresetControlWidgetState extends State<_PresetControlWidget> {
   Widget build(final BuildContext context) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildAddIcon(context),
+          _buildAddIcon(),
           const SizedBox(width: 8),
           _buildComboBox(),
         ],
@@ -84,24 +86,20 @@ class _PresetControlWidgetState extends State<_PresetControlWidget> {
   Widget _buildComboBox() => Selector<PresetControlViewModel, List<String>?>(
         selector: (final _, final vm) => vm.presets,
         builder: (final context, final value, final child) {
-          final String text;
-          if (value != null) {
-            text = '${widget.prefix} Preset...';
-          } else {
-            text = 'Grabbing ${widget.prefix} Presets...';
-          }
+          final text = value != null
+              ? '${widget.prefix} Preset...'
+              : 'Grabbing ${widget.prefix} Presets...';
           return RepaintBoundary(
             child: ComboBox(
               items: value
                   ?.map((final e) => ComboBoxItem(value: e, child: Text(e)))
                   .toList(),
               placeholder: Text(text),
-              onChanged: (final value) => showDialog(
+              onChanged: (final value) => unawaited(showDialog(
                 barrierDismissible: true,
                 context: context,
-                builder: (final context2) =>
-                    _presetDialog(value!, context2, context),
-              ),
+                builder: (final dCtx) => _presetDialog(value!, dCtx),
+              )),
             ),
           );
         },
@@ -110,7 +108,6 @@ class _PresetControlWidgetState extends State<_PresetControlWidget> {
   ContentDialog _presetDialog(
     final String name,
     final BuildContext dialogContext,
-    final BuildContext buildContext,
   ) {
     final vm = context.read<PresetControlViewModel>();
     return ContentDialog(
@@ -118,7 +115,7 @@ class _PresetControlWidgetState extends State<_PresetControlWidget> {
       content: Text('Preset name: $name'),
       actions: [
         FluentTheme(
-          data: FluentTheme.of(buildContext).copyWith(accentColor: Colors.red),
+          data: FluentTheme.of(context).copyWith(accentColor: Colors.red),
           child: FilledButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
@@ -142,44 +139,44 @@ class _PresetControlWidgetState extends State<_PresetControlWidget> {
     );
   }
 
-  Widget _buildAddIcon(final BuildContext context) => RepaintBoundary(
+  Widget _buildAddIcon() => RepaintBoundary(
         child: IconButton(
           icon: const Icon(FluentIcons.add),
-          onPressed: () => showDialog(
-            barrierDismissible: true,
-            context: context,
-            builder: (final context2) => _addDialog(context2, context),
-          ),
+          onPressed: _onPresetAddPressed,
         ),
       );
 
-  Widget _addDialog(
-      final BuildContext dialogContext, final BuildContext buildContext) {
-    final vm = context.read<PresetControlViewModel>();
-    return ContentDialog(
-      title: Text('Add ${widget.prefix} Preset'),
-      content: SizedBox(
-        height: 40,
-        child: TextBox(
-          controller: _controller,
-          placeholder: 'Preset Name',
+  void _onPresetAddPressed() {
+    unawaited(
+      showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (final dCtx) => ContentDialog(
+          title: Text('Add ${widget.prefix} Preset'),
+          content: SizedBox(
+            height: 40,
+            child: TextBox(
+              controller: _controller,
+              placeholder: 'Preset Name',
+            ),
+          ),
+          actions: [
+            Button(
+              onPressed: Navigator.of(dCtx).pop,
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(dCtx).pop();
+                final text = _controller.text;
+                _controller.clear();
+                context.read<PresetControlViewModel>().addPreset(text);
+              },
+              child: const Text('Add'),
+            ),
+          ],
         ),
       ),
-      actions: [
-        Button(
-          onPressed: Navigator.of(dialogContext).pop,
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () {
-            Navigator.of(dialogContext).pop();
-            final text = _controller.text;
-            _controller.clear();
-            vm.addPreset(text);
-          },
-          child: const Text('Add'),
-        ),
-      ],
     );
   }
 }

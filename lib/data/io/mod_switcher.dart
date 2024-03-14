@@ -71,62 +71,62 @@ Future<void> disable({
   }
 }
 
-Future<List<File>> _getModShaders(final String modPath) async {
-  final shaderFilenames = <File>[];
+Future<List<String>> _getModShaders(final String modPath) async {
+  final shaderPaths = <String>[];
   final modShaderPath = modPath.pJoin(kShaderFixes);
   try {
     final fseUnder = await getUnder<File>(modShaderPath);
-    shaderFilenames.addAll(fseUnder);
+    shaderPaths.addAll(fseUnder);
   } on PathNotFoundException {
     // _logger.i(e);
   }
-  return shaderFilenames;
+  return shaderPaths;
 }
 
 Future<void> _copyShaders(
   final String targetPath,
-  final List<File> shaderFiles,
+  final List<String> shaderPaths,
 ) async {
   // check for existence first
   await _shaderFinder(
     targetPath,
-    shaderFiles,
+    shaderPaths,
     (final found) => throw FileSystemException(
       'Target directory is not empty',
-      found.path.pBasename,
+      found.pBasename,
     ),
   );
 
   final futures = <Future<File>>[];
-  for (final elem in shaderFiles) {
-    final modFilename = elem.path.pBasename;
+  for (final elem in shaderPaths) {
+    final modFilename = elem.pBasename;
     final moveName = targetPath.pJoin(modFilename);
-    futures.add(elem.copy(moveName));
+    futures.add(File(elem).copy(moveName));
   }
   await Future.wait(futures);
 }
 
 Future<void> _deleteShaders(
   final String targetPath,
-  final List<File> shaderFiles,
+  final List<String> shaderPaths,
 ) async {
   await _shaderFinder(
     targetPath,
-    shaderFiles,
-    (final found) => found.delete(),
+    shaderPaths,
+    (final found) => File(found).delete(),
   );
 }
 
 Future<void> _shaderFinder(
   final String targetPath,
-  final List<File> shaderFiles,
-  final Future<void> Function(File found) onFound,
+  final List<String> shaderPaths,
+  final Future<void> Function(String foundPath) onFound,
 ) async {
-  final programShadersMap = Map<String, File>.fromEntries(
+  final programShadersMap = Map<String, String>.fromEntries(
     (await getUnder<File>(targetPath))
-        .map((final e) => MapEntry(e.path.pBasename, e)),
+        .map((final e) => MapEntry(e.pBasename, e)),
   );
-  final shaderSets = shaderFiles.map((final e) => e.path.pBasename).toSet();
+  final shaderSets = shaderPaths.map((final e) => e.pBasename).toSet();
   final inter = programShadersMap.keys.toSet().intersection(shaderSets);
   final futures = <Future<void>>[];
   for (final elem in inter) {

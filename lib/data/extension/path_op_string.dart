@@ -26,7 +26,11 @@ extension PathOpString on String {
     while (!baseName.pIsEnabled) {
       baseName = baseName.substring(_disabledHeaderLength).trimLeft();
     }
-    return pDirname.pJoin(baseName);
+    if (p.split(this).length == 1) {
+      return baseName;
+    } else {
+      return pDirname.pJoin(baseName);
+    }
   }
 
   /// Returns the path in disabled form.
@@ -35,7 +39,11 @@ extension PathOpString on String {
     if (baseName.pIsEnabled) {
       baseName = '$_disabledHeader ${baseName.trimLeft()}';
     }
-    return pDirname.pJoin(baseName);
+    if (p.split(this).length == 1) {
+      return baseName;
+    } else {
+      return pDirname.pJoin(baseName);
+    }
   }
 
   /// Returns whether the paths are equal.

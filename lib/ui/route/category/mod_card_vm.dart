@@ -29,7 +29,7 @@ class _ModCardViewModelImpl extends ChangeNotifier implements ModCardViewModel {
         (final file) => file.pBasename.pEquals(kAkashaConfigFilename),
       );
       previewPath = findPreviewFileInString(event);
-      iniPaths = getActiveIniFiles(event);
+      iniPaths = getActiveIniPaths(event);
       notifyListeners();
     });
   }
