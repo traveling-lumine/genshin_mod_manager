@@ -22,14 +22,14 @@ Future<void> _initialize() async {
   await windowManager.waitUntilReadyToShow(const WindowOptions(
     titleBarStyle: TitleBarStyle.hidden,
     minimumSize: _minWindowSize,
-  ));
+  ),);
 }
 
 void _registerErrorHandlers() {
-  FlutterError.onError = (details) {
+  FlutterError.onError = (final details) {
     final now = DateTime.now().toUtc().toIso8601String();
     final message = _errorToString(details);
-    String stackTrace = _writeStacktrace(details);
+    final stackTrace = _writeStacktrace(details);
     try {
       File('error.log').writeAsStringSync(
         '[$now]\nMessage:\n$message\nStacktrace:\n$stackTrace\n\n',
@@ -40,17 +40,15 @@ void _registerErrorHandlers() {
     }
   };
 
-  ErrorWidget.builder = (details) {
-    return Center(
+  ErrorWidget.builder = (final details) => Center(
       child: SelectableText(
         _errorToString(details),
         style: TextStyle(color: Colors.red.darker),
       ),
     );
-  };
 }
 
-String _writeStacktrace(FlutterErrorDetails details) {
+String _writeStacktrace(final FlutterErrorDetails details) {
   try {
     final stackTrace = details.stack.toString();
     return _elideLines(stackTrace);
@@ -59,10 +57,10 @@ String _writeStacktrace(FlutterErrorDetails details) {
   }
 }
 
-String _elideLines(String stackTrace) {
+String _elideLines(final String stackTrace) {
   // only choose lines that include genshin_mod_manager. Lines that don't include it are shrunk to ...
   final lines = [];
-  int elidedLines = 0;
+  var elidedLines = 0;
   for (final line in stackTrace.split('\n')) {
     if (line.contains('genshin_mod_manager')) {
       if (elidedLines > 0) {
@@ -81,7 +79,7 @@ String _elideLines(String stackTrace) {
   return lines.join('\n');
 }
 
-String _errorToString(FlutterErrorDetails details) {
+String _errorToString(final FlutterErrorDetails details) {
   try {
     return details.exception.toString();
   } catch (e) {

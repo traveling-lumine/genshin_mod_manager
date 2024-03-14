@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/extension/copy_directory.dart';
 import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
@@ -11,30 +12,28 @@ import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class CategoryDropTarget extends StatelessWidget {
+  const CategoryDropTarget({
+    required this.child,
+    required this.category,
+    super.key,
+  });
+
   static final Logger logger = Logger();
 
   final Widget child;
   final ModCategory category;
 
-  const CategoryDropTarget({
-    super.key,
-    required this.child,
-    required this.category,
-  });
-
   @override
-  Widget build(BuildContext context) {
-    return DropTarget(
-      onDragDone: (details) => onDragDone(context, details),
-      child: child,
-    );
-  }
+  Widget build(final BuildContext context) => DropTarget(
+        onDragDone: (final details) => onDragDone(context, details),
+        child: child,
+      );
 
-  void onDragDone(BuildContext context, DropDoneDetails details) {
+  void onDragDone(final BuildContext context, final DropDoneDetails details) {
     final moveInsteadOfCopy = context.read<AppStateService>().moveOnDrag.latest;
     if (moveInsteadOfCopy == null) return;
     final modRoot = category.path;
-    final List<(Directory, String)> queue = [];
+    final queue = <(Directory, String)>[];
     for (final xFile in details.files) {
       final path = xFile.path;
       if (!FileSystemEntity.isDirectorySync(path)) continue;
@@ -68,9 +67,16 @@ class CategoryDropTarget extends StatelessWidget {
       content:
           Text('The following folders already exist and were not $method: \n'
               '${queue.map(
-                    (e) => "'${e.$1.path.pBasename}' -> '${e.$2.pBasename}'",
+                    (final e) =>
+                        "'${e.$1.path.pBasename}' -> '${e.$2.pBasename}'",
                   ).join('\n')}'),
       severity: InfoBarSeverity.warning,
     );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
 }

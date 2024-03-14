@@ -19,28 +19,70 @@ abstract interface class SettingViewModel implements BaseViewModel {
 
   bool? get showEnabledModsFirst;
 
-  void onModRootSelect(String path);
+  void onModRootSelect(final String path);
 
-  void onModExecSelect(String path);
+  void onModExecSelect(final String path);
 
-  void onLauncherSelect(String path);
+  void onLauncherSelect(final String path);
 
-  void onRunTogetherChanged(bool value);
+  void onRunTogetherChanged(final bool value);
 
-  void onMoveOnDragChanged(bool value);
+  void onMoveOnDragChanged(final bool value);
 
-  void onShowFolderIconChanged(bool value);
+  void onShowFolderIconChanged(final bool value);
 
-  void onShowEnabledModsFirstChanged(bool value);
+  void onShowEnabledModsFirstChanged(final bool value);
 }
 
 SettingViewModel createSettingViewModel({
-  required AppStateService appStateService,
-}) {
-  return _SettingViewModelImpl(appStateService: appStateService);
-}
+  required final AppStateService appStateService,
+}) => _SettingViewModelImpl(appStateService: appStateService);
 
 class _SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
+
+  _SettingViewModelImpl({
+    required this.appStateService,
+  })  : modRoot = appStateService.modRoot.latest,
+        modExecFile = appStateService.modExecFile.latest,
+        launcherFile = appStateService.launcherFile.latest,
+        moveOnDrag = appStateService.moveOnDrag.latest,
+        runTogether = appStateService.runTogether.latest,
+        showFolderIcon = appStateService.showFolderIcon.latest,
+        showEnabledModsFirst = appStateService.showEnabledModsFirst.latest {
+    _modRootSubscription = appStateService.modRoot.stream.listen((final event) {
+      modRoot = event;
+      notifyListeners();
+    });
+    _modExecFileSubscription =
+        appStateService.modExecFile.stream.listen((final event) {
+      modExecFile = event;
+      notifyListeners();
+    });
+    _launcherFileSubscription =
+        appStateService.launcherFile.stream.listen((final event) {
+      launcherFile = event;
+      notifyListeners();
+    });
+    _moveOnDragSubscription = appStateService.moveOnDrag.stream.listen((final event) {
+      moveOnDrag = event;
+      notifyListeners();
+    });
+    _runTogetherSubscription =
+        appStateService.runTogether.stream.listen((final event) {
+      runTogether = event;
+      notifyListeners();
+    });
+    _showFolderIconSubscription =
+        appStateService.showFolderIcon.stream.listen((final event) {
+      showFolderIcon = event;
+      notifyListeners();
+    });
+    _showEnabledModsFirstSubscription =
+        appStateService.showEnabledModsFirst.stream.listen((final event) {
+      showEnabledModsFirst = event;
+      notifyListeners();
+    });
+  }
   late final StreamSubscription<String> _modRootSubscription;
   late final StreamSubscription<String> _modExecFileSubscription;
   late final StreamSubscription<String> _launcherFileSubscription;
@@ -72,50 +114,6 @@ class _SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
   @override
   bool? showFolderIcon;
 
-  _SettingViewModelImpl({
-    required this.appStateService,
-  })  : modRoot = appStateService.modRoot.latest,
-        modExecFile = appStateService.modExecFile.latest,
-        launcherFile = appStateService.launcherFile.latest,
-        moveOnDrag = appStateService.moveOnDrag.latest,
-        runTogether = appStateService.runTogether.latest,
-        showFolderIcon = appStateService.showFolderIcon.latest,
-        showEnabledModsFirst = appStateService.showEnabledModsFirst.latest {
-    _modRootSubscription = appStateService.modRoot.stream.listen((event) {
-      modRoot = event;
-      notifyListeners();
-    });
-    _modExecFileSubscription =
-        appStateService.modExecFile.stream.listen((event) {
-      modExecFile = event;
-      notifyListeners();
-    });
-    _launcherFileSubscription =
-        appStateService.launcherFile.stream.listen((event) {
-      launcherFile = event;
-      notifyListeners();
-    });
-    _moveOnDragSubscription = appStateService.moveOnDrag.stream.listen((event) {
-      moveOnDrag = event;
-      notifyListeners();
-    });
-    _runTogetherSubscription =
-        appStateService.runTogether.stream.listen((event) {
-      runTogether = event;
-      notifyListeners();
-    });
-    _showFolderIconSubscription =
-        appStateService.showFolderIcon.stream.listen((event) {
-      showFolderIcon = event;
-      notifyListeners();
-    });
-    _showEnabledModsFirstSubscription =
-        appStateService.showEnabledModsFirst.stream.listen((event) {
-      showEnabledModsFirst = event;
-      notifyListeners();
-    });
-  }
-
   @override
   void dispose() {
     _showEnabledModsFirstSubscription.cancel();
@@ -129,37 +127,37 @@ class _SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
   }
 
   @override
-  void onModRootSelect(String path) {
+  void onModRootSelect(final String path) {
     appStateService.setModRoot(path);
   }
 
   @override
-  void onModExecSelect(path) {
+  void onModExecSelect(final String path) {
     appStateService.setModExecFile(path);
   }
 
   @override
-  void onLauncherSelect(path) {
+  void onLauncherSelect(final String path) {
     appStateService.setLauncherFile(path);
   }
 
   @override
-  void onRunTogetherChanged(bool value) {
+  void onRunTogetherChanged(final bool value) {
     appStateService.setRunTogether(value);
   }
 
   @override
-  void onMoveOnDragChanged(bool value) {
+  void onMoveOnDragChanged(final bool value) {
     appStateService.setMoveOnDrag(value);
   }
 
   @override
-  void onShowFolderIconChanged(bool value) {
+  void onShowFolderIconChanged(final bool value) {
     appStateService.setShowFolderIcon(value);
   }
 
   @override
-  void onShowEnabledModsFirstChanged(bool value) {
+  void onShowEnabledModsFirstChanged(final bool value) {
     appStateService.setShowEnabledModsFirst(value);
   }
 }

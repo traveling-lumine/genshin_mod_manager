@@ -1,23 +1,21 @@
 import 'dart:convert';
 
 class ModCategory {
-  final String path;
-  final String name;
-  final String? iconPath;
 
   ModCategory({
     required this.path,
     required this.name,
     this.iconPath,
   });
+  final String path;
+  final String name;
+  final String? iconPath;
 
   @override
-  String toString() {
-    return 'ModCategory(path: $path, name: $name, iconPath: $iconPath)';
-  }
+  String toString() => 'ModCategory(path: $path, name: $name, iconPath: $iconPath)';
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) return true;
     return other is ModCategory &&
         other.path == path &&
@@ -26,9 +24,7 @@ class ModCategory {
   }
 
   @override
-  int get hashCode {
-    return path.hashCode ^ name.hashCode ^ iconPath.hashCode;
-  }
+  int get hashCode => path.hashCode ^ name.hashCode ^ iconPath.hashCode;
 }
 
 class ModCategoryCodec extends Codec<Object?, Object?> {
@@ -45,7 +41,7 @@ class _MyExtraDecoder extends Converter<Object?, Object?> {
   const _MyExtraDecoder();
 
   @override
-  Object? convert(Object? input) {
+  Object? convert(final Object? input) {
     if (input == null) return null;
     if (input is! List) {
       throw FormatException('Cannot decode type ${input.runtimeType}');
@@ -63,7 +59,7 @@ class _MyExtraDecoder extends Converter<Object?, Object?> {
         iconPath: input[3] as String?,
       );
     } catch (e) {
-      throw FormatException('D\'oh! $e');
+      throw FormatException("D'oh! $e");
     }
   }
 }
@@ -72,7 +68,7 @@ class _MyExtraEncoder extends Converter<Object?, Object?> {
   const _MyExtraEncoder();
 
   @override
-  Object? convert(Object? input) {
+  Object? convert(final Object? input) {
     if (input == null) return null;
     if (input is! ModCategory) {
       throw FormatException('Cannot encode type ${input.runtimeType}');
@@ -85,7 +81,7 @@ class _MyExtraEncoder extends Converter<Object?, Object?> {
         input.iconPath,
       ];
     } catch (e) {
-      throw FormatException('D\'oh! $e');
+      throw FormatException("D'oh! $e");
     }
   }
 }

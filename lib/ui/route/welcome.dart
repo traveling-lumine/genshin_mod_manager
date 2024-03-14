@@ -7,8 +7,7 @@ class WelcomeRoute extends StatelessWidget {
   const WelcomeRoute({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ScaffoldPage(
+  Widget build(final BuildContext context) => ScaffoldPage(
       header: const PageHeader(title: Text('Welcome')),
       content: Center(
         child: Column(
@@ -35,5 +34,4 @@ class WelcomeRoute extends StatelessWidget {
         ),
       ),
     );
-  }
 }

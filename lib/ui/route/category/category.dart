@@ -1,4 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
+import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/category/category_vm.dart';
@@ -12,44 +14,45 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class CategoryRoute extends StatelessWidget {
-  final ModCategory category;
-
   CategoryRoute({
     required this.category,
   }) : super(key: Key(category.name));
+  final ModCategory category;
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => createCategoryRouteViewModel(
-        appStateService: context.read(),
-        rootObserverService: context.read(),
-        category: category,
-      ),
-      child: _CategoryRoute(category: category),
-    );
+  Widget build(final BuildContext context) => ChangeNotifierProvider(
+        create: (final context) => createCategoryRouteViewModel(
+          appStateService: context.read(),
+          rootObserverService: context.read(),
+          category: category,
+        ),
+        child: _CategoryRoute(category: category),
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
 }
 
 class _CategoryRoute extends StatelessWidget {
+  const _CategoryRoute({required this.category});
+
   static const minCrossAxisExtent = 440.0;
   static const mainAxisExtent = 400.0;
   final ModCategory category;
 
-  const _CategoryRoute({required this.category});
-
   @override
-  Widget build(BuildContext context) {
-    return CategoryDropTarget(
-      category: category,
-      child: ScaffoldPage(
-        header: _buildHeader(context),
-        content: _buildContent(),
-      ),
-    );
-  }
+  Widget build(final BuildContext context) => CategoryDropTarget(
+        category: category,
+        child: ScaffoldPage(
+          header: _buildHeader(context),
+          content: _buildContent(),
+        ),
+      );
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(final BuildContext context) {
     final viewModel = context.read<CategoryRouteViewModel>();
     return PageHeader(
       title: Text(category.name),
@@ -82,28 +85,32 @@ class _CategoryRoute extends StatelessWidget {
     );
   }
 
-  Widget _buildContent() {
-    return ThickScrollbar(
-      child: Selector(
-        selector: (context, CategoryRouteViewModel vm) => vm.modPaths,
-        builder: (context, value, child) {
-          if (value == null) {
-            return const Center(child: ProgressRing());
-          }
-          final children = value.map((e) => ModCard(mod: e)).toList();
-          return GridView.builder(
-            padding: const EdgeInsets.all(8),
-            gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
-              minCrossAxisExtent: minCrossAxisExtent,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              mainAxisExtent: mainAxisExtent,
-            ),
-            itemCount: children.length,
-            itemBuilder: (context, index) => children[index],
-          );
-        },
-      ),
-    );
+  Widget _buildContent() => ThickScrollbar(
+        child: Selector<CategoryRouteViewModel, List<Mod>?>(
+          selector: (final context, final vm) => vm.modPaths,
+          builder: (final context, final value, final child) {
+            if (value == null) {
+              return const Center(child: ProgressRing());
+            }
+            final children = value.map((final e) => ModCard(mod: e)).toList();
+            return GridView.builder(
+              padding: const EdgeInsets.all(8),
+              gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
+                minCrossAxisExtent: minCrossAxisExtent,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                mainAxisExtent: mainAxisExtent,
+              ),
+              itemCount: children.length,
+              itemBuilder: (final context, final index) => children[index],
+            );
+          },
+        ),
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
 }

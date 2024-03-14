@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
-import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/route/nahida_store/nahida_store_vm.dart';
@@ -17,34 +17,38 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class NahidaStoreRoute extends StatelessWidget {
+  const NahidaStoreRoute({required this.category, super.key});
+
   final ModCategory category;
 
-  const NahidaStoreRoute({super.key, required this.category});
+  @override
+  Widget build(final BuildContext context) => ChangeNotifierProvider(
+        create: (final context) => createViewModel(
+          observer: context.read(),
+        ),
+        child: _NahidaStoreRoute(category: category),
+      );
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider(create: (context) => createNahidaliveAPI()),
-        ChangeNotifierProvider(
-          create: (context) => createViewModel(
-            api: context.read(),
-            observer: context.read(),
-          ),
-        ),
-      ],
-      child: _NahidaStoreRoute(category: category),
-    );
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
 }
 
 class _NahidaStoreRoute extends StatefulWidget {
-  final ModCategory category;
-
   const _NahidaStoreRoute({required this.category});
+
+  final ModCategory category;
 
   @override
   State<_NahidaStoreRoute> createState() => _NahidaStoreRouteState();
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ModCategory>('category', category));
+  }
 }
 
 class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
@@ -57,7 +61,7 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
     super.initState();
     final vm = context.read<NahidaStoreViewModel>();
     vm.registerDownloadCallbacks(
-      onApiException: (e) {
+      onApiException: (final e) {
         if (!mounted) return;
         displayInfoBarInContext(
           context,
@@ -66,7 +70,7 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
           severity: InfoBarSeverity.error,
         );
       },
-      onDownloadComplete: (element) {
+      onDownloadComplete: (final element) {
         if (!mounted) return;
         displayInfoBarInContext(
           context,
@@ -78,7 +82,7 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
         if (!mounted) return Future(() => null);
         return showDialog(
           context: context,
-          builder: (dialogContext) => ContentDialog(
+          builder: (final dialogContext) => ContentDialog(
             title: const Text('Enter password'),
             content: SizedBox(
               height: 40,
@@ -86,7 +90,7 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
                 autofocus: true,
                 controller: _textEditingController,
                 placeholder: 'Password',
-                onSubmitted: (value) => Navigator.of(dialogContext)
+                onSubmitted: (final value) => Navigator.of(dialogContext)
                     .pop(_textEditingController.text),
               ),
             ),
@@ -104,26 +108,30 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
           ),
         );
       },
-      onExtractFail: (category, modName, data) async {
+      onExtractFail: (final category, final modName, final data) async {
         if (mounted) {
-          unawaited(displayInfoBarInContext(
-            context,
-            title: const Text('Download failed'),
-            content: Text('Failed to extract archive: decode error.'
-                ' Instead, the archive was saved as $modName.'),
-            severity: InfoBarSeverity.error,
-          ));
+          unawaited(
+            displayInfoBarInContext(
+              context,
+              title: const Text('Download failed'),
+              content: Text('Failed to extract archive: decode error.'
+                  ' Instead, the archive was saved as $modName.'),
+              severity: InfoBarSeverity.error,
+            ),
+          );
         }
         try {
           await File(category.path.pJoin(modName)).writeAsBytes(data);
         } catch (e) {
           if (!mounted) return;
-          unawaited(displayInfoBarInContext(
-            context,
-            title: const Text('Write failed'),
-            content: Text('Failed to write archive $modName: $e'),
-            severity: InfoBarSeverity.error,
-          ));
+          unawaited(
+            displayInfoBarInContext(
+              context,
+              title: const Text('Write failed'),
+              content: Text('Failed to write archive $modName: $e'),
+              severity: InfoBarSeverity.error,
+            ),
+          );
         }
       },
     );
@@ -137,20 +145,18 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return ScaffoldPage.withPadding(
-      header: PageHeader(
-        title: Text('${widget.category.name} ← Akasha'),
-        leading: _buildLeading(),
-        commandBar: _buildCommandBar(),
-      ),
-      content: _buildContent(),
-    );
-  }
+  Widget build(final BuildContext context) => ScaffoldPage.withPadding(
+        header: PageHeader(
+          title: Text('${widget.category.name} ← Akasha'),
+          leading: _buildLeading(),
+          commandBar: _buildCommandBar(),
+        ),
+        content: _buildContent(),
+      );
 
   Widget? _buildLeading() => context.canPop()
       ? Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: RepaintBoundary(
             child: IconButton(
               icon: const Icon(FluentIcons.back),
@@ -160,86 +166,79 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
         )
       : null;
 
-  Widget _buildCommandBar() {
-    return RepaintBoundary(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Flexible(child: _buildSearchBox()),
-          const SizedBox(width: 16),
-          _buildCommandBarCard(),
-        ],
-      ),
-    );
-  }
+  Widget _buildCommandBar() => RepaintBoundary(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Flexible(child: _buildSearchBox()),
+            const SizedBox(width: 16),
+            _buildCommandBarCard(),
+          ],
+        ),
+      );
 
-  Widget _buildCommandBarCard() {
-    return IntrinsicCommandBarCard(
-      child: CommandBar(
-        overflowBehavior: CommandBarOverflowBehavior.clip,
-        mainAxisAlignment: MainAxisAlignment.end,
-        primaryItems: [
-          CommandBarButton(
-            icon: const Icon(FluentIcons.refresh),
-            onPressed: () {
-              context.read<NahidaStoreViewModel>().onRefresh();
+  Widget _buildCommandBarCard() => IntrinsicCommandBarCard(
+        child: CommandBar(
+          overflowBehavior: CommandBarOverflowBehavior.clip,
+          mainAxisAlignment: MainAxisAlignment.end,
+          primaryItems: [
+            CommandBarButton(
+              icon: const Icon(FluentIcons.refresh),
+              onPressed: () {
+                context.read<NahidaStoreViewModel>().onRefresh();
+                setState(() {
+                  final prevController = _scrollController;
+                  _scrollController = ScrollController(
+                    initialScrollOffset: prevController.offset,
+                  );
+                  prevController.dispose();
+                });
+              },
+            ),
+          ],
+        ),
+      );
+
+  Widget _buildSearchBox() => ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 300),
+        child: TextFormBox(
+          autovalidateMode: AutovalidateMode.always,
+          placeholder: 'Search tags',
+          onChanged: (final value) {
+            try {
+              final filter = parseTagQuery(value);
               setState(() {
-                final prevController = _scrollController;
-                _scrollController = ScrollController(
-                  initialScrollOffset: prevController.offset,
-                );
-                prevController.dispose();
+                _tagFilter = filter;
               });
-            },
-          ),
-        ],
-      ),
-    );
-  }
+            } catch (e) {
+              setState(() {
+                _tagFilter = null;
+              });
+            }
+          },
+          validator: (final value) {
+            if (value == null || value.isEmpty) return null;
+            try {
+              parseTagQuery(value);
+            } catch (e) {
+              return e.toString();
+            }
+            return null;
+          },
+        ),
+      );
 
-  Widget _buildSearchBox() {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 300),
-      child: TextFormBox(
-        autovalidateMode: AutovalidateMode.always,
-        placeholder: 'Search tags',
-        onChanged: (value) {
-          try {
-            final filter = parseTagQuery(value);
-            setState(() {
-              _tagFilter = filter;
-            });
-          } catch (e) {
-            setState(() {
-              _tagFilter = null;
-            });
-          }
-        },
-        validator: (value) {
-          if (value == null || value.isEmpty) return null;
-          try {
-            parseTagQuery(value);
-          } catch (e) {
-            return e.toString();
-          }
-          return null;
-        },
-      ),
-    );
-  }
-
-  Widget _buildContent() {
-    return Selector<NahidaStoreViewModel, Future<List<NahidaliveElement>>>(
-      selector: (context, model) => model.elements,
-      builder: (context, elements, child) {
-        return FutureBuilder(
+  Widget _buildContent() =>
+      Selector<NahidaStoreViewModel, Future<List<NahidaliveElement>>>(
+        selector: (final context, final model) => model.elements,
+        builder: (final context, final elements, final child) => FutureBuilder(
           future: elements,
-          builder: (context, snapshot) {
+          builder: (final context, final snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: ProgressRing());
             }
             if (snapshot.hasData) {
-              final data = snapshot.data!.where((element) {
+              final data = snapshot.data!.where((final element) {
                 final tagMap = {for (final e in element.tags) e: true};
                 try {
                   final filter = _tagFilter;
@@ -259,7 +258,7 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
                     mainAxisSpacing: 10,
                   ),
                   itemCount: data.length,
-                  itemBuilder: (context, index) => RevertScrollbar(
+                  itemBuilder: (final context, final index) => RevertScrollbar(
                     child: StoreElement(
                       passwordController: _textEditingController,
                       element: data[index],
@@ -272,8 +271,6 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
             return Text('Unable to fetch data.'
                 ' Report this to the developer: $snapshot');
           },
-        );
-      },
-    );
-  }
+        ),
+      );
 }

@@ -36,23 +36,21 @@ Future<List<Mod>> getMods(final ModCategory category) async {
       path: path,
       displayName: path.pEnabledForm.pBasename,
       isEnabled: path.pIsEnabled,
+      category: category,
     );
   }).toList();
   return UnmodifiableListView(res);
 }
 
-Future<List<File>> getActiveIniFiles(final Mod mod) async {
-  final res =
-      await Directory(mod.path).list().whereType<File>().where((final element) {
-    final path = element.path;
-    final extension = path.pExtension;
-    if (!extension.pEquals('.ini')) {
-      return false;
-    }
-    return path.pBasename.pIsEnabled;
-  }).toList();
-  return List.unmodifiable(res);
-}
+List<String> getActiveIniFiles(final List<String> paths) => List.unmodifiable(
+      paths.where((final path) {
+        final extension = path.pExtension;
+        if (!extension.pEquals('.ini')) {
+          return false;
+        }
+        return path.pBasename.pIsEnabled;
+      }),
+    );
 
 Future<List<T>> getUnder<T extends FileSystemEntity>(final String path) async {
   final dir = Directory(path);

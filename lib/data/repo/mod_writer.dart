@@ -9,18 +9,16 @@ import 'package:genshin_mod_manager/domain/repo/mod_writer.dart';
 
 ModWriter createModWriter({
   required final ModCategory category,
-}) {
-  return _ModWriterImpl(
+}) => _ModWriterImpl(
     category: category,
   );
-}
 
 class _ModWriterImpl implements ModWriter {
-  final ModCategory category;
 
   _ModWriterImpl({
     required this.category,
   });
+  final ModCategory category;
 
   @override
   Future<void> write({
@@ -41,9 +39,9 @@ class _ModWriterImpl implements ModWriter {
 }
 
 class ModZipExtractionException implements Exception {
-  final Uint8List data;
 
   const ModZipExtractionException({required this.data});
+  final Uint8List data;
 }
 
 Future<String> _getNonCollidingModName(
@@ -55,7 +53,7 @@ Future<String> _getNonCollidingModName(
 }
 
 String _getEnabledNameRecursive(final String name) {
-  String destDirName = name.pEnabledForm;
+  var destDirName = name.pEnabledForm;
   while (!destDirName.pIsEnabled) {
     destDirName = destDirName.pEnabledForm;
   }
@@ -69,8 +67,8 @@ Future<String> _getNonCollidingName(
   final enabledFormDirNames = (await getUnder<Directory>(category.path))
       .map((final e) => e.path.pBasename.pEnabledForm)
       .toSet();
-  int counter = 0;
-  String noCollisionDestDirName = destDirName;
+  var counter = 0;
+  var noCollisionDestDirName = destDirName;
   while (enabledFormDirNames.contains(noCollisionDestDirName)) {
     counter++;
     noCollisionDestDirName = '$destDirName ($counter)';

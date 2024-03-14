@@ -26,17 +26,56 @@ abstract interface class HomeShellViewModel implements BaseViewModel {
 }
 
 HomeShellViewModel createViewModel({
-  required AppStateService appStateService,
-  required RecursiveFileSystemWatcher recursiveFileSystemWatcher,
-}) {
-  return _HomeShellViewModelImpl(
+  required final AppStateService appStateService,
+  required final RecursiveFileSystemWatcher recursiveFileSystemWatcher,
+}) => _HomeShellViewModelImpl(
     appStateService: appStateService,
     recursiveFileSystemWatcher: recursiveFileSystemWatcher,
   );
-}
 
 class _HomeShellViewModelImpl extends ChangeNotifier
     implements HomeShellViewModel {
+
+  _HomeShellViewModelImpl({
+    required this.appStateService,
+    required this.recursiveFileSystemWatcher,
+  }) {
+    _asmr = appStateService.modRoot.stream.listen((final event) {
+      final modsWatchService = createFSEPathsWatcher<Directory>(
+        targetPath: event,
+        watcher: recursiveFileSystemWatcher,
+      );
+      _modsWatchService?.dispose();
+      _modsWatchService = modsWatchService;
+      final categoryIconFolderObserverService = createCategoryIconWatcher(
+        targetPath: event,
+      );
+      _categoryIconFolderObserverService?.dispose();
+      _categoryIconFolderObserverService = categoryIconFolderObserverService;
+      _modCategoriesSubscription?.cancel();
+      _modCategoriesSubscription = CombineLatestStream.combine3(
+        modsWatchService.paths.stream,
+        categoryIconFolderObserverService.paths.stream,
+        appStateService.modRoot.stream,
+        _getCategories,
+      ).listen((final event) {
+        _modCategories = event;
+        notifyListeners();
+      });
+    });
+
+    _runTogetherSubscription =
+        appStateService.runTogether.stream.listen((final event) {
+      _runTogether = event;
+      notifyListeners();
+    });
+
+    _showFolderIconSubscription =
+        appStateService.showFolderIcon.stream.listen((final event) {
+      _showFolderIcon = event;
+      notifyListeners();
+    });
+  }
   late final StreamSubscription<bool> _runTogetherSubscription;
   late final StreamSubscription<bool> _showFolderIconSubscription;
   late final StreamSubscription<String> _asmr;
@@ -59,47 +98,6 @@ class _HomeShellViewModelImpl extends ChangeNotifier
   @override
   bool? get showFolderIcon => _showFolderIcon;
   bool? _showFolderIcon;
-
-  _HomeShellViewModelImpl({
-    required this.appStateService,
-    required this.recursiveFileSystemWatcher,
-  }) {
-    _asmr = appStateService.modRoot.stream.listen((event) {
-      final modsWatchService = createFSEPathsWatcher<Directory>(
-        targetPath: event,
-        watcher: recursiveFileSystemWatcher,
-      );
-      _modsWatchService?.dispose();
-      _modsWatchService = modsWatchService;
-      final categoryIconFolderObserverService = createCategoryIconWatcher(
-        targetPath: event,
-      );
-      _categoryIconFolderObserverService?.dispose();
-      _categoryIconFolderObserverService = categoryIconFolderObserverService;
-      _modCategoriesSubscription?.cancel();
-      _modCategoriesSubscription = CombineLatestStream.combine3(
-        modsWatchService.paths.stream,
-        categoryIconFolderObserverService.paths.stream,
-        appStateService.modRoot.stream,
-        _getCategories,
-      ).listen((event) {
-        _modCategories = event;
-        notifyListeners();
-      });
-    });
-
-    _runTogetherSubscription =
-        appStateService.runTogether.stream.listen((event) {
-      _runTogether = event;
-      notifyListeners();
-    });
-
-    _showFolderIconSubscription =
-        appStateService.showFolderIcon.stream.listen((event) {
-      _showFolderIcon = event;
-      notifyListeners();
-    });
-  }
 
   @override
   void dispose() {
@@ -132,14 +130,12 @@ class _HomeShellViewModelImpl extends ChangeNotifier
   }
 
   static List<ModCategory> _getCategories(
-      List<String> root, List<String> icons, String modRoot) {
-    return List.unmodifiable(root.map((e) {
+      final List<String> root, final List<String> icons, final String modRoot,) => List.unmodifiable(root.map((final e) {
       final imageFile = findPreviewFileInString(icons, name: e);
       return ModCategory(
         path: e,
         name: e.pBasename,
         iconPath: imageFile,
       );
-    }));
-  }
+    }),);
 }

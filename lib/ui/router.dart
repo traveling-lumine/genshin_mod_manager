@@ -13,6 +13,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class MyApp extends StatelessWidget {
+
+  MyApp({super.key});
   late final _router = GoRouter(
     debugLogDiagnostics: true,
     initialLocation: kLoadingRoute,
@@ -20,45 +22,42 @@ class MyApp extends StatelessWidget {
     routes: [
       GoRoute(
         path: kLoadingRoute,
-        builder: (context, state) => const LoadingRoute(),
+        builder: (final context, final state) => const LoadingRoute(),
       ),
       ShellRoute(
-        builder: (context, state, child) => HomeShell(child: child),
+        builder: (final context, final state, final child) => HomeShell(child: child),
         routes: [
           GoRoute(
             path: kHomeRoute,
-            builder: (context, state) => const WelcomeRoute(),
+            builder: (final context, final state) => const WelcomeRoute(),
           ),
           GoRoute(
             path: kSettingRoute,
-            builder: (context, state) => const SettingRoute(),
+            builder: (final context, final state) => const SettingRoute(),
           ),
           GoRoute(
             path: kLicenseRoute,
-            builder: (context, state) => const OssLicensesRoute(),
+            builder: (final context, final state) => const OssLicensesRoute(),
           ),
           GoRoute(
             path: kCategoryRoute,
-            builder: (context, state) =>
-                CategoryRoute(category: state.extra as ModCategory),
+            builder: (final context, final state) =>
+                CategoryRoute(category: state.extra! as ModCategory),
           ),
           GoRoute(
             path: kNahidaStoreRoute,
-            builder: (context, state) =>
-                NahidaStoreRoute(category: state.extra as ModCategory),
+            builder: (final context, final state) =>
+                NahidaStoreRoute(category: state.extra! as ModCategory),
           ),
         ],
       ),
     ],
   );
 
-  MyApp({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return Provider(
-      create: (context) => createAppStateService(),
-      dispose: (context, value) => value.dispose(),
+  Widget build(final BuildContext context) => Provider(
+      create: (final context) => createAppStateService(),
+      dispose: (final context, final value) => value.dispose(),
       child: FluentApp.router(
         title: 'Genshin Mod Manager',
         routerDelegate: _router.routerDelegate,
@@ -66,5 +65,4 @@ class MyApp extends StatelessWidget {
         routeInformationProvider: _router.routeInformationProvider,
       ),
     );
-  }
 }

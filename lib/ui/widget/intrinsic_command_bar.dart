@@ -1,37 +1,31 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
 class IntrinsicCommandBarCard extends StatelessWidget {
-  final Widget child;
 
   const IntrinsicCommandBarCard({
-    super.key,
-    required this.child,
+    required this.child, super.key,
   });
+  final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return IntrinsicCommandBar(
+  Widget build(final BuildContext context) => IntrinsicCommandBar(
       child: CommandBarCard(
         child: child,
       ),
     );
-  }
 }
 
 class IntrinsicCommandBar extends StatelessWidget {
-  final Widget child;
 
   const IntrinsicCommandBar({
-    super.key,
-    required this.child,
+    required this.child, super.key,
   });
+  final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return IntrinsicWidth(
+  Widget build(final BuildContext context) => IntrinsicWidth(
       child: RepaintBoundary(
         child: child,
       ),
     );
-  }
 }

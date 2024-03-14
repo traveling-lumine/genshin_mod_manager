@@ -2,18 +2,18 @@ import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/repo/akasha.dart';
 import 'package:genshin_mod_manager/domain/repo/mod_writer.dart';
 
-final class AkashaDownloadUseCase {
-  final NahidaliveAPI api;
-  final NahidaliveElement element;
-  final ModWriter writer;
-  final String? pw;
+final class AkashaDownloadUrlUseCase {
 
-  AkashaDownloadUseCase({
+  AkashaDownloadUrlUseCase({
     required this.api,
     required this.element,
     required this.writer,
     this.pw,
   });
+  final NahidaliveAPI api;
+  final NahidaliveElement element;
+  final ModWriter writer;
+  final String? pw;
 
   Future<void> call() async {
     final url = await api.downloadUrl(element.uuid, pw: pw); // HttpException

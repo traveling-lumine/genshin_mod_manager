@@ -2,75 +2,67 @@
 library;
 
 abstract class TagParseElement {
-  bool evaluate(Map<String, bool> tags);
+  bool evaluate(final Map<String, bool> tags);
 }
 
 class Literal extends TagParseElement {
-  final String value;
 
   Literal(this.value);
+  final String value;
 
   @override
-  bool evaluate(Map<String, bool> tags) {
-    return tags[value] ?? false;
-  }
+  bool evaluate(final Map<String, bool> tags) => tags[value] ?? false;
 }
 
 class NotClause extends TagParseElement {
-  final TagParseElement child;
 
   NotClause(this.child);
+  final TagParseElement child;
 
   @override
-  bool evaluate(Map<String, bool> tags) {
-    return !child.evaluate(tags);
-  }
+  bool evaluate(final Map<String, bool> tags) => !child.evaluate(tags);
 }
 
 class AndClause extends TagParseElement {
-  final List<TagParseElement> children;
 
   AndClause(this.children);
+  final List<TagParseElement> children;
 
   @override
-  bool evaluate(Map<String, bool> tags) {
-    return children.every((element) => element.evaluate(tags));
-  }
+  bool evaluate(final Map<String, bool> tags) => children.every((final element) => element.evaluate(tags));
 }
 
 class OrClause extends TagParseElement {
-  final List<TagParseElement> children;
 
   OrClause(this.children);
+  final List<TagParseElement> children;
 
   @override
-  bool evaluate(Map<String, bool> tags) {
-    return children.any((element) => element.evaluate(tags));
-  }
+  bool evaluate(final Map<String, bool> tags) => children.any((final element) => element.evaluate(tags));
 }
 
 class Parenthesis extends TagParseElement {
-  final TagParseElement child;
 
   Parenthesis(this.child);
+  final TagParseElement child;
 
   @override
-  bool evaluate(Map<String, bool> tags) {
-    return child.evaluate(tags);
-  }
+  bool evaluate(final Map<String, bool> tags) => child.evaluate(tags);
 }
 
 enum TokenType { and, or, not, lParen, rParen, literal }
 
 class Token {
-  final TokenType type;
-  final String? value;
 
   Token(this.type, [this.value]);
+  final TokenType type;
+  final String? value;
 }
 
 class Lexer {
-  static final literal = RegExp(r'[^&|!() ]');
+
+  Lexer(this.text);
+  static final literal = RegExp('[^&|!() ]');
   static final Map<String, TokenType> keywords = {
     '&': TokenType.and,
     '|': TokenType.or,
@@ -82,8 +74,6 @@ class Lexer {
   final String text;
   int position = 0;
   Token? currentToken;
-
-  Lexer(this.text);
 
   Token? nextToken() {
     if (position >= text.length) {
@@ -116,19 +106,19 @@ class Lexer {
 }
 
 class Parser {
-  final Lexer lexer;
-  Token? currentToken;
 
   Parser(this.lexer) {
     currentToken = lexer.nextToken();
   }
+  final Lexer lexer;
+  Token? currentToken;
 
-  void eat(TokenType type) {
+  void eat(final TokenType type) {
     if (currentToken?.type == type) {
       currentToken = lexer.nextToken();
     } else {
       throw Exception(
-          'Expected token of type $type, got ${currentToken?.type}');
+          'Expected token of type $type, got ${currentToken?.type}',);
     }
   }
 
@@ -197,7 +187,7 @@ class Parser {
   }
 }
 
-TagParseElement parseTagQuery(String query) {
+TagParseElement parseTagQuery(final String query) {
   final lexer = Lexer(query);
   final parser = Parser(lexer);
   return parser.parse();

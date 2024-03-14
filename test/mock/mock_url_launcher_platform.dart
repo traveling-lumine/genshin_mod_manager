@@ -28,20 +28,15 @@ class MockUrlLauncher extends Fake
   bool launchCalled = false;
 
   // ignore: use_setters_to_change_properties
-  void setCanLaunchExpectations(String url) {
+  void setCanLaunchExpectations(final String url) {
     this.url = url;
   }
 
   void setLaunchExpectations({
-    required String url,
-    PreferredLaunchMode? launchMode,
-    bool? useSafariVC,
-    bool? useWebView,
-    required bool enableJavaScript,
-    required bool enableDomStorage,
-    required bool universalLinksOnly,
-    required Map<String, String> headers,
-    required String? webOnlyWindowName,
+    required final String url,
+    required final bool enableJavaScript, required final bool enableDomStorage, required final bool universalLinksOnly, required final Map<String, String> headers, required final String? webOnlyWindowName, final PreferredLaunchMode? launchMode,
+    final bool? useSafariVC,
+    final bool? useWebView,
   }) {
     this.url = url;
     this.launchMode = launchMode;
@@ -55,7 +50,7 @@ class MockUrlLauncher extends Fake
   }
 
   // ignore: use_setters_to_change_properties
-  void setResponse(bool response) {
+  void setResponse(final bool response) {
     this.response = response;
   }
 
@@ -63,7 +58,7 @@ class MockUrlLauncher extends Fake
   LinkDelegate? get linkDelegate => null;
 
   @override
-  Future<bool> canLaunch(String url) async {
+  Future<bool> canLaunch(final String url) async {
     expect(url, this.url);
     canLaunchCalled = true;
     return response!;
@@ -71,14 +66,14 @@ class MockUrlLauncher extends Fake
 
   @override
   Future<bool> launch(
-    String url, {
-    required bool useSafariVC,
-    required bool useWebView,
-    required bool enableJavaScript,
-    required bool enableDomStorage,
-    required bool universalLinksOnly,
-    required Map<String, String> headers,
-    String? webOnlyWindowName,
+    final String url, {
+    required final bool useSafariVC,
+    required final bool useWebView,
+    required final bool enableJavaScript,
+    required final bool enableDomStorage,
+    required final bool universalLinksOnly,
+    required final Map<String, String> headers,
+    final String? webOnlyWindowName,
   }) async {
     expect(url, this.url);
     expect(useSafariVC, this.useSafariVC);
@@ -93,7 +88,7 @@ class MockUrlLauncher extends Fake
   }
 
   @override
-  Future<bool> launchUrl(String url, LaunchOptions options) async {
+  Future<bool> launchUrl(final String url, final LaunchOptions options) async {
     expect(url, this.url);
     expect(options.mode, launchMode);
     expect(options.webViewConfiguration.enableJavaScript, enableJavaScript);

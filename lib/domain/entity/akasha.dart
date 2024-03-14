@@ -1,6 +1,17 @@
 import 'dart:collection';
 
 class NahidaliveElement {
+
+  const NahidaliveElement({
+    required this.uuid,
+    required this.version,
+    required this.sha256,
+    required this.title,
+    required this.description,
+    required this.tags, required this.uploadDate, required this.previewUrl, required this.koreaOnly, this.arcaUrl,
+    this.virustotalUrl,
+    this.expirationDate,
+  });
   final String uuid;
   final String version;
   final String sha256;
@@ -14,24 +25,8 @@ class NahidaliveElement {
   final String previewUrl;
   final bool koreaOnly;
 
-  const NahidaliveElement({
-    required this.uuid,
-    required this.version,
-    required this.sha256,
-    required this.title,
-    required this.description,
-    this.arcaUrl,
-    this.virustotalUrl,
-    required this.tags,
-    this.expirationDate,
-    required this.uploadDate,
-    required this.previewUrl,
-    required this.koreaOnly,
-  });
-
   @override
-  String toString() {
-    return 'NahidaliveElement('
+  String toString() => 'NahidaliveElement('
         'uuid: $uuid, '
         'version: $version, '
         'sha256: $sha256, '
@@ -45,18 +40,17 @@ class NahidaliveElement {
         'previewUrl: $previewUrl, '
         'koreaOnly: $koreaOnly'
         ')';
-  }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) return true;
     // tag list equality check
     if (other is! NahidaliveElement) return false;
-    bool tagsEqual = true;
+    var tagsEqual = true;
     if (tags.length != other.tags.length) {
       tagsEqual = false;
     } else {
-      for (int i = 0; i < tags.length; i++) {
+      for (var i = 0; i < tags.length; i++) {
         if (tags[i] != other.tags[i]) {
           tagsEqual = false;
           break;
@@ -78,8 +72,7 @@ class NahidaliveElement {
   }
 
   @override
-  int get hashCode {
-    return uuid.hashCode ^
+  int get hashCode => uuid.hashCode ^
         version.hashCode ^
         sha256.hashCode ^
         title.hashCode ^
@@ -91,31 +84,28 @@ class NahidaliveElement {
         uploadDate.hashCode ^
         previewUrl.hashCode ^
         koreaOnly.hashCode;
-  }
 }
 
 class NahidaliveDownloadElement {
-  final bool status;
-  final String? errorCodes;
-  final String? downloadUrl;
 
   const NahidaliveDownloadElement({
     required this.status,
     this.errorCodes,
     this.downloadUrl,
   });
+  final bool status;
+  final String? errorCodes;
+  final String? downloadUrl;
 
   @override
-  String toString() {
-    return 'NahidaliveDownloadElement('
+  String toString() => 'NahidaliveDownloadElement('
         'status: $status, '
         'errorCodes: $errorCodes, '
         'downloadUrl: $downloadUrl'
         ')';
-  }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) return true;
     return other is NahidaliveDownloadElement &&
         other.status == status &&
@@ -124,7 +114,5 @@ class NahidaliveDownloadElement {
   }
 
   @override
-  int get hashCode {
-    return status.hashCode ^ errorCodes.hashCode ^ downloadUrl.hashCode;
-  }
+  int get hashCode => status.hashCode ^ errorCodes.hashCode ^ downloadUrl.hashCode;
 }

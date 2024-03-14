@@ -37,10 +37,10 @@ class OssLicensesRoute extends StatelessWidget {
     await for (final l in LicenseRegistry.licenses) {
       for (final p in l.packages) {
         final lp = lm.putIfAbsent(p, () => []);
-        lp.addAll(l.paragraphs.map((p) => p.text));
+        lp.addAll(l.paragraphs.map((final p) => p.text));
       }
     }
-    final licenses = ossLicenses.where((e) => e.isDirectDependency).toList();
+    final licenses = ossLicenses.where((final e) => e.isDirectDependency).toList();
     // for (final key in lm.keys) {
     //   licenses.add(Package(
     //     name: key,
@@ -53,14 +53,13 @@ class OssLicensesRoute extends StatelessWidget {
     //     isDirectDependency: false,
     //   ));
     // }
-    return licenses..sort((a, b) => a.name.compareTo(b.name));
+    return licenses..sort((final a, final b) => a.name.compareTo(b.name));
   }
 
   static final _licenses = loadLicenses();
 
   @override
-  Widget build(BuildContext context) {
-    return NavigationView(
+  Widget build(final BuildContext context) => NavigationView(
       appBar: const NavigationAppBar(
         title: Text('Open Source Licenses'),
       ),
@@ -68,11 +67,10 @@ class OssLicensesRoute extends StatelessWidget {
         content: FutureBuilder<List<Package>>(
           future: _licenses,
           initialData: const [],
-          builder: (context, snapshot) {
-            return ListView.separated(
+          builder: (final context, final snapshot) => ListView.separated(
               padding: const EdgeInsets.all(0),
               itemCount: snapshot.data?.length ?? 0,
-              itemBuilder: (context, index) {
+              itemBuilder: (final context, final index) {
                 final package = snapshot.data![index];
                 return ListTile(
                   title: Text('${package.name} ${package.version}'),
@@ -82,37 +80,32 @@ class OssLicensesRoute extends StatelessWidget {
                   trailing: const Icon(FluentIcons.chevron_right),
                   onPressed: () => Navigator.of(context).push(
                     FluentPageRoute(
-                      builder: (context) =>
+                      builder: (final context) =>
                           MiscOssLicenseSingle(package: package),
                     ),
                   ),
                 );
               },
-              separatorBuilder: (context, index) => const Divider(),
-            );
-          },
+              separatorBuilder: (final context, final index) => const Divider(),
+            ),
         ),
       ),
     );
-  }
 }
 
 class MiscOssLicenseSingle extends StatelessWidget {
+
+  const MiscOssLicenseSingle({required this.package, super.key});
   final Package package;
 
-  const MiscOssLicenseSingle({super.key, required this.package});
-
-  String _bodyText() {
-    return package.license!.split('\n').map((line) {
+  String _bodyText() => package.license!.split('\n').map((line) {
       if (line.startsWith('//')) line = line.substring(2);
       line = line.trim();
       return line;
     }).join('\n');
-  }
 
   @override
-  Widget build(BuildContext context) {
-    return NavigationView(
+  Widget build(final BuildContext context) => NavigationView(
       appBar: NavigationAppBar(
         title: Text('${package.name} ${package.version}'),
       ),
@@ -121,28 +114,32 @@ class MiscOssLicenseSingle extends StatelessWidget {
           if (package.description.isNotEmpty)
             Padding(
                 padding:
-                    const EdgeInsets.only(top: 12.0, left: 12.0, right: 12.0),
+                    const EdgeInsets.only(top: 12, left: 12, right: 12),
                 child: Text(
                   package.description,
-                )),
+                ),),
           if (package.homepage != null)
             Padding(
                 padding:
-                    const EdgeInsets.only(top: 12.0, left: 12.0, right: 12.0),
+                    const EdgeInsets.only(top: 12, left: 12, right: 12),
                 child: GestureDetector(
                   child: Text(package.homepage!,
                       style: const TextStyle(
-                          decoration: TextDecoration.underline)),
+                          decoration: TextDecoration.underline,),),
                   onTap: () => launchUrl(Uri.parse(package.homepage!)),
-                )),
+                ),),
           if (package.description.isNotEmpty || package.homepage != null)
             const Divider(),
           Padding(
-            padding: const EdgeInsets.only(top: 12.0, left: 12.0, right: 12.0),
+            padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
             child: Text(_bodyText()),
           ),
-        ]),
+        ],),
       ),
     );
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Package>('package', package));
   }
 }

@@ -16,14 +16,34 @@ import 'package:rxdart/subjects.dart';
 PresetService createPresetService({
   required final AppStateService appStateService,
   required final RecursiveFileSystemWatcher observerService,
-}) {
-  return _PresetServiceImpl(
+}) => _PresetServiceImpl(
     appStateService: appStateService,
     observerService: observerService,
   );
-}
 
 class _PresetServiceImpl implements PresetService {
+
+  _PresetServiceImpl({
+    required this.appStateService,
+    required this.observerService,
+  }) {
+    _subscription = appStateService.presetData.stream.listen((final event) {
+      final decoded = jsonDecode(event);
+      _curGlobal = _parseMap(decoded['global']);
+      _curLocal = _parseMap(decoded['local']);
+      _globalPresets.add(List.unmodifiable(_curGlobal.keys));
+      for (final category in _curLocal.entries) {
+        final stream = _localPresets[category.key];
+        if (stream != null) {
+          stream.add(List.unmodifiable(category.value.keys));
+        } else {
+          _localPresets[category.key] = BehaviorSubject.seeded(
+            List.unmodifiable(category.value.keys),
+          );
+        }
+      }
+    });
+  }
   late final StreamSubscription<String> _subscription;
 
   final AppStateService appStateService;
@@ -47,28 +67,6 @@ class _PresetServiceImpl implements PresetService {
 
   final _localPresets = <String, BehaviorSubject<List<String>>>{};
 
-  _PresetServiceImpl({
-    required this.appStateService,
-    required this.observerService,
-  }) {
-    _subscription = appStateService.presetData.stream.listen((final event) {
-      final decoded = jsonDecode(event);
-      _curGlobal = _parseMap(decoded['global']);
-      _curLocal = _parseMap(decoded['local']);
-      _globalPresets.add(List.unmodifiable(_curGlobal.keys));
-      for (final category in _curLocal.entries) {
-        final stream = _localPresets[category.key];
-        if (stream != null) {
-          stream.add(List.unmodifiable(category.value.keys));
-        } else {
-          _localPresets[category.key] = BehaviorSubject.seeded(
-            List.unmodifiable(category.value.keys),
-          );
-        }
-      }
-    });
-  }
-
   @override
   void dispose() {
     _globalPresets.close();
@@ -80,7 +78,7 @@ class _PresetServiceImpl implements PresetService {
 
   @override
   Future<void> addGlobalPreset(final String name) async {
-    Map<String, List<String>> data = {};
+    final data = <String, List<String>>{};
     final modRoot = appStateService.modRoot.latest;
     if (modRoot == null) {
       return;
@@ -103,7 +101,7 @@ class _PresetServiceImpl implements PresetService {
     final String name,
   ) async {
     final categoryDir = category.path;
-    List<String> data = (await getUnder<Directory>(categoryDir))
+    final data = (await getUnder<Directory>(categoryDir))
         .map((final e) => e.path.pBasename)
         .where((final e) => e.pIsEnabled)
         .toList();
@@ -195,7 +193,7 @@ class _PresetServiceImpl implements PresetService {
       final modDir = categoryPath.pJoin(mod);
       final future = disable(
         shaderFixesPath: shaderFixes,
-        modPathW: modDir,
+        modPath: modDir,
       );
       futures.add(future);
     }
@@ -213,8 +211,8 @@ class _PresetServiceImpl implements PresetService {
   }
 }
 
-Map<String, Map<String, List<String>>> _parseMap(final dynamic data) {
-  final Map<String, Map<String, List<String>>> parsed = {};
+Map<String, Map<String, List<String>>> _parseMap(final data) {
+  final parsed = <String, Map<String, List<String>>>{};
   data.forEach((final k, final v) {
     final forEachCategory = _forEachPreset(k, v);
     if (forEachCategory == null) {
@@ -232,7 +230,7 @@ Map<String, List<String>>? _forEachPreset(final k, final v) {
   if (v is! Map) {
     return null;
   }
-  final Map<String, List<String>> b = {};
+  final b = <String, List<String>>{};
   v.forEach((final k, final v) {
     final forEachCategory = _forEachCategory(k, v);
     if (forEachCategory == null) {
@@ -250,7 +248,7 @@ List<String>? _forEachCategory(final k, final v) {
   if (v is! List) {
     return null;
   }
-  final List<String> c = [];
+  final c = <String>[];
   for (final e in v) {
     if (e is! String) {
       continue;

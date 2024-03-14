@@ -8,36 +8,34 @@ import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
 abstract interface class PresetControlViewModel implements BaseViewModel {
   List<String>? get presets;
 
-  void setPreset(String name);
+  void setPreset(final String name);
 
-  void addPreset(String text);
+  void addPreset(final String text);
 
-  void removePreset(String name);
+  void removePreset(final String name);
 }
 
 PresetControlViewModel createGlobalPresetControlViewModel({
-  required PresetService presetService,
-}) {
-  return _GlobalPresetControlViewModelImpl(presetService: presetService);
-}
+  required final PresetService presetService,
+}) => _GlobalPresetControlViewModelImpl(presetService: presetService);
 
 class _GlobalPresetControlViewModelImpl extends ChangeNotifier
     implements PresetControlViewModel {
+
+  _GlobalPresetControlViewModelImpl({
+    required this.presetService,
+  }) : _presets = presetService.globalPresets.latest {
+    _subscription = presetService.globalPresets.stream.listen((final value) {
+      _presets = value;
+      notifyListeners();
+    });
+  }
   late final StreamSubscription<List<String>> _subscription;
   final PresetService presetService;
 
   @override
   List<String>? get presets => _presets;
   List<String>? _presets;
-
-  _GlobalPresetControlViewModelImpl({
-    required this.presetService,
-  }) : _presets = presetService.globalPresets.latest {
-    _subscription = presetService.globalPresets.stream.listen((value) {
-      _presets = value;
-      notifyListeners();
-    });
-  }
 
   @override
   void dispose() {
@@ -46,33 +44,42 @@ class _GlobalPresetControlViewModelImpl extends ChangeNotifier
   }
 
   @override
-  void setPreset(String name) {
+  void setPreset(final String name) {
     presetService.setGlobalPreset(name);
   }
 
   @override
-  void addPreset(String text) {
+  void addPreset(final String text) {
     presetService.addGlobalPreset(text);
   }
 
   @override
-  void removePreset(String name) {
+  void removePreset(final String name) {
     presetService.removeGlobalPreset(name);
   }
 }
 
 PresetControlViewModel createLocalPresetControlViewModel({
-  required PresetService presetService,
-  required ModCategory category,
-}) {
-  return _LocalPresetControlViewModelImpl(
+  required final PresetService presetService,
+  required final ModCategory category,
+}) => _LocalPresetControlViewModelImpl(
     presetService: presetService,
     category: category,
   );
-}
 
 class _LocalPresetControlViewModelImpl extends ChangeNotifier
     implements PresetControlViewModel {
+
+  _LocalPresetControlViewModelImpl({
+    required this.presetService,
+    required this.category,
+  }) : _presets = presetService.getLocalPresets(category).latest {
+    _subscription =
+        presetService.getLocalPresets(category).stream.listen((final value) {
+      _presets = value;
+      notifyListeners();
+    });
+  }
   late final StreamSubscription<List<String>> _subscription;
   final PresetService presetService;
   final ModCategory category;
@@ -81,17 +88,6 @@ class _LocalPresetControlViewModelImpl extends ChangeNotifier
   List<String>? get presets => _presets;
   List<String>? _presets;
 
-  _LocalPresetControlViewModelImpl({
-    required this.presetService,
-    required this.category,
-  }) : _presets = presetService.getLocalPresets(category).latest {
-    _subscription =
-        presetService.getLocalPresets(category).stream.listen((value) {
-      _presets = value;
-      notifyListeners();
-    });
-  }
-
   @override
   void dispose() {
     _subscription.cancel();
@@ -99,17 +95,17 @@ class _LocalPresetControlViewModelImpl extends ChangeNotifier
   }
 
   @override
-  void setPreset(String name) {
+  void setPreset(final String name) {
     presetService.setLocalPreset(category, name);
   }
 
   @override
-  void addPreset(String text) {
+  void addPreset(final String text) {
     presetService.addLocalPreset(category, text);
   }
 
   @override
-  void removePreset(String name) {
+  void removePreset(final String name) {
     presetService.removeLocalPreset(category, name);
   }
 }

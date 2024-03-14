@@ -12,12 +12,12 @@ void main() {
     UrlLauncherPlatform.instance = mock;
   });
 
-  testWidgets('WelcomeRoute welcomes you', (WidgetTester tester) async {
+  testWidgets('WelcomeRoute welcomes you', (final tester) async {
     await tester.pumpWidget(const FluentApp(home: WelcomeRoute()));
 
     expect(find.text('Welcome'), findsAny);
   });
-  testWidgets('WelcomeRoute has a link to GitHub', (WidgetTester tester) async {
+  testWidgets('WelcomeRoute has a link to GitHub', (final tester) async {
     await tester.pumpWidget(const FluentApp(home: WelcomeRoute()));
 
     expect(find.text('Welcome'), findsAny);

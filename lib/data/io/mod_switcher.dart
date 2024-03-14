@@ -19,8 +19,8 @@ Future<void> enable({
     return;
   }
 
-  final List<File> shaderFilenames = await _getModShaders(modPath);
-  final String renameTarget = modPath.pEnabledForm;
+  final shaderFilenames = await _getModShaders(modPath);
+  final renameTarget = modPath.pEnabledForm;
   if (Directory(renameTarget).existsSync()) {
     onModRenameClash?.call(renameTarget);
     return;
@@ -42,17 +42,17 @@ Future<void> enable({
 /// Disables a mod.
 Future<void> disable({
   required final String shaderFixesPath,
-  required final String modPathW,
+  required final String modPath,
   final void Function(String)? onModRenameClash,
   final void Function(Object)? onShaderDeleteFailed,
   final void Function()? onModRenameFailed,
 }) async {
-  if (!Directory(modPathW).existsSync()) {
+  if (!Directory(modPath).existsSync()) {
     return;
   }
 
-  final List<File> shaderFilenames = await _getModShaders(modPathW);
-  final String renameTarget = modPathW.pDisabledForm;
+  final shaderFilenames = await _getModShaders(modPath);
+  final renameTarget = modPath.pDisabledForm;
   if (Directory(renameTarget).existsSync()) {
     onModRenameClash?.call(renameTarget);
     return;
@@ -64,7 +64,7 @@ Future<void> disable({
     return;
   }
   try {
-    Directory(modPathW).renameSync(renameTarget);
+    Directory(modPath).renameSync(renameTarget);
   } on PathAccessException {
     onModRenameFailed?.call();
     await _copyShaders(shaderFixesPath, shaderFilenames);
@@ -72,7 +72,7 @@ Future<void> disable({
 }
 
 Future<List<File>> _getModShaders(final String modPath) async {
-  final List<File> shaderFilenames = [];
+  final shaderFilenames = <File>[];
   final modShaderPath = modPath.pJoin(kShaderFixes);
   try {
     final fseUnder = await getUnder<File>(modShaderPath);

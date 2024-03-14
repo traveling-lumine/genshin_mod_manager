@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:genshin_mod_manager/data/constant.dart';
@@ -30,19 +31,19 @@ import 'package:window_manager/window_manager.dart';
 const _kRepoReleases = '$kRepoBase/releases/latest';
 
 class HomeShell extends StatelessWidget {
+  const HomeShell({required this.child, super.key});
+
   static const resourceDir = 'Resources';
   final Widget child;
 
-  const HomeShell({super.key, required this.child});
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final resourcePath =
         Platform.resolvedExecutable.pDirname.pJoin(resourceDir);
     Directory(resourcePath).createSync(recursive: true);
     return StreamBuilder(
       stream: context.read<AppStateService>().modRoot.stream,
-      builder: (context, snapshot) {
+      builder: (final context, final snapshot) {
         if (snapshot.data == null) {
           return NavigationView(
             appBar: getAppbar("Reading modRoot..."),
@@ -62,20 +63,20 @@ class HomeShell extends StatelessWidget {
           key: Key(modRoot),
           providers: [
             Provider(
-              create: (context) => createRecursiveFileSystemWatcher(
+              create: (final context) => createRecursiveFileSystemWatcher(
                 targetPath: modRoot,
               ),
-              dispose: (context, value) => value.dispose(),
+              dispose: (final context, final value) => value.dispose(),
             ),
             Provider(
-              create: (context) => createPresetService(
+              create: (final context) => createPresetService(
                 appStateService: context.read(),
                 observerService: context.read(),
               ),
-              dispose: (context, value) => value.dispose(),
+              dispose: (final context, final value) => value.dispose(),
             ),
             ChangeNotifierProvider(
-              create: (context) => createViewModel(
+              create: (final context) => createViewModel(
                 appStateService: context.read(),
                 recursiveFileSystemWatcher: context.read(),
               ),
@@ -89,9 +90,9 @@ class HomeShell extends StatelessWidget {
 }
 
 class _HomeShell extends StatefulWidget {
-  final Widget child;
-
   const _HomeShell({required this.child});
+
+  final Widget child;
 
   @override
   State<_HomeShell> createState() => _HomeShellState();
@@ -122,12 +123,16 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (!updateDisplayed) {
       updateDisplayed = true;
-      _shouldUpdate(context).then((value) {
-        if (value == null) return;
-        if (!context.mounted) return;
+      _shouldUpdate(context).then((final value) {
+        if (value == null) {
+          return;
+        }
+        if (!context.mounted) {
+          return;
+        }
         return _displayUpdateInfoBar(value);
       });
     }
@@ -144,8 +149,8 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
       ),
     ];
 
-    final categories =
-        context.select((HomeShellViewModel vm) => vm.modCategories);
+    final categories = context.select<HomeShellViewModel, List<ModCategory>?>(
+        (final vm) => vm.modCategories);
     if (categories == null) {
       return NavigationView(
         appBar: getAppbar("Reading categories..."),
@@ -160,57 +165,60 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
         ),
       );
     }
-    final items = categories.map((e) {
+    final items = categories.map((final e) {
       final iconPath = e.iconPath;
       return _FolderPaneItem(
-          category: e,
-          imageFile: iconPath != null ? File(iconPath) : null,
-          onTap: () => context.go(kCategoryRoute, extra: e));
+        category: e,
+        imageFile: iconPath != null ? File(iconPath) : null,
+        onTap: () => context.go(kCategoryRoute, extra: e),
+      );
     }).toList();
 
     final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
-          ..removeWhere((i) => i is! PaneItem || i is PaneItemAction))
+          ..removeWhere((final i) => i is! PaneItem || i is PaneItemAction))
         .cast<PaneItem>();
 
     final currentRouteExtra = GoRouterState.of(context).extra;
-    final index = effectiveItems.indexWhere((e) {
+    final index = effectiveItems.indexWhere((final e) {
       final key = e.key;
-      if (key is! ValueKey<ModCategory>) return false;
+      if (key is! ValueKey<ModCategory>) {
+        return false;
+      }
       return key.value == currentRouteExtra;
     });
 
-    final int? selected = index != -1 ? index : null;
+    final selected = index != -1 ? index : null;
 
     final uri = GoRouterState.of(context).uri;
     final uriSegments = uri.pathSegments;
     if (uriSegments.length == 1 &&
         uriSegments[0] == 'category' &&
-        !categories.any((e) => e == currentRouteExtra)) {
+        !categories.any((final e) => e == currentRouteExtra)) {
       final String destination;
       final ModCategory? extra;
       if (categories.isNotEmpty) {
-        final index = _search(categories, currentRouteExtra as ModCategory);
+        final index = _search(categories, currentRouteExtra! as ModCategory);
         destination = kCategoryRoute;
         extra = categories[index];
       } else {
         destination = kHomeRoute;
         extra = null;
       }
-      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((final timeStamp) {
         context.go(destination, extra: extra);
       });
     }
 
     return NavigationView(
-      transitionBuilder: (child, animation) =>
+      transitionBuilder: (final child, final animation) =>
           SuppressPageTransition(child: child),
       appBar: _buildAppbar(),
       pane: _buildPane(selected, items, footerItems),
-      paneBodyBuilder: (item, body) => widget.child,
+      paneBodyBuilder: (final item, final body) => widget.child,
     );
   }
 
-  void _displayUpdateInfoBar(String newVersion) {
+  void _displayUpdateInfoBar(final String newVersion) {
     displayInfoBarInContext(
       context,
       duration: const Duration(minutes: 1),
@@ -240,7 +248,7 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
       action: FilledButton(
         onPressed: () => showDialog(
           context: context,
-          builder: (dialogContext) => ContentDialog(
+          builder: (final dialogContext) => ContentDialog(
             title: const Text('Start auto update?'),
             content: RichText(
               textAlign: TextAlign.justify,
@@ -258,7 +266,9 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
                         'Please backup your mods and resources before proceeding.\n'
                         'DELETION OF UNRELATED FILES IS POSSIBLE.',
                     style: TextStyle(
-                        color: Colors.red, fontWeight: FontWeight.bold),
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -286,51 +296,53 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
     );
   }
 
-  NavigationAppBar _buildAppbar() {
-    return NavigationAppBar(
-      actions: const WindowButtons(),
-      automaticallyImplyLeading: false,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Expanded(
-            child: DragToMoveArea(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Genshin Mod Manager'),
+  NavigationAppBar _buildAppbar() => NavigationAppBar(
+        actions: const WindowButtons(),
+        automaticallyImplyLeading: false,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Expanded(
+              child: DragToMoveArea(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Genshin Mod Manager'),
+                ),
               ),
             ),
-          ),
-          Row(
-            children: [
-              PresetControlWidget(isLocal: false),
-              const SizedBox(width: kWindowButtonWidth),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+            Row(
+              children: [
+                PresetControlWidget(isLocal: false),
+                const SizedBox(width: kWindowButtonWidth),
+              ],
+            ),
+          ],
+        ),
+      );
 
-  NavigationPane _buildPane(int? selected, List<_FolderPaneItem> items,
-      List<NavigationPaneItem> footerItems) {
-    return NavigationPane(
-      selected: selected,
-      items: items.cast<NavigationPaneItem>(),
-      footerItems: footerItems,
-      displayMode: PaneDisplayMode.auto,
-      size: const NavigationPaneSize(
-        openWidth: _HomeShellState._navigationPaneOpenWidth,
-      ),
-      autoSuggestBox: _buildAutoSuggestBox(items, footerItems),
-      autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-    );
-  }
+  NavigationPane _buildPane(
+    final int? selected,
+    final List<_FolderPaneItem> items,
+    final List<NavigationPaneItem> footerItems,
+  ) =>
+      NavigationPane(
+        selected: selected,
+        items: items.cast<NavigationPaneItem>(),
+        footerItems: footerItems,
+        size: const NavigationPaneSize(
+          openWidth: _HomeShellState._navigationPaneOpenWidth,
+        ),
+        autoSuggestBox: _buildAutoSuggestBox(items, footerItems),
+        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+      );
 
   List<PaneItemAction> _buildPaneItemActions() {
     const icon = Icon(FluentIcons.user_window);
-    final select = context.select((HomeShellViewModel vm) => vm.runTogether);
-    if (select == null) return const [];
+    final select =
+        context.select<HomeShellViewModel, bool?>((final vm) => vm.runTogether);
+    if (select == null) {
+      return const [];
+    }
     return select
         ? [
             PaneItemAction(
@@ -357,8 +369,7 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
   }
 
   void _runLauncher() {
-    final vm = context.read<HomeShellViewModel>();
-    vm.runLauncher();
+    context.read<HomeShellViewModel>().runLauncher();
   }
 
   void _runBoth() {
@@ -367,56 +378,83 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
   }
 
   void _runMigoto() {
-    final vm = context.read<HomeShellViewModel>();
-    vm.runMigoto();
-    displayInfoBarInContext(
+    context.read<HomeShellViewModel>().runMigoto();
+    unawaited(displayInfoBarInContext(
       context,
       title: const Text('Ran 3d migoto'),
-    );
+    ));
   }
 
   Widget _buildAutoSuggestBox(
-      List<_FolderPaneItem> items, List<NavigationPaneItem> footerItems) {
-    return AutoSuggestBox2(
-      items: items
-          .map((e) => AutoSuggestBoxItem2(
+    final List<_FolderPaneItem> items,
+    final List<NavigationPaneItem> footerItems,
+  ) =>
+      AutoSuggestBox2(
+        items: items
+            .map(
+              (final e) => AutoSuggestBoxItem2(
                 value: e.key,
                 label: e.category.name,
                 onSelected: () => context.go(kCategoryRoute, extra: e.category),
-              ))
-          .toList(),
-      trailingIcon: const Icon(FluentIcons.search),
-      onSubmissionFailed: (text) {
-        if (text.isEmpty) return;
-        final index = items.indexWhere((_FolderPaneItem e) {
-          final name =
-              (e.key as ValueKey<ModCategory>).value.name.toLowerCase();
-          return name.startsWith(text.toLowerCase());
-        });
-        if (index == -1) return;
-        final category = items[index].category;
-        context.go(kCategoryRoute, extra: category);
-      },
-    );
+              ),
+            )
+            .toList(),
+        trailingIcon: const Icon(FluentIcons.search),
+        onSubmissionFailed: (final text) {
+          if (text.isEmpty) {
+            return;
+          }
+          final index = items.indexWhere((final e) {
+            final name =
+                (e.key! as ValueKey<ModCategory>).value.name.toLowerCase();
+            return name.startsWith(text.toLowerCase());
+          });
+          if (index == -1) {
+            return;
+          }
+          final category = items[index].category;
+          context.go(kCategoryRoute, extra: category);
+        },
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+        .add(DiagnosticsProperty<bool>('updateDisplayed', updateDisplayed));
   }
 }
 
 class _FolderPaneItem extends PaneItem {
+  _FolderPaneItem({
+    required this.category,
+    super.onTap,
+    final File? imageFile,
+  }) : super(
+          key: ValueKey(category),
+          title: Text(
+            category.name,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          icon: _getIcon(imageFile),
+          body: const SizedBox.shrink(),
+        );
   static const maxIconWidth = 80.0;
 
-  static Widget _getIcon(File? imageFile) {
-    return Selector(
-      selector: (context, HomeShellViewModel vm) => vm.showFolderIcon,
-      builder: (context, value, child) {
-        if (value == null) return const ProgressRing();
-        return value
-            ? _buildImage(imageFile)
-            : const Icon(FluentIcons.folder_open);
-      },
-    );
-  }
+  static Widget _getIcon(final File? imageFile) =>
+      Selector<HomeShellViewModel, bool?>(
+        selector: (final context, final vm) => vm.showFolderIcon,
+        builder: (final context, final value, final child) {
+          if (value == null) {
+            return const ProgressRing();
+          }
+          return value
+              ? _buildImage(imageFile)
+              : const Icon(FluentIcons.folder_open);
+        },
+      );
 
-  static Widget _buildImage(File? imageFile) {
+  static Widget _buildImage(final File? imageFile) {
     final Image image;
     if (imageFile == null) {
       image = Image.asset('images/app_icon.ico');
@@ -438,69 +476,70 @@ class _FolderPaneItem extends PaneItem {
 
   ModCategory category;
 
-  _FolderPaneItem({
-    required this.category,
-    super.onTap,
-    File? imageFile,
-  }) : super(
-          key: ValueKey(category),
-          title: Text(
-            category.name,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          icon: _getIcon(imageFile),
-          body: const SizedBox.shrink(),
-        );
+  @override
+  Widget build(
+    final BuildContext context,
+    final bool selected,
+    final VoidCallback? onPressed, {
+    final PaneDisplayMode? displayMode,
+    final bool showTextOnTop = true,
+    final int? itemIndex,
+    final bool? autofocus,
+  }) =>
+      CategoryDropTarget(
+        category: category,
+        child: super.build(
+          context,
+          selected,
+          onPressed,
+          displayMode: displayMode,
+          showTextOnTop: showTextOnTop,
+          itemIndex: itemIndex,
+          autofocus: autofocus,
+        ),
+      );
 
   @override
-  Widget build(BuildContext context, bool selected, VoidCallback? onPressed,
-      {PaneDisplayMode? displayMode,
-      bool showTextOnTop = true,
-      int? itemIndex,
-      bool? autofocus}) {
-    return CategoryDropTarget(
-      category: category,
-      child: super.build(
-        context,
-        selected,
-        onPressed,
-        displayMode: displayMode,
-        showTextOnTop: showTextOnTop,
-        itemIndex: itemIndex,
-        autofocus: autofocus,
-      ),
-    );
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
 }
 
-Future<String?> _shouldUpdate(BuildContext context) async {
+Future<String?> _shouldUpdate(final BuildContext context) async {
   final url = Uri.parse(_kRepoReleases);
-  List<String?> versions = await _getVersions(url);
+  final versions = await _getVersions(url);
   final upVersion = versions[0];
   final curVersion = versions[1];
-  if (upVersion == null || curVersion == null) return null;
+  if (upVersion == null || curVersion == null) {
+    return null;
+  }
   return _compareVersions(upVersion, curVersion) ? upVersion : null;
 }
 
-Future<List<String?>> _getVersions(Uri url) async {
+Future<List<String?>> _getVersions(final Uri url) async {
   final client = http.Client();
   final request = http.Request('GET', url)..followRedirects = false;
-  final upstreamVersion = client.send(request).then((value) {
+  final upstreamVersion = client.send(request).then((final value) {
     final location = value.headers['location'];
-    if (location == null) return null;
+    if (location == null) {
+      return null;
+    }
     final lastSlash = location.lastIndexOf('tag/v');
-    if (lastSlash == -1) return null;
+    if (lastSlash == -1) {
+      return null;
+    }
     return location.substring(lastSlash + 5, location.length);
   });
   final currentVersion =
-      PackageInfo.fromPlatform().then((value) => value.version);
+      PackageInfo.fromPlatform().then((final value) => value.version);
   return await Future.wait([upstreamVersion, currentVersion]);
 }
 
-bool _compareVersions(String upVersion, String curVersion) {
+bool _compareVersions(final String upVersion, final String curVersion) {
   final upstream = upVersion.split('.').map(int.parse).toList();
   final current = curVersion.split('.').map(int.parse).toList();
-  bool shouldUpdate = false;
+  var shouldUpdate = false;
   for (var i = 0; i < 3; i++) {
     if (upstream[i] > current[i]) {
       shouldUpdate = true;
@@ -516,12 +555,15 @@ Future<void> _runUpdateScript() async {
   final url = Uri.parse('$_kRepoReleases/download/GenshinModManager.zip');
   final response = await http.get(url);
   final archive = ZipDecoder().decodeBytes(response.bodyBytes);
-  await extractArchiveToDiskAsync(archive, Directory.current.path,
-      asyncWrite: true);
+  await extractArchiveToDiskAsync(
+    archive,
+    Directory.current.path,
+    asyncWrite: true,
+  );
   const updateScript = "setlocal\n"
       "echo update script running\n"
-      "set \"sourceFolder=GenshinModManager\"\n"
-      "if not exist \"genshin_mod_manager.exe\" (\n"
+      'set "sourceFolder=GenshinModManager"\n'
+      'if not exist "genshin_mod_manager.exe" (\n'
       "    echo Maybe not in the mod manager folder? Exiting for safety.\n"
       "    pause\n"
       "    start cmd /c del update.cmd\n"
@@ -542,25 +584,27 @@ Future<void> _runUpdateScript() async {
       "start cmd /c del update.cmd\n"
       "endlocal\n";
   await File('update.cmd').writeAsString(updateScript);
-  unawaited(Process.run(
-    'start',
-    [
-      'cmd',
-      '/c',
-      'timeout /t 3 && call update.cmd > update.log',
-    ],
-    runInShell: true,
-  ));
+  unawaited(
+    Process.run(
+      'start',
+      [
+        'cmd',
+        '/c',
+        'timeout /t 3 && call update.cmd > update.log',
+      ],
+      runInShell: true,
+    ),
+  );
   await Future.delayed(const Duration(milliseconds: 200));
   exit(0);
 }
 
-int _search(List<ModCategory> categories, ModCategory category) {
+int _search(final List<ModCategory> categories, final ModCategory category) {
   final length = categories.length;
-  int lo = 0;
-  int hi = length;
+  var lo = 0;
+  var hi = length;
   while (lo < hi) {
-    int mid = lo + ((hi - lo) >> 1);
+    final mid = lo + ((hi - lo) >> 1);
     if (compareNatural(categories[mid].name, category.name) < 0) {
       lo = mid + 1;
     } else {

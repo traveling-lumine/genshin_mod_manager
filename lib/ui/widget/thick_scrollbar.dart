@@ -2,14 +2,13 @@ import 'package:fluent_ui/fluent_ui.dart';
 
 class ThickScrollbar extends StatelessWidget {
   const ThickScrollbar({
-    super.key,
-    required this.child,
+    required this.child, super.key,
   });
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final current = FluentTheme.of(context);
     final isBright = current.brightness == Brightness.light;
     // higher contrast
@@ -30,14 +29,13 @@ class ThickScrollbar extends StatelessWidget {
 
 class RevertScrollbar extends StatelessWidget {
   const RevertScrollbar({
-    super.key,
-    required this.child,
+    required this.child, super.key,
   });
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final brightness = FluentTheme.of(context).brightness;
     final toUse = brightness == Brightness.light
         ? FluentThemeData.light()

@@ -1,15 +1,13 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control/preset_control_vm.dart';
 import 'package:provider/provider.dart';
 
 class PresetControlWidget extends StatelessWidget {
-  final bool isLocal;
-  final ModCategory? category;
-
   PresetControlWidget({
-    super.key,
     required this.isLocal,
+    super.key,
     this.category,
   }) {
     if (isLocal && category == null) {
@@ -17,33 +15,51 @@ class PresetControlWidget extends StatelessWidget {
     }
   }
 
+  final bool isLocal;
+  final ModCategory? category;
+
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) {
-        if (isLocal) {
-          return createLocalPresetControlViewModel(
-            presetService: context.read(),
-            category: category!,
-          );
-        } else {
-          return createGlobalPresetControlViewModel(
-            presetService: context.read(),
-          );
-        }
-      },
-      child: _PresetControlWidget(prefix: isLocal ? 'Local' : 'Global'),
-    );
+  Widget build(final BuildContext context) => ChangeNotifierProvider(
+        create: (final context) {
+          if (isLocal) {
+            return createLocalPresetControlViewModel(
+              presetService: context.read(),
+              category: category!,
+            );
+          } else {
+            return createGlobalPresetControlViewModel(
+              presetService: context.read(),
+            );
+          }
+        },
+        child: _PresetControlWidget(prefix: isLocal ? 'Local' : 'Global'),
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty<bool>('isLocal', isLocal))
+      ..add(DiagnosticsProperty<ModCategory?>('category', category))
+      ..add(DiagnosticsProperty<ModCategory?>('category', category))
+      ..add(DiagnosticsProperty<ModCategory?>('category', category))
+      ..add(DiagnosticsProperty<ModCategory?>('category', category));
   }
 }
 
 class _PresetControlWidget extends StatefulWidget {
-  final String prefix;
-
   const _PresetControlWidget({required this.prefix});
+
+  final String prefix;
 
   @override
   State<_PresetControlWidget> createState() => _PresetControlWidgetState();
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('prefix', prefix));
+  }
 }
 
 class _PresetControlWidgetState extends State<_PresetControlWidget> {
@@ -56,46 +72,46 @@ class _PresetControlWidgetState extends State<_PresetControlWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildAddIcon(context),
-        const SizedBox(width: 8),
-        _buildComboBox(),
-      ],
-    );
-  }
+  Widget build(final BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildAddIcon(context),
+          const SizedBox(width: 8),
+          _buildComboBox(),
+        ],
+      );
 
-  Widget _buildComboBox() {
-    return Selector(
-      selector: (_, PresetControlViewModel vm) => vm.presets,
-      builder: (context, value, child) {
-        final String text;
-        if (value != null) {
-          text = '${widget.prefix} Preset...';
-        } else {
-          text = 'Grabbing ${widget.prefix} Presets...';
-        }
-        return RepaintBoundary(
-          child: ComboBox(
-            items: value
-                ?.map((e) => ComboBoxItem(value: e, child: Text(e)))
-                .toList(),
-            placeholder: Text(text),
-            onChanged: (value) => showDialog(
-              barrierDismissible: true,
-              context: context,
-              builder: (context2) => _presetDialog(value!, context2, context),
+  Widget _buildComboBox() => Selector<PresetControlViewModel, List<String>?>(
+        selector: (final _, final vm) => vm.presets,
+        builder: (final context, final value, final child) {
+          final String text;
+          if (value != null) {
+            text = '${widget.prefix} Preset...';
+          } else {
+            text = 'Grabbing ${widget.prefix} Presets...';
+          }
+          return RepaintBoundary(
+            child: ComboBox(
+              items: value
+                  ?.map((final e) => ComboBoxItem(value: e, child: Text(e)))
+                  .toList(),
+              placeholder: Text(text),
+              onChanged: (final value) => showDialog(
+                barrierDismissible: true,
+                context: context,
+                builder: (final context2) =>
+                    _presetDialog(value!, context2, context),
+              ),
             ),
-          ),
-        );
-      },
-    );
-  }
+          );
+        },
+      );
 
   ContentDialog _presetDialog(
-      String name, BuildContext dialogContext, BuildContext buildContext) {
+    final String name,
+    final BuildContext dialogContext,
+    final BuildContext buildContext,
+  ) {
     final vm = context.read<PresetControlViewModel>();
     return ContentDialog(
       title: Text('Apply ${widget.prefix} Preset?'),
@@ -126,20 +142,19 @@ class _PresetControlWidgetState extends State<_PresetControlWidget> {
     );
   }
 
-  Widget _buildAddIcon(BuildContext context) {
-    return RepaintBoundary(
-      child: IconButton(
-        icon: const Icon(FluentIcons.add),
-        onPressed: () => showDialog(
-          barrierDismissible: true,
-          context: context,
-          builder: (context2) => _addDialog(context2, context),
+  Widget _buildAddIcon(final BuildContext context) => RepaintBoundary(
+        child: IconButton(
+          icon: const Icon(FluentIcons.add),
+          onPressed: () => showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (final context2) => _addDialog(context2, context),
+          ),
         ),
-      ),
-    );
-  }
+      );
 
-  Widget _addDialog(BuildContext dialogContext, BuildContext buildContext) {
+  Widget _addDialog(
+      final BuildContext dialogContext, final BuildContext buildContext) {
     final vm = context.read<PresetControlViewModel>();
     return ContentDialog(
       title: Text('Add ${widget.prefix} Preset'),

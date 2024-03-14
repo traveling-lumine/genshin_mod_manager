@@ -22,19 +22,19 @@ abstract interface class AppStateService implements Disposable {
 
   void reload();
 
-  void setModRoot(String path);
+  void setModRoot(final String path);
 
-  void setModExecFile(String path);
+  void setModExecFile(final String path);
 
-  void setLauncherFile(String path);
+  void setLauncherFile(final String path);
 
-  void setRunTogether(bool value);
+  void setRunTogether(final bool value);
 
-  void setMoveOnDrag(bool value);
+  void setMoveOnDrag(final bool value);
 
-  void setShowFolderIcon(bool value);
+  void setShowFolderIcon(final bool value);
 
-  void setShowEnabledModsFirst(bool value);
+  void setShowEnabledModsFirst(final bool value);
 
-  void setPresetData(String data);
+  void setPresetData(final String data);
 }

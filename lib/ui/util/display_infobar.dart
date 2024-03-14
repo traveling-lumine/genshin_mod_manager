@@ -1,17 +1,16 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
 Future<void> displayInfoBarInContext(
-  BuildContext context, {
-  required Widget title,
-  Duration duration = const Duration(seconds: 3),
-  Widget? content,
-  Widget? action,
-  InfoBarSeverity severity = InfoBarSeverity.info,
-}) {
-  return displayInfoBar(
+  final BuildContext context, {
+  required final Widget title,
+  final Duration duration = const Duration(seconds: 3),
+  final Widget? content,
+  final Widget? action,
+  final InfoBarSeverity severity = InfoBarSeverity.info,
+}) => displayInfoBar(
     context,
     duration: duration,
-    builder: (context, close) => InfoBar(
+    builder: (final context, final close) => InfoBar(
       title: title,
       content: content,
       action: action,
@@ -19,4 +18,3 @@ Future<void> displayInfoBarInContext(
       onClose: close,
     ),
   );
-}
