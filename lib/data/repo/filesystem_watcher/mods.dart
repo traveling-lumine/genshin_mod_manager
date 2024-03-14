@@ -23,7 +23,7 @@ class _ModsWatcherImpl implements ModsWatcher {
   late final StreamSubscription<List<Mod>> _subscription;
 
   @override
-  LatestStream<List<Mod>> get mods => vS2LS(_pathsStream.stream);
+  LatestStream<List<Mod>> get mods => vS2LS(_pathsStream);
   final _pathsStream = BehaviorSubject<List<Mod>>();
 
   @override

@@ -21,7 +21,7 @@ class _RecursiveFileSystemWatcherImpl implements RecursiveFileSystemWatcher {
   late final StreamSubscription<FSEvent> _subscription;
 
   @override
-  LatestStream<FSEvent> get event => vS2LS(_subject.stream);
+  LatestStream<FSEvent> get event => vS2LS(_subject);
   final _subject = BehaviorSubject<FSEvent>.seeded(
     const FSEvent(paths: [], force: true),
   );

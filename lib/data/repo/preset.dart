@@ -54,7 +54,7 @@ class _PresetServiceImpl implements PresetService {
   var _curLocal = <String, Map<String, List<String>>>{};
 
   @override
-  LatestStream<List<String>> get globalPresets => vS2LS(_globalPresets.stream);
+  LatestStream<List<String>> get globalPresets => vS2LS(_globalPresets);
   final _globalPresets = BehaviorSubject<List<String>>();
 
   @override
@@ -64,7 +64,7 @@ class _PresetServiceImpl implements PresetService {
       category.name,
       () => BehaviorSubject.seeded([]),
     );
-    return vS2LS(stream.stream);
+    return vS2LS(stream);
   }
 
   final _localPresets = <String, BehaviorSubject<List<String>>>{};

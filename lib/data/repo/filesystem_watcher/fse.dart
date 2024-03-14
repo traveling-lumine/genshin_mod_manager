@@ -28,7 +28,7 @@ class _FSEPathsWatcherImpl<T extends FileSystemEntity>
   StreamSubscription<List<String>>? _subscription;
 
   @override
-  LatestStream<List<String>> get paths => vS2LS(_paths.stream);
+  LatestStream<List<String>> get paths => vS2LS(_paths);
   final _paths = BehaviorSubject<List<String>>();
 
   @override

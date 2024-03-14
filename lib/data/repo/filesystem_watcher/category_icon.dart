@@ -23,7 +23,7 @@ class _CategoryIconWatcherImpl implements FSEPathsWatcher {
   late final StreamSubscription<List<String>> _subscription;
 
   @override
-  LatestStream<List<String>> get paths => vS2LS(_pathsStream.stream);
+  LatestStream<List<String>> get paths => vS2LS(_pathsStream);
   final _pathsStream = BehaviorSubject<List<String>>();
 
   @override

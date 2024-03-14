@@ -38,7 +38,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  LatestStream<String> get modRoot => vS2LS(_modRoot.stream);
+  LatestStream<String> get modRoot => vS2LS(_modRoot);
   final BehaviorSubject<String> _modRoot = BehaviorSubject.seeded('.');
 
   @override
@@ -48,7 +48,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  LatestStream<String> get modExecFile => vS2LS(_modExecFile.stream);
+  LatestStream<String> get modExecFile => vS2LS(_modExecFile);
   final BehaviorSubject<String> _modExecFile = BehaviorSubject.seeded('.');
 
   @override
@@ -58,7 +58,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  LatestStream<String> get launcherFile => vS2LS(_launcherFile.stream);
+  LatestStream<String> get launcherFile => vS2LS(_launcherFile);
   final BehaviorSubject<String> _launcherFile = BehaviorSubject.seeded('.');
 
   @override
@@ -68,7 +68,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  LatestStream<bool> get runTogether => vS2LS(_runTogether.stream);
+  LatestStream<bool> get runTogether => vS2LS(_runTogether);
   final BehaviorSubject<bool> _runTogether = BehaviorSubject.seeded(false);
 
   @override
@@ -78,7 +78,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  LatestStream<bool> get moveOnDrag => vS2LS(_moveOnDrag.stream);
+  LatestStream<bool> get moveOnDrag => vS2LS(_moveOnDrag);
   final BehaviorSubject<bool> _moveOnDrag = BehaviorSubject.seeded(false);
 
   @override
@@ -88,7 +88,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  LatestStream<bool> get showFolderIcon => vS2LS(_showFolderIcon.stream);
+  LatestStream<bool> get showFolderIcon => vS2LS(_showFolderIcon);
   final BehaviorSubject<bool> _showFolderIcon = BehaviorSubject.seeded(true);
 
   @override
@@ -98,8 +98,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  LatestStream<bool> get showEnabledModsFirst =>
-      vS2LS(_showEnabledModsFirst.stream);
+  LatestStream<bool> get showEnabledModsFirst => vS2LS(_showEnabledModsFirst);
   final BehaviorSubject<bool> _showEnabledModsFirst =
       BehaviorSubject.seeded(false);
 
@@ -110,7 +109,7 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   @override
-  LatestStream<String> get presetData => vS2LS(_presetData.stream);
+  LatestStream<String> get presetData => vS2LS(_presetData);
   final BehaviorSubject<String> _presetData = BehaviorSubject.seeded('123');
 
   @override
@@ -138,72 +137,72 @@ class _AppStateServiceImpl implements AppStateService {
   }
 
   Future<bool> _getFuture() => SharedPreferences.getInstance().timeout(
-    _sharedPreferencesAwaitTime,
-    onTimeout: () {
-      throw TimeoutException(
-        'Unable to obtain SharedPreference settings',
         _sharedPreferencesAwaitTime,
-      );
-    },
-  ).then((final value) {
-    _sharedPreferences = value;
+        onTimeout: () {
+          throw TimeoutException(
+            'Unable to obtain SharedPreference settings',
+            _sharedPreferencesAwaitTime,
+          );
+        },
+      ).then((final value) {
+        _sharedPreferences = value;
 
-    const dotString = '.';
-    final tDirRaw = value.getString(_targetDirKey);
-    final targetDir = tDirRaw ?? dotString;
+        const dotString = '.';
+        final tDirRaw = value.getString(_targetDirKey);
+        final targetDir = tDirRaw ?? dotString;
 
-    final mRootRaw = value.getString(_modRootKey);
-    if (mRootRaw != null) {
-      _modRoot.add(mRootRaw);
-    }
-    if (_modRoot.valueOrNull == dotString && targetDir != dotString) {
-      setModRoot(targetDir.pJoin('Mods'));
-    }
+        final mRootRaw = value.getString(_modRootKey);
+        if (mRootRaw != null) {
+          _modRoot.add(mRootRaw);
+        }
+        if (_modRoot.valueOrNull == dotString && targetDir != dotString) {
+          setModRoot(targetDir.pJoin('Mods'));
+        }
 
-    final mExecRaw = value.getString(_modExecFileKey);
-    if (mExecRaw != null) {
-      _modExecFile.add(mExecRaw);
-    }
-    if (_modExecFile.valueOrNull == dotString && targetDir != dotString) {
-      setModExecFile(targetDir.pJoin('3DMigoto Loader.exe'));
-    }
+        final mExecRaw = value.getString(_modExecFileKey);
+        if (mExecRaw != null) {
+          _modExecFile.add(mExecRaw);
+        }
+        if (_modExecFile.valueOrNull == dotString && targetDir != dotString) {
+          setModExecFile(targetDir.pJoin('3DMigoto Loader.exe'));
+        }
 
-    if (targetDir != dotString) {
-      unawaited(_sharedPreferences?.setString(_targetDirKey, dotString));
-    }
+        if (targetDir != dotString) {
+          unawaited(_sharedPreferences?.setString(_targetDirKey, dotString));
+        }
 
-    final lFileRaw = value.getString(_launcherFileKey);
-    if (lFileRaw != null) {
-      _launcherFile.add(lFileRaw);
-    }
+        final lFileRaw = value.getString(_launcherFileKey);
+        if (lFileRaw != null) {
+          _launcherFile.add(lFileRaw);
+        }
 
-    final runTogetherRaw = value.getBool(_runTogetherKey);
-    if (runTogetherRaw != null) {
-      _runTogether.add(runTogetherRaw);
-    }
+        final runTogetherRaw = value.getBool(_runTogetherKey);
+        if (runTogetherRaw != null) {
+          _runTogether.add(runTogetherRaw);
+        }
 
-    final moveOnDragRaw = value.getBool(_moveOnDragKey);
-    if (moveOnDragRaw != null) {
-      _moveOnDrag.add(moveOnDragRaw);
-    }
+        final moveOnDragRaw = value.getBool(_moveOnDragKey);
+        if (moveOnDragRaw != null) {
+          _moveOnDrag.add(moveOnDragRaw);
+        }
 
-    final showFolderIconRaw = value.getBool(_showFolderIconKey);
-    if (showFolderIconRaw != null) {
-      _showFolderIcon.add(showFolderIconRaw);
-    }
+        final showFolderIconRaw = value.getBool(_showFolderIconKey);
+        if (showFolderIconRaw != null) {
+          _showFolderIcon.add(showFolderIconRaw);
+        }
 
-    final showEnabledModsFirstRaw = value.getBool(_showEnabledModsFirstKey);
-    if (showEnabledModsFirstRaw != null) {
-      _showEnabledModsFirst.add(showEnabledModsFirstRaw);
-    }
+        final showEnabledModsFirstRaw = value.getBool(_showEnabledModsFirstKey);
+        if (showEnabledModsFirstRaw != null) {
+          _showEnabledModsFirst.add(showEnabledModsFirstRaw);
+        }
 
-    final presetDataRaw = value.getString(_presetDatakey);
-    if (presetDataRaw != null) {
-      _presetData.add(presetDataRaw);
-    }
+        final presetDataRaw = value.getString(_presetDatakey);
+        if (presetDataRaw != null) {
+          _presetData.add(presetDataRaw);
+        }
 
-    return true;
-  });
+        return true;
+      });
 
   @override
   String toString() => 'AppStateService{'
