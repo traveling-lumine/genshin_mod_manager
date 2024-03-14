@@ -106,14 +106,13 @@ class _FSEPathsWatcherImpl<T extends FileSystemEntity>
     required this.targetPath,
     required final RecursiveFileSystemWatcher watcher,
   }) {
-    unawaited(getUnder<T>(targetPath).then((value) {
-      _paths.add(List.unmodifiable(value.map((final e) => e.path)));
-      _subscription = watcher.event.stream
-          .where((final event) => _ifEventDirectUnder2(event, targetPath))
-          .asyncMap(_getPaths)
-          .listen(_paths.add);
-    }));
+    _subscription = watcher.event.stream
+        .where((final event) => _ifEventDirectUnder2(event, targetPath))
+        .asyncMap(_getPaths)
+        .listen(_paths.add);
   }
+
+  bool _initialized = false;
 
   String targetPath;
 
@@ -135,6 +134,24 @@ class _FSEPathsWatcherImpl<T extends FileSystemEntity>
       List.unmodifiable(
         (await getUnder<T>(targetPath)).map((final e) => e.path),
       );
+
+  bool _ifEventDirectUnder2(
+    final FSEvent event,
+    final String watchedPath,
+  ) {
+    if (!_initialized) {
+      _initialized = true;
+      return true;
+    }
+    if (event.force) {
+      return true;
+    }
+    final paths = event.paths;
+    final targets = paths.map((final e) => e.pDirname).toList() + paths;
+    return targets.any(
+      (final e) => e.pEquals(watchedPath) | e.pEquals(watchedPath.pDirname),
+    );
+  }
 }
 
 ModsWatcher createModsWatcher({
@@ -190,20 +207,6 @@ bool _ifEventDirectUnder(
         ..add(destination.pDirname);
     }
   }
-  return targets.any(
-    (final e) => e.pEquals(watchedPath) | e.pEquals(watchedPath.pDirname),
-  );
-}
-
-bool _ifEventDirectUnder2(
-  final FSEvent event,
-  final String watchedPath,
-) {
-  if (event.force) {
-    return true;
-  }
-  final paths = event.paths;
-  final targets = paths.map((final e) => e.pDirname).toList() + paths;
   return targets.any(
     (final e) => e.pEquals(watchedPath) | e.pEquals(watchedPath.pDirname),
   );
