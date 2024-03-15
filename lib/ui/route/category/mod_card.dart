@@ -143,7 +143,7 @@ class _ModCardState extends State<_ModCard> {
           builder: (final context, final constraints) => Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Expanded(child: _buildDesc(context, constraints)),
+              _buildDesc(context, constraints),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Divider(direction: Axis.vertical),
@@ -170,21 +170,19 @@ class _ModCardState extends State<_ModCard> {
               ),
             );
           }
-          final alliniFile = iniPaths
-              .map(
-                (final path) =>
-                    IniWidget(iniFile: IniFile(path: path, mod: widget.mod)),
-              )
-              .toList();
           return Expanded(
-            child: alliniFile.isNotEmpty
+            child: iniPaths.isNotEmpty
                 ? Card(
                     backgroundColor: Colors.white.withOpacity(0.4),
                     padding: const EdgeInsets.all(4),
                     child: ListView.builder(
-                      itemBuilder: (final context, final index) =>
-                          alliniFile[index],
-                      itemCount: alliniFile.length,
+                      itemBuilder: (final context, final index) {
+                        final path = iniPaths[index];
+                        return IniWidget(
+                          iniFile: IniFile(path: path, mod: widget.mod),
+                        );
+                      },
+                      itemCount: iniPaths.length,
                     ),
                   )
                 : const Center(
@@ -202,18 +200,20 @@ class _ModCardState extends State<_ModCard> {
         selector: (final context, final vm) => vm.previewPath,
         builder: (final context, final previewPath, final child) {
           if (previewPath == null) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(FluentIcons.unknown),
-                const SizedBox(height: 4),
-                RepaintBoundary(
-                  child: Button(
-                    onPressed: () => unawaited(_onPaste(context)),
-                    child: const Text('Paste'),
+            return Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(FluentIcons.unknown),
+                  const SizedBox(height: 4),
+                  RepaintBoundary(
+                    child: Button(
+                      onPressed: () => unawaited(_onPaste(context)),
+                      child: const Text('Paste'),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           }
           return _buildImageDesc(context, constraints, previewPath);
@@ -254,19 +254,17 @@ class _ModCardState extends State<_ModCard> {
       constraints: BoxConstraints(
         maxWidth: constraints.maxWidth - _ModCard._minIniSectionWidth,
       ),
-      child: Center(
-        child: GestureDetector(
-          onTapUp: (final details) => _onImageTap(context, fileImage),
-          onSecondaryTapUp: (final details) =>
-              _onImageRightClick(details, context, previewFile),
-          child: FlyoutTarget(
-            controller: _contextController,
-            key: _contextAttachKey,
-            child: Image(
-              image: fileImage,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.medium,
-            ),
+      child: GestureDetector(
+        onTapUp: (final details) => _onImageTap(context, fileImage),
+        onSecondaryTapUp: (final details) =>
+            _onImageRightClick(details, context, previewFile),
+        child: FlyoutTarget(
+          controller: _contextController,
+          key: _contextAttachKey,
+          child: Image(
+            image: fileImage,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.medium,
           ),
         ),
       ),
