@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
-import 'package:genshin_mod_manager/data/io/fsops.dart';
+import 'package:genshin_mod_manager/data/helper/fsops.dart';
+import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/ui/viewmodel_base.dart';

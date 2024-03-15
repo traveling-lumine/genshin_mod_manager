@@ -4,9 +4,9 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
-import 'package:genshin_mod_manager/data/io/fsops.dart';
-import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
+import 'package:genshin_mod_manager/data/helper/fsops.dart';
+import 'package:genshin_mod_manager/data/helper/mod_switcher.dart';
+import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/data/repo/mod_writer.dart';

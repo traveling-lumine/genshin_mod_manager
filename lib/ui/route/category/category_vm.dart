@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
-import 'package:genshin_mod_manager/data/io/fsops.dart';
+import 'package:genshin_mod_manager/data/helper/fsops.dart';
+import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';

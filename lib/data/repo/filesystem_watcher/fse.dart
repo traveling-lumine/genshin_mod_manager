@@ -17,7 +17,7 @@ class _FSEPathsWatcherImpl<T extends FileSystemEntity>
   }) {
     _subscription = watcher.event.stream
         .where((final event) => _ifEventDirectUnder2(event, targetPath))
-        .asyncMap(_getPaths)
+        .map(_getPaths)
         .listen(_paths.add);
   }
 
@@ -37,10 +37,10 @@ class _FSEPathsWatcherImpl<T extends FileSystemEntity>
     unawaited(_subscription?.cancel());
   }
 
-  Future<List<String>> _getPaths(
+  List<String> _getPaths(
     final FSEvent event,
-  ) async =>
-      getUnder<T>(targetPath);
+  ) =>
+      getUnderSync<T>(targetPath);
 
   bool _ifEventDirectUnder2(
     final FSEvent event,

@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
-import 'package:genshin_mod_manager/data/io/fsops.dart';
-import 'package:genshin_mod_manager/data/io/mod_switcher.dart';
+import 'package:genshin_mod_manager/data/helper/fsops.dart';
+import 'package:genshin_mod_manager/data/helper/mod_switcher.dart';
+import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/data/mapper/latest_stream.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';

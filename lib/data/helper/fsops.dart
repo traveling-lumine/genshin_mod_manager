@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/extension/path_op_string.dart';
+import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
@@ -58,6 +58,19 @@ List<String> getActiveIniPaths(final List<String> paths) =>
 Future<List<String>> getUnder<T extends FileSystemEntity>(
   final String path,
 ) async {
+  final dir = Directory(path);
+  if (!dir.existsSync()) {
+    return [];
+  }
+  final res =
+      await dir.list().whereType<T>().map((final event) => event.path).toList();
+  return res;
+}
+
+/// Returns a String path list under the given [path], synchronously.
+List<String> getUnderSync<T extends FileSystemEntity>(
+  final String path,
+) {
   final dir = Directory(path);
   if (!dir.existsSync()) {
     return [];
