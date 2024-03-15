@@ -36,6 +36,12 @@ class _IniWidget extends StatefulWidget {
 
   @override
   State<_IniWidget> createState() => _IniWidgetState();
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<IniFile>('iniFile', iniFile));
+  }
 }
 
 class _IniWidgetState extends State<_IniWidget> {

@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class ModCategory {
-  ModCategory({
+  const ModCategory({
     required this.path,
     required this.name,
     this.iconPath,

@@ -27,8 +27,8 @@ class _ModsWatcherImpl implements ModsWatcher {
 
   @override
   void dispose() {
-    _pathsStream.close();
-    _subscription.cancel();
+    unawaited(_pathsStream.close());
+    unawaited(_subscription.cancel());
   }
 
   Future<List<Mod>> _getMods(final FSEvent _) => getMods(category);

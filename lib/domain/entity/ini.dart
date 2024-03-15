@@ -47,6 +47,6 @@ class IniSection {
   int get hashCode => throw UnimplementedError();
 
   @override
-  String toString() =>
-      'IniSection(iniFile: $iniFile, section: $section, line: $line, key: $key, value: $value)';
+  String toString() => 'IniSection(iniFile: $iniFile, section: $section, '
+      'line: $line, key: $key, value: $value)';
 }

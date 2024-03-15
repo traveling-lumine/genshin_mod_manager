@@ -60,7 +60,8 @@ class _HomeShellViewModelImpl extends ChangeNotifier
         appStateService.modRoot.stream,
         _getCategories,
       ).listen((final event) {
-        _modCategories = event..sort((a, b) => compareNatural(a.name, b.name));
+        _modCategories = event
+          ..sort((final a, final b) => compareNatural(a.name, b.name));
         notifyListeners();
       });
     });
@@ -103,12 +104,12 @@ class _HomeShellViewModelImpl extends ChangeNotifier
 
   @override
   void dispose() {
-    _showFolderIconSubscription.cancel();
-    _runTogetherSubscription.cancel();
+    unawaited(_showFolderIconSubscription.cancel());
+    unawaited(_runTogetherSubscription.cancel());
     _categoryWatcher?.dispose();
     _categoryIconFolderObserverService?.dispose();
-    _modCategoriesSubscription?.cancel();
-    _asmr.cancel();
+    unawaited(_modCategoriesSubscription?.cancel());
+    unawaited(_asmr.cancel());
     super.dispose();
   }
 

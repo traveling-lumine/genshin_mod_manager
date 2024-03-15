@@ -13,6 +13,7 @@ import 'package:genshin_mod_manager/domain/repo/latest_stream.dart';
 import 'package:genshin_mod_manager/domain/repo/preset.dart';
 import 'package:rxdart/subjects.dart';
 
+/// A service that manages presets.
 PresetService createPresetService({
   required final AppStateService appStateService,
   required final RecursiveFileSystemWatcher observerService,
@@ -28,7 +29,7 @@ class _PresetServiceImpl implements PresetService {
     required this.observerService,
   }) {
     _subscription = appStateService.presetData.stream.listen((final event) {
-      final decoded = jsonDecode(event);
+      final Map<String, dynamic> decoded = jsonDecode(event);
       _curGlobal = _parseMap(decoded['global']);
       _curLocal = _parseMap(decoded['local']);
       _globalPresets.add(_curGlobal.keys.toList());
@@ -213,7 +214,9 @@ class _PresetServiceImpl implements PresetService {
   }
 }
 
-Map<String, Map<String, List<String>>> _parseMap(final data) {
+Map<String, Map<String, List<String>>> _parseMap(
+  final Map<String, dynamic> data,
+) {
   final parsed = <String, Map<String, List<String>>>{};
   data.forEach((final k, final v) {
     final forEachCategory = _forEachPreset(k, v);

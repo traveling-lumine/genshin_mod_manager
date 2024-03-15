@@ -1,5 +1,8 @@
 import 'dart:collection';
 
+import 'package:meta/meta.dart';
+
+@immutable
 class NahidaliveElement {
   const NahidaliveElement({
     required this.uuid,
@@ -47,9 +50,13 @@ class NahidaliveElement {
 
   @override
   bool operator ==(final Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other)) {
+      return true;
+    }
     // tag list equality check
-    if (other is! NahidaliveElement) return false;
+    if (other is! NahidaliveElement) {
+      return false;
+    }
     var tagsEqual = true;
     if (tags.length != other.tags.length) {
       tagsEqual = false;
@@ -91,6 +98,7 @@ class NahidaliveElement {
       koreaOnly.hashCode;
 }
 
+@immutable
 class NahidaliveDownloadElement {
   const NahidaliveDownloadElement({
     required this.status,
@@ -111,7 +119,9 @@ class NahidaliveDownloadElement {
 
   @override
   bool operator ==(final Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other)) {
+      return true;
+    }
     return other is NahidaliveDownloadElement &&
         other.status == status &&
         other.errorCodes == errorCodes &&

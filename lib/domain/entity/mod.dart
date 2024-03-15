@@ -16,8 +16,8 @@ class Mod {
   final ModCategory category;
 
   @override
-  String toString() =>
-      'Mod{path: $path, displayName: $displayName, isEnabled: $isEnabled, category: $category}';
+  String toString() => 'Mod{path: $path, displayName: $displayName,'
+      ' isEnabled: $isEnabled, category: $category}';
 
   @override
   bool operator ==(final Object other) {

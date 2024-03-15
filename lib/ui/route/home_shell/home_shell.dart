@@ -536,7 +536,7 @@ Future<List<String?>> _getVersions(final Uri url) async {
   });
   final currentVersion =
       PackageInfo.fromPlatform().then((final value) => value.version);
-  return await Future.wait([upstreamVersion, currentVersion]);
+  return Future.wait([upstreamVersion, currentVersion]);
 }
 
 bool _compareVersions(final String upVersion, final String curVersion) {

@@ -3,7 +3,7 @@ import 'package:path/path.dart' as p;
 
 void main() {
   test("pDir join pBase equals original", () {
-    var path = 'c';
+    const path = 'c';
     final split = p.split(path);
     expect(split, ['c']);
   });

@@ -69,7 +69,7 @@ class OssLicensesRoute extends StatelessWidget {
             future: _licenses,
             initialData: const [],
             builder: (final context, final snapshot) => ListView.separated(
-              padding: const EdgeInsets.all(0),
+              padding: EdgeInsets.zero,
               itemCount: snapshot.data?.length ?? 0,
               itemBuilder: (final context, final index) {
                 final package = snapshot.data![index];
@@ -100,9 +100,10 @@ class MiscOssLicenseSingle extends StatelessWidget {
   final Package package;
 
   String _bodyText() => package.license!.split('\n').map((line) {
-        if (line.startsWith('//')) line = line.substring(2);
-        line = line.trim();
-        return line;
+        if (line.startsWith('//')) {
+          line = line.substring(2);
+        }
+        return line.trim();
       }).join('\n');
 
   @override

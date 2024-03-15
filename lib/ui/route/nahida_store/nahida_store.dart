@@ -59,10 +59,11 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
   @override
   void initState() {
     super.initState();
-    final vm = context.read<NahidaStoreViewModel>();
-    vm.registerDownloadCallbacks(
+    context.read<NahidaStoreViewModel>().registerDownloadCallbacks(
       onApiException: (final e) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         displayInfoBarInContext(
           context,
           title: const Text('Download failed'),
@@ -71,7 +72,9 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
         );
       },
       onDownloadComplete: (final element) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         displayInfoBarInContext(
           context,
           title: Text('Downloaded ${element.title}'),
@@ -79,7 +82,9 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
         );
       },
       onPasswordRequired: () {
-        if (!mounted) return Future(() => null);
+        if (!mounted) {
+          return Future(() => null);
+        }
         return showDialog(
           context: context,
           builder: (final dialogContext) => ContentDialog(
@@ -123,7 +128,9 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
         try {
           await File(category.path.pJoin(modName)).writeAsBytes(data);
         } catch (e) {
-          if (!mounted) return;
+          if (!mounted) {
+            return;
+          }
           unawaited(
             displayInfoBarInContext(
               context,
@@ -217,7 +224,9 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
             }
           },
           validator: (final value) {
-            if (value == null || value.isEmpty) return null;
+            if (value == null || value.isEmpty) {
+              return null;
+            }
             try {
               parseTagQuery(value);
             } catch (e) {
@@ -245,7 +254,9 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
               final tagMap = {for (final e in element.tags) e: true};
               try {
                 final filter = _tagFilter;
-                if (filter == null) return true;
+                if (filter == null) {
+                  return true;
+                }
                 return filter.evaluate(tagMap);
               } catch (e) {
                 return true;

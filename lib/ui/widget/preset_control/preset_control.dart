@@ -95,11 +95,13 @@ class _PresetControlWidgetState extends State<_PresetControlWidget> {
                   ?.map((final e) => ComboBoxItem(value: e, child: Text(e)))
                   .toList(),
               placeholder: Text(text),
-              onChanged: (final value) => unawaited(showDialog(
-                barrierDismissible: true,
-                context: context,
-                builder: (final dCtx) => _presetDialog(value!, dCtx),
-              )),
+              onChanged: (final value) => unawaited(
+                showDialog(
+                  barrierDismissible: true,
+                  context: context,
+                  builder: (final dCtx) => _presetDialog(value!, dCtx),
+                ),
+              ),
             ),
           );
         },

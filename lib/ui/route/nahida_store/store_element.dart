@@ -75,15 +75,17 @@ class StoreElement extends StatelessWidget {
     // networkImage to widget
     return Center(
       child: GestureDetector(
-        onTap: () => showDialog(
-          context: context,
-          barrierDismissible: true,
-          builder: (final dialogContext) => GestureDetector(
-            onTap: Navigator.of(dialogContext).pop,
-            onSecondaryTap: Navigator.of(dialogContext).pop,
-            child: Image(
-              image: networkImage,
-              fit: BoxFit.contain,
+        onTap: () => unawaited(
+          showDialog(
+            context: context,
+            barrierDismissible: true,
+            builder: (final dialogContext) => GestureDetector(
+              onTap: Navigator.of(dialogContext).pop,
+              onSecondaryTap: Navigator.of(dialogContext).pop,
+              child: Image(
+                image: networkImage,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
         ),
