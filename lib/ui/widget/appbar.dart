@@ -8,8 +8,8 @@ class WindowButtons extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) => const SizedBox(
-      width: kWindowButtonWidth,
-      height: 50,
-      child: RepaintBoundary(child: WindowCaption()),
-    );
+        width: kWindowButtonWidth,
+        height: 50,
+        child: RepaintBoundary(child: WindowCaption()),
+      );
 }

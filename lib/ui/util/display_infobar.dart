@@ -7,14 +7,15 @@ Future<void> displayInfoBarInContext(
   final Widget? content,
   final Widget? action,
   final InfoBarSeverity severity = InfoBarSeverity.info,
-}) => displayInfoBar(
-    context,
-    duration: duration,
-    builder: (final context, final close) => InfoBar(
-      title: title,
-      content: content,
-      action: action,
-      severity: severity,
-      onClose: close,
-    ),
-  );
+}) =>
+    displayInfoBar(
+      context,
+      duration: duration,
+      builder: (final context, final close) => InfoBar(
+        title: title,
+        content: content,
+        action: action,
+        severity: severity,
+        onClose: close,
+      ),
+    );

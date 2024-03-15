@@ -17,11 +17,11 @@ abstract interface class PresetControlViewModel implements BaseViewModel {
 
 PresetControlViewModel createGlobalPresetControlViewModel({
   required final PresetService presetService,
-}) => _GlobalPresetControlViewModelImpl(presetService: presetService);
+}) =>
+    _GlobalPresetControlViewModelImpl(presetService: presetService);
 
 class _GlobalPresetControlViewModelImpl extends ChangeNotifier
     implements PresetControlViewModel {
-
   _GlobalPresetControlViewModelImpl({
     required this.presetService,
   }) : _presets = presetService.globalPresets.latest {
@@ -30,6 +30,7 @@ class _GlobalPresetControlViewModelImpl extends ChangeNotifier
       notifyListeners();
     });
   }
+
   late final StreamSubscription<List<String>> _subscription;
   final PresetService presetService;
 
@@ -62,14 +63,14 @@ class _GlobalPresetControlViewModelImpl extends ChangeNotifier
 PresetControlViewModel createLocalPresetControlViewModel({
   required final PresetService presetService,
   required final ModCategory category,
-}) => _LocalPresetControlViewModelImpl(
-    presetService: presetService,
-    category: category,
-  );
+}) =>
+    _LocalPresetControlViewModelImpl(
+      presetService: presetService,
+      category: category,
+    );
 
 class _LocalPresetControlViewModelImpl extends ChangeNotifier
     implements PresetControlViewModel {
-
   _LocalPresetControlViewModelImpl({
     required this.presetService,
     required this.category,
@@ -80,6 +81,7 @@ class _LocalPresetControlViewModelImpl extends ChangeNotifier
       notifyListeners();
     });
   }
+
   late final StreamSubscription<List<String>> _subscription;
   final PresetService presetService;
   final ModCategory category;

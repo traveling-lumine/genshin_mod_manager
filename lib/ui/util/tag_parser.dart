@@ -6,8 +6,8 @@ abstract class TagParseElement {
 }
 
 class Literal extends TagParseElement {
-
   Literal(this.value);
+
   final String value;
 
   @override
@@ -15,8 +15,8 @@ class Literal extends TagParseElement {
 }
 
 class NotClause extends TagParseElement {
-
   NotClause(this.child);
+
   final TagParseElement child;
 
   @override
@@ -24,26 +24,28 @@ class NotClause extends TagParseElement {
 }
 
 class AndClause extends TagParseElement {
-
   AndClause(this.children);
+
   final List<TagParseElement> children;
 
   @override
-  bool evaluate(final Map<String, bool> tags) => children.every((final element) => element.evaluate(tags));
+  bool evaluate(final Map<String, bool> tags) =>
+      children.every((final element) => element.evaluate(tags));
 }
 
 class OrClause extends TagParseElement {
-
   OrClause(this.children);
+
   final List<TagParseElement> children;
 
   @override
-  bool evaluate(final Map<String, bool> tags) => children.any((final element) => element.evaluate(tags));
+  bool evaluate(final Map<String, bool> tags) =>
+      children.any((final element) => element.evaluate(tags));
 }
 
 class Parenthesis extends TagParseElement {
-
   Parenthesis(this.child);
+
   final TagParseElement child;
 
   @override
@@ -53,15 +55,15 @@ class Parenthesis extends TagParseElement {
 enum TokenType { and, or, not, lParen, rParen, literal }
 
 class Token {
-
   Token(this.type, [this.value]);
+
   final TokenType type;
   final String? value;
 }
 
 class Lexer {
-
   Lexer(this.text);
+
   static final literal = RegExp('[^&|!() ]');
   static final Map<String, TokenType> keywords = {
     '&': TokenType.and,
@@ -106,10 +108,10 @@ class Lexer {
 }
 
 class Parser {
-
   Parser(this.lexer) {
     currentToken = lexer.nextToken();
   }
+
   final Lexer lexer;
   Token? currentToken;
 
@@ -118,7 +120,8 @@ class Parser {
       currentToken = lexer.nextToken();
     } else {
       throw Exception(
-          'Expected token of type $type, got ${currentToken?.type}',);
+        'Expected token of type $type, got ${currentToken?.type}',
+      );
     }
   }
 

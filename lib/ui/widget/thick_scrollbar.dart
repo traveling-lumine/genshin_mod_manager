@@ -2,7 +2,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 
 class ThickScrollbar extends StatelessWidget {
   const ThickScrollbar({
-    required this.child, super.key,
+    required this.child,
+    super.key,
   });
 
   final Widget child;
@@ -29,7 +30,8 @@ class ThickScrollbar extends StatelessWidget {
 
 class RevertScrollbar extends StatelessWidget {
   const RevertScrollbar({
-    required this.child, super.key,
+    required this.child,
+    super.key,
   });
 
   final Widget child;

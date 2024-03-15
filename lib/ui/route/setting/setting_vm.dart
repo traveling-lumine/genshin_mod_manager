@@ -36,10 +36,10 @@ abstract interface class SettingViewModel implements BaseViewModel {
 
 SettingViewModel createSettingViewModel({
   required final AppStateService appStateService,
-}) => _SettingViewModelImpl(appStateService: appStateService);
+}) =>
+    _SettingViewModelImpl(appStateService: appStateService);
 
 class _SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
-
   _SettingViewModelImpl({
     required this.appStateService,
   })  : modRoot = appStateService.modRoot.latest,
@@ -63,7 +63,8 @@ class _SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
       launcherFile = event;
       notifyListeners();
     });
-    _moveOnDragSubscription = appStateService.moveOnDrag.stream.listen((final event) {
+    _moveOnDragSubscription =
+        appStateService.moveOnDrag.stream.listen((final event) {
       moveOnDrag = event;
       notifyListeners();
     });
@@ -83,6 +84,7 @@ class _SettingViewModelImpl extends ChangeNotifier implements SettingViewModel {
       notifyListeners();
     });
   }
+
   late final StreamSubscription<String> _modRootSubscription;
   late final StreamSubscription<String> _modExecFileSubscription;
   late final StreamSubscription<String> _launcherFileSubscription;

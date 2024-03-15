@@ -1,17 +1,21 @@
 import 'dart:collection';
 
 class NahidaliveElement {
-
   const NahidaliveElement({
     required this.uuid,
     required this.version,
     required this.sha256,
     required this.title,
     required this.description,
-    required this.tags, required this.uploadDate, required this.previewUrl, required this.koreaOnly, this.arcaUrl,
+    required this.tags,
+    required this.uploadDate,
+    required this.previewUrl,
+    required this.koreaOnly,
+    this.arcaUrl,
     this.virustotalUrl,
     this.expirationDate,
   });
+
   final String uuid;
   final String version;
   final String sha256;
@@ -27,19 +31,19 @@ class NahidaliveElement {
 
   @override
   String toString() => 'NahidaliveElement('
-        'uuid: $uuid, '
-        'version: $version, '
-        'sha256: $sha256, '
-        'title: $title, '
-        'description: $description, '
-        'arcaUrl: $arcaUrl, '
-        'virustotalUrl: $virustotalUrl, '
-        'tags: $tags, '
-        'expirationDate: $expirationDate, '
-        'uploadDate: $uploadDate, '
-        'previewUrl: $previewUrl, '
-        'koreaOnly: $koreaOnly'
-        ')';
+      'uuid: $uuid, '
+      'version: $version, '
+      'sha256: $sha256, '
+      'title: $title, '
+      'description: $description, '
+      'arcaUrl: $arcaUrl, '
+      'virustotalUrl: $virustotalUrl, '
+      'tags: $tags, '
+      'expirationDate: $expirationDate, '
+      'uploadDate: $uploadDate, '
+      'previewUrl: $previewUrl, '
+      'koreaOnly: $koreaOnly'
+      ')';
 
   @override
   bool operator ==(final Object other) {
@@ -72,37 +76,38 @@ class NahidaliveElement {
   }
 
   @override
-  int get hashCode => uuid.hashCode ^
-        version.hashCode ^
-        sha256.hashCode ^
-        title.hashCode ^
-        description.hashCode ^
-        arcaUrl.hashCode ^
-        virustotalUrl.hashCode ^
-        tags.hashCode ^
-        expirationDate.hashCode ^
-        uploadDate.hashCode ^
-        previewUrl.hashCode ^
-        koreaOnly.hashCode;
+  int get hashCode =>
+      uuid.hashCode ^
+      version.hashCode ^
+      sha256.hashCode ^
+      title.hashCode ^
+      description.hashCode ^
+      arcaUrl.hashCode ^
+      virustotalUrl.hashCode ^
+      tags.hashCode ^
+      expirationDate.hashCode ^
+      uploadDate.hashCode ^
+      previewUrl.hashCode ^
+      koreaOnly.hashCode;
 }
 
 class NahidaliveDownloadElement {
-
   const NahidaliveDownloadElement({
     required this.status,
     this.errorCodes,
     this.downloadUrl,
   });
+
   final bool status;
   final String? errorCodes;
   final String? downloadUrl;
 
   @override
   String toString() => 'NahidaliveDownloadElement('
-        'status: $status, '
-        'errorCodes: $errorCodes, '
-        'downloadUrl: $downloadUrl'
-        ')';
+      'status: $status, '
+      'errorCodes: $errorCodes, '
+      'downloadUrl: $downloadUrl'
+      ')';
 
   @override
   bool operator ==(final Object other) {
@@ -114,5 +119,6 @@ class NahidaliveDownloadElement {
   }
 
   @override
-  int get hashCode => status.hashCode ^ errorCodes.hashCode ^ downloadUrl.hashCode;
+  int get hashCode =>
+      status.hashCode ^ errorCodes.hashCode ^ downloadUrl.hashCode;
 }

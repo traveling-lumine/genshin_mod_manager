@@ -8,30 +8,30 @@ class WelcomeRoute extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) => ScaffoldPage(
-      header: const PageHeader(title: Text('Welcome')),
-      content: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Welcome to Genshin Mod Manager!'),
-            const SizedBox(height: 16),
-            const Text('This is a work in progress.'),
-            const SizedBox(height: 16),
-            const Text('Please report any issues to the GitHub repository.'),
-            const SizedBox(height: 16),
-            RichText(
-              text: TextSpan(
-                text: kRepoBase,
-                style: TextStyle(
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
+        header: const PageHeader(title: Text('Welcome')),
+        content: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Welcome to Genshin Mod Manager!'),
+              const SizedBox(height: 16),
+              const Text('This is a work in progress.'),
+              const SizedBox(height: 16),
+              const Text('Please report any issues to the GitHub repository.'),
+              const SizedBox(height: 16),
+              RichText(
+                text: TextSpan(
+                  text: kRepoBase,
+                  style: TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () => launchUrl(Uri.parse(kRepoBase)),
                 ),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () => launchUrl(Uri.parse(kRepoBase)),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
 }

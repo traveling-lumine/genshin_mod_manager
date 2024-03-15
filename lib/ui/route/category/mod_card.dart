@@ -21,11 +21,14 @@ import 'package:logger/logger.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 
+/// A [Card] that represents a [Mod].
 class ModCard extends StatelessWidget {
+  /// Creates a [ModCard] with a key [Mod.path].
   ModCard({
     required this.mod,
   }) : super(key: Key(mod.path));
 
+  /// Bound [Mod].
   final Mod mod;
 
   @override
@@ -54,21 +57,39 @@ class ModCard extends StatelessWidget {
   }
 }
 
-class _ModCard extends StatelessWidget {
-  _ModCard({required this.mod});
+class _ModCard extends StatefulWidget {
+  const _ModCard({required this.mod});
 
   static const _minIniSectionWidth = 150.0;
   static final _logger = Logger();
 
+  final Mod mod;
+
+  @override
+  State<_ModCard> createState() => _ModCardState();
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Mod>('mod', mod));
+  }
+}
+
+class _ModCardState extends State<_ModCard> {
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
-  final Mod mod;
+
+  @override
+  void dispose() {
+    _contextController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(final BuildContext context) => GestureDetector(
         onTap: () => _onToggle(context),
         child: Card(
-          backgroundColor: mod.isEnabled
+          backgroundColor: widget.mod.isEnabled
               ? Colors.green.lightest
               : Colors.red.lightest.withOpacity(0.5),
           padding: const EdgeInsets.all(6),
@@ -91,7 +112,7 @@ class _ModCard extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                mod.displayName,
+                widget.mod.displayName,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: FluentTheme.of(context).typography.bodyStrong,
@@ -102,9 +123,7 @@ class _ModCard extends StatelessWidget {
               RepaintBoundary(
                 child: Button(
                   child: const Icon(FluentIcons.refresh),
-                  onPressed: () async {
-                    await _onRefresh(context, value);
-                  },
+                  onPressed: () async => _onRefresh(context, value),
                 ),
               ),
             ],
@@ -112,7 +131,7 @@ class _ModCard extends StatelessWidget {
             RepaintBoundary(
               child: Button(
                 child: const Icon(FluentIcons.folder_open),
-                onPressed: () => openFolder(mod.path),
+                onPressed: () => openFolder(widget.mod.path),
               ),
             ),
           ],
@@ -140,7 +159,7 @@ class _ModCard extends StatelessWidget {
         builder: (final context, final iniPaths, final child) {
           if (iniPaths == null) {
             return const SizedBox(
-              width: _minIniSectionWidth,
+              width: _ModCard._minIniSectionWidth,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -154,7 +173,7 @@ class _ModCard extends StatelessWidget {
           final alliniFile = iniPaths
               .map(
                 (final path) =>
-                    IniWidget(iniFile: IniFile(path: path, mod: mod)),
+                    IniWidget(iniFile: IniFile(path: path, mod: widget.mod)),
               )
               .toList();
           return Expanded(
@@ -204,10 +223,10 @@ class _ModCard extends StatelessWidget {
   Future<void> _onPaste(final BuildContext context) async {
     final image = await Pasteboard.image;
     if (image == null) {
-      _logger.d('No image found in clipboard');
+      _ModCard._logger.d('No image found in clipboard');
       return;
     }
-    final filePath = mod.path.pJoin('preview.png');
+    final filePath = widget.mod.path.pJoin('preview.png');
     await File(filePath).writeAsBytes(image);
     if (!context.mounted) {
       return;
@@ -220,7 +239,7 @@ class _ModCard extends StatelessWidget {
         onClose: close,
       ),
     );
-    _logger.d('Image pasted to $filePath');
+    _ModCard._logger.d('Image pasted to $filePath');
     return;
   }
 
@@ -233,7 +252,7 @@ class _ModCard extends StatelessWidget {
     final fileImage = FileImage(previewFile);
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxWidth: constraints.maxWidth - _minIniSectionWidth,
+        maxWidth: constraints.maxWidth - _ModCard._minIniSectionWidth,
       ),
       child: Center(
         child: GestureDetector(
@@ -311,7 +330,7 @@ class _ModCard extends StatelessWidget {
       showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (final context2) => ContentDialog(
+        builder: (final dCtx) => ContentDialog(
           title: const Text('Delete preview image?'),
           content:
               const Text('Are you sure you want to delete the preview image?'),
@@ -319,7 +338,7 @@ class _ModCard extends StatelessWidget {
             Button(
               child: const Text('Cancel'),
               onPressed: () {
-                Navigator.of(context2).pop();
+                Navigator.of(dCtx).pop();
                 Navigator.of(context).pop();
               },
             ),
@@ -328,7 +347,7 @@ class _ModCard extends StatelessWidget {
               child: FilledButton(
                 onPressed: () {
                   previewFile.deleteSync();
-                  Navigator.of(context2).pop();
+                  Navigator.of(dCtx).pop();
                   Navigator.of(context).pop();
                   displayInfoBar(
                     context,
@@ -357,7 +376,7 @@ class _ModCard extends StatelessWidget {
       final recursiveObserverService =
           context.read<RecursiveFileSystemWatcher>();
       final fileContent = await File(findConfig).readAsString();
-      final config = jsonDecode(fileContent);
+      final Map<String, dynamic> config = jsonDecode(fileContent);
       final uuid = config['uuid'] as String;
       final version = config['version'] as String;
       final updateCode = config['update_code'] as String;
@@ -383,11 +402,11 @@ class _ModCard extends StatelessWidget {
 
       recursiveObserverService.cut();
       try {
-        await Directory(mod.path).delete(recursive: true);
+        await Directory(widget.mod.path).delete(recursive: true);
         if (!context.mounted) {
           throw Exception('context not mounted');
         }
-        final writer = createModWriter(category: mod.category);
+        final writer = createModWriter(category: widget.mod.category);
         await writer.write(
           modName: targetElement.title,
           data: data,
@@ -399,7 +418,7 @@ class _ModCard extends StatelessWidget {
           displayInfoBarInContext(
             context,
             title: const Text('Update downloaded'),
-            content: Text('Update downloaded to ${mod.path.pDirname}'),
+            content: Text('Update downloaded to ${widget.mod.path.pDirname}'),
             severity: InfoBarSeverity.success,
           ),
         );
@@ -434,11 +453,11 @@ class _ModCard extends StatelessWidget {
       _errorDialog(context, 'ShaderFixes path not found');
       return;
     }
-    if (mod.isEnabled) {
+    if (widget.mod.isEnabled) {
       unawaited(
         disable(
           shaderFixesPath: shaderFixesPath,
-          modPath: mod.path,
+          modPath: widget.mod.path,
           onModRenameClash: (final p0) => _showDirectoryExists(context, p0),
           onShaderDeleteFailed: (final e) => _errorDialog(
             context,
@@ -451,7 +470,7 @@ class _ModCard extends StatelessWidget {
       unawaited(
         enable(
           shaderFixesPath: shaderFixesPath,
-          modPath: mod.path,
+          modPath: widget.mod.path,
           onModRenameClash: (final p0) => _showDirectoryExists(context, p0),
           onShaderExists: (final e) =>
               _errorDialog(context, '${e.path} already exists!'),
@@ -499,6 +518,6 @@ class _ModCard extends StatelessWidget {
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Mod>('mod', mod));
+    properties.add(DiagnosticsProperty<Mod>('mod', widget.mod));
   }
 }

@@ -1541,8 +1541,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'lints',
-    description:
-        '''
+    description: '''
 Official Dart lint rules. Defines the 'core' and 'recommended' set of lints suggested by the Dart team.
 ''',
     repository: 'https://github.com/dart-lang/lints',
@@ -2540,8 +2539,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     homepage: 'https://github.com/bcgit/pc-dart',
     authors: [],
     version: '3.7.4',
-    license:
-        '''
+    license: '''
 Copyright (c) 2000 - 2019 The Legion of the Bouncy Castle Inc. (https://www.bouncycastle.org)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -3856,8 +3854,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   ),
   Package(
     name: 'win32',
-    description:
-        '''
+    description: '''
 A Dart library for accessing common Win32 APIs using FFI. No C required!
 ''',
     homepage: 'https://win32.pub',
@@ -4002,14 +3999,19 @@ SOFTWARE.''',
 
 /// Package license definition.
 class Package {
-
   const Package({
     required this.name,
     required this.description,
-    required this.authors, required this.version, required this.isMarkdown, required this.isSdk, required this.isDirectDependency, this.homepage,
+    required this.authors,
+    required this.version,
+    required this.isMarkdown,
+    required this.isSdk,
+    required this.isDirectDependency,
+    this.homepage,
     this.repository,
     this.license,
   });
+
   /// Package name
   final String name;
 

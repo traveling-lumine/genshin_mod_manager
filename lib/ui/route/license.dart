@@ -40,7 +40,8 @@ class OssLicensesRoute extends StatelessWidget {
         lp.addAll(l.paragraphs.map((final p) => p.text));
       }
     }
-    final licenses = ossLicenses.where((final e) => e.isDirectDependency).toList();
+    final licenses =
+        ossLicenses.where((final e) => e.isDirectDependency).toList();
     // for (final key in lm.keys) {
     //   licenses.add(Package(
     //     name: key,
@@ -60,14 +61,14 @@ class OssLicensesRoute extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) => NavigationView(
-      appBar: const NavigationAppBar(
-        title: Text('Open Source Licenses'),
-      ),
-      content: ScaffoldPage(
-        content: FutureBuilder<List<Package>>(
-          future: _licenses,
-          initialData: const [],
-          builder: (final context, final snapshot) => ListView.separated(
+        appBar: const NavigationAppBar(
+          title: Text('Open Source Licenses'),
+        ),
+        content: ScaffoldPage(
+          content: FutureBuilder<List<Package>>(
+            future: _licenses,
+            initialData: const [],
+            builder: (final context, final snapshot) => ListView.separated(
               padding: const EdgeInsets.all(0),
               itemCount: snapshot.data?.length ?? 0,
               itemBuilder: (final context, final index) {
@@ -88,55 +89,61 @@ class OssLicensesRoute extends StatelessWidget {
               },
               separatorBuilder: (final context, final index) => const Divider(),
             ),
+          ),
         ),
-      ),
-    );
+      );
 }
 
 class MiscOssLicenseSingle extends StatelessWidget {
-
   const MiscOssLicenseSingle({required this.package, super.key});
+
   final Package package;
 
   String _bodyText() => package.license!.split('\n').map((line) {
-      if (line.startsWith('//')) line = line.substring(2);
-      line = line.trim();
-      return line;
-    }).join('\n');
+        if (line.startsWith('//')) line = line.substring(2);
+        line = line.trim();
+        return line;
+      }).join('\n');
 
   @override
   Widget build(final BuildContext context) => NavigationView(
-      appBar: NavigationAppBar(
-        title: Text('${package.name} ${package.version}'),
-      ),
-      content: ScaffoldPage(
-        content: ListView(children: <Widget>[
-          if (package.description.isNotEmpty)
-            Padding(
-                padding:
-                    const EdgeInsets.only(top: 12, left: 12, right: 12),
-                child: Text(
-                  package.description,
-                ),),
-          if (package.homepage != null)
-            Padding(
-                padding:
-                    const EdgeInsets.only(top: 12, left: 12, right: 12),
-                child: GestureDetector(
-                  child: Text(package.homepage!,
+        appBar: NavigationAppBar(
+          title: Text('${package.name} ${package.version}'),
+        ),
+        content: ScaffoldPage(
+          content: ListView(
+            children: <Widget>[
+              if (package.description.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
+                  child: Text(
+                    package.description,
+                  ),
+                ),
+              if (package.homepage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
+                  child: GestureDetector(
+                    child: Text(
+                      package.homepage!,
                       style: const TextStyle(
-                          decoration: TextDecoration.underline,),),
-                  onTap: () => launchUrl(Uri.parse(package.homepage!)),
-                ),),
-          if (package.description.isNotEmpty || package.homepage != null)
-            const Divider(),
-          Padding(
-            padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
-            child: Text(_bodyText()),
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                    onTap: () => launchUrl(Uri.parse(package.homepage!)),
+                  ),
+                ),
+              if (package.description.isNotEmpty || package.homepage != null)
+                const Divider(),
+              Padding(
+                padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
+                child: Text(_bodyText()),
+              ),
+            ],
           ),
-        ],),
-      ),
-    );
+        ),
+      );
+
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
