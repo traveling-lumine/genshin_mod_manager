@@ -1,15 +1,17 @@
+import 'dart:io';
+
 import 'package:meta/meta.dart';
 
 @immutable
 final class FSEvent {
   const FSEvent({
-    required this.paths,
+    this.event,
     this.force = false,
   });
 
-  final List<String> paths;
+  final FileSystemEvent? event;
   final bool force;
 
   @override
-  String toString() => 'FSEvent{paths: $paths, force: $force}';
+  String toString() => 'FSEvent{paths: $event, force: $force}';
 }

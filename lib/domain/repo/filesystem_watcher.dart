@@ -20,3 +20,7 @@ abstract interface class FSEPathsWatcher implements Disposable {
 abstract interface class ModsWatcher implements Disposable {
   LatestStream<List<Mod>> get mods;
 }
+
+abstract interface class FileWatcher implements Disposable {
+  LatestStream<int> get updateCode;
+}

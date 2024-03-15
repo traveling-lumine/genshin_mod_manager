@@ -9,9 +9,11 @@ import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/domain/repo/latest_stream.dart';
+import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 
 part 'filesystem_watcher/category_icon.dart';
+part 'filesystem_watcher/file_watcher.dart';
 part 'filesystem_watcher/fse.dart';
 part 'filesystem_watcher/mods.dart';
 part 'filesystem_watcher/recursive.dart';

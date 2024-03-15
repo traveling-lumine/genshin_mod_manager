@@ -8,7 +8,8 @@ import 'package:window_manager/window_manager.dart';
 
 const _minWindowSize = Size(600, 600);
 
-void main() async {
+void main(final List<String> args) async {
+  print('Starting app with args: $args');
   await _initialize();
   if (!kDebugMode) {
     _registerErrorHandlers();
@@ -19,10 +20,12 @@ void main() async {
 Future<void> _initialize() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
-  await windowManager.waitUntilReadyToShow(const WindowOptions(
-    titleBarStyle: TitleBarStyle.hidden,
-    minimumSize: _minWindowSize,
-  ),);
+  await windowManager.waitUntilReadyToShow(
+    const WindowOptions(
+      titleBarStyle: TitleBarStyle.hidden,
+      minimumSize: _minWindowSize,
+    ),
+  );
 }
 
 void _registerErrorHandlers() {
@@ -41,11 +44,11 @@ void _registerErrorHandlers() {
   };
 
   ErrorWidget.builder = (final details) => Center(
-      child: SelectableText(
-        _errorToString(details),
-        style: TextStyle(color: Colors.red.darker),
-      ),
-    );
+        child: SelectableText(
+          _errorToString(details),
+          style: TextStyle(color: Colors.red.darker),
+        ),
+      );
 }
 
 String _writeStacktrace(final FlutterErrorDetails details) {

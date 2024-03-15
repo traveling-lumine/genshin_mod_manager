@@ -14,12 +14,11 @@ class _ModsWatcherImpl implements ModsWatcher {
     required this.category,
     required final RecursiveFileSystemWatcher watcher,
   }) {
-    _subscription =
-        watcher.event.stream.asyncMap(_getMods).listen(_pathsStream.add);
+    _subscription = watcher.event.stream.asyncMap(_getMods).listen(_listen);
   }
 
+  static final _logger = Logger();
   final ModCategory category;
-
   late final StreamSubscription<List<Mod>> _subscription;
 
   @override
@@ -33,4 +32,12 @@ class _ModsWatcherImpl implements ModsWatcher {
   }
 
   Future<List<Mod>> _getMods(final FSEvent _) => getMods(category);
+
+  void _listen(final List<Mod> event) {
+    _logger.d('$this: updated');
+    _pathsStream.add(event);
+  }
+
+  @override
+  String toString() => '_ModsWatcherImpl($category)';
 }

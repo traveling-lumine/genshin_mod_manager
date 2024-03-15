@@ -10,10 +10,11 @@ import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/data/repo/mod_writer.dart';
+import 'package:genshin_mod_manager/domain/entity/ini.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
-import 'package:genshin_mod_manager/ui/route/category/editor_text.dart';
+import 'package:genshin_mod_manager/ui/route/category/mod_card/ini_widget.dart';
 import 'package:genshin_mod_manager/ui/route/category/mod_card_vm.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:logger/logger.dart';
@@ -24,6 +25,7 @@ class ModCard extends StatelessWidget {
   ModCard({
     required this.mod,
   }) : super(key: Key(mod.path));
+
   final Mod mod;
 
   @override
@@ -127,10 +129,50 @@ class _ModCard extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Divider(direction: Axis.vertical),
               ),
-              buildIni(),
+              _buildIni(),
             ],
           ),
         ),
+      );
+
+  Widget _buildIni() => Selector<ModCardViewModel, List<String>?>(
+        selector: (final context, final vm) => vm.iniPaths,
+        builder: (final context, final iniPaths, final child) {
+          if (iniPaths == null) {
+            return const SizedBox(
+              width: _minIniSectionWidth,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ProgressRing(),
+                  SizedBox(height: 4),
+                  Text('Waiting for connection'),
+                ],
+              ),
+            );
+          }
+          final alliniFile = iniPaths
+              .map(
+                (final path) =>
+                    IniWidget(iniFile: IniFile(path: path, mod: mod)),
+              )
+              .toList();
+          return Expanded(
+            child: alliniFile.isNotEmpty
+                ? Card(
+                    backgroundColor: Colors.white.withOpacity(0.4),
+                    padding: const EdgeInsets.all(4),
+                    child: ListView.builder(
+                      itemBuilder: (final context, final index) =>
+                          alliniFile[index],
+                      itemCount: alliniFile.length,
+                    ),
+                  )
+                : const Center(
+                    child: Text('No ini files found'),
+                  ),
+          );
+        },
       );
 
   Widget _buildDesc(
@@ -139,8 +181,8 @@ class _ModCard extends StatelessWidget {
   ) =>
       Selector<ModCardViewModel, String?>(
         selector: (final context, final vm) => vm.previewPath,
-        builder: (final context, final previewFile, final child) {
-          if (previewFile == null) {
+        builder: (final context, final previewPath, final child) {
+          if (previewPath == null) {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -155,7 +197,7 @@ class _ModCard extends StatelessWidget {
               ],
             );
           }
-          return _buildImageDesc(context, constraints, File(previewFile));
+          return _buildImageDesc(context, constraints, previewPath);
         },
       );
 
@@ -185,236 +227,124 @@ class _ModCard extends StatelessWidget {
   Widget _buildImageDesc(
     final BuildContext context,
     final BoxConstraints constraints,
-    final File previewFile,
-  ) =>
-      ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: constraints.maxWidth - _minIniSectionWidth,
-        ),
+    final String previewPath,
+  ) {
+    final previewFile = File(previewPath);
+    final fileImage = FileImage(previewFile);
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: constraints.maxWidth - _minIniSectionWidth,
+      ),
+      child: Center(
         child: GestureDetector(
-          onTapUp: (final details) {
-            showDialog(
-              context: context,
-              builder: (final context) => GestureDetector(
-                onTap: Navigator.of(context).pop,
-                onSecondaryTap: Navigator.of(context).pop,
-                child: Image.file(
-                  previewFile,
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.medium,
-                ),
-              ),
-            );
-          },
-          onSecondaryTapUp: (final details) {
-            final targetContext = _contextAttachKey.currentContext;
-            if (targetContext == null) {
-              return;
-            }
-            final box = targetContext.findRenderObject()! as RenderBox;
-            final position = box.localToGlobal(
-              details.localPosition,
-              ancestor: Navigator.of(context).context.findRenderObject(),
-            );
-            unawaited(_contextController.showFlyout(
-              position: position,
-              builder: (final context) => FlyoutContent(
-                child: SizedBox(
-                  width: 120,
-                  child: CommandBar(
-                    primaryItems: [
-                      CommandBarButton(
-                        icon: const Icon(FluentIcons.delete),
-                        label: const Text('Delete'),
-                        onPressed: () => _showDialog(context, previewFile),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ));
-          },
+          onTapUp: (final details) => _onImageTap(context, fileImage),
+          onSecondaryTapUp: (final details) =>
+              _onImageRightClick(details, context, previewFile),
           child: FlyoutTarget(
             controller: _contextController,
             key: _contextAttachKey,
-            child: Image.file(
-              previewFile,
+            child: Image(
+              image: fileImage,
               fit: BoxFit.contain,
               filterQuality: FilterQuality.medium,
             ),
           ),
         ),
-      );
-
-  Widget buildIni() => Consumer<ModCardViewModel>(
-        builder: (final context, final value, final child) {
-          final iniPaths = value.iniPaths;
-          if (iniPaths == null) {
-            return const Center(child: ProgressRing());
-          }
-          final alliniFile = allFilesToWidget(iniPaths);
-          return Expanded(
-            child: alliniFile.isNotEmpty
-                ? Card(
-                    backgroundColor: Colors.white.withOpacity(0.4),
-                    padding: const EdgeInsets.all(4),
-                    child: ListView(
-                      children: alliniFile,
-                    ),
-                  )
-                : const Center(
-                    child: Text('No ini files found'),
-                  ),
-          );
-        },
-      );
-
-  List<Widget> allFilesToWidget(final List<String>? paths) {
-    if (paths == null) {
-      return [];
-    }
-    final alliniFile = <Widget>[];
-    for (final path in paths) {
-      final widget = FutureBuilder(
-        future: File(path)
-            // ignore: discarded_futures
-            .readAsLines(encoding: const Utf8Codec(allowMalformed: true)),
-        builder: (final context, final snapshot) {
-          if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          }
-          final rowElements = <Widget>[buildIniHeader(path)];
-          if (snapshot.connectionState != ConnectionState.done) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ...rowElements,
-                  const ProgressRing(),
-                  const Text('Loading ini file'),
-                ],
-              ),
-            );
-          }
-          late String lastSection;
-          var metSection = false;
-          for (final line in snapshot.data!) {
-            if (line.startsWith('[')) {
-              metSection = false;
-            }
-            final regExp = RegExp(r'\[Key.*?\]');
-            final match = regExp.firstMatch(line)?.group(0);
-            if (match != null) {
-              rowElements.add(Text(match));
-              lastSection = match;
-              metSection = true;
-            }
-            final lineLower = line.toLowerCase();
-            if (lineLower.startsWith('key')) {
-              rowElements
-                  .add(buildIniFieldEditor('key:', lastSection, line, path));
-            } else if (lineLower.startsWith('back')) {
-              rowElements
-                  .add(buildIniFieldEditor('back:', lastSection, line, path));
-            } else if (line.startsWith(r'$') && metSection) {
-              final cycles = ','.allMatches(line.split(';').first).length + 1;
-              rowElements.add(Text('Cycles: $cycles'));
-            }
-          }
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: rowElements,
-          );
-        },
-      );
-      alliniFile.add(widget);
-    }
-    return alliniFile;
-  }
-
-  Widget buildIniHeader(final String iniPath) {
-    final basenameString = iniPath.pBasename;
-    return Row(
-      children: [
-        Expanded(
-          child: Tooltip(
-            message: basenameString,
-            child: Text(
-              basenameString,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-        RepaintBoundary(
-          child: Button(
-            child: const Icon(FluentIcons.document_management),
-            onPressed: () => runProgram(File(iniPath)),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget buildIniFieldEditor(
-    final String data,
-    final String section,
-    final String line,
-    final String path,
-  ) =>
-      Row(
-        children: [
-          Text(data),
-          Expanded(
-            child: EditorText(
-              section: section,
-              line: line,
-              path: path,
+  void _onImageTap(final BuildContext context, final FileImage fileImage) {
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (final dCtx) => GestureDetector(
+          onTap: Navigator.of(dCtx).pop,
+          onSecondaryTap: Navigator.of(dCtx).pop,
+          child: Image(
+            image: fileImage,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.medium,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onImageRightClick(
+    final TapUpDetails details,
+    final BuildContext context,
+    final File previewFile,
+  ) {
+    final targetContext = _contextAttachKey.currentContext;
+    if (targetContext == null) {
+      return;
+    }
+    final box = targetContext.findRenderObject()! as RenderBox;
+    final position = box.localToGlobal(
+      details.localPosition,
+      ancestor: Navigator.of(context).context.findRenderObject(),
+    );
+    unawaited(
+      _contextController.showFlyout(
+        position: position,
+        builder: (final fCtx) => FlyoutContent(
+          child: SizedBox(
+            width: 120,
+            child: CommandBar(
+              primaryItems: [
+                CommandBarButton(
+                  icon: const Icon(FluentIcons.delete),
+                  label: const Text('Delete'),
+                  onPressed: () => _onImageDelete(context, previewFile),
+                ),
+              ],
             ),
           ),
-        ],
-      );
+        ),
+      ),
+    );
+  }
 
-  void _showDialog(final BuildContext context, final File previewFile) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (final context2) => ContentDialog(
-        title: const Text('Delete preview image?'),
-        content:
-            const Text('Are you sure you want to delete the preview image?'),
-        actions: [
-          Button(
-            child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.of(context2).pop();
-              Navigator.of(context).pop();
-            },
-          ),
-          FluentTheme(
-            data: FluentTheme.of(context).copyWith(accentColor: Colors.red),
-            child: FilledButton(
+  void _onImageDelete(final BuildContext context, final File previewFile) {
+    unawaited(
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (final context2) => ContentDialog(
+          title: const Text('Delete preview image?'),
+          content:
+              const Text('Are you sure you want to delete the preview image?'),
+          actions: [
+            Button(
+              child: const Text('Cancel'),
               onPressed: () {
-                previewFile.deleteSync();
                 Navigator.of(context2).pop();
                 Navigator.of(context).pop();
-                displayInfoBar(
-                  context,
-                  builder: (final context, final close) => InfoBar(
-                    title: const Text('Preview deleted'),
-                    content: Text('Preview deleted from ${previewFile.path}'),
-                    severity: InfoBarSeverity.warning,
-                    onClose: close,
-                  ),
-                );
               },
-              child: const Text('Delete'),
             ),
-          ),
-        ],
+            FluentTheme(
+              data: FluentTheme.of(context).copyWith(accentColor: Colors.red),
+              child: FilledButton(
+                onPressed: () {
+                  previewFile.deleteSync();
+                  Navigator.of(context2).pop();
+                  Navigator.of(context).pop();
+                  displayInfoBar(
+                    context,
+                    builder: (final context, final close) => InfoBar(
+                      title: const Text('Preview deleted'),
+                      content: Text('Preview deleted from ${previewFile.path}'),
+                      severity: InfoBarSeverity.warning,
+                      onClose: close,
+                    ),
+                  );
+                },
+                child: const Text('Delete'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -508,7 +438,9 @@ class _ModCard extends StatelessWidget {
           modPath: mod.path,
           onModRenameClash: (final p0) => _showDirectoryExists(context, p0),
           onShaderDeleteFailed: (final e) => _errorDialog(
-              context, 'Failed to delete files in ShaderFixes: $e'),
+            context,
+            'Failed to delete files in ShaderFixes: $e',
+          ),
           onModRenameFailed: () => _showErrorDialog(context),
         ),
       );

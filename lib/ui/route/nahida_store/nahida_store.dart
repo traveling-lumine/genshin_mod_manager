@@ -237,39 +237,39 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: ProgressRing());
             }
-            if (snapshot.hasData) {
-              final data = snapshot.data!.where((final element) {
-                final tagMap = {for (final e in element.tags) e: true};
-                try {
-                  final filter = _tagFilter;
-                  if (filter == null) return true;
-                  return filter.evaluate(tagMap);
-                } catch (e) {
-                  return true;
-                }
-              }).toList();
-              return ThickScrollbar(
-                child: GridView.builder(
-                  controller: _scrollController,
-                  gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
-                    minCrossAxisExtent: 500,
-                    mainAxisExtent: 500,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                  ),
-                  itemCount: data.length,
-                  itemBuilder: (final context, final index) => RevertScrollbar(
-                    child: StoreElement(
-                      passwordController: _textEditingController,
-                      element: data[index],
-                      category: widget.category,
-                    ),
+            if (!snapshot.hasData) {
+              return Text('Unable to fetch data.'
+                  ' Report this to the developer: $snapshot');
+            }
+            final data = snapshot.data!.where((final element) {
+              final tagMap = {for (final e in element.tags) e: true};
+              try {
+                final filter = _tagFilter;
+                if (filter == null) return true;
+                return filter.evaluate(tagMap);
+              } catch (e) {
+                return true;
+              }
+            }).toList();
+            return ThickScrollbar(
+              child: GridView.builder(
+                controller: _scrollController,
+                gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
+                  minCrossAxisExtent: 500,
+                  mainAxisExtent: 500,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: data.length,
+                itemBuilder: (final context, final index) => RevertScrollbar(
+                  child: StoreElement(
+                    passwordController: _textEditingController,
+                    element: data[index],
+                    category: widget.category,
                   ),
                 ),
-              );
-            }
-            return Text('Unable to fetch data.'
-                ' Report this to the developer: $snapshot');
+              ),
+            );
           },
         ),
       );
