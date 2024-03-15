@@ -382,29 +382,32 @@ class _ModCard extends StatelessWidget {
       final data = await api.download(downloadElement);
 
       recursiveObserverService.cut();
-      await Directory(mod.path).delete(recursive: true);
-      if (!context.mounted) {
-        throw Exception('context not mounted');
+      try {
+        await Directory(mod.path).delete(recursive: true);
+        if (!context.mounted) {
+          throw Exception('context not mounted');
+        }
+        final writer = createModWriter(category: mod.category);
+        await writer.write(
+          modName: targetElement.title,
+          data: data,
+        );
+        if (!context.mounted) {
+          return;
+        }
+        unawaited(
+          displayInfoBarInContext(
+            context,
+            title: const Text('Update downloaded'),
+            content: Text('Update downloaded to ${mod.path.pDirname}'),
+            severity: InfoBarSeverity.success,
+          ),
+        );
+      } finally {
+        recursiveObserverService
+          ..uncut()
+          ..forceUpdate();
       }
-      final writer = createModWriter(category: mod.category);
-      await writer.write(
-        modName: targetElement.title,
-        data: data,
-      );
-      if (!context.mounted) {
-        return;
-      }
-      unawaited(
-        displayInfoBarInContext(
-          context,
-          title: const Text('Update downloaded'),
-          content: Text('Update downloaded to ${mod.path.pDirname}'),
-          severity: InfoBarSeverity.success,
-        ),
-      );
-      recursiveObserverService
-        ..uncut()
-        ..forceUpdate();
     } on FormatException catch (e) {
       if (!context.mounted) {
         return;
