@@ -222,24 +222,7 @@ class _EditorTextState extends State<_EditorText> {
   }
 
   void _editIniKey(final String value) {
-    final iniSection = widget.iniSection;
-    var metSection = false;
-    final allLines = <String>[];
-    final lineHeader = iniSection.key;
-    final path = File(iniSection.iniFile.path);
-    path.readAsLinesSync().forEach((final element) {
-      final regExp = RegExp(r'\[Key.*?\]').firstMatch(element);
-      if (regExp != null && regExp.group(0) == iniSection.section) {
-        metSection = true;
-      }
-      if (metSection &&
-          element.toLowerCase() == iniSection.line.toLowerCase()) {
-        allLines.add('$lineHeader = ${value.trim()}');
-      } else {
-        allLines.add(element);
-      }
-    });
-    path.writeAsStringSync(allLines.join('\n'));
+    context.read<IniWidgetViewModel>().editIniFile(widget.iniSection, value);
   }
 
   @override

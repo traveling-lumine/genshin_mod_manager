@@ -10,6 +10,8 @@ import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
 
 abstract interface class IniWidgetViewModel implements BaseViewModel {
   Future<List<String>>? get iniLines;
+
+  void editIniFile(final IniSection section, final String value);
 }
 
 IniWidgetViewModel createIniWidgetViewModel({
@@ -39,6 +41,26 @@ class _IniWidgetViewModelImpl extends ChangeNotifier
 
   @override
   Future<List<String>>? iniLines;
+
+  @override
+  void editIniFile(final IniSection section, final String value) {
+    var metSection = false;
+    final allLines = <String>[];
+    final lineHeader = section.key;
+    final path = File(section.iniFile.path);
+    path.readAsLinesSync().forEach((final element) {
+      final regExp = RegExp(r'\[Key.*?\]').firstMatch(element);
+      if (regExp != null && regExp.group(0) == section.section) {
+        metSection = true;
+      }
+      if (metSection && element.toLowerCase() == section.line.toLowerCase()) {
+        allLines.add('$lineHeader = ${value.trim()}');
+      } else {
+        allLines.add(element);
+      }
+    });
+    path.writeAsStringSync(allLines.join('\n'));
+  }
 
   void _listen(final event) {
     // ignore: discarded_futures
