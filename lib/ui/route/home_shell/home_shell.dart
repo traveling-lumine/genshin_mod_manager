@@ -64,7 +64,7 @@ class HomeShell extends StatelessWidget {
           providers: [
             Provider(
               create: (final context) => createRecursiveFileSystemWatcher(
-                targetPath: modRoot,
+                targetPath: modRoot.pDirname,
               ),
               dispose: (final context, final value) => value.dispose(),
             ),
