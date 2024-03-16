@@ -7,45 +7,33 @@ class NahidaliveElement {
   const NahidaliveElement({
     required this.uuid,
     required this.version,
-    required this.sha256,
     required this.title,
     required this.description,
     required this.tags,
-    required this.uploadDate,
     required this.previewUrl,
-    required this.koreaOnly,
     this.arcaUrl,
     this.virustotalUrl,
-    this.expirationDate,
   });
 
   final String uuid;
   final String version;
-  final String sha256;
   final String title;
   final String description;
   final String? arcaUrl;
   final String? virustotalUrl;
   final UnmodifiableListView<String> tags;
-  final String? expirationDate;
-  final String uploadDate;
   final String previewUrl;
-  final bool koreaOnly;
 
   @override
   String toString() => 'NahidaliveElement('
       'uuid: $uuid, '
       'version: $version, '
-      'sha256: $sha256, '
       'title: $title, '
       'description: $description, '
       'arcaUrl: $arcaUrl, '
       'virustotalUrl: $virustotalUrl, '
       'tags: $tags, '
-      'expirationDate: $expirationDate, '
-      'uploadDate: $uploadDate, '
       'previewUrl: $previewUrl, '
-      'koreaOnly: $koreaOnly'
       ')';
 
   @override
@@ -70,32 +58,24 @@ class NahidaliveElement {
     }
     return other.uuid == uuid &&
         other.version == version &&
-        other.sha256 == sha256 &&
         other.title == title &&
         other.description == description &&
         other.arcaUrl == arcaUrl &&
         other.virustotalUrl == virustotalUrl &&
         tagsEqual &&
-        other.expirationDate == expirationDate &&
-        other.uploadDate == uploadDate &&
-        other.previewUrl == previewUrl &&
-        other.koreaOnly == koreaOnly;
+        other.previewUrl == previewUrl;
   }
 
   @override
   int get hashCode =>
       uuid.hashCode ^
       version.hashCode ^
-      sha256.hashCode ^
       title.hashCode ^
       description.hashCode ^
       arcaUrl.hashCode ^
       virustotalUrl.hashCode ^
       tags.hashCode ^
-      expirationDate.hashCode ^
-      uploadDate.hashCode ^
-      previewUrl.hashCode ^
-      koreaOnly.hashCode;
+      previewUrl.hashCode;
 }
 
 @immutable

@@ -87,32 +87,24 @@ NahidaliveElement _neFromJson(final json) => switch (json) {
       {
         'uuid': final String uuid,
         'version': final String version,
-        'sha256': final String sha256,
         'title': final String title,
         'description': final String description,
         'arca_url': final String? arcaUrl,
         'virustotal_url': final String? virustotalUrl,
         'tags': final List<dynamic> tags,
-        'expiration_date': final String? expirationDate,
-        'upload_date': final String uploadDate,
         'preview_url': final String previewUrl,
-        'koreaonly': final bool koreaonly,
       } =>
         NahidaliveElement(
           uuid: uuid,
           version: version,
-          sha256: sha256,
           title: title,
           description: description,
           arcaUrl: arcaUrl,
           virustotalUrl: virustotalUrl,
           tags: UnmodifiableListView(tags.cast<String>()),
-          expirationDate: expirationDate,
-          uploadDate: uploadDate,
           previewUrl: previewUrl,
-          koreaOnly: koreaonly,
         ),
-      _ => throw const FormatException('Unknown NahidaliveElement format.'),
+      _ => throw FormatException('Unknown NahidaliveElement format: $json'),
     };
 
 NahidaliveDownloadElement _ndeFromJson(final Map<String, dynamic> json) =>
