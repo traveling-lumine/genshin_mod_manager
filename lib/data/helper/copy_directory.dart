@@ -11,8 +11,8 @@ extension CopyDirectory on Directory {
 }
 
 void _copyDirectorySync(final Directory dir, final String dest) {
-  final newDir = Directory(dest)..createSync(recursive: true);
   final listSync = dir.listSync();
+  final newDir = Directory(dest)..createSync(recursive: true);
   for (final element in listSync) {
     final newName = newDir.path.pJoin(element.path.pBasename);
     if (element is File) {

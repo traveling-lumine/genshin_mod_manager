@@ -64,24 +64,24 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
         if (!mounted) {
           return;
         }
-        displayInfoBarInContext(
+        unawaited(displayInfoBarInContext(
           context,
           title: const Text('Download failed'),
           content: Text('${e.uri}'),
           severity: InfoBarSeverity.error,
-        );
+        ));
       },
       onDownloadComplete: (final element) {
         if (!mounted) {
           return;
         }
-        displayInfoBarInContext(
+        unawaited(displayInfoBarInContext(
           context,
           title: Text('Downloaded ${element.title}'),
           severity: InfoBarSeverity.success,
-        );
+        ));
       },
-      onPasswordRequired: () {
+      onPasswordRequired: (final wrongPw) {
         if (!mounted) {
           return Future(() => null);
         }
@@ -89,14 +89,23 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
           context: context,
           builder: (final dialogContext) => ContentDialog(
             title: const Text('Enter password'),
-            content: SizedBox(
-              height: 40,
-              child: TextBox(
+            content: IntrinsicHeight(
+              child: TextFormBox(
+                autovalidateMode: AutovalidateMode.always,
                 autofocus: true,
                 controller: _textEditingController,
                 placeholder: 'Password',
-                onSubmitted: (final value) => Navigator.of(dialogContext)
+                onFieldSubmitted: (final value) => Navigator.of(dialogContext)
                     .pop(_textEditingController.text),
+                validator: (final value) {
+                  if (wrongPw == null || value == null) {
+                    return null;
+                  }
+                  if (value == wrongPw) {
+                    return "Wrong password";
+                  }
+                  return null;
+                },
               ),
             ),
             actions: [

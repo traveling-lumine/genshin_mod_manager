@@ -48,10 +48,18 @@ class CategoryDropTarget extends StatelessWidget {
         try {
           dir.renameSync(newPath);
           logger.d('Moved $path to $newPath');
-        } on FileSystemException {
-          dir.copyToPath(newPath);
-          dir.deleteSync(recursive: true);
-          logger.d('Fallback: copy-deleted $path to $newPath');
+        } on FileSystemException catch (e) {
+          if (e.osError?.errorCode == 87) {
+            displayInfoBarInContext(
+              context,
+              title: const Text('Incorrect parameter'),
+              severity: InfoBarSeverity.error,
+            );
+          } else {
+            dir.copyToPath(newPath);
+            dir.deleteSync(recursive: true);
+            logger.d('Fallback: copy-deleted $path to $newPath');
+          }
         }
       } else {
         dir.copyToPath(newPath);
