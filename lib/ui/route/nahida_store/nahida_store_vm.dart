@@ -23,11 +23,10 @@ abstract interface class NahidaStoreViewModel implements BaseViewModel {
   });
 
   void registerDownloadCallbacks({
-    final Future<String?> Function()? onPasswordRequired,
-    final void Function(HttpException e)? onApiException,
-    final void Function(NahidaliveElement element)? onDownloadComplete,
-    final void Function(ModCategory category, String modName, Uint8List data)?
-        onExtractFail,
+    final Future<String?> Function(String?)? onPasswordRequired,
+    final void Function(HttpException)? onApiException,
+    final void Function(NahidaliveElement)? onDownloadComplete,
+    final void Function(ModCategory, String, Uint8List)? onExtractFail,
   });
 }
 
@@ -49,7 +48,7 @@ final class _NahidaStoreViewModelImpl extends ChangeNotifier
   final NahidaliveAPI api;
   final RecursiveFileSystemWatcher observer;
 
-  Future<String?> Function()? _onPasswordRequired;
+  Future<String?> Function(String?)? _onPasswordRequired;
   void Function(HttpException)? _onApiException;
   void Function(NahidaliveElement)? _onDownloadComplete;
   void Function(ModCategory, String, Uint8List)? _onExtractFail;
@@ -73,32 +72,31 @@ final class _NahidaStoreViewModelImpl extends ChangeNotifier
   Future<void> onModDownload({
     required final NahidaliveElement element,
     required final ModCategory category,
-    final String? pw,
+    String? pw,
   }) async {
     final writer = createModWriter(category: category);
-    try {
-      await AkashaDownloadUrlUseCase(
-        api: api,
-        element: element,
-        writer: writer,
-        pw: pw,
-      ).call();
-    } on HttpException catch (e) {
-      _onApiException?.call(e);
-      return;
-    } on WrongPasswordException {
-      final password = await _onPasswordRequired?.call();
-      if (password == null) {
+    while (true) {
+      try {
+        await AkashaDownloadUrlUseCase(
+          api: api,
+          element: element,
+          writer: writer,
+          pw: pw,
+        ).call();
+        break;
+      } on HttpException catch (e) {
+        _onApiException?.call(e);
+        return;
+      } on WrongPasswordException {
+        final password = await _onPasswordRequired?.call(pw);
+        if (password == null) {
+          return;
+        }
+        pw = password;
+      } on ModZipExtractionException catch (e) {
+        _onExtractFail?.call(category, element.title, e.data);
         return;
       }
-      return onModDownload(
-        element: element,
-        category: category,
-        pw: password,
-      );
-    } on ModZipExtractionException catch (e) {
-      _onExtractFail?.call(category, element.title, e.data);
-      return;
     }
     _onDownloadComplete?.call(element);
     observer.forceUpdate();
@@ -106,11 +104,10 @@ final class _NahidaStoreViewModelImpl extends ChangeNotifier
 
   @override
   void registerDownloadCallbacks({
-    final Future<String?> Function()? onPasswordRequired,
-    final void Function(HttpException e)? onApiException,
-    final void Function(NahidaliveElement element)? onDownloadComplete,
-    final void Function(ModCategory category, String modName, Uint8List data)?
-        onExtractFail,
+    final Future<String?> Function(String?)? onPasswordRequired,
+    final void Function(HttpException)? onApiException,
+    final void Function(NahidaliveElement)? onDownloadComplete,
+    final void Function(ModCategory, String, Uint8List)? onExtractFail,
   }) {
     _onPasswordRequired = onPasswordRequired;
     _onApiException = onApiException;
