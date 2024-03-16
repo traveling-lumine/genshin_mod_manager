@@ -213,6 +213,7 @@ class _ModCardState extends State<_ModCard> {
             );
           }
           if (previewPath == '') {
+            _lastModified = null;
             return Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -265,7 +266,17 @@ class _ModCardState extends State<_ModCard> {
     final fileImage = FileImage2(previewFile);
     final nowModified = previewFile.lastModifiedSync();
     final lastModified = _lastModified;
-    if (lastModified != null && !nowModified.isAtSameMomentAs(lastModified)) {
+    if (lastModified != null) {
+      print(this.widget.mod.displayName);
+      print(nowModified);
+      print(lastModified);
+      if (!nowModified.isAtSameMomentAs(lastModified)) {
+        unawaited(fileImage.evict());
+      }
+    } else {
+      print(this.widget.mod.displayName);
+      print(nowModified);
+      print(lastModified);
       unawaited(fileImage.evict());
     }
     _lastModified = nowModified;
