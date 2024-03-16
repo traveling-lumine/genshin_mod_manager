@@ -17,6 +17,7 @@ import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/ui/route/category/mod_card/ini_widget.dart';
 import 'package:genshin_mod_manager/ui/route/category/mod_card_vm.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
+import 'package:genshin_mod_manager/ui/widget/third_party/flutter/file_image.dart';
 import 'package:logger/logger.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
@@ -76,6 +77,8 @@ class _ModCard extends StatefulWidget {
 }
 
 class _ModCardState extends State<_ModCard> {
+  DateTime? _lastModified;
+
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
 
@@ -259,7 +262,13 @@ class _ModCardState extends State<_ModCard> {
     final String previewPath,
   ) {
     final previewFile = File(previewPath);
-    final fileImage = FileImage(previewFile);
+    final fileImage = FileImage2(previewFile);
+    final nowModified = previewFile.lastModifiedSync();
+    final lastModified = _lastModified;
+    if (lastModified != null && !nowModified.isAtSameMomentAs(lastModified)) {
+      unawaited(fileImage.evict());
+    }
+    _lastModified = nowModified;
     return ConstrainedBox(
       constraints: BoxConstraints(
         maxWidth: constraints.maxWidth - _ModCard._minIniSectionWidth,
@@ -271,28 +280,17 @@ class _ModCardState extends State<_ModCard> {
         child: FlyoutTarget(
           controller: _contextController,
           key: _contextAttachKey,
-          child: FutureBuilder(
-            future: Future(previewFile.readAsBytesSync),
-            builder: (final context, final snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: ProgressRing());
-              }
-              if (snapshot.hasError) {
-                return const Center(child: Text('Failed to read file'));
-              }
-              return Image.memory(
-                snapshot.data!,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.medium,
-              );
-            },
+          child: Image(
+            image: fileImage,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.medium,
           ),
         ),
       ),
     );
   }
 
-  void _onImageTap(final BuildContext context, final FileImage fileImage) {
+  void _onImageTap(final BuildContext context, final FileImage2 fileImage) {
     unawaited(
       showDialog(
         context: context,
