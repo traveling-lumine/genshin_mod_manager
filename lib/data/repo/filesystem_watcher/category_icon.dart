@@ -12,10 +12,10 @@ class _CategoryIconWatcherImpl implements FSEPathsWatcher {
   _CategoryIconWatcherImpl({
     required this.targetPath,
   }) {
-    unawaited(_getPaths().then(_pathsStream.add));
+    _pathsStream.add(_getPaths());
     _subscription = Directory(targetPath)
         .watch()
-        .asyncMap((final event) async => _getPaths())
+        .map((final event) => _getPaths())
         .listen(_pathsStream.add);
   }
 
@@ -32,5 +32,5 @@ class _CategoryIconWatcherImpl implements FSEPathsWatcher {
     unawaited(_subscription.cancel());
   }
 
-  Future<List<String>> _getPaths() => getUnder<File>(targetPath);
+  List<String> _getPaths() => getUnder<File>(targetPath);
 }

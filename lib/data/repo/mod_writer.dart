@@ -52,7 +52,7 @@ Future<String> _getNonCollidingName(
   final ModCategory category,
   final String destDirName,
 ) async {
-  final enabledFormDirNames = (await getUnder<Directory>(category.path))
+  final enabledFormDirNames = getUnder<Directory>(category.path)
       .map((final e) => e.pDisabledForm.pBasename)
       .toSet();
   var counter = 0;

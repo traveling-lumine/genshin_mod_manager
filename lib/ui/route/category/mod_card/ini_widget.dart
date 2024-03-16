@@ -66,7 +66,7 @@ class _IniWidgetState extends State<_IniWidget> {
               ),
             );
           } else {
-            return _buildColumn(data!);
+            return _buildColumn();
           }
         }
         if (snapshot.hasError) {
@@ -74,12 +74,12 @@ class _IniWidgetState extends State<_IniWidget> {
         }
         final list = snapshot.data!;
         data = list;
-        return _buildColumn(list);
+        return _buildColumn();
       },
     );
   }
 
-  Column _buildColumn(final List<String> list) {
+  Column _buildColumn() {
     final rowElements = <Widget>[];
     late String lastSection;
     var metSection = false;

@@ -6,7 +6,6 @@ import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:rxdart/rxdart.dart';
 
 /// Returns [ModCategory] list from the mod root obtained from [service].
 Future<List<ModCategory>> getCategories(final AppStateService service) async {
@@ -18,7 +17,7 @@ Future<List<ModCategory>> getCategories(final AppStateService service) async {
   if (!dir.existsSync()) {
     return [];
   }
-  final res = await dir.list().whereType<Directory>().map((final event) {
+  final res = dir.listSync().whereType<Directory>().map((final event) {
     final path = event.path;
     return ModCategory(
       path: path,
@@ -32,7 +31,7 @@ Future<List<ModCategory>> getCategories(final AppStateService service) async {
 Future<List<Mod>> getMods(final ModCategory category) async {
   final root = category.path;
   final res =
-      await Directory(root).list().whereType<Directory>().map((final event) {
+      Directory(root).listSync().whereType<Directory>().map((final event) {
     final path = event.path;
     return Mod(
       path: path,
@@ -55,15 +54,15 @@ List<String> getActiveIniPaths(final List<String> paths) =>
     }).toList();
 
 /// Returns a String path list under the given [path].
-Future<List<String>> getUnder<T extends FileSystemEntity>(
+List<String> getUnder<T extends FileSystemEntity>(
   final String path,
-) async {
+) {
   final dir = Directory(path);
   if (!dir.existsSync()) {
     return [];
   }
   final res =
-      await dir.list().whereType<T>().map((final event) => event.path).toList();
+      dir.listSync().whereType<T>().map((final event) => event.path).toList();
   return res;
 }
 

@@ -200,6 +200,16 @@ class _ModCardState extends State<_ModCard> {
         selector: (final context, final vm) => vm.previewPath,
         builder: (final context, final previewPath, final child) {
           if (previewPath == null) {
+            return const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ProgressRing(),
+                SizedBox(height: 4),
+                Text('Waiting for connection'),
+              ],
+            );
+          }
+          if (previewPath == '') {
             return Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -400,7 +410,7 @@ class _ModCardState extends State<_ModCard> {
 
       recursiveObserverService.cut();
       try {
-        await Directory(widget.mod.path).delete(recursive: true);
+        Directory(widget.mod.path).deleteSync(recursive: true);
         if (!context.mounted) {
           throw Exception('context not mounted');
         }

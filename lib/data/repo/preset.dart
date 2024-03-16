@@ -86,10 +86,10 @@ class _PresetServiceImpl implements PresetService {
     if (modRoot == null) {
       return;
     }
-    final categoryDirs = await getUnder<Directory>(modRoot);
+    final categoryDirs = getUnder<Directory>(modRoot);
     for (final categoryDir in categoryDirs) {
       final category = categoryDir.pBasename;
-      data[category] = (await getUnder<Directory>(categoryDir))
+      data[category] = getUnder<Directory>(categoryDir)
           .map((final e) => e.pBasename)
           .where((final e) => e.pIsEnabled)
           .toList();
@@ -104,7 +104,7 @@ class _PresetServiceImpl implements PresetService {
     final String name,
   ) async {
     final categoryDir = category.path;
-    final data = (await getUnder<Directory>(categoryDir))
+    final data = getUnder<Directory>(categoryDir)
         .map((final e) => e.pBasename)
         .where((final e) => e.pIsEnabled)
         .toList();
@@ -185,7 +185,7 @@ class _PresetServiceImpl implements PresetService {
       return;
     }
     final shaderFixes = latest2.pDirname.pJoin(kShaderFixes);
-    final currentEnabled = (await getUnder<Directory>(categoryPath))
+    final currentEnabled = getUnder<Directory>(categoryPath)
         .where((final e) => e.pIsEnabled)
         .map((final e) => e.pBasename)
         .toList();

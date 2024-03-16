@@ -75,7 +75,7 @@ Future<List<String>> _getModShaders(final String modPath) async {
   final shaderPaths = <String>[];
   final modShaderPath = modPath.pJoin(kShaderFixes);
   try {
-    final fseUnder = await getUnder<File>(modShaderPath);
+    final fseUnder = getUnder<File>(modShaderPath);
     shaderPaths.addAll(fseUnder);
   } on PathNotFoundException {
     // _logger.i(e);
@@ -113,7 +113,7 @@ Future<void> _deleteShaders(
   await _shaderFinder(
     targetPath,
     shaderPaths,
-    (final found) => File(found).delete(),
+    (final found) => Future(() => File(found).deleteSync()),
   );
 }
 
@@ -123,8 +123,7 @@ Future<void> _shaderFinder(
   final Future<void> Function(String foundPath) onFound,
 ) async {
   final programShadersMap = Map<String, String>.fromEntries(
-    (await getUnder<File>(targetPath))
-        .map((final e) => MapEntry(e.pBasename, e)),
+    getUnder<File>(targetPath).map((final e) => MapEntry(e.pBasename, e)),
   );
   final shaderSets = shaderPaths.map((final e) => e.pBasename).toSet();
   final inter = programShadersMap.keys.toSet().intersection(shaderSets);

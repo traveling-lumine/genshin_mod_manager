@@ -68,6 +68,8 @@ class _IniWidgetViewModelImpl extends ChangeNotifier
     notifyListeners();
   }
 
-  Future<List<String>> _getFuture() => File(iniFile.path)
-      .readAsLines(encoding: const Utf8Codec(allowMalformed: true));
+  Future<List<String>> _getFuture() => Future(
+        () => File(iniFile.path)
+            .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true)),
+      );
 }
