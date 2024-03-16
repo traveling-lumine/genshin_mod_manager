@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genshin_mod_manager/route/welcome.dart';
+import 'package:genshin_mod_manager/ui/route/welcome.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 import 'mock/mock_url_launcher_platform.dart';
@@ -12,12 +12,12 @@ void main() {
     UrlLauncherPlatform.instance = mock;
   });
 
-  testWidgets('WelcomeRoute welcomes you', (WidgetTester tester) async {
+  testWidgets('WelcomeRoute welcomes you', (final tester) async {
     await tester.pumpWidget(const FluentApp(home: WelcomeRoute()));
 
     expect(find.text('Welcome'), findsAny);
   });
-  testWidgets('WelcomeRoute has a link to GitHub', (WidgetTester tester) async {
+  testWidgets('WelcomeRoute has a link to GitHub', (final tester) async {
     await tester.pumpWidget(const FluentApp(home: WelcomeRoute()));
 
     expect(find.text('Welcome'), findsAny);
