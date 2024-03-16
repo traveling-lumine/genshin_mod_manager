@@ -271,10 +271,21 @@ class _ModCardState extends State<_ModCard> {
         child: FlyoutTarget(
           controller: _contextController,
           key: _contextAttachKey,
-          child: Image(
-            image: fileImage,
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.medium,
+          child: FutureBuilder(
+            future: Future(previewFile.readAsBytesSync),
+            builder: (final context, final snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: ProgressRing());
+              }
+              if (snapshot.hasError) {
+                return const Center(child: Text('Failed to read file'));
+              }
+              return Image.memory(
+                snapshot.data!,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.medium,
+              );
+            },
           ),
         ),
       ),
