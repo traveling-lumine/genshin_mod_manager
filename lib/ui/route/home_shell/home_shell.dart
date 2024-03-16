@@ -15,7 +15,6 @@ import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/home_shell/home_shell_vm.dart';
-import 'package:genshin_mod_manager/ui/route/loading.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
@@ -30,16 +29,20 @@ import 'package:window_manager/window_manager.dart';
 
 const _kRepoReleases = '$kRepoBase/releases/latest';
 
+/// A shell for the home route.
 class HomeShell extends StatelessWidget {
+  /// Creates a [HomeShell].
   const HomeShell({required this.child, super.key});
 
-  static const resourceDir = 'Resources';
+  static const _resourceDir = 'Resources';
+
+  /// The child widget.
   final Widget child;
 
   @override
   Widget build(final BuildContext context) {
     final resourcePath =
-        Platform.resolvedExecutable.pDirname.pJoin(resourceDir);
+        Platform.resolvedExecutable.pDirname.pJoin(_resourceDir);
     Directory(resourcePath).createSync(recursive: true);
     return StreamBuilder(
       stream: context.read<AppStateService>().modRoot.stream,
@@ -106,8 +109,7 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
 
   @override
   void onWindowFocus() {
-    final vm = context.read<HomeShellViewModel>();
-    vm.onWindowFocus();
+    context.read<HomeShellViewModel>().onWindowFocus();
   }
 
   @override
@@ -126,15 +128,17 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
   Widget build(final BuildContext context) {
     if (!updateDisplayed) {
       updateDisplayed = true;
-      _shouldUpdate(context).then((final value) {
-        if (value == null) {
-          return;
-        }
-        if (!context.mounted) {
-          return;
-        }
-        return _displayUpdateInfoBar(value);
-      });
+      unawaited(
+        _shouldUpdate(context).then((final value) {
+          if (value == null) {
+            return;
+          }
+          if (!context.mounted) {
+            return;
+          }
+          return _displayUpdateInfoBar(value);
+        }),
+      );
     }
 
     final footerItems = [
@@ -220,82 +224,87 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
   }
 
   void _displayUpdateInfoBar(final String newVersion) {
-    displayInfoBarInContext(
-      context,
-      duration: const Duration(minutes: 1),
-      title: RichText(
-        text: TextSpan(
-          style: DefaultTextStyle.of(context).style,
-          children: [
-            const TextSpan(text: 'New version available: '),
-            TextSpan(
-              text: newVersion,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const TextSpan(text: '. Click '),
-            TextSpan(
-              text: 'here',
-              style: TextStyle(
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
+    unawaited(
+      displayInfoBarInContext(
+        context,
+        duration: const Duration(minutes: 1),
+        title: RichText(
+          text: TextSpan(
+            style: DefaultTextStyle.of(context).style,
+            children: [
+              const TextSpan(text: 'New version available: '),
+              TextSpan(
+                text: newVersion,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () => launchUrl(Uri.parse(_kRepoReleases)),
-            ),
-            const TextSpan(text: ' to open link.'),
-          ],
-        ),
-      ),
-      action: FilledButton(
-        onPressed: () => showDialog(
-          context: context,
-          builder: (final dialogContext) => ContentDialog(
-            title: const Text('Start auto update?'),
-            content: RichText(
-              textAlign: TextAlign.justify,
-              text: TextSpan(
-                style: DefaultTextStyle.of(context).style,
-                children: [
-                  const TextSpan(
-                    text:
-                        'This will download the latest version and replace the current one.'
-                        ' This feature is experimental and may not work as expected.\n',
-                    // justify
-                  ),
-                  TextSpan(
-                    text:
-                        'Please backup your mods and resources before proceeding.\n'
-                        'DELETION OF UNRELATED FILES IS POSSIBLE.',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              Button(
-                onPressed: Navigator.of(dialogContext).pop,
-                child: const Text('Cancel'),
-              ),
-              FluentTheme(
-                data: FluentThemeData(accentColor: Colors.red),
-                child: FilledButton(
-                  child: const Text('Start'),
-                  onPressed: () async {
-                    Navigator.of(dialogContext).pop();
-                    await _runUpdateScript();
-                  },
+              const TextSpan(text: '. Click '),
+              TextSpan(
+                text: 'here',
+                style: TextStyle(
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
                 ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () => launchUrl(Uri.parse(_kRepoReleases)),
               ),
+              const TextSpan(text: ' to open link.'),
             ],
           ),
         ),
-        child: const Text('Auto update'),
+        action: FilledButton(
+          onPressed: () => showDialog(
+            context: context,
+            builder: (final dialogContext) => ContentDialog(
+              title: const Text('Start auto update?'),
+              content: _getAutoUpdateWarning(),
+              actions: [
+                Button(
+                  onPressed: Navigator.of(dialogContext).pop,
+                  child: const Text('Cancel'),
+                ),
+                FluentTheme(
+                  data: FluentThemeData(accentColor: Colors.red),
+                  child: FilledButton(
+                    child: const Text('Start'),
+                    onPressed: () async {
+                      Navigator.of(dialogContext).pop();
+                      await _runUpdateScript();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          child: const Text('Auto update'),
+        ),
       ),
     );
   }
+
+  RichText _getAutoUpdateWarning() => RichText(
+        textAlign: TextAlign.justify,
+        text: TextSpan(
+          style: DefaultTextStyle.of(context).style,
+          children: [
+            const TextSpan(
+              text: 'This will download the latest version'
+                  ' and replace the current one.'
+                  ' This feature is experimental'
+                  ' and may not work as expected.\n',
+              // justify
+            ),
+            TextSpan(
+              text: 'Please backup your mods'
+                  ' and resources before proceeding.\n'
+                  'DELETION OF UNRELATED FILES IS POSSIBLE.',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
 
   NavigationAppBar _buildAppbar() => NavigationAppBar(
         actions: const WindowButtons(),

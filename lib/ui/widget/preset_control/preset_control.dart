@@ -6,7 +6,9 @@ import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control/preset_control_vm.dart';
 import 'package:provider/provider.dart';
 
+/// A widget that provides a control for presets.
 class PresetControlWidget extends StatelessWidget {
+  /// Creates a [PresetControlWidget].
   PresetControlWidget({
     required this.isLocal,
     super.key,
@@ -17,7 +19,10 @@ class PresetControlWidget extends StatelessWidget {
     }
   }
 
+  /// Creates a [PresetControlWidget] for local presets.
   final bool isLocal;
+
+  /// The category of the local preset control.
   final ModCategory? category;
 
   @override
@@ -42,9 +47,6 @@ class PresetControlWidget extends StatelessWidget {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty<bool>('isLocal', isLocal))
-      ..add(DiagnosticsProperty<ModCategory?>('category', category))
-      ..add(DiagnosticsProperty<ModCategory?>('category', category))
-      ..add(DiagnosticsProperty<ModCategory?>('category', category))
       ..add(DiagnosticsProperty<ModCategory?>('category', category));
   }
 }

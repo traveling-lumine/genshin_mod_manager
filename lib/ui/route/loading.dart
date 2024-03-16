@@ -6,13 +6,14 @@ import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
 
+/// A route that shows a loading screen.
 class LoadingRoute extends StatelessWidget {
+  /// Creates a [LoadingRoute].
   const LoadingRoute({super.key});
 
   static const String _destinationRoute = kHomeRoute;
-  static final Logger logger = Logger();
+  static final Logger _logger = Logger();
 
   @override
   Widget build(final BuildContext context) => FutureBuilder(
@@ -25,7 +26,7 @@ class LoadingRoute extends StatelessWidget {
             return _buildLoading();
           }
           if (snapshot.hasError) {
-            logger.e('App FutureBuilder snapshot error: ${snapshot.error}');
+            _logger.e('App FutureBuilder snapshot error: ${snapshot.error}');
             return _buildError(context, snapshot.error);
           }
           SchedulerBinding.instance.addPostFrameCallback((final timeStamp) {
@@ -93,14 +94,3 @@ class LoadingRoute extends StatelessWidget {
         ),
       );
 }
-
-NavigationAppBar getAppbar(final String text) => NavigationAppBar(
-      actions: const WindowButtons(),
-      automaticallyImplyLeading: false,
-      title: DragToMoveArea(
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(text),
-        ),
-      ),
-    );

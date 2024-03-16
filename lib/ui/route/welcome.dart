@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:genshin_mod_manager/data/constant.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// This route welcomes you!
 class WelcomeRoute extends StatelessWidget {
+  /// Creates a [WelcomeRoute].
   const WelcomeRoute({super.key});
 
   @override
@@ -27,7 +31,7 @@ class WelcomeRoute extends StatelessWidget {
                     decoration: TextDecoration.underline,
                   ),
                   recognizer: TapGestureRecognizer()
-                    ..onTap = () => launchUrl(Uri.parse(kRepoBase)),
+                    ..onTap = () => unawaited(launchUrl(Uri.parse(kRepoBase))),
                 ),
               ),
             ],

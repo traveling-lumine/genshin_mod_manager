@@ -5,16 +5,22 @@ import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/preset.dart';
 import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
 
+/// A view model for the preset control widget.
 abstract interface class PresetControlViewModel implements BaseViewModel {
+  /// The list of presets.
   List<String>? get presets;
 
+  /// Sets the preset.
   void setPreset(final String name);
 
+  /// Adds a new preset.
   void addPreset(final String text);
 
+  /// Removes a preset.
   void removePreset(final String name);
 }
 
+/// Creates a view model for the global preset control.
 PresetControlViewModel createGlobalPresetControlViewModel({
   required final PresetService presetService,
 }) =>
@@ -40,7 +46,7 @@ class _GlobalPresetControlViewModelImpl extends ChangeNotifier
 
   @override
   void dispose() {
-    _subscription.cancel();
+    unawaited(_subscription.cancel());
     super.dispose();
   }
 
@@ -60,6 +66,7 @@ class _GlobalPresetControlViewModelImpl extends ChangeNotifier
   }
 }
 
+/// Creates a view model for the local preset control.
 PresetControlViewModel createLocalPresetControlViewModel({
   required final PresetService presetService,
   required final ModCategory category,
@@ -92,7 +99,7 @@ class _LocalPresetControlViewModelImpl extends ChangeNotifier
 
   @override
   void dispose() {
-    _subscription.cancel();
+    unawaited(_subscription.cancel());
     super.dispose();
   }
 
