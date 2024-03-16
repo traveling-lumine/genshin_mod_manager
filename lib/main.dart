@@ -61,7 +61,8 @@ String _writeStacktrace(final FlutterErrorDetails details) {
 }
 
 String _elideLines(final String stackTrace) {
-  // only choose lines that include genshin_mod_manager. Lines that don't include it are shrunk to ...
+  // only choose lines that include genshin_mod_manager.
+  // Lines that don't include it are shrunk to ...
   final lines = [];
   var elidedLines = 0;
   for (final line in stackTrace.split('\n')) {

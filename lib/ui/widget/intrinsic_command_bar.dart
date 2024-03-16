@@ -1,33 +1,23 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
+/// A card that is used to wrap the [CommandBar] to make it
+/// have an intrinsic width.
 class IntrinsicCommandBarCard extends StatelessWidget {
+  /// Creates a card that is used to wrap the [CommandBar] to make it
   const IntrinsicCommandBarCard({
     required this.child,
     super.key,
   });
 
-  final Widget child;
-
-  @override
-  Widget build(final BuildContext context) => IntrinsicCommandBar(
-        child: CommandBarCard(
-          child: child,
-        ),
-      );
-}
-
-class IntrinsicCommandBar extends StatelessWidget {
-  const IntrinsicCommandBar({
-    required this.child,
-    super.key,
-  });
-
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override
   Widget build(final BuildContext context) => IntrinsicWidth(
-        child: RepaintBoundary(
-          child: child,
+        child: CommandBarCard(
+          child: RepaintBoundary(
+            child: child,
+          ),
         ),
       );
 }
