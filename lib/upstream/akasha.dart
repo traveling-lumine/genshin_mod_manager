@@ -11,30 +11,22 @@ const _base = "https://nahida.live";
 class NahidaliveElement {
   final String uuid;
   final String version;
-  final String sha256;
   final String title;
   final String description;
   final String? arcaUrl;
   final String? virustotalUrl;
   final UnmodifiableListView<String> tags;
-  final String? expirationDate;
-  final String uploadDate;
   final String previewUrl;
-  final bool koreaOnly;
 
   const NahidaliveElement({
     required this.uuid,
     required this.version,
-    required this.sha256,
     required this.title,
     required this.description,
     this.arcaUrl,
     this.virustotalUrl,
     required this.tags,
-    this.expirationDate,
-    required this.uploadDate,
     required this.previewUrl,
-    required this.koreaOnly,
   });
 
   factory NahidaliveElement.fromJson(Map<String, dynamic> json) {
@@ -42,32 +34,24 @@ class NahidaliveElement {
       {
         'uuid': String uuid,
         'version': String version,
-        'sha256': String sha256,
         'title': String title,
         'description': String description,
         'arca_url': String? arcaUrl,
         'virustotal_url': String? virustotalUrl,
         'tags': List<dynamic> tags,
-        'expiration_date': String? expirationDate,
-        'upload_date': String uploadDate,
         'preview_url': String previewUrl,
-        'koreaonly': bool koreaonly,
       } =>
         NahidaliveElement(
           uuid: uuid,
           version: version,
-          sha256: sha256,
           title: title,
           description: description,
           arcaUrl: arcaUrl,
           virustotalUrl: virustotalUrl,
           tags: UnmodifiableListView(tags.cast<String>()),
-          expirationDate: expirationDate,
-          uploadDate: uploadDate,
           previewUrl: previewUrl,
-          koreaOnly: koreaonly,
         ),
-      _ => throw const FormatException('Unknown NahidaliveElement format.'),
+      _ => throw FormatException('Unknown NahidaliveElement format: $json'),
     };
   }
 
@@ -76,16 +60,12 @@ class NahidaliveElement {
     return 'NahidaliveElement('
         'uuid: $uuid, '
         'version: $version, '
-        'sha256: $sha256, '
         'title: $title, '
         'description: $description, '
         'arcaUrl: $arcaUrl, '
         'virustotalUrl: $virustotalUrl, '
         'tags: $tags, '
-        'expirationDate: $expirationDate, '
-        'uploadDate: $uploadDate, '
         'previewUrl: $previewUrl, '
-        'koreaOnly: $koreaOnly'
         ')';
   }
 }
