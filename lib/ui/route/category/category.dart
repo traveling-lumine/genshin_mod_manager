@@ -100,7 +100,7 @@ class _CategoryRoute extends StatelessWidget {
                 value?.map((final e) => ModCard(mod: e)).toList() ?? [];
             return LayoutBuilder(
               builder: (final context, final constraints) => AnimatedCrossFade(
-                duration: const Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 200),
                 firstChild: ConstrainedBox(
                   constraints: constraints,
                   child: const Center(

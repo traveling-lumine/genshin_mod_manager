@@ -1,12 +1,4 @@
-import 'dart:io';
-
-import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/data/helper/fsops.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/domain/entity/ini.dart';
-import 'package:genshin_mod_manager/ui/route/category/mod_card/ini_widget_vm.dart';
-import 'package:provider/provider.dart';
+part of '../mod_card.dart';
 
 class IniWidget extends StatelessWidget {
   IniWidget({required this.iniFile}) : super(key: Key(iniFile.path));

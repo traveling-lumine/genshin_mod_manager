@@ -8,19 +8,20 @@ import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/mod_switcher.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
-import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/data/repo/mod_writer.dart';
 import 'package:genshin_mod_manager/domain/entity/ini.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
-import 'package:genshin_mod_manager/ui/route/category/mod_card/ini_widget.dart';
+import 'package:genshin_mod_manager/ui/route/category/mod_card/ini_widget_vm.dart';
 import 'package:genshin_mod_manager/ui/route/category/mod_card_vm.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
-import 'package:genshin_mod_manager/ui/widget/third_party/flutter/file_image.dart';
 import 'package:logger/logger.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
+import 'package:window_manager/window_manager.dart';
+
+part 'mod_card/ini_widget.dart';
 
 /// A [Card] that represents a [Mod].
 class ModCard extends StatelessWidget {
@@ -33,21 +34,8 @@ class ModCard extends StatelessWidget {
   final Mod mod;
 
   @override
-  Widget build(final BuildContext context) => MultiProvider(
-        providers: [
-          Provider(
-            create: (final context) => createFSEPathsWatcher<File>(
-              targetPath: mod.path,
-              watcher: context.read(),
-            ),
-            dispose: (final context, final value) => value.dispose(),
-          ),
-          ChangeNotifierProvider(
-            create: (final context) => createModCardViewModel(
-              fsePathsWatcher: context.read(),
-            ),
-          ),
-        ],
+  Widget build(final BuildContext context) => ChangeNotifierProvider(
+        create: (final context) => createModCardViewModel(mod: mod),
         child: _ModCard(mod: mod),
       );
 
@@ -76,15 +64,25 @@ class _ModCard extends StatefulWidget {
   }
 }
 
-class _ModCardState extends State<_ModCard> {
-  DateTime? _lastModified;
-
+class _ModCardState extends State<_ModCard> with WindowListener {
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
 
   @override
+  void onWindowFocus() {
+    context.read<ModCardViewModel>().forceUpdate();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WindowManager.instance.addListener(this);
+  }
+
+  @override
   void dispose() {
     _contextController.dispose();
+    WindowManager.instance.removeListener(this);
     super.dispose();
   }
 
@@ -199,21 +197,10 @@ class _ModCardState extends State<_ModCard> {
     final BuildContext context,
     final BoxConstraints constraints,
   ) =>
-      Selector<ModCardViewModel, String?>(
-        selector: (final context, final vm) => vm.previewPath,
-        builder: (final context, final previewPath, final child) {
-          if (previewPath == null) {
-            return const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ProgressRing(),
-                SizedBox(height: 4),
-                Text('Waiting for connection'),
-              ],
-            );
-          }
-          if (previewPath == '') {
-            _lastModified = null;
+      Selector<ModCardViewModel, Future<FileImage>?>(
+        selector: (final context, final vm) => vm.preview,
+        builder: (final context, final preview, final child) {
+          if (preview == null) {
             return Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -230,7 +217,7 @@ class _ModCardState extends State<_ModCard> {
               ),
             );
           }
-          return _buildImageDesc(context, constraints, previewPath);
+          return _buildImageDesc(context, constraints, preview);
         },
       );
 
@@ -260,48 +247,41 @@ class _ModCardState extends State<_ModCard> {
   Widget _buildImageDesc(
     final BuildContext context,
     final BoxConstraints constraints,
-    final String previewPath,
-  ) {
-    final previewFile = File(previewPath);
-    final fileImage = FileImage2(previewFile);
-    final nowModified = previewFile.lastModifiedSync();
-    final lastModified = _lastModified;
-    if (lastModified != null) {
-      print(this.widget.mod.displayName);
-      print(nowModified);
-      print(lastModified);
-      if (!nowModified.isAtSameMomentAs(lastModified)) {
-        unawaited(fileImage.evict());
-      }
-    } else {
-      print(this.widget.mod.displayName);
-      print(nowModified);
-      print(lastModified);
-      unawaited(fileImage.evict());
-    }
-    _lastModified = nowModified;
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: constraints.maxWidth - _ModCard._minIniSectionWidth,
-      ),
-      child: GestureDetector(
-        onTapUp: (final details) => _onImageTap(context, fileImage),
-        onSecondaryTapUp: (final details) =>
-            _onImageRightClick(details, context, previewFile),
-        child: FlyoutTarget(
-          controller: _contextController,
-          key: _contextAttachKey,
-          child: Image(
-            image: fileImage,
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.medium,
-          ),
+    final Future<FileImage> fileImage,
+  ) =>
+      ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: constraints.maxWidth - _ModCard._minIniSectionWidth,
         ),
-      ),
-    );
-  }
+        child: FutureBuilder<FileImage>(
+          future: fileImage,
+          builder: (final context, final snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: ProgressRing());
+            }
+            if (!snapshot.hasData) {
+              return const Center(child: Icon(FluentIcons.error));
+            }
+            final fileImage = snapshot.data!;
+            return GestureDetector(
+              onTapUp: (final details) => _onImageTap(context, fileImage),
+              onSecondaryTapUp: (final details) =>
+                  _onImageRightClick(details, context, fileImage),
+              child: FlyoutTarget(
+                controller: _contextController,
+                key: _contextAttachKey,
+                child: Image(
+                  image: fileImage,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.medium,
+                ),
+              ),
+            );
+          },
+        ),
+      );
 
-  void _onImageTap(final BuildContext context, final FileImage2 fileImage) {
+  void _onImageTap(final BuildContext context, final ImageProvider image) {
     unawaited(
       showDialog(
         context: context,
@@ -309,7 +289,7 @@ class _ModCardState extends State<_ModCard> {
           onTap: Navigator.of(dCtx).pop,
           onSecondaryTap: Navigator.of(dCtx).pop,
           child: Image(
-            image: fileImage,
+            image: image,
             fit: BoxFit.contain,
             filterQuality: FilterQuality.medium,
           ),
@@ -321,7 +301,7 @@ class _ModCardState extends State<_ModCard> {
   void _onImageRightClick(
     final TapUpDetails details,
     final BuildContext context,
-    final File previewFile,
+    final FileImage fileImage,
   ) {
     final targetContext = _contextAttachKey.currentContext;
     if (targetContext == null) {
@@ -343,7 +323,7 @@ class _ModCardState extends State<_ModCard> {
                 CommandBarButton(
                   icon: const Icon(FluentIcons.delete),
                   label: const Text('Delete'),
-                  onPressed: () => _onImageDelete(context, previewFile),
+                  onPressed: () => _onImageDelete(context, fileImage),
                 ),
               ],
             ),
@@ -353,7 +333,7 @@ class _ModCardState extends State<_ModCard> {
     );
   }
 
-  void _onImageDelete(final BuildContext context, final File previewFile) {
+  void _onImageDelete(final BuildContext context, final FileImage fileImage) {
     unawaited(
       showDialog(
         context: context,
@@ -374,14 +354,15 @@ class _ModCardState extends State<_ModCard> {
               data: FluentTheme.of(context).copyWith(accentColor: Colors.red),
               child: FilledButton(
                 onPressed: () {
-                  previewFile.deleteSync();
+                  fileImage.file.deleteSync();
                   Navigator.of(dCtx).pop();
                   Navigator.of(context).pop();
                   displayInfoBar(
                     context,
                     builder: (final context, final close) => InfoBar(
                       title: const Text('Preview deleted'),
-                      content: Text('Preview deleted from ${previewFile.path}'),
+                      content:
+                          Text('Preview deleted from ${fileImage.file.path}'),
                       severity: InfoBarSeverity.warning,
                       onClose: close,
                     ),

@@ -17,7 +17,6 @@ class _ModsWatcherImpl implements ModsWatcher {
     _subscription = watcher.event.stream.asyncMap(_getMods).listen(_listen);
   }
 
-  static final _logger = Logger();
   final ModCategory category;
   late final StreamSubscription<List<Mod>> _subscription;
 
@@ -34,7 +33,6 @@ class _ModsWatcherImpl implements ModsWatcher {
   Future<List<Mod>> _getMods(final FSEvent _) => getMods(category);
 
   void _listen(final List<Mod> event) {
-    _logger.d('$this: updated');
     _pathsStream.add(event);
   }
 

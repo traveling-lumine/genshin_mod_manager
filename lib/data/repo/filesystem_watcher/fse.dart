@@ -23,7 +23,6 @@ class _FSEPathsWatcherImpl<T extends FileSystemEntity>
         .listen(_paths.add);
   }
 
-  static final _logger = Logger();
   bool _initialized = false;
   String targetPath;
   StreamSubscription<List<String>>? _subscription;
@@ -43,27 +42,21 @@ class _FSEPathsWatcherImpl<T extends FileSystemEntity>
   bool _shouldUpdate(final FSEvent event) {
     if (!_initialized) {
       _initialized = true;
-      _logger.t('$this: initialized');
       return true;
     }
     if (event.force) {
-      _logger.i('$this: forced update');
       return true;
     }
     final event2 = event.event;
     if (event2 is! FileSystemModifyEvent) {
-      _logger.t('$this: event is not a FileSystemModifyEvent');
       return false;
     }
     if (!event2.contentChanged || !event2.isDirectory) {
-      _logger.t('$this: event is not a directory content change');
       return false;
     }
     final path = event2.path;
     final pEquals = targetPath.pEquals(path);
-    if (pEquals) {
-      _logger.i('$this: accepted event');
-    }
+    if (pEquals) {}
     return pEquals;
   }
 
