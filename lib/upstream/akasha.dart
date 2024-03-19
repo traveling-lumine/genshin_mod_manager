@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 const kAkashaConfigFilename = 'config.json';
-const _base = "https://nahida.live";
+const _base = "https://api.nahida.live";
 
 class NahidaliveElement {
   final String uuid;
