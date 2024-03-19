@@ -22,6 +22,7 @@ dependencies:
   go_router: ^13.2.1
   hooks_riverpod: ^2.5.1
   http: ^1.2.0
+  json_annotation: ^4.8.1
   logger: ^2.1.0
   meta: ^1.11.0
   package_info_plus: ^5.0.1
@@ -45,6 +46,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   freezed: ^2.4.7
+  json_serializable: ^6.7.1
   plugin_platform_interface: ^2.1.8
   riverpod_generator: ^2.4.0
   riverpod_lint: ^2.3.10
