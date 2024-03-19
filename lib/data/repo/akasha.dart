@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 
 /// The filename of Akasha's configuration file.
 const kAkashaConfigFilename = 'config.json';
-const _kAkashaBase = "https://nahida.live";
+const _kAkashaBase = "https://api.nahida.live";
 const _kAkashaApi = '$_kAkashaBase/mods/apiv2';
 const _kAkashaDownload = '$_kAkashaApi/download';
 const _kAkashaList = '$_kAkashaApi/list';
