@@ -4,7 +4,6 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control/preset_control_vm.dart';
-import 'package:provider/provider.dart';
 
 /// A widget that provides a control for presets.
 class PresetControlWidget extends StatelessWidget {

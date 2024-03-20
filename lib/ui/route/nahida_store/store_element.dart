@@ -6,7 +6,7 @@ import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/route/nahida_store/nahida_store_vm.dart';
 import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
-import 'package:provider/provider.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 class StoreElement extends StatelessWidget {

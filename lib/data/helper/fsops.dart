@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 
 /// Returns [ModCategory] list from the mod root obtained from [service].
 Future<List<ModCategory>> getCategories(final AppStateService service) async {

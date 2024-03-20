@@ -13,7 +13,6 @@ import 'package:genshin_mod_manager/ui/widget/preset_control/preset_control.dart
 import 'package:genshin_mod_manager/ui/widget/thick_scrollbar.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_delegate.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 /// A route that displays a category of mods.
 class CategoryRoute extends StatelessWidget {

@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/route/nahida_store/nahida_store_vm.dart';
@@ -14,7 +13,6 @@ import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
 import 'package:genshin_mod_manager/ui/widget/thick_scrollbar.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_delegate.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 class NahidaStoreRoute extends StatelessWidget {
   const NahidaStoreRoute({required this.category, super.key});

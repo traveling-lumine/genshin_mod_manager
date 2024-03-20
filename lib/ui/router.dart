@@ -1,5 +1,6 @@
+import 'dart:convert';
+
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/data/repo/app_state.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/category/category.dart';
@@ -10,7 +11,6 @@ import 'package:genshin_mod_manager/ui/route/nahida_store/nahida_store.dart';
 import 'package:genshin_mod_manager/ui/route/setting/setting.dart';
 import 'package:genshin_mod_manager/ui/route/welcome.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   final _router = GoRouter(
     debugLogDiagnostics: true,
     initialLocation: kLoadingRoute,
-    extraCodec: const ModCategoryCodec(),
+    extraCodec: const _ModCategoryCodec(),
     routes: [
       GoRoute(
         path: kLoadingRoute,
@@ -56,14 +56,35 @@ class MyApp extends StatelessWidget {
   );
 
   @override
-  Widget build(final BuildContext context) => Provider(
-        create: (final context) => createAppStateService(),
-        dispose: (final context, final value) => value.dispose(),
-        child: FluentApp.router(
-          title: 'Genshin Mod Manager',
-          routerDelegate: _router.routerDelegate,
-          routeInformationParser: _router.routeInformationParser,
-          routeInformationProvider: _router.routeInformationProvider,
-        ),
+  Widget build(final BuildContext context) => FluentApp.router(
+        title: 'Genshin Mod Manager',
+        routerDelegate: _router.routerDelegate,
+        routeInformationParser: _router.routeInformationParser,
+        routeInformationProvider: _router.routeInformationProvider,
       );
+}
+
+class _ModCategoryCodec extends Codec<ModCategory, String> {
+  const _ModCategoryCodec();
+
+  @override
+  Converter<String, ModCategory> get decoder => const _MyExtraDecoder();
+
+  @override
+  Converter<ModCategory, String> get encoder => const _MyExtraEncoder();
+}
+
+class _MyExtraDecoder extends Converter<String, ModCategory> {
+  const _MyExtraDecoder();
+
+  @override
+  ModCategory convert(final String input) =>
+      ModCategory.fromJson(jsonDecode(input));
+}
+
+class _MyExtraEncoder extends Converter<ModCategory, String> {
+  const _MyExtraEncoder();
+
+  @override
+  String convert(final ModCategory input) => jsonEncode(input.toJson());
 }

@@ -6,7 +6,6 @@ import 'package:genshin_mod_manager/ui/route/setting/setting_vm.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/no_deref_file_opener.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:provider/provider.dart';
 
 const _itemPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 16);
 

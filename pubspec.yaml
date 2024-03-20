@@ -28,7 +28,6 @@ dependencies:
   package_info_plus: ^5.0.1
   pasteboard: ^0.2.0
   path: ^1.9.0
-  provider: ^6.1.2
   riverpod_annotation: ^2.3.5
   rxdart: ^0.27.7
   shared_preferences: ^2.2.2

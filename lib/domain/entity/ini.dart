@@ -1,52 +1,28 @@
+import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
-import 'package:meta/meta.dart';
 
-@immutable
-class IniFile {
-  const IniFile({
-    required this.path,
-    required this.mod,
-  });
+part 'ini.freezed.dart';
 
-  final String path;
-  final Mod mod;
-
-  @override
-  bool operator ==(final Object other) {
-    throw UnimplementedError();
-  }
-
-  @override
-  int get hashCode => throw UnimplementedError();
-
-  @override
-  String toString() => 'IniFile(path: $path, mod: $mod)';
+@freezed
+class IniFile with _$IniFile {
+  const factory IniFile({
+    required final String path,
+    required final Mod mod,
+  }) = _IniFile;
 }
 
-@immutable
-class IniSection {
-  IniSection({
-    required this.iniFile,
-    required this.section,
-    required this.line,
-  })  : key = line.split('=')[0].trim(),
-        value = line.split('=')[1].trim();
+@freezed
+class IniSection with _$IniSection {
+  const IniSection._();
 
-  final IniFile iniFile;
-  final String section;
-  final String line;
-  final String key;
-  final String value;
+  const factory IniSection({
+    required final IniFile iniFile,
+    required final String section,
+    required final String line,
+  }) = _IniSection;
 
-  @override
-  bool operator ==(final Object other) {
-    throw UnimplementedError();
-  }
+  String get key => line.split('=')[0].trim();
 
-  @override
-  int get hashCode => throw UnimplementedError();
-
-  @override
-  String toString() => 'IniSection(iniFile: $iniFile, section: $section, '
-      'line: $line, key: $key, value: $value)';
+  String get value => line.split('=')[1].trim();
 }

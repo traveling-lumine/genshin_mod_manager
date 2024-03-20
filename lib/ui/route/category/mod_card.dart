@@ -18,7 +18,7 @@ import 'package:genshin_mod_manager/ui/route/category/mod_card_vm.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:logger/logger.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'package:provider/provider.dart';
+
 import 'package:window_manager/window_manager.dart';
 
 part 'mod_card/ini_widget.dart';

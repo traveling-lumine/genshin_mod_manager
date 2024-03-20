@@ -23,7 +23,7 @@ import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:provider/provider.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
