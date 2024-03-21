@@ -1,6 +1,7 @@
 import 'package:genshin_mod_manager/data/repo/app_state_storage.dart';
 import 'package:genshin_mod_manager/data/repo/sharedpreference_storage.dart';
 import 'package:genshin_mod_manager/domain/entity/app_state.dart';
+import 'package:genshin_mod_manager/domain/entity/preset.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state_storage.dart';
 import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/change.dart';
@@ -84,7 +85,7 @@ class AppStateNotifier extends _$AppStateNotifier {
     return callChangeShowEnabledModsFirstUseCase(curState, value);
   }
 
-  AppState changePresetData(final Map<String, Map<String, List<String>>> data) {
+  AppState changePresetData(final PresetData data) {
     ref.read(appStateStorageProvider).setPresetData(data);
     final curState = state;
     return callChangePresetDataUseCase(curState, data);

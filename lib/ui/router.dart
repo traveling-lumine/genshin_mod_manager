@@ -4,11 +4,11 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/category/category.dart';
-import 'package:genshin_mod_manager/ui/route/home_shell/home_shell.dart';
+import 'package:genshin_mod_manager/ui/route/home_shell.dart';
 import 'package:genshin_mod_manager/ui/route/license.dart';
 import 'package:genshin_mod_manager/ui/route/loading.dart';
 import 'package:genshin_mod_manager/ui/route/nahida_store/nahida_store.dart';
-import 'package:genshin_mod_manager/ui/route/setting/setting.dart';
+import 'package:genshin_mod_manager/ui/route/setting.dart';
 import 'package:genshin_mod_manager/ui/route/welcome.dart';
 import 'package:go_router/go_router.dart';
 

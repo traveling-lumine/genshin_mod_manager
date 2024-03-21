@@ -1,3 +1,5 @@
+import 'package:genshin_mod_manager/domain/entity/preset.dart';
+
 abstract interface class AppStateStorage {
   String? getModRoot();
 
@@ -27,9 +29,9 @@ abstract interface class AppStateStorage {
 
   void setShowEnabledModsFirst(final bool value);
 
-  Map<String, Map<String, List<String>>>? getPresetData();
+  PresetData? getPresetData();
 
-  void setPresetData(final Map<String, Map<String, List<String>>> data);
+  void setPresetData(final PresetData data);
 
   @Deprecated('Backwards compatibility only')
   String? getTargetDir();

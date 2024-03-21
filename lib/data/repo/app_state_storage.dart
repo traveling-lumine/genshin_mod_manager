@@ -1,5 +1,7 @@
+import 'package:genshin_mod_manager/domain/entity/preset.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state_storage.dart';
 import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
+import 'package:logger/logger.dart';
 
 class AppStateStorageImpl implements AppStateStorage {
   const AppStateStorageImpl({
@@ -87,17 +89,82 @@ class AppStateStorageImpl implements AppStateStorage {
   }
 
   @override
-  Map<String, Map<String, List<String>>>? getPresetData() {
+  PresetData? getPresetData() {
     final data = persistentStorage.getMap(_presetDatakey);
     if (data == null) {
       return null;
     }
-    return Map<String, Map<String, List<String>>>.from(data);
+    try {
+      final global = data['global'];
+      final local = data['local'];
+      return PresetData(
+        global: Map.fromEntries(
+          global.entries.map(
+            (final e) => MapEntry(
+              e.key,
+              BundledPresetData(
+                bundledPresets: Map.fromEntries(
+                  e.value.entries.map(
+                    (final f) => MapEntry(
+                      f.key,
+                      PresetTargetData(mods: f.value),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        local: Map.fromEntries(
+          local.entries.map(
+            (final e) => MapEntry(
+              e.key,
+              BundledPresetData(
+                bundledPresets: Map.fromEntries(
+                  e.value.entries.map(
+                    (final f) => MapEntry(
+                      f.key,
+                      PresetTargetData(mods: f.value),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    } on Exception catch (e) {
+      Logger().e('Failed to parse preset data: $e');
+      return null;
+    }
   }
 
   @override
-  void setPresetData(final Map<String, Map<String, List<String>>> data) {
-    persistentStorage.setMap(_presetDatakey, data);
+  void setPresetData(final PresetData data) {
+    final global = Map.fromEntries(
+      data.global.entries.map(
+        (final e) => MapEntry(
+          e.key,
+          Map.fromEntries(
+            e.value.bundledPresets.entries
+                .map((final f) => MapEntry(f.key, f.value.mods)),
+          ),
+        ),
+      ),
+    );
+    final local = Map.fromEntries(
+      data.local.entries.map(
+        (final e) => MapEntry(
+          e.key,
+          Map.fromEntries(
+            e.value.bundledPresets.entries
+                .map((final f) => MapEntry(f.key, f.value.mods)),
+          ),
+        ),
+      ),
+    );
+    persistentStorage
+        .setMap(_presetDatakey, {'global': global, 'local': local});
   }
 
   @override

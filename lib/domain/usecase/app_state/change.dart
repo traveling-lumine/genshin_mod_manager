@@ -1,4 +1,5 @@
 import 'package:genshin_mod_manager/domain/entity/app_state.dart';
+import 'package:genshin_mod_manager/domain/entity/preset.dart';
 
 AppState callChangeModRootUseCase(final AppState curState, final String path) =>
     curState.copyWith(modRoot: path);
@@ -41,6 +42,6 @@ AppState callChangeShowEnabledModsFirstUseCase(
 
 AppState callChangePresetDataUseCase(
   final AppState curState,
-  final Map<String, Map<String, List<String>>> data,
+  final PresetData data,
 ) =>
     curState.copyWith(presetData: data);

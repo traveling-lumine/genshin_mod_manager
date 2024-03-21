@@ -8,100 +8,35 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:genshin_mod_manager/data/constant.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
-import 'package:genshin_mod_manager/data/repo/preset.dart';
+import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
-import 'package:genshin_mod_manager/ui/route/home_shell/home_shell_vm.dart';
+import 'package:genshin_mod_manager/ui/provider/app_state.dart';
+import 'package:genshin_mod_manager/ui/provider/home_shell_vm.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
-import 'package:genshin_mod_manager/ui/widget/preset_control/preset_control.dart';
+import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 const _kRepoReleases = '$kRepoBase/releases/latest';
 
-/// A shell for the home route.
-class HomeShell extends StatelessWidget {
-  /// Creates a [HomeShell].
-  const HomeShell({required this.child, super.key});
-
-  static const _resourceDir = 'Resources';
-
-  /// The child widget.
-  final Widget child;
-
-  @override
-  Widget build(final BuildContext context) {
-    final resourcePath =
-        Platform.resolvedExecutable.pDirname.pJoin(_resourceDir);
-    Directory(resourcePath).createSync(recursive: true);
-    return StreamBuilder(
-      stream: context.read<AppStateService>().modRoot.stream,
-      builder: (final context, final snapshot) {
-        if (snapshot.data == null) {
-          return NavigationView(
-            appBar: getAppbar("Reading modRoot..."),
-            content: const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ProgressRing(),
-                  Text('Reading modRoot...'),
-                ],
-              ),
-            ),
-          );
-        }
-        final modRoot = snapshot.data!;
-        return MultiProvider(
-          key: Key(modRoot),
-          providers: [
-            Provider(
-              create: (final context) => createRecursiveFileSystemWatcher(
-                targetPath: modRoot.pDirname,
-              ),
-              dispose: (final context, final value) => value.dispose(),
-            ),
-            Provider(
-              create: (final context) => createPresetService(
-                appStateService: context.read(),
-                observerService: context.read(),
-              ),
-              dispose: (final context, final value) => value.dispose(),
-            ),
-            ChangeNotifierProvider(
-              create: (final context) => createViewModel(
-                appStateService: context.read(),
-                recursiveFileSystemWatcher: context.read(),
-              ),
-            ),
-          ],
-          child: _HomeShell(child: child),
-        );
-      },
-    );
-  }
-}
-
-class _HomeShell extends StatefulWidget {
-  const _HomeShell({required this.child});
+class HomeShell extends ConsumerStatefulWidget {
+  const HomeShell({required this.child});
 
   final Widget child;
 
   @override
-  State<_HomeShell> createState() => _HomeShellState();
+  ConsumerState<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
+class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     with WindowListener {
   static const _navigationPaneOpenWidth = 270.0;
 
@@ -348,11 +283,9 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
 
   List<PaneItemAction> _buildPaneItemActions() {
     const icon = Icon(FluentIcons.user_window);
-    final select =
-        context.select<HomeShellViewModel, bool?>((final vm) => vm.runTogether);
-    if (select == null) {
-      return const [];
-    }
+    final select = ref.watch(
+      appStateNotifierProvider.select((final value) => value.runTogether),
+    );
     return select
         ? [
             PaneItemAction(
@@ -378,23 +311,31 @@ class _HomeShellState<T extends StatefulWidget> extends State<_HomeShell>
           ];
   }
 
-  void _runLauncher() {
-    context.read<HomeShellViewModel>().runLauncher();
-  }
-
   void _runBoth() {
     _runMigoto();
     _runLauncher();
   }
 
   void _runMigoto() {
-    context.read<HomeShellViewModel>().runMigoto();
+    final path = ref.read(appStateNotifierProvider).modExecFile;
+    if (path == null) {
+      return;
+    }
+    runProgram(File(path));
     unawaited(
       displayInfoBarInContext(
         context,
         title: const Text('Ran 3d migoto'),
       ),
     );
+  }
+
+  void _runLauncher() {
+    final launcher = ref.read(appStateNotifierProvider).launcherFile;
+    if (launcher == null) {
+      return;
+    }
+    runProgram(File(launcher));
   }
 
   Widget _buildAutoSuggestBox(
@@ -453,13 +394,12 @@ class _FolderPaneItem extends PaneItem {
         );
   static const maxIconWidth = 80.0;
 
-  static Widget _getIcon(final File? imageFile) =>
-      Selector<HomeShellViewModel, bool?>(
-        selector: (final context, final vm) => vm.showFolderIcon,
-        builder: (final context, final value, final child) {
-          if (value == null) {
-            return const ProgressRing();
-          }
+  static Widget _getIcon(final File? imageFile) => Consumer(
+        builder: (final context, final ref, final child) {
+          final value = ref.watch(
+            appStateNotifierProvider
+                .select((final value) => value.showFolderIcon),
+          );
           return value
               ? _buildImage(imageFile)
               : const Icon(FluentIcons.folder_open);

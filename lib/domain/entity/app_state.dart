@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:genshin_mod_manager/domain/entity/preset.dart';
 
 part 'app_state.freezed.dart';
 
@@ -13,6 +14,6 @@ class AppState with _$AppState {
     final String? modRoot,
     final String? modExecFile,
     final String? launcherFile,
-    final Map<String, Map<String, List<String>>>? presetData,
+    final PresetData? presetData,
   }) = _AppState;
 }

@@ -5,12 +5,67 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+
+class RootWatcher {
+  RootWatcher({
+    required this.modRoot,
+  }) {
+    final dir = Directory(modRoot);
+    _controller.add(
+      dir
+          .listSync()
+          .whereType<Directory>()
+          .map(
+            (final event) => ModCategory(
+              path: event.path,
+              name: event.path,
+            ),
+          )
+          .toList(),
+    );
+
+    _subscription = dir
+        .watch(
+          events: FileSystemEvent.delete |
+              FileSystemEvent.create |
+              FileSystemEvent.move,
+        )
+        .listen(_listen);
+  }
+
+  final StreamController<List<ModCategory>> _controller =
+      StreamController<List<ModCategory>>();
+  final String modRoot;
+  late final StreamSubscription<FileSystemEvent> _subscription;
+  Stream<List<ModCategory>> categories;
+
+  void dispose() {
+    _subscription.cancel();
+    _controller.close();
+  }
+
+  void _listen(final FileSystemEvent event) {
+    _controller;
+  }
+}
+
+@riverpod
+class HomeShellNotifier extends _$HomeShellNotifier {
+
+  final resourcePath =
+  Platform.resolvedExecutable.pDirname.pJoin(_resourceDir);
+  Directory(resourcePath).createSync(recursive: true);
+  static const _resourceDir = 'Resources';
+
+  @override
+  List<ModCategory> build() {
+    return [];
+  }
+}
 
 abstract interface class HomeShellViewModel implements BaseViewModel {
   List<ModCategory>? get modCategories;

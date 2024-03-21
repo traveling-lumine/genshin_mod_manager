@@ -1,13 +1,4 @@
-import 'dart:async';
-
-import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/domain/entity/akasha.dart';
-import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/ui/route/nahida_store/nahida_store_vm.dart';
-import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
-
-import 'package:url_launcher/url_launcher.dart';
+part of 'nahida_store.dart';
 
 class StoreElement extends StatelessWidget {
   const StoreElement({

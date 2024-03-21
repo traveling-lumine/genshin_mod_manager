@@ -11,17 +11,15 @@ import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/data/repo/mod_writer.dart';
 import 'package:genshin_mod_manager/domain/entity/ini.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
-import 'package:genshin_mod_manager/ui/route/category/mod_card/ini_widget_vm.dart';
-import 'package:genshin_mod_manager/ui/route/category/mod_card_vm.dart';
+import 'package:genshin_mod_manager/ui/provider/ini_widget_vm.dart';
+import 'package:genshin_mod_manager/ui/provider/mod_card_vm.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
 import 'package:pasteboard/pasteboard.dart';
-
 import 'package:window_manager/window_manager.dart';
 
-part 'mod_card/ini_widget.dart';
+part 'ini_widget.dart';
 
 /// A [Card] that represents a [Mod].
 class ModCard extends StatelessWidget {
@@ -34,10 +32,7 @@ class ModCard extends StatelessWidget {
   final Mod mod;
 
   @override
-  Widget build(final BuildContext context) => ChangeNotifierProvider(
-        create: (final context) => createModCardViewModel(mod: mod),
-        child: _ModCard(mod: mod),
-      );
+  Widget build(final BuildContext context) => _ModCard(mod: mod);
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
@@ -46,7 +41,7 @@ class ModCard extends StatelessWidget {
   }
 }
 
-class _ModCard extends StatefulWidget {
+class _ModCard extends ConsumerStatefulWidget {
   const _ModCard({required this.mod});
 
   static const _minIniSectionWidth = 150.0;
@@ -55,7 +50,7 @@ class _ModCard extends StatefulWidget {
   final Mod mod;
 
   @override
-  State<_ModCard> createState() => _ModCardState();
+  ConsumerState<_ModCard> createState() => _ModCardState();
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
@@ -64,7 +59,7 @@ class _ModCard extends StatefulWidget {
   }
 }
 
-class _ModCardState extends State<_ModCard> with WindowListener {
+class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
 

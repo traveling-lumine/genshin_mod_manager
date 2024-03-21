@@ -23,8 +23,7 @@ mixin _$AppState {
   String? get modRoot => throw _privateConstructorUsedError;
   String? get modExecFile => throw _privateConstructorUsedError;
   String? get launcherFile => throw _privateConstructorUsedError;
-  Map<String, Map<String, List<String>>>? get presetData =>
-      throw _privateConstructorUsedError;
+  PresetData? get presetData => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $AppStateCopyWith<AppState> get copyWith =>
@@ -44,7 +43,9 @@ abstract class $AppStateCopyWith<$Res> {
       String? modRoot,
       String? modExecFile,
       String? launcherFile,
-      Map<String, Map<String, List<String>>>? presetData});
+      PresetData? presetData});
+
+  $PresetDataCopyWith<$Res>? get presetData;
 }
 
 /// @nodoc
@@ -101,8 +102,20 @@ class _$AppStateCopyWithImpl<$Res, $Val extends AppState>
       presetData: freezed == presetData
           ? _value.presetData
           : presetData // ignore: cast_nullable_to_non_nullable
-              as Map<String, Map<String, List<String>>>?,
+              as PresetData?,
     ) as $Val);
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $PresetDataCopyWith<$Res>? get presetData {
+    if (_value.presetData == null) {
+      return null;
+    }
+
+    return $PresetDataCopyWith<$Res>(_value.presetData!, (value) {
+      return _then(_value.copyWith(presetData: value) as $Val);
+    });
   }
 }
 
@@ -122,7 +135,10 @@ abstract class _$$AppStateImplCopyWith<$Res>
       String? modRoot,
       String? modExecFile,
       String? launcherFile,
-      Map<String, Map<String, List<String>>>? presetData});
+      PresetData? presetData});
+
+  @override
+  $PresetDataCopyWith<$Res>? get presetData;
 }
 
 /// @nodoc
@@ -175,9 +191,9 @@ class __$$AppStateImplCopyWithImpl<$Res>
           : launcherFile // ignore: cast_nullable_to_non_nullable
               as String?,
       presetData: freezed == presetData
-          ? _value._presetData
+          ? _value.presetData
           : presetData // ignore: cast_nullable_to_non_nullable
-              as Map<String, Map<String, List<String>>>?,
+              as PresetData?,
     ));
   }
 }
@@ -193,8 +209,7 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
       this.modRoot,
       this.modExecFile,
       this.launcherFile,
-      final Map<String, Map<String, List<String>>>? presetData})
-      : _presetData = presetData;
+      this.presetData});
 
   @override
   final bool runTogether;
@@ -210,15 +225,8 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
   final String? modExecFile;
   @override
   final String? launcherFile;
-  final Map<String, Map<String, List<String>>>? _presetData;
   @override
-  Map<String, Map<String, List<String>>>? get presetData {
-    final value = _presetData;
-    if (value == null) return null;
-    if (_presetData is EqualUnmodifiableMapView) return _presetData;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(value);
-  }
+  final PresetData? presetData;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -258,8 +266,8 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
                 other.modExecFile == modExecFile) &&
             (identical(other.launcherFile, launcherFile) ||
                 other.launcherFile == launcherFile) &&
-            const DeepCollectionEquality()
-                .equals(other._presetData, _presetData));
+            (identical(other.presetData, presetData) ||
+                other.presetData == presetData));
   }
 
   @override
@@ -272,7 +280,7 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
       modRoot,
       modExecFile,
       launcherFile,
-      const DeepCollectionEquality().hash(_presetData));
+      presetData);
 
   @JsonKey(ignore: true)
   @override
@@ -283,15 +291,14 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
 
 abstract class _AppState implements AppState {
   const factory _AppState(
-          {required final bool runTogether,
-          required final bool moveOnDrag,
-          required final bool showFolderIcon,
-          required final bool showEnabledModsFirst,
-          final String? modRoot,
-          final String? modExecFile,
-          final String? launcherFile,
-          final Map<String, Map<String, List<String>>>? presetData}) =
-      _$AppStateImpl;
+      {required final bool runTogether,
+      required final bool moveOnDrag,
+      required final bool showFolderIcon,
+      required final bool showEnabledModsFirst,
+      final String? modRoot,
+      final String? modExecFile,
+      final String? launcherFile,
+      final PresetData? presetData}) = _$AppStateImpl;
 
   @override
   bool get runTogether;
@@ -308,7 +315,7 @@ abstract class _AppState implements AppState {
   @override
   String? get launcherFile;
   @override
-  Map<String, Map<String, List<String>>>? get presetData;
+  PresetData? get presetData;
   @override
   @JsonKey(ignore: true)
   _$$AppStateImplCopyWith<_$AppStateImpl> get copyWith =>

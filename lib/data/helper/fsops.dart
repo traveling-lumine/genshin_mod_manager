@@ -6,26 +6,6 @@ import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 
-/// Returns [ModCategory] list from the mod root obtained from [service].
-Future<List<ModCategory>> getCategories(final AppStateService service) async {
-  final root = service.modRoot.latest;
-  if (root == null) {
-    return [];
-  }
-  final dir = Directory(root);
-  if (!dir.existsSync()) {
-    return [];
-  }
-  final res = dir.listSync().whereType<Directory>().map((final event) {
-    final path = event.path;
-    return ModCategory(
-      path: path,
-      name: path.pBasename,
-    );
-  }).toList();
-  return UnmodifiableListView(res);
-}
-
 /// Returns a [Mod] list from the given [category].
 Future<List<Mod>> getMods(final ModCategory category) async {
   final root = category.path;

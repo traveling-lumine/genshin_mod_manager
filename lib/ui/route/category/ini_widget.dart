@@ -1,4 +1,4 @@
-part of '../mod_card.dart';
+part of 'mod_card.dart';
 
 class IniWidget extends StatelessWidget {
   IniWidget({required this.iniFile}) : super(key: Key(iniFile.path));
