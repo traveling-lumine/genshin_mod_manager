@@ -1,6 +1,6 @@
 part of 'nahida_store.dart';
 
-class StoreElement extends StatelessWidget {
+class StoreElement extends ConsumerWidget {
   const StoreElement({
     required this.element,
     required this.category,
@@ -13,7 +13,7 @@ class StoreElement extends StatelessWidget {
   final ModCategory category;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final buttons = <CommandBarItem>[];
     final virusTotalUrl = element.virustotalUrl;
     if (virusTotalUrl != null && virusTotalUrl.isNotEmpty) {
@@ -41,7 +41,7 @@ class StoreElement extends StatelessWidget {
           context: context,
           barrierDismissible: true,
           builder: (final dialogContext) =>
-              _downloadDialog(dialogContext, context),
+              _downloadDialog(dialogContext, context, ref),
         ),
         icon: const Icon(FluentIcons.download),
       ),
@@ -197,6 +197,7 @@ class StoreElement extends StatelessWidget {
   Widget _downloadDialog(
     final BuildContext dialogContext,
     final BuildContext context,
+    final WidgetRef ref,
   ) =>
       ContentDialog(
         title: Text('Download ${element.title}?'),
@@ -209,12 +210,10 @@ class StoreElement extends StatelessWidget {
           FilledButton(
             onPressed: () async {
               Navigator.of(dialogContext).pop();
-              final vm = context.read<NahidaStoreViewModel>();
               unawaited(
-                vm.onModDownload(
-                  element: element,
-                  category: category,
-                ),
+                ref
+                    .read(downloadModelProvider)
+                    .onModDownload(element: element, category: category),
               );
             },
             child: const Text('Download'),

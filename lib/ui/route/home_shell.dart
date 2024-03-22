@@ -7,12 +7,12 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:genshin_mod_manager/data/constant.dart';
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
+import 'package:genshin_mod_manager/domain/constant.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/provider/app_state.dart';
-import 'package:genshin_mod_manager/ui/provider/home_shell_vm.dart';
+import 'package:genshin_mod_manager/ui/provider/home_shell.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
@@ -40,17 +40,26 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     with WindowListener {
   static const _navigationPaneOpenWidth = 270.0;
 
-  bool updateDisplayed = false;
-
   @override
   void onWindowFocus() {
-    context.read<HomeShellViewModel>().onWindowFocus();
+    ref.invalidate(homeShellNotifierProvider);
   }
 
   @override
   void initState() {
     super.initState();
     WindowManager.instance.addListener(this);
+    unawaited(
+      _shouldUpdate(context).then((final value) {
+        if (value == null) {
+          return;
+        }
+        if (!mounted) {
+          return;
+        }
+        return _displayUpdateInfoBar(value);
+      }),
+    );
   }
 
   @override
@@ -61,21 +70,15 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   @override
   Widget build(final BuildContext context) {
-    if (!updateDisplayed) {
-      updateDisplayed = true;
-      unawaited(
-        _shouldUpdate(context).then((final value) {
-          if (value == null) {
-            return;
-          }
-          if (!context.mounted) {
-            return;
-          }
-          return _displayUpdateInfoBar(value);
-        }),
-      );
-    }
+    final categories = ref.watch(homeShellNotifierProvider);
+    return categories.when(
+      data: _buildData,
+      error: _buildError,
+      loading: _buildLoading,
+    );
+  }
 
+  NavigationView _buildData(final List<ModCategory> categories) {
     final footerItems = [
       PaneItemSeparator(),
       ..._buildPaneItemActions(),
@@ -87,24 +90,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         onTap: () => context.go(kSettingRoute),
       ),
     ];
-
-    final categories = context.select<HomeShellViewModel, List<ModCategory>?>(
-      (final vm) => vm.modCategories,
-    );
-    if (categories == null) {
-      return NavigationView(
-        appBar: getAppbar("Reading categories..."),
-        content: const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ProgressRing(),
-              Text('Reading categories...'),
-            ],
-          ),
-        ),
-      );
-    }
     final items = categories.map((final e) {
       final iconPath = e.iconPath;
       return _FolderPaneItem(
@@ -156,6 +141,103 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       pane: _buildPane(selected, items, footerItems),
       paneBodyBuilder: (final item, final body) => widget.child,
     );
+  }
+
+  NavigationView _buildError(final Object error, final StackTrace stackTrace) =>
+      NavigationView(
+        appBar: getAppbar('Error'),
+        content: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Error: $error'),
+              Text('Stack trace: $stackTrace'),
+            ],
+          ),
+        ),
+      );
+
+  NavigationView _buildLoading() => NavigationView(
+        appBar: getAppbar("Reading categories..."),
+        content: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ProgressRing(),
+              Text('Reading categories...'),
+            ],
+          ),
+        ),
+      );
+
+  NavigationAppBar _buildAppbar() => NavigationAppBar(
+        actions: const WindowButtons(),
+        automaticallyImplyLeading: false,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Expanded(
+              child: DragToMoveArea(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Genshin Mod Manager'),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                PresetControlWidget(isLocal: false),
+                const SizedBox(width: kWindowButtonWidth),
+              ],
+            ),
+          ],
+        ),
+      );
+
+  NavigationPane _buildPane(
+    final int? selected,
+    final List<_FolderPaneItem> items,
+    final List<NavigationPaneItem> footerItems,
+  ) =>
+      NavigationPane(
+        selected: selected,
+        items: items.cast<NavigationPaneItem>(),
+        footerItems: footerItems,
+        size: const NavigationPaneSize(
+          openWidth: _HomeShellState._navigationPaneOpenWidth,
+        ),
+        autoSuggestBox: _buildAutoSuggestBox(items, footerItems),
+        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+      );
+
+  List<PaneItemAction> _buildPaneItemActions() {
+    const icon = Icon(FluentIcons.user_window);
+    final select = ref.watch(
+      appStateNotifierProvider.select((final value) => value.runTogether),
+    );
+    return select
+        ? [
+            PaneItemAction(
+              key: const ValueKey('<run_both>'),
+              icon: icon,
+              title: const Text('Run 3d migoto & launcher'),
+              onTap: _runBoth,
+            ),
+          ]
+        : [
+            PaneItemAction(
+              key: const ValueKey('<run_migoto>'),
+              icon: icon,
+              title: const Text('Run 3d migoto'),
+              onTap: _runMigoto,
+            ),
+            PaneItemAction(
+              key: const ValueKey('<run_launcher>'),
+              icon: icon,
+              title: const Text('Run launcher'),
+              onTap: _runLauncher,
+            ),
+          ];
   }
 
   void _displayUpdateInfoBar(final String newVersion) {
@@ -241,76 +323,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         ),
       );
 
-  NavigationAppBar _buildAppbar() => NavigationAppBar(
-        actions: const WindowButtons(),
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Expanded(
-              child: DragToMoveArea(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Genshin Mod Manager'),
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                PresetControlWidget(isLocal: false),
-                const SizedBox(width: kWindowButtonWidth),
-              ],
-            ),
-          ],
-        ),
-      );
-
-  NavigationPane _buildPane(
-    final int? selected,
-    final List<_FolderPaneItem> items,
-    final List<NavigationPaneItem> footerItems,
-  ) =>
-      NavigationPane(
-        selected: selected,
-        items: items.cast<NavigationPaneItem>(),
-        footerItems: footerItems,
-        size: const NavigationPaneSize(
-          openWidth: _HomeShellState._navigationPaneOpenWidth,
-        ),
-        autoSuggestBox: _buildAutoSuggestBox(items, footerItems),
-        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-      );
-
-  List<PaneItemAction> _buildPaneItemActions() {
-    const icon = Icon(FluentIcons.user_window);
-    final select = ref.watch(
-      appStateNotifierProvider.select((final value) => value.runTogether),
-    );
-    return select
-        ? [
-            PaneItemAction(
-              key: const ValueKey('<run_both>'),
-              icon: icon,
-              title: const Text('Run 3d migoto & launcher'),
-              onTap: _runBoth,
-            ),
-          ]
-        : [
-            PaneItemAction(
-              key: const ValueKey('<run_migoto>'),
-              icon: icon,
-              title: const Text('Run 3d migoto'),
-              onTap: _runMigoto,
-            ),
-            PaneItemAction(
-              key: const ValueKey('<run_launcher>'),
-              icon: icon,
-              title: const Text('Run launcher'),
-              onTap: _runLauncher,
-            ),
-          ];
-  }
-
   void _runBoth() {
     _runMigoto();
     _runLauncher();
@@ -369,13 +381,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           context.go(kCategoryRoute, extra: category);
         },
       );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-        .add(DiagnosticsProperty<bool>('updateDisplayed', updateDisplayed));
-  }
 }
 
 class _FolderPaneItem extends PaneItem {

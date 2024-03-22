@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/ui/router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
 const _minWindowSize = Size(600, 600);
@@ -14,7 +15,7 @@ void main(final List<String> args) async {
   if (!kDebugMode) {
     _registerErrorHandlers();
   }
-  runApp(MyApp());
+  runApp(ProviderScope(child: MyApp()));
 }
 
 Future<void> _initialize() async {

@@ -1,81 +1,34 @@
-part of 'mod_card.dart';
+part of 'category.dart';
 
-class IniWidget extends StatelessWidget {
-  IniWidget({required this.iniFile}) : super(key: Key(iniFile.path));
-
-  final IniFile iniFile;
-
-  @override
-  Widget build(final BuildContext context) => ChangeNotifierProvider(
-        create: (final context) => createIniWidgetViewModel(
-          iniFile: iniFile,
-          watcher: context.read(),
-        ),
-        child: _IniWidget(iniFile: iniFile),
-      );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<IniFile>('iniFile', iniFile));
-  }
-}
-
-class _IniWidget extends StatefulWidget {
+class _IniWidget extends ConsumerWidget {
   const _IniWidget({required this.iniFile});
 
   final IniFile iniFile;
 
   @override
-  State<_IniWidget> createState() => _IniWidgetState();
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<IniFile>('iniFile', iniFile));
-  }
-}
-
-class _IniWidgetState extends State<_IniWidget> {
-  List<String>? data;
-
-  @override
-  Widget build(final BuildContext context) {
-    final future = context.watch<IniWidgetViewModel>().iniLines;
-    return FutureBuilder(
-      future: future,
-      builder: (final context, final snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          if (data == null) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildIniHeader(widget.iniFile.path),
-                  const ProgressRing(),
-                  const Text('Loading ini file'),
-                ],
-              ),
-            );
-          } else {
-            return _buildColumn();
-          }
-        }
-        if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        }
-        final list = snapshot.data!;
-        data = list;
-        return _buildColumn();
-      },
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final lines = ref.watch(iniLinesProvider(iniFile));
+    return lines.when(
+      data: _buildColumn,
+      error: (final error, final stackTrace) => Text('Error: $error'),
+      loading: () => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildIniHeader(iniFile.path),
+            const ProgressRing(),
+            const Text('Loading ini file'),
+          ],
+        ),
+      ),
     );
   }
 
-  Column _buildColumn() {
+  Column _buildColumn(final List<String> data) {
     final rowElements = <Widget>[];
     late String lastSection;
     var metSection = false;
-    for (final line in data!) {
+    for (final line in data) {
       if (line.startsWith('[')) {
         metSection = false;
       }
@@ -92,7 +45,7 @@ class _IniWidgetState extends State<_IniWidget> {
           _buildIniFieldEditor(
             'key:',
             IniSection(
-              iniFile: widget.iniFile,
+              iniFile: iniFile,
               line: line,
               section: lastSection,
             ),
@@ -103,7 +56,7 @@ class _IniWidgetState extends State<_IniWidget> {
           _buildIniFieldEditor(
             'back:',
             IniSection(
-              iniFile: widget.iniFile,
+              iniFile: iniFile,
               line: line,
               section: lastSection,
             ),
@@ -118,7 +71,7 @@ class _IniWidgetState extends State<_IniWidget> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildIniHeader(widget.iniFile.path),
+        _buildIniHeader(iniFile.path),
         ...rowElements,
       ],
     );
@@ -168,65 +121,47 @@ class _IniWidgetState extends State<_IniWidget> {
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IterableProperty<String>('data', data));
+    properties.add(DiagnosticsProperty<IniFile>('iniFile', iniFile));
   }
 }
 
-class _EditorText extends StatefulWidget {
+class _EditorText extends HookConsumerWidget {
   _EditorText({required this.iniSection}) : super(key: Key(iniSection.section));
 
   final IniSection iniSection;
 
   @override
-  State<_EditorText> createState() => _EditorTextState();
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final textEditingController =
+        useTextEditingController(text: iniSection.value);
+    return Focus(
+      onFocusChange: (final event) =>
+          _onFocusChange(event, textEditingController),
+      child: TextBox(
+        controller: textEditingController,
+        onSubmitted: (final value) {
+          ref
+              .read(iniLinesProvider(iniSection.iniFile).notifier)
+              .editIniFile(iniSection, value);
+        },
+      ),
+    );
+  }
+
+  void _onFocusChange(
+    final bool event,
+    final TextEditingController textEditingController,
+  ) {
+    if (event) {
+      return;
+    }
+    textEditingController.text = iniSection.value;
+    return;
+  }
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<IniSection>('iniSection', iniSection));
-  }
-}
-
-class _EditorTextState extends State<_EditorText> {
-  late final TextEditingController _textEditingController =
-      TextEditingController(text: widget.iniSection.value);
-
-  @override
-  void didUpdateWidget(covariant final _EditorText oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _textEditingController.text = widget.iniSection.value;
-  }
-
-  @override
-  void dispose() {
-    _textEditingController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(final BuildContext context) => Focus(
-        onFocusChange: _onFocusChange,
-        child: TextBox(
-          controller: _textEditingController,
-          onSubmitted: _editIniKey,
-        ),
-      );
-
-  void _onFocusChange(final event) {
-    if (event) {
-      return;
-    }
-    _textEditingController.text = widget.iniSection.value;
-  }
-
-  void _editIniKey(final String value) {
-    context.read<IniWidgetViewModel>().editIniFile(widget.iniSection, value);
-  }
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-        .add(DiagnosticsProperty<IniSection>('iniSection', widget.iniSection));
   }
 }

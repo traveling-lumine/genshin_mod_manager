@@ -2,159 +2,182 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
-import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-abstract interface class ModCardViewModel implements BaseViewModel {
-  String? get configPath;
+part 'mod_card_vm.g.dart';
 
-  Future<FileImage>? get preview;
-
-  List<String>? get iniPaths;
-
-  void forceUpdate();
-}
-
-ModCardViewModel createModCardViewModel({required final Mod mod}) =>
-    _ModCardViewModelImpl(mod: mod);
-
-class _ModCardViewModelImpl extends ChangeNotifier implements ModCardViewModel {
-  _ModCardViewModelImpl({required this.mod}) {
-    final modDir = Directory(mod.path);
-    _updatePaths(modDir.listSync().map((final e) => e.path).toList());
+class ModCardModel {
+  ModCardModel(this._mod) {
+    final modDir = Directory(_mod.path);
+    _updatePaths(getUnderSync<File>(_mod.path));
     _subscription = modDir.watch().listen(_listen);
   }
 
+  final Mod _mod;
   late final StreamSubscription<FileSystemEvent> _subscription;
-  final Mod mod;
 
-  @override
-  void dispose() {
-    unawaited(_subscription.cancel());
-    super.dispose();
+  Stream<String?> get configPath => _configPathController.stream;
+  final _configPathController = StreamController<String?>();
+  String? configPathCurVal;
+
+  void setConfigPath(final String? val) {
+    if (configPathCurVal != val) {
+      configPathCurVal = val;
+      _configPathController.add(val);
+    }
   }
 
-  @override
-  String? configPath;
+  Stream<FileImage?> get preview => _previewController.stream;
+  final _previewController = StreamController<FileImage?>();
+  FileImage? previewCurVal;
 
-  @override
-  Future<FileImage>? preview;
-  String? previewPath;
+  void setPreview(final FileImage? val) {
+    if (previewCurVal != val) {
+      previewCurVal = val;
+      _previewController.add(val);
+    }
+  }
 
-  @override
-  List<String>? iniPaths;
+  Stream<List<String>> get iniPaths => _iniPathsController.stream;
+  final _iniPathsController = StreamController<List<String>>();
+  late List<String> iniPathsCurVal;
 
-  @override
-  void forceUpdate() {
-    final modDir = Directory(mod.path);
-    _updatePaths(modDir.listSync().map((final e) => e.path).toList());
-    notifyListeners();
+  void setIniPaths(final List<String> val) {
+    if (!const ListEquality().equals(iniPathsCurVal, val)) {
+      iniPathsCurVal = val;
+      _iniPathsController.add(val);
+    }
+  }
+
+  void dispose() {
+    unawaited(_subscription.cancel());
+    unawaited(_configPathController.close());
+    unawaited(_previewController.close());
+    unawaited(_iniPathsController.close());
   }
 
   void _listen(final FileSystemEvent event) {
     final path = event.path;
-    final shouldNotify = switch (event) {
-      (FileSystemModifyEvent _) => _onModify(path),
-      (FileSystemCreateEvent _) => _onCreate(path),
-      (FileSystemDeleteEvent _) => _onDelete(path),
-      (FileSystemMoveEvent _) => _onMove(path, event.destination),
-    };
-    if (shouldNotify) {
-      notifyListeners();
+    switch (event) {
+      case FileSystemModifyEvent _:
+        _onModify(path);
+      case FileSystemCreateEvent _:
+        _onCreate(path);
+      case FileSystemDeleteEvent _:
+        _onDelete(path);
+      case FileSystemMoveEvent _:
+        _onMove(path, event.destination);
     }
   }
 
-  bool _onModify(final String path) {
-    var shouldNotify = false;
-    if (previewPath?.pEquals(path) ?? false) {
-      preview = Future(() async {
-        final fileImage = FileImage(File(previewPath!));
+  void _onModify(final String path) {
+    final fileImage = previewCurVal;
+    if (fileImage == null) {
+      return;
+    }
+    if (fileImage.file.path.pEquals(path)) {
+      unawaited(() async {
         await fileImage.evict();
-        return fileImage;
-      });
-      shouldNotify = true;
+        setPreview(FileImage(File(path)));
+      }());
     }
-    return shouldNotify;
   }
 
-  bool _onCreate(final String path) {
-    var shouldNotify = false;
+  void _onCreate(final String path) {
     if (path.pBasename.pEquals(kAkashaConfigFilename)) {
-      configPath = path;
-      shouldNotify = true;
+      setConfigPath(path);
     }
-    if (preview == null) {
+    if (previewCurVal == null) {
       final previewPath = findPreviewFileInString([path]);
       if (previewPath != null) {
-        preview = Future(() async {
+        unawaited(() async {
           final fileImage = FileImage(File(previewPath));
           await fileImage.evict();
-          return fileImage;
-        });
-        this.previewPath = previewPath;
-        shouldNotify = true;
+          setPreview(fileImage);
+        }());
       }
     }
     if (path.pExtension.pEquals('.ini')) {
-      iniPaths = [...?iniPaths, path];
-      shouldNotify = true;
+      setIniPaths([...iniPathsCurVal, path]);
     }
-    return shouldNotify;
   }
 
-  bool _onDelete(final String path) {
-    var shouldNotify = false;
-    if (configPath?.pEquals(path) ?? false) {
-      configPath = null;
-      shouldNotify = true;
+  void _onDelete(final String path) {
+    if (configPathCurVal?.pEquals(path) ?? false) {
+      setConfigPath(null);
     }
-    if (previewPath?.pEquals(path) ?? false) {
-      unawaited(FileImage(File(previewPath!)).evict());
-      preview = null;
-      previewPath = null;
-      shouldNotify = true;
+    if (previewCurVal?.file.path.pEquals(path) ?? false) {
+      unawaited(() async {
+        await previewCurVal?.evict();
+        setPreview(null);
+      }());
     }
-    if (iniPaths?.remove(path) ?? false) {
-      iniPaths = [...iniPaths!];
-      shouldNotify = true;
+    final iniPaths = iniPathsCurVal;
+    if (iniPaths.remove(path)) {
+      setIniPaths([...iniPaths]);
     }
-    return shouldNotify;
   }
 
-  bool _onMove(final String path, final String? destination) {
-    var shouldNotify = false;
+  void _onMove(final String path, final String? destination) {
     if (destination == null) {
       _updatePaths(
-        Directory(mod.path).listSync().map((final e) => e.path).toList(),
+        Directory(_mod.path).listSync().map((final e) => e.path).toList(),
       );
-      shouldNotify = true;
     } else {
-      shouldNotify |= _onDelete(path);
-      shouldNotify |= _onCreate(destination);
-      shouldNotify |= _onModify(destination);
+      _onDelete(path);
+      _onCreate(destination);
+      _onModify(destination);
     }
-    return shouldNotify;
   }
 
   void _updatePaths(final List<String> paths) {
-    configPath = paths.firstWhereOrNull(
-      (final path) => path.pBasename.pEquals(kAkashaConfigFilename),
+    setConfigPath(
+      paths.firstWhereOrNull(
+        (final path) => path.pBasename.pEquals(kAkashaConfigFilename),
+      ),
     );
 
     final previewPath = findPreviewFileInString(paths);
     if (previewPath != null) {
-      final fileImage = FileImage(File(previewPath));
-      unawaited(fileImage.evict());
-      preview = SynchronousFuture(fileImage);
-      this.previewPath = previewPath;
+      unawaited(() async {
+        final fileImage = FileImage(File(previewPath));
+        await fileImage.evict();
+        setPreview(fileImage);
+      }());
     }
 
-    iniPaths =
-        paths.where((final path) => path.pExtension.pEquals('.ini')).toList();
+    setIniPaths(
+      paths.where((final path) => path.pExtension.pEquals('.ini')).toList(),
+    );
   }
+}
+
+@riverpod
+ModCardModel modCardModel(final ModCardModelRef ref, final Mod mod) {
+  final modCardModel = ModCardModel(mod);
+  ref.onDispose(modCardModel.dispose);
+  return modCardModel;
+}
+
+@riverpod
+Stream<String?> configPath(final ConfigPathRef ref, final Mod mod) {
+  final model = ref.watch(modCardModelProvider(mod));
+  return model.configPath;
+}
+
+@riverpod
+Stream<FileImage?> preview(final PreviewRef ref, final Mod mod) {
+  final model = ref.watch(modCardModelProvider(mod));
+  return model.preview;
+}
+
+@riverpod
+Stream<List<String>> iniPaths(final IniPathsRef ref, final Mod mod) {
+  final model = ref.watch(modCardModelProvider(mod));
+  return model.iniPaths;
 }

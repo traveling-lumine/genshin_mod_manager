@@ -6,69 +6,36 @@ import 'package:genshin_mod_manager/data/repo/mod_writer.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/akasha.dart';
-import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
 import 'package:genshin_mod_manager/domain/usecase/akasha/download_url.dart';
-import 'package:genshin_mod_manager/domain/usecase/akasha/refresh.dart';
-import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-abstract interface class NahidaStoreViewModel implements BaseViewModel {
-  Future<List<NahidaliveElement>> get elements;
+part 'nahida_store.g.dart';
 
-  void onRefresh();
+@riverpod
+NahidaliveAPI akashaApi(final AkashaApiRef ref) => createNahidaliveAPI();
 
-  Future<void> onModDownload({
-    required final NahidaliveElement element,
-    required final ModCategory category,
-    final String? pw,
-  });
-
-  void registerDownloadCallbacks({
-    final Future<String?> Function(String?)? onPasswordRequired,
-    final void Function(HttpException)? onApiException,
-    final void Function(NahidaliveElement)? onDownloadComplete,
-    final void Function(ModCategory, String, Uint8List)? onExtractFail,
-  });
+@riverpod
+Future<List<NahidaliveElement>> akashaElement(final AkashaElementRef ref) {
+  final api = ref.watch(akashaApiProvider);
+  return api.fetchNahidaliveElements();
 }
 
-NahidaStoreViewModel createViewModel({
-  required final RecursiveFileSystemWatcher observer,
-}) =>
-    _NahidaStoreViewModelImpl(
-      observer: observer,
-    );
+@riverpod
+NahidaDownloadModel downloadModel(final DownloadModelRef ref) {
+  final api = ref.watch(akashaApiProvider);
+  return NahidaDownloadModel(api);
+}
 
-final class _NahidaStoreViewModelImpl extends ChangeNotifier
-    implements NahidaStoreViewModel {
-  _NahidaStoreViewModelImpl({
-    required this.observer,
-  }) : api = createNahidaliveAPI() {
-    onRefresh();
-  }
+final class NahidaDownloadModel {
+  NahidaDownloadModel(this.api);
 
   final NahidaliveAPI api;
-  final RecursiveFileSystemWatcher observer;
 
   Future<String?> Function(String?)? _onPasswordRequired;
   void Function(HttpException)? _onApiException;
   void Function(NahidaliveElement)? _onDownloadComplete;
   void Function(ModCategory, String, Uint8List)? _onExtractFail;
 
-  @override
-  Future<List<NahidaliveElement>> get elements => _elements;
-  late Future<List<NahidaliveElement>> _elements;
-
-  set elements(final Future<List<NahidaliveElement>> value) {
-    _elements = value;
-    notifyListeners();
-  }
-
-  @override
-  void onRefresh() {
-    // ignore: discarded_futures
-    elements = AkashaRefreshUseCase(api: api).call();
-  }
-
-  @override
   Future<void> onModDownload({
     required final NahidaliveElement element,
     required final ModCategory category,
@@ -99,10 +66,8 @@ final class _NahidaStoreViewModelImpl extends ChangeNotifier
       }
     }
     _onDownloadComplete?.call(element);
-    observer.forceUpdate();
   }
 
-  @override
   void registerDownloadCallbacks({
     final Future<String?> Function(String?)? onPasswordRequired,
     final void Function(HttpException)? onApiException,

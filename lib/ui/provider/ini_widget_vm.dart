@@ -2,47 +2,53 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
+import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/ini.dart';
-import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
-import 'package:genshin_mod_manager/ui/viewmodel_base.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-abstract interface class IniWidgetViewModel implements BaseViewModel {
-  Future<List<String>>? get iniLines;
+part 'ini_widget_vm.g.dart';
 
-  void editIniFile(final IniSection section, final String value);
-}
-
-IniWidgetViewModel createIniWidgetViewModel({
-  required final IniFile iniFile,
-  required final RecursiveFileSystemWatcher watcher,
-}) =>
-    _IniWidgetViewModelImpl(
-      iniFile: iniFile,
-      watcher: createFileWatcher(path: iniFile.path, watcher: watcher),
+class IniModel {
+  IniModel(this._iniFile) {
+    final dir = Directory(_iniFile.path);
+    _iniLinesController.add(
+      File(_iniFile.path)
+          .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true)),
     );
-
-class _IniWidgetViewModelImpl extends ChangeNotifier
-    implements IniWidgetViewModel {
-  _IniWidgetViewModelImpl({required this.watcher, required this.iniFile}) {
-    _subscription = watcher.updateCode.stream.listen(_listen);
+    _subscription = dir
+        .watch(events: FileSystemEvent.modify)
+        .where((final event) => event.path.pEquals(_iniFile.path))
+        .listen(_listen);
   }
 
-  late final StreamSubscription<int> _subscription;
-  final FileWatcher watcher;
-  final IniFile iniFile;
+  final IniFile _iniFile;
+  late final StreamSubscription<FileSystemEvent> _subscription;
 
-  @override
+  Stream<List<String>> get iniLines => _iniLinesController.stream;
+  final _iniLinesController = StreamController<List<String>>.broadcast();
+
   void dispose() {
     unawaited(_subscription.cancel());
-    super.dispose();
+    unawaited(_iniLinesController.close());
   }
 
-  @override
-  Future<List<String>>? iniLines;
+  void _listen(final FileSystemEvent event) {
+    _iniLinesController.add(
+      File(_iniFile.path)
+          .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true)),
+    );
+  }
+}
 
+@riverpod
+class IniLines extends _$IniLines {
   @override
+  Stream<List<String>> build(final IniFile iniFile) {
+    final model = IniModel(iniFile);
+    ref.onDispose(model.dispose);
+    return model.iniLines;
+  }
+
   void editIniFile(final IniSection section, final String value) {
     var metSection = false;
     final allLines = <String>[];
@@ -61,15 +67,4 @@ class _IniWidgetViewModelImpl extends ChangeNotifier
     });
     path.writeAsStringSync(allLines.join('\n'));
   }
-
-  void _listen(final event) {
-    // ignore: discarded_futures
-    iniLines = _getFuture();
-    notifyListeners();
-  }
-
-  Future<List<String>> _getFuture() => Future(
-        () => File(iniFile.path)
-            .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true)),
-      );
 }
