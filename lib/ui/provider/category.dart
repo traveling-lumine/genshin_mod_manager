@@ -55,7 +55,7 @@ class CategoryModel {
   int _sort(final Mod a, final Mod b) {
     if (_enabledFirst) {
       final aEnabled = a.isEnabled;
-      final bEnabled = a.isEnabled;
+      final bEnabled = b.isEnabled;
       if (aEnabled && !bEnabled) {
         return -1;
       } else if (!aEnabled && bEnabled) {
