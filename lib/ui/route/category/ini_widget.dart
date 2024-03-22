@@ -135,6 +135,13 @@ class _EditorText extends HookConsumerWidget {
   Widget build(final BuildContext context, final WidgetRef ref) {
     final textEditingController =
         useTextEditingController(text: iniSection.value);
+    useEffect(
+      () {
+        textEditingController.text = iniSection.value;
+        return null;
+      },
+      [iniSection.value],
+    );
     return Focus(
       onFocusChange: (final event) =>
           _onFocusChange(event, textEditingController),

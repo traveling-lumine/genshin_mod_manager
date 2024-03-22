@@ -44,7 +44,7 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
 
   @override
   void onWindowFocus() {
-    ref.invalidate(modCardModelProvider(widget.mod));
+    ref.read(modCardVMProvider(widget.mod).notifier).refresh();
   }
 
   @override

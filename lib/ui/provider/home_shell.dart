@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
@@ -15,17 +16,7 @@ class RootWatcher {
         _iconDir = Directory(
             Platform.resolvedExecutable.pDirname.pJoin(_resourceDir)) {
     _iconDir.createSync(recursive: true);
-    final icons = getUnderSync<File>(_iconDir.path);
-    final categories2 = getUnderSync<Directory>(_dir.path);
-    final res = categories2.map((final event) {
-      final name = event.pBasename;
-      return ModCategory(
-        path: event,
-        name: name,
-        iconPath: findPreviewFileInString(icons, name: name),
-      );
-    }).toList();
-    _controller.add(res);
+    _add();
     _subscription = _dir
         .watch(
           events: FileSystemEvent.delete |
@@ -51,7 +42,10 @@ class RootWatcher {
   late final StreamSubscription<FileSystemEvent> _subscription;
   late final StreamSubscription<FileSystemEvent> _subscription2;
 
-  Stream<List<ModCategory>> get categories => _controller.stream;
+  Stream<List<ModCategory>> get categories => _controller.stream.distinct(
+        (final previous, final next) =>
+            const ListEquality().equals(previous, next),
+      );
 
   void dispose() {
     unawaited(_subscription2.cancel());
@@ -60,6 +54,10 @@ class RootWatcher {
   }
 
   void _listen(final FileSystemEvent event) {
+    _add();
+  }
+
+  void _add() {
     final icons = getUnderSync<File>(_iconDir.path);
     final categories2 = getUnderSync<Directory>(_dir.path);
     final res = categories2.map((final event) {
@@ -72,13 +70,28 @@ class RootWatcher {
     }).toList();
     _controller.add(res);
   }
+
+  void refresh() {
+    _add();
+  }
 }
 
 @riverpod
-Stream<List<ModCategory>> homeShellNotifier(final HomeShellNotifierRef ref) {
+RootWatcher rootWatcher(final RootWatcherRef ref) {
   final modRoot = ref
       .watch(appStateNotifierProvider.select((final state) => state.modRoot));
   final watcher = RootWatcher(modRoot!);
   ref.onDispose(watcher.dispose);
-  return watcher.categories;
+  return watcher;
+}
+
+@riverpod
+class HomeShellList extends _$HomeShellList {
+  @override
+  Stream<List<ModCategory>> build() =>
+      ref.watch(rootWatcherProvider).categories;
+
+  void refresh() {
+    ref.read(rootWatcherProvider).refresh();
+  }
 }

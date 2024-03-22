@@ -6,7 +6,7 @@ part of 'mod_card_vm.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$modCardModelHash() => r'c22b9bcfa8cdf5896ce8fa52815ae3952955e7df';
+String _$configPathHash() => r'ac24a243904badc8ed836757b19667a3df0d7692';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -28,134 +28,6 @@ class _SystemHash {
     return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
   }
 }
-
-/// See also [modCardModel].
-@ProviderFor(modCardModel)
-const modCardModelProvider = ModCardModelFamily();
-
-/// See also [modCardModel].
-class ModCardModelFamily extends Family<ModCardModel> {
-  /// See also [modCardModel].
-  const ModCardModelFamily();
-
-  /// See also [modCardModel].
-  ModCardModelProvider call(
-    Mod mod,
-  ) {
-    return ModCardModelProvider(
-      mod,
-    );
-  }
-
-  @override
-  ModCardModelProvider getProviderOverride(
-    covariant ModCardModelProvider provider,
-  ) {
-    return call(
-      provider.mod,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'modCardModelProvider';
-}
-
-/// See also [modCardModel].
-class ModCardModelProvider extends AutoDisposeProvider<ModCardModel> {
-  /// See also [modCardModel].
-  ModCardModelProvider(
-    Mod mod,
-  ) : this._internal(
-          (ref) => modCardModel(
-            ref as ModCardModelRef,
-            mod,
-          ),
-          from: modCardModelProvider,
-          name: r'modCardModelProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$modCardModelHash,
-          dependencies: ModCardModelFamily._dependencies,
-          allTransitiveDependencies:
-              ModCardModelFamily._allTransitiveDependencies,
-          mod: mod,
-        );
-
-  ModCardModelProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.mod,
-  }) : super.internal();
-
-  final Mod mod;
-
-  @override
-  Override overrideWith(
-    ModCardModel Function(ModCardModelRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: ModCardModelProvider._internal(
-        (ref) => create(ref as ModCardModelRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        mod: mod,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeProviderElement<ModCardModel> createElement() {
-    return _ModCardModelProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is ModCardModelProvider && other.mod == mod;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, mod.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-mixin ModCardModelRef on AutoDisposeProviderRef<ModCardModel> {
-  /// The parameter `mod` of this provider.
-  Mod get mod;
-}
-
-class _ModCardModelProviderElement
-    extends AutoDisposeProviderElement<ModCardModel> with ModCardModelRef {
-  _ModCardModelProviderElement(super.provider);
-
-  @override
-  Mod get mod => (origin as ModCardModelProvider).mod;
-}
-
-String _$configPathHash() => r'b1f0e5d926b42258193c1c14ed606cfe6aa1f30e';
 
 /// See also [configPath].
 @ProviderFor(configPath)
@@ -283,7 +155,7 @@ class _ConfigPathProviderElement
   Mod get mod => (origin as ConfigPathProvider).mod;
 }
 
-String _$previewHash() => r'7a5fb49f8d0e0f7f03ebd3c810fb332d9e527983';
+String _$previewHash() => r'5d6d64b36e69fefd9d8c941f4a886f46fb7a5f86';
 
 /// See also [preview].
 @ProviderFor(preview)
@@ -410,7 +282,7 @@ class _PreviewProviderElement
   Mod get mod => (origin as PreviewProvider).mod;
 }
 
-String _$iniPathsHash() => r'2e916f344da04b8b8118543ddd20cc0837d3f2b1';
+String _$iniPathsHash() => r'e45978e2641edcb1efefc0af9e40e97f26b2608f';
 
 /// See also [iniPaths].
 @ProviderFor(iniPaths)
@@ -535,6 +407,147 @@ class _IniPathsProviderElement
 
   @override
   Mod get mod => (origin as IniPathsProvider).mod;
+}
+
+String _$modCardVMHash() => r'80a1854fbe8fbba9e4b192b11ac035a6a58c54fd';
+
+abstract class _$ModCardVM extends BuildlessAutoDisposeNotifier<ModCardModel> {
+  late final Mod mod;
+
+  ModCardModel build(
+    Mod mod,
+  );
+}
+
+/// See also [ModCardVM].
+@ProviderFor(ModCardVM)
+const modCardVMProvider = ModCardVMFamily();
+
+/// See also [ModCardVM].
+class ModCardVMFamily extends Family<ModCardModel> {
+  /// See also [ModCardVM].
+  const ModCardVMFamily();
+
+  /// See also [ModCardVM].
+  ModCardVMProvider call(
+    Mod mod,
+  ) {
+    return ModCardVMProvider(
+      mod,
+    );
+  }
+
+  @override
+  ModCardVMProvider getProviderOverride(
+    covariant ModCardVMProvider provider,
+  ) {
+    return call(
+      provider.mod,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'modCardVMProvider';
+}
+
+/// See also [ModCardVM].
+class ModCardVMProvider
+    extends AutoDisposeNotifierProviderImpl<ModCardVM, ModCardModel> {
+  /// See also [ModCardVM].
+  ModCardVMProvider(
+    Mod mod,
+  ) : this._internal(
+          () => ModCardVM()..mod = mod,
+          from: modCardVMProvider,
+          name: r'modCardVMProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$modCardVMHash,
+          dependencies: ModCardVMFamily._dependencies,
+          allTransitiveDependencies: ModCardVMFamily._allTransitiveDependencies,
+          mod: mod,
+        );
+
+  ModCardVMProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.mod,
+  }) : super.internal();
+
+  final Mod mod;
+
+  @override
+  ModCardModel runNotifierBuild(
+    covariant ModCardVM notifier,
+  ) {
+    return notifier.build(
+      mod,
+    );
+  }
+
+  @override
+  Override overrideWith(ModCardVM Function() create) {
+    return ProviderOverride(
+      origin: this,
+      override: ModCardVMProvider._internal(
+        () => create()..mod = mod,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        mod: mod,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeNotifierProviderElement<ModCardVM, ModCardModel> createElement() {
+    return _ModCardVMProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ModCardVMProvider && other.mod == mod;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, mod.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+mixin ModCardVMRef on AutoDisposeNotifierProviderRef<ModCardModel> {
+  /// The parameter `mod` of this provider.
+  Mod get mod;
+}
+
+class _ModCardVMProviderElement
+    extends AutoDisposeNotifierProviderElement<ModCardVM, ModCardModel>
+    with ModCardVMRef {
+  _ModCardVMProviderElement(super.provider);
+
+  @override
+  Mod get mod => (origin as ModCardVMProvider).mod;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

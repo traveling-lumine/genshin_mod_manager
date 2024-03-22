@@ -22,7 +22,7 @@ class ModCardModel {
   late final StreamSubscription<FileSystemEvent> _subscription;
 
   Stream<String?> get configPath => _configPathController.stream;
-  final _configPathController = StreamController<String?>();
+  final _configPathController = StreamController<String?>()..add(null);
   String? configPathCurVal;
 
   void setConfigPath(final String? val) {
@@ -33,14 +33,12 @@ class ModCardModel {
   }
 
   Stream<FileImage?> get preview => _previewController.stream;
-  final _previewController = StreamController<FileImage?>();
+  final _previewController = StreamController<FileImage?>()..add(null);
   FileImage? previewCurVal;
 
   void setPreview(final FileImage? val) {
-    if (previewCurVal != val) {
-      previewCurVal = val;
-      _previewController.add(val);
-    }
+    previewCurVal = val;
+    _previewController.add(val);
   }
 
   Stream<List<String>> get iniPaths => _iniPathsController.stream;
@@ -117,9 +115,9 @@ class ModCardModel {
         setPreview(null);
       }());
     }
-    final iniPaths = iniPathsCurVal;
+    final iniPaths = [...iniPathsCurVal];
     if (iniPaths.remove(path)) {
-      setIniPaths([...iniPaths]);
+      setIniPaths(iniPaths);
     }
   }
 
@@ -155,29 +153,40 @@ class ModCardModel {
       paths.where((final path) => path.pExtension.pEquals('.ini')).toList(),
     );
   }
+
+  void refresh() {
+    _updatePaths(getUnderSync<File>(_mod.path));
+  }
 }
 
 @riverpod
-ModCardModel modCardModel(final ModCardModelRef ref, final Mod mod) {
-  final modCardModel = ModCardModel(mod);
-  ref.onDispose(modCardModel.dispose);
-  return modCardModel;
+class ModCardVM extends _$ModCardVM {
+  @override
+  ModCardModel build(final Mod mod) {
+    final modCardModel = ModCardModel(mod);
+    ref.onDispose(modCardModel.dispose);
+    return modCardModel;
+  }
+
+  void refresh() {
+    state.refresh();
+  }
 }
 
 @riverpod
 Stream<String?> configPath(final ConfigPathRef ref, final Mod mod) {
-  final model = ref.watch(modCardModelProvider(mod));
+  final model = ref.watch(modCardVMProvider(mod));
   return model.configPath;
 }
 
 @riverpod
 Stream<FileImage?> preview(final PreviewRef ref, final Mod mod) {
-  final model = ref.watch(modCardModelProvider(mod));
+  final model = ref.watch(modCardVMProvider(mod));
   return model.preview;
 }
 
 @riverpod
 Stream<List<String>> iniPaths(final IniPathsRef ref, final Mod mod) {
-  final model = ref.watch(modCardModelProvider(mod));
+  final model = ref.watch(modCardVMProvider(mod));
   return model.iniPaths;
 }

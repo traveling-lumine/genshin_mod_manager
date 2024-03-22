@@ -42,7 +42,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   @override
   void onWindowFocus() {
-    ref.invalidate(homeShellNotifierProvider);
+    ref.read(homeShellListProvider.notifier).refresh();
   }
 
   @override
@@ -70,7 +70,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   @override
   Widget build(final BuildContext context) {
-    final categories = ref.watch(homeShellNotifierProvider);
+    final categories = ref.watch(homeShellListProvider);
     return categories.when(
       data: _buildData,
       error: _buildError,

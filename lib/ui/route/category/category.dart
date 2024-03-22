@@ -87,6 +87,7 @@ class CategoryRoute extends StatelessWidget {
           builder: (final context, final ref, final child) {
             final value = ref.watch(categoryWatcherProvider(category));
             return value.when(
+              skipLoadingOnReload: true,
               data: (final data) {
                 final children =
                     data.map((final e) => ModCard(mod: e)).toList();
