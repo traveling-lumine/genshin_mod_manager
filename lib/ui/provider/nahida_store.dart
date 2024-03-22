@@ -11,7 +11,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'nahida_store.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 NahidaliveAPI akashaApi(final AkashaApiRef ref) => createNahidaliveAPI();
 
 @riverpod
@@ -20,7 +20,7 @@ Future<List<NahidaliveElement>> akashaElement(final AkashaElementRef ref) {
   return api.fetchNahidaliveElements();
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 NahidaDownloadModel downloadModel(final DownloadModelRef ref) {
   final api = ref.watch(akashaApiProvider);
   return NahidaDownloadModel(api);

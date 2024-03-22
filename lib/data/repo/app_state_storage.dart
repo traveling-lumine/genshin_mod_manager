@@ -99,38 +99,42 @@ class AppStateStorageImpl implements AppStateStorage {
       final local = data['local'];
       return PresetData(
         global: Map.fromEntries(
-          global.entries.map(
-            (final e) => MapEntry(
-              e.key,
-              BundledPresetData(
-                bundledPresets: Map.fromEntries(
-                  e.value.entries.map(
-                    (final f) => MapEntry(
-                      f.key,
-                      PresetTargetData(mods: f.value),
+          (global as Map<String, dynamic>).entries.map(
+                (final e) => MapEntry(
+                  e.key,
+                  BundledPresetData(
+                    bundledPresets: Map.fromEntries(
+                      (e.value as Map<String, dynamic>).entries.map(
+                            (final f) => MapEntry(
+                              f.key,
+                              PresetTargetData(
+                                mods: List<String>.from(f.value),
+                              ),
+                            ),
+                          ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
         ),
         local: Map.fromEntries(
-          local.entries.map(
-            (final e) => MapEntry(
-              e.key,
-              BundledPresetData(
-                bundledPresets: Map.fromEntries(
-                  e.value.entries.map(
-                    (final f) => MapEntry(
-                      f.key,
-                      PresetTargetData(mods: f.value),
+          (local as Map<String, dynamic>).entries.map(
+                (final e) => MapEntry(
+                  e.key,
+                  BundledPresetData(
+                    bundledPresets: Map.fromEntries(
+                      (e.value as Map<String, dynamic>).entries.map(
+                            (final f) => MapEntry(
+                              f.key,
+                              PresetTargetData(
+                                mods: List<String>.from(f.value),
+                              ),
+                            ),
+                          ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
         ),
       );
     } on Exception catch (e) {

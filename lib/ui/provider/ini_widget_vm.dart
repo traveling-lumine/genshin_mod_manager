@@ -10,7 +10,7 @@ part 'ini_widget_vm.g.dart';
 
 class IniModel {
   IniModel(this._iniFile) {
-    final dir = Directory(_iniFile.path);
+    final dir = Directory(_iniFile.path.pDirname);
     _iniLinesController.add(
       File(_iniFile.path)
           .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true)),
@@ -25,7 +25,7 @@ class IniModel {
   late final StreamSubscription<FileSystemEvent> _subscription;
 
   Stream<List<String>> get iniLines => _iniLinesController.stream;
-  final _iniLinesController = StreamController<List<String>>.broadcast();
+  final _iniLinesController = StreamController<List<String>>();
 
   void dispose() {
     unawaited(_subscription.cancel());

@@ -44,8 +44,8 @@ class ModCardModel {
   }
 
   Stream<List<String>> get iniPaths => _iniPathsController.stream;
-  final _iniPathsController = StreamController<List<String>>();
-  late List<String> iniPathsCurVal;
+  final _iniPathsController = StreamController<List<String>>()..add([]);
+  List<String> iniPathsCurVal = [];
 
   void setIniPaths(final List<String> val) {
     if (!const ListEquality().equals(iniPathsCurVal, val)) {

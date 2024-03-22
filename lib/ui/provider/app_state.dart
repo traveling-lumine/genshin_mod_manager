@@ -43,51 +43,51 @@ class AppStateNotifier extends _$AppStateNotifier {
     return callAppStateInitializationUseCase(storage);
   }
 
-  AppState changeModRoot(final String path) {
+  void changeModRoot(final String path) {
     ref.read(appStateStorageProvider).setModRoot(path);
     final curState = state;
-    return callChangeModRootUseCase(curState, path);
+    state = callChangeModRootUseCase(curState, path);
   }
 
-  AppState changeModExecFile(final String path) {
+  void changeModExecFile(final String path) {
     ref.read(appStateStorageProvider).setModExecFile(path);
     final curState = state;
-    return callChangeModExecFileUseCase(curState, path);
+    state = callChangeModExecFileUseCase(curState, path);
   }
 
-  AppState changeLauncherFile(final String path) {
+  void changeLauncherFile(final String path) {
     ref.read(appStateStorageProvider).setLauncherFile(path);
     final curState = state;
-    return callChangeLauncherFileUseCase(curState, path);
+    state = callChangeLauncherFileUseCase(curState, path);
   }
 
-  AppState changeRunTogether(final bool value) {
+  void changeRunTogether(final bool value) {
     ref.read(appStateStorageProvider).setRunTogether(value);
     final curState = state;
-    return callChangeRunTogetherUseCase(curState, value);
+    state = callChangeRunTogetherUseCase(curState, value);
   }
 
-  AppState changeMoveOnDrag(final bool value) {
+  void changeMoveOnDrag(final bool value) {
     ref.read(appStateStorageProvider).setMoveOnDrag(value);
     final curState = state;
-    return callChangeMoveOnDragUseCase(curState, value);
+    state = callChangeMoveOnDragUseCase(curState, value);
   }
 
-  AppState changeShowFolderIcon(final bool value) {
+  void changeShowFolderIcon(final bool value) {
     ref.read(appStateStorageProvider).setShowFolderIcon(value);
     final curState = state;
-    return callChangeShowFolderIconUseCase(curState, value);
+    state = callChangeShowFolderIconUseCase(curState, value);
   }
 
-  AppState changeShowEnabledModsFirst(final bool value) {
+  void changeShowEnabledModsFirst(final bool value) {
     ref.read(appStateStorageProvider).setShowEnabledModsFirst(value);
     final curState = state;
-    return callChangeShowEnabledModsFirstUseCase(curState, value);
+    state = callChangeShowEnabledModsFirstUseCase(curState, value);
   }
 
-  AppState changePresetData(final PresetData data) {
+  void changePresetData(final PresetData data) {
     ref.read(appStateStorageProvider).setPresetData(data);
     final curState = state;
-    return callChangePresetDataUseCase(curState, data);
+    state = callChangePresetDataUseCase(curState, data);
   }
 }

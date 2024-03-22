@@ -9,6 +9,7 @@ class _IniWidget extends ConsumerWidget {
   Widget build(final BuildContext context, final WidgetRef ref) {
     final lines = ref.watch(iniLinesProvider(iniFile));
     return lines.when(
+      skipLoadingOnReload: true,
       data: _buildColumn,
       error: (final error, final stackTrace) => Text('Error: $error'),
       loading: () => Center(

@@ -9,13 +9,57 @@ import 'package:window_manager/window_manager.dart';
 
 const _minWindowSize = Size(600, 600);
 
+class _MyObserver extends ProviderObserver {
+  @override
+  void didDisposeProvider(
+    final ProviderBase<Object?> provider,
+    final ProviderContainer container,
+  ) {
+    print('Disposed: $provider, $container');
+  }
+
+  @override
+  void didAddProvider(
+    final ProviderBase<Object?> provider,
+    final Object? value,
+    final ProviderContainer container,
+  ) {
+    print('Added: $provider, $value, $container');
+  }
+
+  @override
+  void didUpdateProvider(
+    final ProviderBase<Object?> provider,
+    final Object? previousValue,
+    final Object? newValue,
+    final ProviderContainer container,
+  ) {
+    print('Updated: $provider, $previousValue, $newValue, $container');
+  }
+
+  @override
+  void providerDidFail(
+    final ProviderBase<Object?> provider,
+    final Object error,
+    final StackTrace stackTrace,
+    final ProviderContainer container,
+  ) {
+    print('Failed: $provider, $error, $stackTrace, $container');
+  }
+}
+
 void main(final List<String> args) async {
   print('Starting app with args: $args');
   await _initialize();
   if (!kDebugMode) {
     _registerErrorHandlers();
   }
-  runApp(ProviderScope(child: MyApp()));
+  runApp(
+    ProviderScope(
+      // observers: [_MyObserver()],
+      child: MyApp(),
+    ),
+  );
 }
 
 Future<void> _initialize() async {

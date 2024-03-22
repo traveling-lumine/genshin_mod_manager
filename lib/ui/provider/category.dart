@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
@@ -12,24 +13,36 @@ part 'category.g.dart';
 class CategoryModel {
   CategoryModel(this._enabledFirst, this._category) {
     final dir = Directory(_category.path);
-    mods = dir
+    _add();
+    _subscription = dir
         .watch(
           events: FileSystemEvent.delete |
               FileSystemEvent.create |
               FileSystemEvent.move,
         )
-        .map(_map);
+        .listen(_listen);
   }
 
   final bool _enabledFirst;
   final ModCategory _category;
+  late final StreamSubscription<FileSystemEvent> _subscription;
 
-  late final Stream<List<Mod>> mods;
+  Stream<List<Mod>> get mods => _mods.stream;
+  final _mods = StreamController<List<Mod>>();
 
-  List<Mod> _map(final FileSystemEvent event) {
+  void dispose() {
+    unawaited(_subscription.cancel());
+    unawaited(_mods.close());
+  }
+
+  void _listen(final FileSystemEvent event) {
+    _add();
+  }
+
+  void _add() {
     final dirs = getUnderSync<Directory>(_category.path);
     final modList = dirs.map(_converter).toList()..sort(_sort);
-    return modList;
+    _mods.add(modList);
   }
 
   Mod _converter(final String path) => Mod(
@@ -65,5 +78,6 @@ Stream<List<Mod>> categoryWatcher(
         .select((final value) => value.showEnabledModsFirst),
   );
   final categoryModel = CategoryModel(enabledModsFirst, category);
+  ref.onDispose(categoryModel.dispose);
   return categoryModel.mods;
 }

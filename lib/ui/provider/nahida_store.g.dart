@@ -6,11 +6,11 @@ part of 'nahida_store.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$akashaApiHash() => r'9285c2c7e5f2990733ed7f523a527650e025e566';
+String _$akashaApiHash() => r'cd2b762166d25ea38aa41550bf24fcb2ef0b57b7';
 
 /// See also [akashaApi].
 @ProviderFor(akashaApi)
-final akashaApiProvider = AutoDisposeProvider<NahidaliveAPI>.internal(
+final akashaApiProvider = Provider<NahidaliveAPI>.internal(
   akashaApi,
   name: r'akashaApiProvider',
   debugGetCreateSourceHash:
@@ -19,7 +19,7 @@ final akashaApiProvider = AutoDisposeProvider<NahidaliveAPI>.internal(
   allTransitiveDependencies: null,
 );
 
-typedef AkashaApiRef = AutoDisposeProviderRef<NahidaliveAPI>;
+typedef AkashaApiRef = ProviderRef<NahidaliveAPI>;
 String _$akashaElementHash() => r'f12cb3dc600732080538e51b4d1925c90c44fe46';
 
 /// See also [akashaElement].
@@ -37,11 +37,11 @@ final akashaElementProvider =
 
 typedef AkashaElementRef
     = AutoDisposeFutureProviderRef<List<NahidaliveElement>>;
-String _$downloadModelHash() => r'422d7cce809313fd501112158d080cc213af6b49';
+String _$downloadModelHash() => r'a77b1d9d9d77035b67cbe3edf0a58cca8f20f2f7';
 
 /// See also [downloadModel].
 @ProviderFor(downloadModel)
-final downloadModelProvider = AutoDisposeProvider<NahidaDownloadModel>.internal(
+final downloadModelProvider = Provider<NahidaDownloadModel>.internal(
   downloadModel,
   name: r'downloadModelProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -51,6 +51,6 @@ final downloadModelProvider = AutoDisposeProvider<NahidaDownloadModel>.internal(
   allTransitiveDependencies: null,
 );
 
-typedef DownloadModelRef = AutoDisposeProviderRef<NahidaDownloadModel>;
+typedef DownloadModelRef = ProviderRef<NahidaDownloadModel>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
