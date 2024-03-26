@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'ini_widget_vm.dart';
+part of 'ini_widget.dart';
 
 // **************************************************************************
 // RiverpodGenerator

@@ -6,7 +6,7 @@ part of 'home_shell.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$rootWatcherHash() => r'26148a24d1c4547d2e7ebf755bdac76d4fae897c';
+String _$rootWatcherHash() => r'38ce6c7b138679434bde3bc866210d81cb65fc97';
 
 /// See also [rootWatcher].
 @ProviderFor(rootWatcher)

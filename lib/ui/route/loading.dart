@@ -21,7 +21,7 @@ class LoadingRoute extends ConsumerWidget {
     return sharedPreference.when(
       data: (final data) => _buildData(context),
       error: (final error, final stackTrace) =>
-          _buildError(error, ref, context),
+          _buildError(error, context, ref),
       loading: _buildLoading,
     );
   }
@@ -50,8 +50,8 @@ class LoadingRoute extends ConsumerWidget {
 
   NavigationView _buildError(
     final Object error,
-    final WidgetRef ref,
     final BuildContext context,
+    final WidgetRef ref,
   ) {
     _logger.e('App FutureBuilder snapshot error: $error');
     return NavigationView(

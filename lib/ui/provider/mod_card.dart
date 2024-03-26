@@ -9,7 +9,7 @@ import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'mod_card_vm.g.dart';
+part 'mod_card.g.dart';
 
 class ModCardModel {
   ModCardModel(this._mod) {
@@ -32,11 +32,11 @@ class ModCardModel {
     }
   }
 
-  Stream<FileImage?> get preview => _previewController.stream;
-  final _previewController = StreamController<FileImage?>()..add(null);
-  FileImage? previewCurVal;
+  Stream<Future<FileImage>?> get preview => _previewController.stream;
+  final _previewController = StreamController<Future<FileImage>?>()..add(null);
+  Future<FileImage>? previewCurVal;
 
-  void setPreview(final FileImage? val) {
+  void setPreview(final Future<FileImage>? val) {
     previewCurVal = val;
     _previewController.add(val);
   }
@@ -78,11 +78,18 @@ class ModCardModel {
     if (fileImage == null) {
       return;
     }
-    if (fileImage.file.path.pEquals(path)) {
-      unawaited(() async {
-        await fileImage.evict();
-        setPreview(FileImage(File(path)));
-      }());
+
+    final previewPath = findPreviewFileInString(getUnderSync<File>(_mod.path));
+    if (previewPath != null) {
+      setPreview(
+        Future(() async {
+          final fileImage = FileImage(File(previewPath));
+          await fileImage.evict();
+          return fileImage;
+        }),
+      );
+    } else {
+      setPreview(null);
     }
   }
 
@@ -90,16 +97,20 @@ class ModCardModel {
     if (path.pBasename.pEquals(kAkashaConfigFilename)) {
       setConfigPath(path);
     }
-    if (previewCurVal == null) {
-      final previewPath = findPreviewFileInString([path]);
-      if (previewPath != null) {
-        unawaited(() async {
+
+    final previewPath = findPreviewFileInString(getUnderSync<File>(_mod.path));
+    if (previewPath != null) {
+      setPreview(
+        Future(() async {
           final fileImage = FileImage(File(previewPath));
           await fileImage.evict();
-          setPreview(fileImage);
-        }());
-      }
+          return fileImage;
+        }),
+      );
+    } else {
+      setPreview(null);
     }
+
     if (path.pExtension.pEquals('.ini')) {
       setIniPaths([...iniPathsCurVal, path]);
     }
@@ -109,12 +120,20 @@ class ModCardModel {
     if (configPathCurVal?.pEquals(path) ?? false) {
       setConfigPath(null);
     }
-    if (previewCurVal?.file.path.pEquals(path) ?? false) {
-      unawaited(() async {
-        await previewCurVal?.evict();
-        setPreview(null);
-      }());
+
+    final previewPath = findPreviewFileInString(getUnderSync<File>(_mod.path));
+    if (previewPath != null) {
+      setPreview(
+        Future(() async {
+          final fileImage = FileImage(File(previewPath));
+          await fileImage.evict();
+          return fileImage;
+        }),
+      );
+    } else {
+      setPreview(null);
     }
+
     final iniPaths = [...iniPathsCurVal];
     if (iniPaths.remove(path)) {
       setIniPaths(iniPaths);
@@ -142,11 +161,13 @@ class ModCardModel {
 
     final previewPath = findPreviewFileInString(paths);
     if (previewPath != null) {
-      unawaited(() async {
-        final fileImage = FileImage(File(previewPath));
-        await fileImage.evict();
-        setPreview(fileImage);
-      }());
+      setPreview(
+        Future(() async {
+          final fileImage = FileImage(File(previewPath));
+          await fileImage.evict();
+          return fileImage;
+        }),
+      );
     }
 
     setIniPaths(
@@ -155,7 +176,16 @@ class ModCardModel {
   }
 
   void refresh() {
-    _updatePaths(getUnderSync<File>(_mod.path));
+    final underSync = getUnderSync<File>(_mod.path);
+    setConfigPath(
+      underSync.firstWhereOrNull(
+        (final path) => path.pBasename.pEquals(kAkashaConfigFilename),
+      ),
+    );
+
+    setIniPaths(
+      underSync.where((final path) => path.pExtension.pEquals('.ini')).toList(),
+    );
   }
 }
 
@@ -180,7 +210,7 @@ Stream<String?> configPath(final ConfigPathRef ref, final Mod mod) {
 }
 
 @riverpod
-Stream<FileImage?> preview(final PreviewRef ref, final Mod mod) {
+Stream<Future<FileImage>?> preview(final PreviewRef ref, final Mod mod) {
   final model = ref.watch(modCardVMProvider(mod));
   return model.preview;
 }

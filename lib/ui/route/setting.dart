@@ -165,7 +165,7 @@ class _PathSelectItem extends StatelessWidget {
                       final value =
                           ref.watch(appStateNotifierProvider.select(selector));
                       return Text(
-                        value ?? 'Loading...',
+                        value ?? 'Please select...',
                         style: FluentTheme.of(context).typography.caption,
                       );
                     },

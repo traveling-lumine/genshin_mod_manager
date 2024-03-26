@@ -1,30 +1,7 @@
 part of 'category.dart';
 
-/// A [Card] that represents a [Mod].
-class ModCard extends StatelessWidget {
-  /// Creates a [ModCard] with a key [Mod.path].
-  ModCard({
-    required this.mod,
-  }) : super(key: Key(mod.path));
-
-  /// Bound [Mod].
-  final Mod mod;
-
-  @override
-  Widget build(final BuildContext context) => _ModCard(mod: mod);
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Mod>('mod', mod));
-  }
-}
-
 class _ModCard extends ConsumerStatefulWidget {
   const _ModCard({required this.mod});
-
-  static const _minIniSectionWidth = 150.0;
-  static final _logger = Logger();
 
   final Mod mod;
 
@@ -39,6 +16,8 @@ class _ModCard extends ConsumerStatefulWidget {
 }
 
 class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
+  static const _minIniSectionWidth = 150.0;
+  static final _logger = Logger();
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
 
@@ -194,7 +173,7 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
                     ),
             ),
             error: (final error, final stackTrace) => SizedBox(
-              width: _ModCard._minIniSectionWidth,
+              width: _minIniSectionWidth,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -205,7 +184,7 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
               ),
             ),
             loading: () => const SizedBox(
-              width: _ModCard._minIniSectionWidth,
+              width: _minIniSectionWidth,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -257,7 +236,7 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
   Future<void> _onPaste(final BuildContext context) async {
     final image = await Pasteboard.image;
     if (image == null) {
-      _ModCard._logger.d('No image found in clipboard');
+      _logger.d('No image found in clipboard');
       return;
     }
     final filePath = widget.mod.path.pJoin('preview.png');
@@ -273,32 +252,47 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
         onClose: close,
       ),
     );
-    _ModCard._logger.d('Image pasted to $filePath');
+    _logger.d('Image pasted to $filePath');
     return;
   }
 
   Widget _buildImageDesc(
     final BuildContext context,
     final BoxConstraints constraints,
-    final FileImage fileImage,
+    final Future<FileImage> fileImage,
   ) =>
       ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: constraints.maxWidth - _ModCard._minIniSectionWidth,
+          maxWidth: constraints.maxWidth - _minIniSectionWidth,
         ),
-        child: GestureDetector(
-          onTapUp: (final details) => _onImageTap(context, fileImage),
-          onSecondaryTapUp: (final details) =>
-              _onImageRightClick(details, context, fileImage),
-          child: FlyoutTarget(
-            controller: _contextController,
-            key: _contextAttachKey,
-            child: Image(
-              image: fileImage,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.medium,
-            ),
-          ),
+        child: FutureBuilder(
+          future: fileImage,
+          builder: (final context, final snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: ProgressRing());
+            }
+            if (snapshot.hasError) {
+              return const Center(child: Icon(FluentIcons.error));
+            }
+            if (snapshot.data == null) {
+              return const Center(child: Icon(FluentIcons.error));
+            }
+            final fileImage = snapshot.data!;
+            return GestureDetector(
+              onTapUp: (final details) => _onImageTap(context, fileImage),
+              onSecondaryTapUp: (final details) =>
+                  _onImageRightClick(details, context, fileImage),
+              child: FlyoutTarget(
+                controller: _contextController,
+                key: _contextAttachKey,
+                child: Image(
+                  image: fileImage,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.medium,
+                ),
+              ),
+            );
+          },
         ),
       );
 

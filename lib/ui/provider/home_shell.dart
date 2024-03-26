@@ -10,8 +10,16 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_shell.g.dart';
 
-class RootWatcher {
-  RootWatcher(final String modRoot)
+abstract interface class RootWatcher {
+  Stream<List<ModCategory>> get categories;
+
+  void dispose();
+
+  void refresh();
+}
+
+class RootWatcherImpl implements RootWatcher {
+  RootWatcherImpl(final String modRoot)
       : _dir = Directory(modRoot),
         _iconDir = Directory(
             Platform.resolvedExecutable.pDirname.pJoin(_resourceDir)) {
@@ -76,11 +84,31 @@ class RootWatcher {
   }
 }
 
+class NullRootWatcher implements RootWatcher {
+  @override
+  Stream<List<ModCategory>> get categories => Stream.value([]);
+
+  @override
+  void dispose() {
+    // Do nothing.
+  }
+
+  @override
+  void refresh() {
+    // Do nothing.
+  }
+}
+
 @riverpod
 RootWatcher rootWatcher(final RootWatcherRef ref) {
   final modRoot = ref
       .watch(appStateNotifierProvider.select((final state) => state.modRoot));
-  final watcher = RootWatcher(modRoot!);
+  final RootWatcher watcher;
+  if (modRoot == null) {
+    watcher = NullRootWatcher();
+  } else {
+    watcher = RootWatcherImpl(modRoot);
+  }
   ref.onDispose(watcher.dispose);
   return watcher;
 }

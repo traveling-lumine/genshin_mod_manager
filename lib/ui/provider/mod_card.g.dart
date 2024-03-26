@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'mod_card_vm.dart';
+part of 'mod_card.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -155,14 +155,14 @@ class _ConfigPathProviderElement
   Mod get mod => (origin as ConfigPathProvider).mod;
 }
 
-String _$previewHash() => r'5d6d64b36e69fefd9d8c941f4a886f46fb7a5f86';
+String _$previewHash() => r'c5fdc45be47dd2f3eae7b1001b3d03eb0a1b5443';
 
 /// See also [preview].
 @ProviderFor(preview)
 const previewProvider = PreviewFamily();
 
 /// See also [preview].
-class PreviewFamily extends Family<AsyncValue<FileImage?>> {
+class PreviewFamily extends Family<AsyncValue<Future<FileImage>?>> {
   /// See also [preview].
   const PreviewFamily();
 
@@ -200,7 +200,7 @@ class PreviewFamily extends Family<AsyncValue<FileImage?>> {
 }
 
 /// See also [preview].
-class PreviewProvider extends AutoDisposeStreamProvider<FileImage?> {
+class PreviewProvider extends AutoDisposeStreamProvider<Future<FileImage>?> {
   /// See also [preview].
   PreviewProvider(
     Mod mod,
@@ -234,7 +234,7 @@ class PreviewProvider extends AutoDisposeStreamProvider<FileImage?> {
 
   @override
   Override overrideWith(
-    Stream<FileImage?> Function(PreviewRef provider) create,
+    Stream<Future<FileImage>?> Function(PreviewRef provider) create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -251,7 +251,7 @@ class PreviewProvider extends AutoDisposeStreamProvider<FileImage?> {
   }
 
   @override
-  AutoDisposeStreamProviderElement<FileImage?> createElement() {
+  AutoDisposeStreamProviderElement<Future<FileImage>?> createElement() {
     return _PreviewProviderElement(this);
   }
 
@@ -269,13 +269,14 @@ class PreviewProvider extends AutoDisposeStreamProvider<FileImage?> {
   }
 }
 
-mixin PreviewRef on AutoDisposeStreamProviderRef<FileImage?> {
+mixin PreviewRef on AutoDisposeStreamProviderRef<Future<FileImage>?> {
   /// The parameter `mod` of this provider.
   Mod get mod;
 }
 
 class _PreviewProviderElement
-    extends AutoDisposeStreamProviderElement<FileImage?> with PreviewRef {
+    extends AutoDisposeStreamProviderElement<Future<FileImage>?>
+    with PreviewRef {
   _PreviewProviderElement(super.provider);
 
   @override

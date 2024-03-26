@@ -6,7 +6,7 @@ import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/ini.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'ini_widget_vm.g.dart';
+part 'ini_widget.g.dart';
 
 class IniModel {
   IniModel(this._iniFile) {

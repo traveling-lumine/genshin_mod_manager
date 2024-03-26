@@ -16,8 +16,8 @@ import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/provider/app_state.dart';
 import 'package:genshin_mod_manager/ui/provider/category.dart';
-import 'package:genshin_mod_manager/ui/provider/ini_widget_vm.dart';
-import 'package:genshin_mod_manager/ui/provider/mod_card_vm.dart';
+import 'package:genshin_mod_manager/ui/provider/ini_widget.dart';
+import 'package:genshin_mod_manager/ui/provider/mod_card.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
@@ -90,7 +90,7 @@ class CategoryRoute extends StatelessWidget {
               skipLoadingOnReload: true,
               data: (final data) {
                 final children =
-                    data.map((final e) => ModCard(mod: e)).toList();
+                    data.map((final e) => _ModCard(mod: e)).toList();
                 return GridView.builder(
                   padding: const EdgeInsets.all(8),
                   gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(

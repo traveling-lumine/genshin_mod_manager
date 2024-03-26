@@ -15,7 +15,7 @@ part 'app_state.g.dart';
 Future<SharedPreferences> sharedPreference(
   final SharedPreferenceRef ref,
 ) =>
-    SharedPreferences.getInstance();
+    SharedPreferences.getInstance().timeout(const Duration(seconds: 5));
 
 @riverpod
 PersistentStorage sharedPreferenceStorage(
