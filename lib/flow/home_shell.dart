@@ -5,7 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/ui/provider/app_state.dart';
+import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_shell.g.dart';

@@ -6,7 +6,7 @@ import 'package:genshin_mod_manager/data/helper/mod_switcher.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/entity/preset.dart';
-import 'package:genshin_mod_manager/ui/provider/app_state.dart';
+import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'preset.g.dart';

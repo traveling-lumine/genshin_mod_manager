@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/ui/provider/nahida_store.dart';
+import 'package:genshin_mod_manager/flow/nahida_store.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/util/tag_parser.dart';
 import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';

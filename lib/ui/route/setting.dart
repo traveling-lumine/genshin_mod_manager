@@ -3,7 +3,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/domain/entity/app_state.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
-import 'package:genshin_mod_manager/ui/provider/app_state.dart';
+import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/no_deref_file_opener.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
