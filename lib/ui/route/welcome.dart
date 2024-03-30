@@ -6,9 +6,29 @@ import 'package:genshin_mod_manager/domain/constant.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// This route welcomes you!
-class WelcomeRoute extends StatelessWidget {
+class WelcomeRoute extends StatefulWidget {
   /// Creates a [WelcomeRoute].
   const WelcomeRoute({super.key});
+
+  @override
+  State<WelcomeRoute> createState() => _WelcomeRouteState();
+}
+
+class _WelcomeRouteState extends State<WelcomeRoute> {
+  final _tapGestureRecognizer = TapGestureRecognizer();
+
+  @override
+  void initState() {
+    super.initState();
+    _tapGestureRecognizer.onTap =
+        () => unawaited(launchUrl(Uri.parse(kRepoBase)));
+  }
+
+  @override
+  void dispose() {
+    _tapGestureRecognizer.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(final BuildContext context) => ScaffoldPage(
@@ -26,12 +46,11 @@ class WelcomeRoute extends StatelessWidget {
               RichText(
                 text: TextSpan(
                   text: kRepoBase,
-                  style: TextStyle(
+                  style: DefaultTextStyle.of(context).style.copyWith(
                     color: Colors.blue,
                     decoration: TextDecoration.underline,
                   ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () => unawaited(launchUrl(Uri.parse(kRepoBase))),
+                  recognizer: _tapGestureRecognizer,
                 ),
               ),
             ],

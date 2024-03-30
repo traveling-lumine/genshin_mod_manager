@@ -10,9 +10,16 @@ import 'package:genshin_mod_manager/ui/route/setting.dart';
 import 'package:genshin_mod_manager/ui/route/welcome.dart';
 import 'package:go_router/go_router.dart';
 
-class MyApp extends StatelessWidget {
-  MyApp({super.key});
+/// The main application widget.
+class MyApp extends StatefulWidget {
+  /// Creates a [MyApp].
+  const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   final _router = GoRouter(
     debugLogDiagnostics: true,
     initialLocation: kLoadingRoute,
@@ -51,6 +58,12 @@ class MyApp extends StatelessWidget {
       ),
     ],
   );
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(final BuildContext context) => FluentApp.router(
