@@ -10,13 +10,12 @@ import 'package:flutter/scheduler.dart';
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/domain/constant.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/flow/home_shell.dart';
+import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
-import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -135,9 +134,10 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     }
 
     return NavigationView(
-      transitionBuilder: (final child, final animation) =>
-          SuppressPageTransition(child: child),
-      appBar: _buildAppbar(),
+      appBar: getAppbar(
+        'Genshin Mod Manager',
+        presetControl: true,
+      ),
       pane: _buildPane(selected, items, footerItems),
       paneBodyBuilder: (final item, final body) => widget.child,
     );
@@ -167,30 +167,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
               Text('Reading categories...'),
             ],
           ),
-        ),
-      );
-
-  NavigationAppBar _buildAppbar() => NavigationAppBar(
-        actions: const WindowButtons(),
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Expanded(
-              child: DragToMoveArea(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Genshin Mod Manager'),
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                PresetControlWidget(isLocal: false),
-                const SizedBox(width: kWindowButtonWidth),
-              ],
-            ),
-          ],
         ),
       );
 
@@ -471,7 +447,7 @@ Future<String?> _shouldUpdate(final BuildContext context) async {
   if (upVersion == null || curVersion == null) {
     return null;
   }
-  return _compareVersions(upVersion, curVersion) ? upVersion : null;
+  return upVersion != curVersion ? upVersion : null;
 }
 
 Future<List<String?>> _getVersions(final Uri url) async {
@@ -491,21 +467,6 @@ Future<List<String?>> _getVersions(final Uri url) async {
   final currentVersion =
       PackageInfo.fromPlatform().then((final value) => value.version);
   return Future.wait([upstreamVersion, currentVersion]);
-}
-
-bool _compareVersions(final String upVersion, final String curVersion) {
-  final upstream = upVersion.split('.').map(int.parse).toList();
-  final current = curVersion.split('.').map(int.parse).toList();
-  var shouldUpdate = false;
-  for (var i = 0; i < 3; i++) {
-    if (upstream[i] > current[i]) {
-      shouldUpdate = true;
-      break;
-    } else if (upstream[i] < current[i]) {
-      break;
-    }
-  }
-  return shouldUpdate;
 }
 
 Future<void> _runUpdateScript() async {

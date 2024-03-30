@@ -56,7 +56,7 @@ class PresetControlWidget extends HookWidget {
           if (isLocal) {
             value = ref.watch(localPresetNotifierProvider(category!));
           } else {
-            value = []; //ref.watch(globalPresetNotifierProvider);
+            value = ref.watch(globalPresetNotifierProvider);
           }
           return RepaintBoundary(
             child: ComboBox(
