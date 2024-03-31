@@ -11,10 +11,14 @@ class WindowButtons extends StatelessWidget {
   const WindowButtons({super.key});
 
   @override
-  Widget build(final BuildContext context) => const SizedBox(
+  Widget build(final BuildContext context) => SizedBox(
         width: kWindowButtonWidth,
         height: 50,
-        child: RepaintBoundary(child: WindowCaption()),
+        child: RepaintBoundary(
+          child: WindowCaption(
+            brightness: FluentTheme.of(context).brightness,
+          ),
+        ),
       );
 }
 
@@ -26,7 +30,17 @@ NavigationAppBar getAppbar(
   Widget title = DragToMoveArea(
     child: Align(
       alignment: Alignment.centerLeft,
-      child: Text(text),
+      child: Builder(
+        builder: (final context) => DefaultTextStyle(
+          style: TextStyle(
+            color: FluentTheme.of(context).brightness == Brightness.light
+                ? Colors.black.withOpacity(0.8956)
+                : Colors.white,
+            fontSize: 14,
+          ),
+          child: Text(text),
+        ),
+      ),
     ),
   );
   if (presetControl) {
@@ -38,7 +52,6 @@ NavigationAppBar getAppbar(
           right: kWindowButtonWidth,
           child: PresetControlWidget(isLocal: false),
         ),
-        const SizedBox(width: kWindowButtonWidth),
       ],
     );
   }

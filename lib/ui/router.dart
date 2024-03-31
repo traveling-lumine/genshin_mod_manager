@@ -67,6 +67,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(final BuildContext context) => FluentApp.router(
+        darkTheme: FluentThemeData.dark(),
         title: 'Genshin Mod Manager',
         routerDelegate: _router.routerDelegate,
         routeInformationParser: _router.routeInformationParser,

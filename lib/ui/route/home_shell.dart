@@ -11,6 +11,7 @@ import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/domain/constant.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/flow/app_state.dart';
+import 'package:genshin_mod_manager/flow/app_version.dart';
 import 'package:genshin_mod_manager/flow/home_shell.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
@@ -20,7 +21,6 @@ import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -48,17 +48,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   void initState() {
     super.initState();
     WindowManager.instance.addListener(this);
-    unawaited(
-      _shouldUpdate(context).then((final value) {
-        if (value == null) {
-          return;
-        }
-        if (!mounted) {
-          return;
-        }
-        return _displayUpdateInfoBar(value);
-      }),
-    );
   }
 
   @override
@@ -69,6 +58,12 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   @override
   Widget build(final BuildContext context) {
+    ref.listen(isOutdatedProvider, (final previous, final next) async {
+      if (next is AsyncData && next.requireValue) {
+        final remote = await ref.read(remoteVersionProvider.future);
+        _displayUpdateInfoBar(remote!);
+      }
+    });
     final categories = ref.watch(homeShellListProvider);
     return categories.when(
       data: _buildData,
@@ -135,7 +130,10 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
     return NavigationView(
       appBar: getAppbar(
-        'Genshin Mod Manager',
+        'Genshin Mod Manager${ref.watch(isOutdatedProvider).maybeWhen(
+              data: (final value) => value ? ' (update!)' : '',
+              orElse: () => '',
+            )}',
         presetControl: true,
       ),
       pane: _buildPane(selected, items, footerItems),
@@ -437,36 +435,6 @@ class _FolderPaneItem extends PaneItem {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
-}
-
-Future<String?> _shouldUpdate(final BuildContext context) async {
-  final url = Uri.parse(_kRepoReleases);
-  final versions = await _getVersions(url);
-  final upVersion = versions[0];
-  final curVersion = versions[1];
-  if (upVersion == null || curVersion == null) {
-    return null;
-  }
-  return upVersion != curVersion ? upVersion : null;
-}
-
-Future<List<String?>> _getVersions(final Uri url) async {
-  final client = http.Client();
-  final request = http.Request('GET', url)..followRedirects = false;
-  final upstreamVersion = client.send(request).then((final value) {
-    final location = value.headers['location'];
-    if (location == null) {
-      return null;
-    }
-    final lastSlash = location.lastIndexOf('tag/v');
-    if (lastSlash == -1) {
-      return null;
-    }
-    return location.substring(lastSlash + 5, location.length);
-  });
-  final currentVersion =
-      PackageInfo.fromPlatform().then((final value) => value.version);
-  return Future.wait([upstreamVersion, currentVersion]);
 }
 
 Future<void> _runUpdateScript() async {

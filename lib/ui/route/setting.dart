@@ -1,13 +1,15 @@
+import 'dart:async';
+
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/domain/entity/app_state.dart';
 import 'package:genshin_mod_manager/flow/app_state.dart';
+import 'package:genshin_mod_manager/flow/app_version.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/no_deref_file_opener.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 const _itemPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 16);
 
@@ -106,7 +108,7 @@ class _SettingRoute extends ConsumerWidget {
                 ),
                 RepaintBoundary(
                   child: Button(
-                    onPressed: () => context.push(kLicenseRoute),
+                    onPressed: () => unawaited(context.push(kLicenseRoute)),
                     child: const Text('View'),
                   ),
                 ),
@@ -115,18 +117,36 @@ class _SettingRoute extends ConsumerWidget {
           ),
           Padding(
             padding: _itemPadding,
-            child: FutureBuilder(
-              future: PackageInfo.fromPlatform(),
-              builder: (final context, final snapshot) {
-                if (!snapshot.hasData) {
-                  return const Text('Loading...');
-                }
-                final packageInfo = snapshot.data!;
-                return Text(
-                  'Version: ${packageInfo.version}',
-                  style: FluentTheme.of(context).typography.caption,
-                );
-              },
+            child: Row(
+              children: [
+                Expanded(
+                  child: Consumer(
+                    builder: (final context, final ref, final child) {
+                      final curVersion = ref.watch(versionStringProvider).when(
+                            data: (final version) => version,
+                            error: (final error, final stackTrace) => '(error)',
+                            loading: () => 'Loading...',
+                          );
+                      final isOutdated = ref.watch(isOutdatedProvider).when(
+                            data: (final value) =>
+                                value ? '(new version available)' : '',
+                            error: (final error, final stackTrace) => '',
+                            loading: () => '',
+                          );
+                      return Text(
+                        'Version: $curVersion $isOutdated',
+                        style: FluentTheme.of(context).typography.caption,
+                      );
+                    },
+                  ),
+                ),
+                Button(
+                  child: const Text('Check'),
+                  onPressed: () {
+                    ref.invalidate(remoteVersionProvider);
+                  },
+                ),
+              ],
             ),
           ),
         ],
