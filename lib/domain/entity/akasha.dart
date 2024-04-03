@@ -13,8 +13,8 @@ class NahidaliveElement with _$NahidaliveElement {
     required final String description,
     required final List<String> tags,
     @JsonKey(name: 'preview_url') required final String previewUrl,
-    final String? arcaUrl,
-    final String? virustotalUrl,
+    @JsonKey(name: 'arca_url') final String? arcaUrl,
+    @JsonKey(name: 'virustotal_url') final String? virustotalUrl,
   }) = _NahidaliveElement;
 
   factory NahidaliveElement.fromJson(final Map<String, dynamic> json) =>

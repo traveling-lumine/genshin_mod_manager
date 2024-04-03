@@ -15,8 +15,8 @@ _$NahidaliveElementImpl _$$NahidaliveElementImplFromJson(
       description: json['description'] as String,
       tags: (json['tags'] as List<dynamic>).map((e) => e as String).toList(),
       previewUrl: json['preview_url'] as String,
-      arcaUrl: json['arcaUrl'] as String?,
-      virustotalUrl: json['virustotalUrl'] as String?,
+      arcaUrl: json['arca_url'] as String?,
+      virustotalUrl: json['virustotal_url'] as String?,
     );
 
 Map<String, dynamic> _$$NahidaliveElementImplToJson(
@@ -28,8 +28,8 @@ Map<String, dynamic> _$$NahidaliveElementImplToJson(
       'description': instance.description,
       'tags': instance.tags,
       'preview_url': instance.previewUrl,
-      'arcaUrl': instance.arcaUrl,
-      'virustotalUrl': instance.virustotalUrl,
+      'arca_url': instance.arcaUrl,
+      'virustotal_url': instance.virustotalUrl,
     };
 
 _$NahidaliveDownloadElementImpl _$$NahidaliveDownloadElementImplFromJson(
