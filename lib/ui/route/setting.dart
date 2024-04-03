@@ -166,7 +166,7 @@ class _PathSelectItem extends StatelessWidget {
             return Text(value ?? 'Please select...');
           },
         ),
-        trailing: RepaintBoundary(
+        leading: RepaintBoundary(
           child: Button(
             onPressed: onPressed,
             child: Icon(icon),
@@ -199,13 +199,14 @@ class _SwitchItem extends StatelessWidget {
 
   final String text;
   final bool Function(AppState vm) selector;
+
   // ignore: avoid_positional_boolean_parameters
   final void Function(bool value) onChanged;
 
   @override
   Widget build(final BuildContext context) => ListTile(
         title: Text(text),
-        trailing: Consumer(
+        leading: Consumer(
           builder: (final context, final ref, final child) {
             final value = ref.watch(appStateNotifierProvider.select(selector));
             return RepaintBoundary(
