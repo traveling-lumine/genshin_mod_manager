@@ -1,9 +1,7 @@
-import 'dart:async';
-
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:genshin_mod_manager/domain/constant.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:genshin_mod_manager/ui/util/open_url.dart';
 
 /// This route welcomes you!
 class WelcomeRoute extends StatefulWidget {
@@ -20,8 +18,7 @@ class _WelcomeRouteState extends State<WelcomeRoute> {
   @override
   void initState() {
     super.initState();
-    _tapGestureRecognizer.onTap =
-        () => unawaited(launchUrl(Uri.parse(kRepoBase)));
+    _tapGestureRecognizer.onTap = () => openUrl(kRepoBase);
   }
 
   @override
@@ -47,9 +44,9 @@ class _WelcomeRouteState extends State<WelcomeRoute> {
                 text: TextSpan(
                   text: kRepoBase,
                   style: DefaultTextStyle.of(context).style.copyWith(
-                    color: Colors.blue,
-                    decoration: TextDecoration.underline,
-                  ),
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
                   recognizer: _tapGestureRecognizer,
                 ),
               ),

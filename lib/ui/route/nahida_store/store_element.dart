@@ -19,7 +19,7 @@ class StoreElement extends ConsumerWidget {
     if (virusTotalUrl != null && virusTotalUrl.isNotEmpty) {
       buttons.add(
         CommandBarButton(
-          onPressed: () => launchUrl(Uri.parse(virusTotalUrl)),
+          onPressed: () => openUrl(virusTotalUrl),
           icon: const Icon(FluentIcons.shield_alert),
         ),
       );
@@ -28,7 +28,7 @@ class StoreElement extends ConsumerWidget {
     if (arcaUrl != null && arcaUrl.isNotEmpty) {
       buttons.add(
         CommandBarButton(
-          onPressed: () => launchUrl(Uri.parse(arcaUrl)),
+          onPressed: () => openUrl(arcaUrl),
           icon: const ImageIcon(
             AssetImage('images/arca_logo.png'),
           ),
