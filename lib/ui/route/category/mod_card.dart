@@ -1,73 +1,12 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
+part of 'category.dart';
 
-import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/data/helper/fsops.dart';
-import 'package:genshin_mod_manager/data/helper/mod_switcher.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/data/repo/akasha.dart';
-import 'package:genshin_mod_manager/data/repo/filesystem_watcher.dart';
-import 'package:genshin_mod_manager/data/repo/mod_writer.dart';
-import 'package:genshin_mod_manager/domain/entity/ini.dart';
-import 'package:genshin_mod_manager/domain/entity/mod.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-import 'package:genshin_mod_manager/domain/repo/filesystem_watcher.dart';
-import 'package:genshin_mod_manager/ui/route/category/mod_card/ini_widget.dart';
-import 'package:genshin_mod_manager/ui/route/category/mod_card_vm.dart';
-import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
-import 'package:genshin_mod_manager/ui/widget/third_party/flutter/file_image.dart';
-import 'package:logger/logger.dart';
-import 'package:pasteboard/pasteboard.dart';
-import 'package:provider/provider.dart';
-
-/// A [Card] that represents a [Mod].
-class ModCard extends StatelessWidget {
-  /// Creates a [ModCard] with a key [Mod.path].
-  ModCard({
-    required this.mod,
-  }) : super(key: Key(mod.path));
-
-  /// Bound [Mod].
-  final Mod mod;
-
-  @override
-  Widget build(final BuildContext context) => MultiProvider(
-        providers: [
-          Provider(
-            create: (final context) => createFSEPathsWatcher<File>(
-              targetPath: mod.path,
-              watcher: context.read(),
-            ),
-            dispose: (final context, final value) => value.dispose(),
-          ),
-          ChangeNotifierProvider(
-            create: (final context) => createModCardViewModel(
-              fsePathsWatcher: context.read(),
-            ),
-          ),
-        ],
-        child: _ModCard(mod: mod),
-      );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Mod>('mod', mod));
-  }
-}
-
-class _ModCard extends StatefulWidget {
+class _ModCard extends ConsumerStatefulWidget {
   const _ModCard({required this.mod});
 
-  static const _minIniSectionWidth = 150.0;
-  static final _logger = Logger();
-
   final Mod mod;
 
   @override
-  State<_ModCard> createState() => _ModCardState();
+  ConsumerState<_ModCard> createState() => _ModCardState();
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
@@ -76,15 +15,27 @@ class _ModCard extends StatefulWidget {
   }
 }
 
-class _ModCardState extends State<_ModCard> {
-  DateTime? _lastModified;
-
+class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
+  static const _minIniSectionWidth = 150.0;
+  static final _logger = Logger();
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
 
   @override
+  void onWindowFocus() {
+    ref.read(modCardVMProvider(widget.mod).notifier).refresh();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WindowManager.instance.addListener(this);
+  }
+
+  @override
   void dispose() {
     _contextController.dispose();
+    WindowManager.instance.removeListener(this);
     super.dispose();
   }
 
@@ -108,37 +59,78 @@ class _ModCardState extends State<_ModCard> {
         ),
       );
 
-  Widget _buildFolderHeader(final BuildContext context) =>
-      Selector<ModCardViewModel, String?>(
-        selector: (final context, final vm) => vm.configPath,
-        builder: (final context, final value, final child) => Row(
-          children: [
-            Expanded(
-              child: Text(
-                widget.mod.displayName,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: FluentTheme.of(context).typography.bodyStrong,
-              ),
-            ),
-            if (value != null) ...[
-              const SizedBox(width: 4),
-              RepaintBoundary(
-                child: Button(
-                  child: const Icon(FluentIcons.refresh),
-                  onPressed: () async => _onRefresh(context, value),
+  Widget _buildFolderHeader(final BuildContext context) => Consumer(
+        builder: (final context, final ref, final child) {
+          final value = ref.watch(configPathProvider(widget.mod));
+          return value.when(
+            data: (final data) => Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    widget.mod.displayName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: FluentTheme.of(context).typography.bodyStrong,
+                  ),
                 ),
-              ),
-            ],
-            const SizedBox(width: 4),
-            RepaintBoundary(
-              child: Button(
-                child: const Icon(FluentIcons.folder_open),
-                onPressed: () => openFolder(widget.mod.path),
-              ),
+                if (data != null) ...[
+                  const SizedBox(width: 4),
+                  RepaintBoundary(
+                    child: Button(
+                      child: const Icon(FluentIcons.refresh),
+                      onPressed: () async => _onRefresh(context, data),
+                    ),
+                  ),
+                ],
+                const SizedBox(width: 4),
+                RepaintBoundary(
+                  child: Button(
+                    child: const Icon(FluentIcons.folder_open),
+                    onPressed: () => openFolder(widget.mod.path),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+            error: (final error, final stackTrace) => Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    widget.mod.displayName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: FluentTheme.of(context).typography.bodyStrong,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                RepaintBoundary(
+                  child: Button(
+                    child: const Icon(FluentIcons.folder_open),
+                    onPressed: () => openFolder(widget.mod.path),
+                  ),
+                ),
+              ],
+            ),
+            loading: () => Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    widget.mod.displayName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: FluentTheme.of(context).typography.bodyStrong,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                RepaintBoundary(
+                  child: Button(
+                    child: const Icon(FluentIcons.folder_open),
+                    onPressed: () => openFolder(widget.mod.path),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       );
 
   Widget _buildFolderContent(final BuildContext context) => Expanded(
@@ -157,12 +149,42 @@ class _ModCardState extends State<_ModCard> {
         ),
       );
 
-  Widget _buildIni() => Selector<ModCardViewModel, List<String>?>(
-        selector: (final context, final vm) => vm.iniPaths,
-        builder: (final context, final iniPaths, final child) {
-          if (iniPaths == null) {
-            return const SizedBox(
-              width: _ModCard._minIniSectionWidth,
+  Widget _buildIni() => Consumer(
+        builder: (final context, final ref, final child) {
+          final iniPaths = ref.watch(iniPathsProvider(widget.mod));
+          return iniPaths.when(
+            data: (final iniPaths) => Expanded(
+              child: iniPaths.isNotEmpty
+                  ? Card(
+                      backgroundColor: Colors.white.withOpacity(0.4),
+                      padding: const EdgeInsets.all(4),
+                      child: ListView.builder(
+                        itemBuilder: (final context, final index) {
+                          final path = iniPaths[index];
+                          return _IniWidget(
+                            iniFile: IniFile(path: path, mod: widget.mod),
+                          );
+                        },
+                        itemCount: iniPaths.length,
+                      ),
+                    )
+                  : const Center(
+                      child: Text('No ini files found'),
+                    ),
+            ),
+            error: (final error, final stackTrace) => SizedBox(
+              width: _minIniSectionWidth,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(FluentIcons.error),
+                  const SizedBox(height: 4),
+                  Text('Error: $error'),
+                ],
+              ),
+            ),
+            loading: () => const SizedBox(
+              width: _minIniSectionWidth,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -171,26 +193,7 @@ class _ModCardState extends State<_ModCard> {
                   Text('Waiting for connection'),
                 ],
               ),
-            );
-          }
-          return Expanded(
-            child: iniPaths.isNotEmpty
-                ? Card(
-                    backgroundColor: Colors.white.withOpacity(0.4),
-                    padding: const EdgeInsets.all(4),
-                    child: ListView.builder(
-                      itemBuilder: (final context, final index) {
-                        final path = iniPaths[index];
-                        return IniWidget(
-                          iniFile: IniFile(path: path, mod: widget.mod),
-                        );
-                      },
-                      itemCount: iniPaths.length,
-                    ),
-                  )
-                : const Center(
-                    child: Text('No ini files found'),
-                  ),
+            ),
           );
         },
       );
@@ -199,45 +202,41 @@ class _ModCardState extends State<_ModCard> {
     final BuildContext context,
     final BoxConstraints constraints,
   ) =>
-      Selector<ModCardViewModel, String?>(
-        selector: (final context, final vm) => vm.previewPath,
-        builder: (final context, final previewPath, final child) {
-          if (previewPath == null) {
-            return const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+      Consumer(
+        builder: (final context, final ref, final child) {
+          final preview = ref.watch(previewProvider(widget.mod));
+          final expanded = Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                ProgressRing(),
-                SizedBox(height: 4),
-                Text('Waiting for connection'),
-              ],
-            );
-          }
-          if (previewPath == '') {
-            _lastModified = null;
-            return Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(FluentIcons.unknown),
-                  const SizedBox(height: 4),
-                  RepaintBoundary(
-                    child: Button(
-                      onPressed: () => unawaited(_onPaste(context)),
-                      child: const Text('Paste'),
-                    ),
+                const Icon(FluentIcons.unknown),
+                const SizedBox(height: 4),
+                RepaintBoundary(
+                  child: Button(
+                    onPressed: () => unawaited(_onPaste(context)),
+                    child: const Text('Paste'),
                   ),
-                ],
-              ),
-            );
-          }
-          return _buildImageDesc(context, constraints, previewPath);
+                ),
+              ],
+            ),
+          );
+          return preview.when(
+            data: (final data) {
+              if (data == null) {
+                return expanded;
+              }
+              return _buildImageDesc(context, constraints, data);
+            },
+            error: (final error, final stackTrace) => expanded,
+            loading: () => expanded,
+          );
         },
       );
 
   Future<void> _onPaste(final BuildContext context) async {
     final image = await Pasteboard.image;
     if (image == null) {
-      _ModCard._logger.d('No image found in clipboard');
+      _logger.d('No image found in clipboard');
       return;
     }
     final filePath = widget.mod.path.pJoin('preview.png');
@@ -253,55 +252,51 @@ class _ModCardState extends State<_ModCard> {
         onClose: close,
       ),
     );
-    _ModCard._logger.d('Image pasted to $filePath');
+    _logger.d('Image pasted to $filePath');
     return;
   }
 
   Widget _buildImageDesc(
     final BuildContext context,
     final BoxConstraints constraints,
-    final String previewPath,
-  ) {
-    final previewFile = File(previewPath);
-    final fileImage = FileImage2(previewFile);
-    final nowModified = previewFile.lastModifiedSync();
-    final lastModified = _lastModified;
-    if (lastModified != null) {
-      print(this.widget.mod.displayName);
-      print(nowModified);
-      print(lastModified);
-      if (!nowModified.isAtSameMomentAs(lastModified)) {
-        unawaited(fileImage.evict());
-      }
-    } else {
-      print(this.widget.mod.displayName);
-      print(nowModified);
-      print(lastModified);
-      unawaited(fileImage.evict());
-    }
-    _lastModified = nowModified;
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: constraints.maxWidth - _ModCard._minIniSectionWidth,
-      ),
-      child: GestureDetector(
-        onTapUp: (final details) => _onImageTap(context, fileImage),
-        onSecondaryTapUp: (final details) =>
-            _onImageRightClick(details, context, previewFile),
-        child: FlyoutTarget(
-          controller: _contextController,
-          key: _contextAttachKey,
-          child: Image(
-            image: fileImage,
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.medium,
-          ),
+    final Future<FileImage> fileImage,
+  ) =>
+      ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: constraints.maxWidth - _minIniSectionWidth,
         ),
-      ),
-    );
-  }
+        child: FutureBuilder(
+          future: fileImage,
+          builder: (final context, final snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: ProgressRing());
+            }
+            if (snapshot.hasError) {
+              return const Center(child: Icon(FluentIcons.error));
+            }
+            if (snapshot.data == null) {
+              return const Center(child: Icon(FluentIcons.error));
+            }
+            final fileImage = snapshot.data!;
+            return GestureDetector(
+              onTapUp: (final details) => _onImageTap(context, fileImage),
+              onSecondaryTapUp: (final details) =>
+                  _onImageRightClick(details, context, fileImage),
+              child: FlyoutTarget(
+                controller: _contextController,
+                key: _contextAttachKey,
+                child: Image(
+                  image: fileImage,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.medium,
+                ),
+              ),
+            );
+          },
+        ),
+      );
 
-  void _onImageTap(final BuildContext context, final FileImage2 fileImage) {
+  void _onImageTap(final BuildContext context, final ImageProvider image) {
     unawaited(
       showDialog(
         context: context,
@@ -309,7 +304,7 @@ class _ModCardState extends State<_ModCard> {
           onTap: Navigator.of(dCtx).pop,
           onSecondaryTap: Navigator.of(dCtx).pop,
           child: Image(
-            image: fileImage,
+            image: image,
             fit: BoxFit.contain,
             filterQuality: FilterQuality.medium,
           ),
@@ -321,7 +316,7 @@ class _ModCardState extends State<_ModCard> {
   void _onImageRightClick(
     final TapUpDetails details,
     final BuildContext context,
-    final File previewFile,
+    final FileImage fileImage,
   ) {
     final targetContext = _contextAttachKey.currentContext;
     if (targetContext == null) {
@@ -343,7 +338,7 @@ class _ModCardState extends State<_ModCard> {
                 CommandBarButton(
                   icon: const Icon(FluentIcons.delete),
                   label: const Text('Delete'),
-                  onPressed: () => _onImageDelete(context, previewFile),
+                  onPressed: () => _onImageDelete(context, fileImage),
                 ),
               ],
             ),
@@ -353,7 +348,7 @@ class _ModCardState extends State<_ModCard> {
     );
   }
 
-  void _onImageDelete(final BuildContext context, final File previewFile) {
+  void _onImageDelete(final BuildContext context, final FileImage fileImage) {
     unawaited(
       showDialog(
         context: context,
@@ -374,14 +369,15 @@ class _ModCardState extends State<_ModCard> {
               data: FluentTheme.of(context).copyWith(accentColor: Colors.red),
               child: FilledButton(
                 onPressed: () {
-                  previewFile.deleteSync();
+                  fileImage.file.deleteSync();
                   Navigator.of(dCtx).pop();
                   Navigator.of(context).pop();
                   displayInfoBar(
                     context,
                     builder: (final context, final close) => InfoBar(
                       title: const Text('Preview deleted'),
-                      content: Text('Preview deleted from ${previewFile.path}'),
+                      content:
+                          Text('Preview deleted from ${fileImage.file.path}'),
                       severity: InfoBarSeverity.warning,
                       onClose: close,
                     ),
@@ -401,8 +397,6 @@ class _ModCardState extends State<_ModCard> {
     final String findConfig,
   ) async {
     try {
-      final recursiveObserverService =
-          context.read<RecursiveFileSystemWatcher>();
       final fileContent = await File(findConfig).readAsString();
       final Map<String, dynamic> config = jsonDecode(fileContent);
       final uuid = config['uuid'] as String;
@@ -428,7 +422,6 @@ class _ModCardState extends State<_ModCard> {
           await api.downloadUrl(uuid, updateCode: updateCode);
       final data = await api.download(downloadElement);
 
-      recursiveObserverService.cut();
       try {
         Directory(widget.mod.path).deleteSync(recursive: true);
         if (!context.mounted) {
@@ -450,11 +443,7 @@ class _ModCardState extends State<_ModCard> {
             severity: InfoBarSeverity.success,
           ),
         );
-      } finally {
-        recursiveObserverService
-          ..uncut()
-          ..forceUpdate();
-      }
+      } finally {}
     } on FormatException catch (e) {
       if (!context.mounted) {
         return;
@@ -471,10 +460,9 @@ class _ModCardState extends State<_ModCard> {
   }
 
   void _onToggle(final BuildContext context) {
-    final shaderFixesPath = context
-        .read<AppStateService>()
+    final shaderFixesPath = ref
+        .read(appStateNotifierProvider)
         .modExecFile
-        .latest
         ?.pDirname
         .pJoin(kShaderFixes);
     if (shaderFixesPath == null) {

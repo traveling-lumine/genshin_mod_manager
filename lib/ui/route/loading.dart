@@ -1,96 +1,103 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:go_router/go_router.dart';
-import 'package:logger/logger.dart';
-import 'package:provider/provider.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// A route that shows a loading screen.
-class LoadingRoute extends StatelessWidget {
+class LoadingRoute extends HookConsumerWidget {
   /// Creates a [LoadingRoute].
   const LoadingRoute({super.key});
 
   static const String _destinationRoute = kHomeRoute;
-  static final Logger _logger = Logger();
 
   @override
-  Widget build(final BuildContext context) => FutureBuilder(
-        // ignore: discarded_futures
-        future: context.select<AppStateService, Future<bool>>(
-          (final value) => value.successfulLoad,
-        ),
-        builder: (final context, final snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return _buildLoading();
-          }
-          if (snapshot.hasError) {
-            _logger.e('App FutureBuilder snapshot error: ${snapshot.error}');
-            return _buildError(context, snapshot.error);
-          }
-          SchedulerBinding.instance.addPostFrameCallback((final timeStamp) {
-            context.go(_destinationRoute);
-          });
-          return _buildDone(context);
-        },
-      );
+  Widget build(final BuildContext context, final WidgetRef ref) =>
+      ref.watch(sharedPreferenceProvider).when(
+            data: _buildData,
+            error: (final error, final stackTrace) =>
+                _buildError(error, context, ref),
+            loading: _buildLoading,
+          );
 
-  Widget _buildError(final BuildContext context, final Object? error) =>
-      NavigationView(
-        appBar: getAppbar("Error!"),
-        content: Center(
-          child: Column(
+  Widget _buildData(final Object? data) {
+    final context = useContext();
+    SchedulerBinding.instance.addPostFrameCallback((final timeStamp) {
+      _goToMain(context);
+    });
+    return _TitledNavView(
+      title: "Done!",
+      children: [
+        const Text('Done!'),
+        const SizedBox(height: 16),
+        Button(
+          onPressed: () => _goToMain(context),
+          child: const Text('Go to Home'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildError(
+    final Object error,
+    final BuildContext context,
+    final WidgetRef ref,
+  ) =>
+      _TitledNavView(
+        title: "Error!",
+        children: [
+          Text('Error: $error'),
+          const SizedBox(height: 16),
+          Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Error: $error'),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Button(
-                    onPressed: () => context.read<AppStateService>().reload(),
-                    child: const Text('Retry'),
-                  ),
-                  const SizedBox(width: 16),
-                  Button(
-                    onPressed: () => context.go(_destinationRoute),
-                    child: const Text('Override'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-
-  Widget _buildLoading() => NavigationView(
-        appBar: getAppbar("Loading..."),
-        content: const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ProgressRing(),
-              Text('Loading...'),
-            ],
-          ),
-        ),
-      );
-
-  Widget _buildDone(final BuildContext context) => NavigationView(
-        appBar: getAppbar("Done!"),
-        content: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Done!'),
-              const SizedBox(height: 16),
               Button(
-                onPressed: () => context.go(_destinationRoute),
-                child: const Text('Go to Home'),
+                onPressed: () => ref.invalidate(sharedPreferenceProvider),
+                child: const Text('Retry'),
+              ),
+              const SizedBox(width: 16),
+              Button(
+                onPressed: () => _goToMain(context),
+                child: const Text('Override'),
               ),
             ],
           ),
+        ],
+      );
+
+  Widget _buildLoading() => const _TitledNavView(
+        title: "Loading...",
+        children: [
+          ProgressRing(),
+          SizedBox(height: 16),
+          Text('Loading...'),
+        ],
+      );
+
+  void _goToMain(final BuildContext context) => context.go(_destinationRoute);
+}
+
+class _TitledNavView extends StatelessWidget {
+  const _TitledNavView({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(final BuildContext context) => NavigationView(
+        appBar: getAppbar(title),
+        content: Center(
+          child: Column(mainAxisSize: MainAxisSize.min, children: children),
         ),
       );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+  }
 }

@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -24,8 +23,9 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
   Future<List<NahidaliveElement>> fetchNahidaliveElements() async {
     final response = await _client.get(Uri.parse(_kAkashaList));
     if (response.statusCode == 200) {
-      final List<dynamic> body = jsonDecode(response.body);
-      return body.map(_neFromJson).toList();
+      final body = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      final list = body.map(NahidaliveElement.fromJson).toList();
+      return list;
     } else {
       throw Exception('fetch list failed');
     }
@@ -35,7 +35,7 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
   Future<NahidaliveElement> fetchNahidaliveElement(final String uuid) async {
     final response = await _client.get(Uri.parse('$_kAkashaList?uuid=$uuid'));
     if (response.statusCode == 200) {
-      return _neFromJson(jsonDecode(response.body));
+      return NahidaliveElement.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('fetch element failed');
     }
@@ -59,7 +59,7 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
     }
     final response = await _client.get(uri);
     if (response.statusCode == 200) {
-      return _ndeFromJson(jsonDecode(response.body));
+      return NahidaliveDownloadElement.fromJson(jsonDecode(response.body));
     } else {
       throw HttpException('download url failed', uri: uri);
     }
@@ -82,50 +82,3 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
     }
   }
 }
-
-NahidaliveElement _neFromJson(final json) => switch (json) {
-      {
-        'uuid': final String uuid,
-        'version': final String version,
-        'title': final String title,
-        'description': final String description,
-        'arca_url': final String? arcaUrl,
-        'virustotal_url': final String? virustotalUrl,
-        'tags': final List<dynamic> tags,
-        'preview_url': final String previewUrl,
-      } =>
-        NahidaliveElement(
-          uuid: uuid,
-          version: version,
-          title: title,
-          description: description,
-          arcaUrl: arcaUrl,
-          virustotalUrl: virustotalUrl,
-          tags: UnmodifiableListView(tags.cast<String>()),
-          previewUrl: previewUrl,
-        ),
-      _ => throw FormatException('Unknown NahidaliveElement format: $json'),
-    };
-
-NahidaliveDownloadElement _ndeFromJson(final Map<String, dynamic> json) =>
-    switch (json) {
-      {
-        'status': final bool status,
-        'download_url': final String downloadUrl,
-      } =>
-        NahidaliveDownloadElement(
-          status: status,
-          downloadUrl: downloadUrl,
-        ),
-      {
-        'status': final bool status,
-        'error-codes': final String errorCodes,
-      } =>
-        NahidaliveDownloadElement(
-          status: status,
-          errorCodes: errorCodes,
-        ),
-      _ => throw FormatException(
-          'Unknown NahidaliveDownloadElement format: $json',
-        ),
-    };

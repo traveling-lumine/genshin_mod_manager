@@ -1,57 +1,7 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
 
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/domain/entity/mod.dart';
-import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state.dart';
-
-/// Returns [ModCategory] list from the mod root obtained from [service].
-Future<List<ModCategory>> getCategories(final AppStateService service) async {
-  final root = service.modRoot.latest;
-  if (root == null) {
-    return [];
-  }
-  final dir = Directory(root);
-  if (!dir.existsSync()) {
-    return [];
-  }
-  final res = dir.listSync().whereType<Directory>().map((final event) {
-    final path = event.path;
-    return ModCategory(
-      path: path,
-      name: path.pBasename,
-    );
-  }).toList();
-  return UnmodifiableListView(res);
-}
-
-/// Returns a [Mod] list from the given [category].
-Future<List<Mod>> getMods(final ModCategory category) async {
-  final root = category.path;
-  final res =
-      Directory(root).listSync().whereType<Directory>().map((final event) {
-    final path = event.path;
-    return Mod(
-      path: path,
-      displayName: path.pEnabledForm.pBasename,
-      isEnabled: path.pIsEnabled,
-      category: category,
-    );
-  }).toList();
-  return UnmodifiableListView(res);
-}
-
-/// Returns active ini paths from the given [paths].
-List<String> getActiveIniPaths(final List<String> paths) =>
-    paths.where((final path) {
-      final extension = path.pExtension;
-      if (!extension.pEquals('.ini')) {
-        return false;
-      }
-      return path.pBasename.pIsEnabled;
-    }).toList();
 
 /// Returns a String path list under the given [path].
 List<String> getUnder<T extends FileSystemEntity>(

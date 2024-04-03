@@ -6,28 +6,25 @@ import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/ui/route/nahida_store/nahida_store_vm.dart';
-import 'package:genshin_mod_manager/ui/route/nahida_store/store_element.dart';
+import 'package:genshin_mod_manager/flow/nahida_store.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/util/tag_parser.dart';
 import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
 import 'package:genshin_mod_manager/ui/widget/thick_scrollbar.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_delegate.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class NahidaStoreRoute extends StatelessWidget {
+part 'store_element.dart';
+
+class NahidaStoreRoute extends ConsumerStatefulWidget {
   const NahidaStoreRoute({required this.category, super.key});
 
   final ModCategory category;
 
   @override
-  Widget build(final BuildContext context) => ChangeNotifierProvider(
-        create: (final context) => createViewModel(
-          observer: context.read(),
-        ),
-        child: _NahidaStoreRoute(category: category),
-      );
+  ConsumerState<NahidaStoreRoute> createState() => _NahidaStoreRouteState();
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
@@ -36,22 +33,7 @@ class NahidaStoreRoute extends StatelessWidget {
   }
 }
 
-class _NahidaStoreRoute extends StatefulWidget {
-  const _NahidaStoreRoute({required this.category});
-
-  final ModCategory category;
-
-  @override
-  State<_NahidaStoreRoute> createState() => _NahidaStoreRouteState();
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ModCategory>('category', category));
-  }
-}
-
-class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
+class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
   final _textEditingController = TextEditingController();
   ScrollController _scrollController = ScrollController();
   TagParseElement? _tagFilter;
@@ -59,7 +41,7 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
   @override
   void initState() {
     super.initState();
-    context.read<NahidaStoreViewModel>().registerDownloadCallbacks(
+    ref.read(downloadModelProvider).registerDownloadCallbacks(
       onApiException: (final e) {
         if (!mounted) {
           return;
@@ -136,7 +118,7 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
         }
         try {
           await File(category.path.pJoin(modName)).writeAsBytes(data);
-        } catch (e) {
+        } on Exception catch (e) {
           if (!mounted) {
             return;
           }
@@ -201,7 +183,7 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
             CommandBarButton(
               icon: const Icon(FluentIcons.refresh),
               onPressed: () {
-                context.read<NahidaStoreViewModel>().onRefresh();
+                ref.invalidate(akashaElementProvider);
                 setState(() {
                   final prevController = _scrollController;
                   _scrollController = ScrollController(
@@ -226,7 +208,7 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
               setState(() {
                 _tagFilter = filter;
               });
-            } catch (e) {
+            } on Exception {
               setState(() {
                 _tagFilter = null;
               });
@@ -238,7 +220,7 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
             }
             try {
               parseTagQuery(value);
-            } catch (e) {
+            } on Exception catch (e) {
               return e.toString();
             }
             return null;
@@ -246,51 +228,51 @@ class _NahidaStoreRouteState extends State<_NahidaStoreRoute> {
         ),
       );
 
-  Widget _buildContent() =>
-      Selector<NahidaStoreViewModel, Future<List<NahidaliveElement>>>(
-        selector: (final context, final model) => model.elements,
-        builder: (final context, final elements, final child) => FutureBuilder(
-          future: elements,
-          builder: (final context, final snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: ProgressRing());
-            }
-            if (!snapshot.hasData) {
-              return Text('Unable to fetch data.'
-                  ' Report this to the developer: $snapshot');
-            }
-            final data = snapshot.data!.where((final element) {
-              final tagMap = {for (final e in element.tags) e: true};
-              try {
-                final filter = _tagFilter;
-                if (filter == null) {
-                  return true;
-                }
-                return filter.evaluate(tagMap);
-              } catch (e) {
-                return true;
-              }
-            }).toList();
-            return ThickScrollbar(
-              child: GridView.builder(
-                controller: _scrollController,
-                gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
-                  minCrossAxisExtent: 500,
-                  mainAxisExtent: 500,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemCount: data.length,
-                itemBuilder: (final context, final index) => RevertScrollbar(
-                  child: StoreElement(
-                    passwordController: _textEditingController,
-                    element: data[index],
-                    category: widget.category,
-                  ),
-                ),
+  Widget _buildContent() {
+    final data = ref.watch(akashaElementProvider);
+    return data.when(
+      data: (final data2) {
+        final data = data2.where((final element) {
+          final tagMap = {for (final e in element.tags) e: true};
+          final filter = _tagFilter;
+          if (filter == null) {
+            return true;
+          }
+          try {
+            return filter.evaluate(tagMap);
+          } on Exception {
+            return true;
+          }
+        }).toList();
+        return ThickScrollbar(
+          child: GridView.builder(
+            controller: _scrollController,
+            gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
+              minCrossAxisExtent: 500,
+              mainAxisExtent: 500,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
+            itemCount: data.length,
+            itemBuilder: (final context, final index) => RevertScrollbar(
+              child: StoreElement(
+                passwordController: _textEditingController,
+                element: data[index],
+                category: widget.category,
               ),
-            );
-          },
-        ),
-      );
+            ),
+          ),
+        );
+      },
+      error: (final e, final stackTrace) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(FluentIcons.error),
+          const SizedBox(height: 8),
+          Text('Failed to load data: ${e.runtimeType}'),
+        ],
+      ),
+      loading: () => const Center(child: ProgressRing()),
+    );
+  }
 }

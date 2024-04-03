@@ -1,11 +1,15 @@
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  plugins:
+    - custom_lint
+
 linter:
   rules:
     - always_declare_return_types
     - always_put_control_body_on_new_line
     - always_put_required_named_parameters_first
-#    - always_specify_types
+    #- always_specify_types
     - always_use_package_imports
     - annotate_overrides
     - annotate_redeclares
@@ -20,7 +24,7 @@ linter:
     - avoid_equals_and_hash_code_on_mutable_classes
     - avoid_escaping_inner_quotes
     - avoid_field_initializers_in_const_classes
-#    - avoid_final_parameters
+    #- avoid_final_parameters
     - avoid_function_literals_in_foreach_calls
     - avoid_implementing_value_types
     - avoid_init_to_null
@@ -124,7 +128,7 @@ linter:
     - prefer_const_literals_to_create_immutables
     - prefer_constructors_over_static_methods
     - prefer_contains
-#    - prefer_double_quotes
+    #- prefer_double_quotes
     - prefer_expression_function_bodies
     - prefer_final_fields
     - prefer_final_in_for_each
@@ -147,8 +151,8 @@ linter:
     - prefer_mixin
     - prefer_null_aware_method_calls
     - prefer_null_aware_operators
-#    - prefer_relative_imports
-#    - prefer_single_quotes
+    #- prefer_relative_imports
+    #- prefer_single_quotes
     - prefer_spread_collections
     - prefer_typing_uninitialized_variables
     - prefer_void_to_null
@@ -176,7 +180,7 @@ linter:
     - unnecessary_breaks
     - unnecessary_const
     - unnecessary_constructor_name
-#    - unnecessary_final
+    #- unnecessary_final
     - unnecessary_getters_setters
     - unnecessary_lambdas
     - unnecessary_late
