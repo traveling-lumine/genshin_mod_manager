@@ -24,7 +24,7 @@ class AppStateStorageImpl implements AppStateStorage {
   static const bool _showEnabledModsFirstDefaultValue = false;
   static const String _presetDatakey = 'presetData';
   static const String _darkModeKey = 'darkMode';
-  static const bool _darkModeDefaultValue = false;
+  static const bool _darkModeDefaultValue = true;
 
   final PersistentStorage persistentStorage;
 
