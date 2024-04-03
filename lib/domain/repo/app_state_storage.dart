@@ -33,6 +33,10 @@ abstract interface class AppStateStorage {
 
   void setPresetData(final PresetData data);
 
+  bool getDarkMode();
+
+  void setDarkMode(final bool value);
+
   @Deprecated('Backwards compatibility only')
   String? getTargetDir();
 

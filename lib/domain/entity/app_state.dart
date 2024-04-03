@@ -11,6 +11,7 @@ class AppState with _$AppState {
     required final bool moveOnDrag,
     required final bool showFolderIcon,
     required final bool showEnabledModsFirst,
+    required final bool darkMode,
     final String? modRoot,
     final String? modExecFile,
     final String? launcherFile,

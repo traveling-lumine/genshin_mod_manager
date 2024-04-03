@@ -96,6 +96,12 @@ class _SettingRoute extends ConsumerWidget {
                 .read(appStateNotifierProvider.notifier)
                 .changeShowEnabledModsFirst,
           ),
+          _SwitchItem(
+            text: 'Dark mode',
+            selector: (final value) => value.darkMode,
+            onChanged:
+                ref.read(appStateNotifierProvider.notifier).changeDarkMode,
+          ),
           _buildLicense(context),
           _buildVersion(ref),
         ],

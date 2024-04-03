@@ -40,20 +40,23 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
   }
 
   @override
-  Widget build(final BuildContext context) => GestureDetector(
-        onTap: () => _onToggle(context),
-        child: Card(
-          backgroundColor: widget.mod.isEnabled
-              ? Colors.green.lightest
-              : Colors.red.lightest.withOpacity(0.5),
-          padding: const EdgeInsets.all(6),
-          child: FocusTraversalGroup(
-            child: Column(
-              children: [
-                _buildFolderHeader(context),
-                const SizedBox(height: 4),
-                _buildFolderContent(context),
-              ],
+  Widget build(final BuildContext context) => FluentTheme(
+        data: FluentThemeData.light(),
+        child: GestureDetector(
+          onTap: () => _onToggle(context),
+          child: Card(
+            backgroundColor: widget.mod.isEnabled
+                ? Colors.green.lightest
+                : Colors.red.lightest.withOpacity(0.5),
+            padding: const EdgeInsets.all(6),
+            child: FocusTraversalGroup(
+              child: Column(
+                children: [
+                  _buildFolderHeader(context),
+                  const SizedBox(height: 4),
+                  _buildFolderContent(context),
+                ],
+              ),
             ),
           ),
         ),

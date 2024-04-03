@@ -60,7 +60,7 @@ final appStateStorageProvider = AutoDisposeProvider<AppStateStorage>.internal(
 );
 
 typedef AppStateStorageRef = AutoDisposeProviderRef<AppStateStorage>;
-String _$appStateNotifierHash() => r'b64bf3c556876be37f90d4438156967d2af8d9af';
+String _$appStateNotifierHash() => r'6ac5deb95599e38e0026b0fbbb00354a2a968c59';
 
 /// The notifier for the app state.
 ///
