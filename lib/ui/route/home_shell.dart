@@ -15,13 +15,13 @@ import 'package:genshin_mod_manager/flow/app_version.dart';
 import 'package:genshin_mod_manager/flow/home_shell.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
+import 'package:genshin_mod_manager/ui/util/open_url.dart';
 import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 const _kRepoReleases = '$kRepoBase/releases/latest';
@@ -236,7 +236,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
                   decoration: TextDecoration.underline,
                 ),
                 recognizer: TapGestureRecognizer()
-                  ..onTap = () => launchUrl(Uri.parse(_kRepoReleases)),
+                  ..onTap = () => openUrl(_kRepoReleases),
               ),
               const TextSpan(text: ' to open link.'),
             ],

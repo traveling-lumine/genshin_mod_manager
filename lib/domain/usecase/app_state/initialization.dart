@@ -31,5 +31,6 @@ AppState callAppStateInitializationUseCase(final AppStateStorage storage) {
     launcherFile: storage.getLauncherFile(),
     showFolderIcon: storage.getShowFolderIcon(),
     showEnabledModsFirst: storage.getShowEnabledModsFirst(),
+    darkMode: storage.getDarkMode(),
   );
 }

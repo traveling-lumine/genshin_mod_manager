@@ -45,3 +45,9 @@ AppState callChangePresetDataUseCase(
   final PresetData data,
 ) =>
     curState.copyWith(presetData: data);
+
+AppState callChangeDarkModeUseCase(
+  final AppState curState,
+  final bool value,
+) =>
+    curState.copyWith(darkMode: value);

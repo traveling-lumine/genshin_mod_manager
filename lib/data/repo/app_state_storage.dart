@@ -23,6 +23,8 @@ class AppStateStorageImpl implements AppStateStorage {
   static const String _showEnabledModsFirstKey = 'showEnabledModsFirst';
   static const bool _showEnabledModsFirstDefaultValue = false;
   static const String _presetDatakey = 'presetData';
+  static const String _darkModeKey = 'darkMode';
+  static const bool _darkModeDefaultValue = true;
 
   final PersistentStorage persistentStorage;
 
@@ -170,6 +172,14 @@ class AppStateStorageImpl implements AppStateStorage {
     persistentStorage
         .setMap(_presetDatakey, {'global': global, 'local': local});
   }
+
+  @override
+  bool getDarkMode() =>
+      persistentStorage.getBool(_darkModeKey) ?? _darkModeDefaultValue;
+
+  @override
+  void setDarkMode(final bool value) =>
+      persistentStorage.setBool(_darkModeKey, value);
 
   @override
   @Deprecated('Backwards compatibility only')

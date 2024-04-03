@@ -27,7 +27,9 @@ mixin _$NahidaliveElement {
   List<String> get tags => throw _privateConstructorUsedError;
   @JsonKey(name: 'preview_url')
   String get previewUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'arca_url')
   String? get arcaUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'virustotal_url')
   String? get virustotalUrl => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -49,8 +51,8 @@ abstract class $NahidaliveElementCopyWith<$Res> {
       String description,
       List<String> tags,
       @JsonKey(name: 'preview_url') String previewUrl,
-      String? arcaUrl,
-      String? virustotalUrl});
+      @JsonKey(name: 'arca_url') String? arcaUrl,
+      @JsonKey(name: 'virustotal_url') String? virustotalUrl});
 }
 
 /// @nodoc
@@ -127,8 +129,8 @@ abstract class _$$NahidaliveElementImplCopyWith<$Res>
       String description,
       List<String> tags,
       @JsonKey(name: 'preview_url') String previewUrl,
-      String? arcaUrl,
-      String? virustotalUrl});
+      @JsonKey(name: 'arca_url') String? arcaUrl,
+      @JsonKey(name: 'virustotal_url') String? virustotalUrl});
 }
 
 /// @nodoc
@@ -200,8 +202,8 @@ class _$NahidaliveElementImpl
       required this.description,
       required final List<String> tags,
       @JsonKey(name: 'preview_url') required this.previewUrl,
-      this.arcaUrl,
-      this.virustotalUrl})
+      @JsonKey(name: 'arca_url') this.arcaUrl,
+      @JsonKey(name: 'virustotal_url') this.virustotalUrl})
       : _tags = tags;
 
   factory _$NahidaliveElementImpl.fromJson(Map<String, dynamic> json) =>
@@ -227,8 +229,10 @@ class _$NahidaliveElementImpl
   @JsonKey(name: 'preview_url')
   final String previewUrl;
   @override
+  @JsonKey(name: 'arca_url')
   final String? arcaUrl;
   @override
+  @JsonKey(name: 'virustotal_url')
   final String? virustotalUrl;
 
   @override
@@ -299,14 +303,15 @@ class _$NahidaliveElementImpl
 
 abstract class _NahidaliveElement implements NahidaliveElement {
   const factory _NahidaliveElement(
-      {required final String uuid,
-      required final String version,
-      required final String title,
-      required final String description,
-      required final List<String> tags,
-      @JsonKey(name: 'preview_url') required final String previewUrl,
-      final String? arcaUrl,
-      final String? virustotalUrl}) = _$NahidaliveElementImpl;
+          {required final String uuid,
+          required final String version,
+          required final String title,
+          required final String description,
+          required final List<String> tags,
+          @JsonKey(name: 'preview_url') required final String previewUrl,
+          @JsonKey(name: 'arca_url') final String? arcaUrl,
+          @JsonKey(name: 'virustotal_url') final String? virustotalUrl}) =
+      _$NahidaliveElementImpl;
 
   factory _NahidaliveElement.fromJson(Map<String, dynamic> json) =
       _$NahidaliveElementImpl.fromJson;
@@ -325,8 +330,10 @@ abstract class _NahidaliveElement implements NahidaliveElement {
   @JsonKey(name: 'preview_url')
   String get previewUrl;
   @override
+  @JsonKey(name: 'arca_url')
   String? get arcaUrl;
   @override
+  @JsonKey(name: 'virustotal_url')
   String? get virustotalUrl;
   @override
   @JsonKey(ignore: true)

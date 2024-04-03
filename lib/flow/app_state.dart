@@ -66,28 +66,28 @@ class AppStateNotifier extends _$AppStateNotifier {
   }
 
   /// Changes the run together.
-// ignore: avoid_positional_boolean_parameters
+  // ignore: avoid_positional_boolean_parameters
   void changeRunTogether(final bool value) {
     ref.read(appStateStorageProvider).setRunTogether(value);
     state = callChangeRunTogetherUseCase(state, value);
   }
 
   /// Changes the move on drag.
-// ignore: avoid_positional_boolean_parameters
+  // ignore: avoid_positional_boolean_parameters
   void changeMoveOnDrag(final bool value) {
     ref.read(appStateStorageProvider).setMoveOnDrag(value);
     state = callChangeMoveOnDragUseCase(state, value);
   }
 
   /// Changes the show folder icon.
-// ignore: avoid_positional_boolean_parameters
+  // ignore: avoid_positional_boolean_parameters
   void changeShowFolderIcon(final bool value) {
     ref.read(appStateStorageProvider).setShowFolderIcon(value);
     state = callChangeShowFolderIconUseCase(state, value);
   }
 
   /// Changes the show enabled mods first.
-// ignore: avoid_positional_boolean_parameters
+  // ignore: avoid_positional_boolean_parameters
   void changeShowEnabledModsFirst(final bool value) {
     ref.read(appStateStorageProvider).setShowEnabledModsFirst(value);
     state = callChangeShowEnabledModsFirstUseCase(state, value);
@@ -97,5 +97,12 @@ class AppStateNotifier extends _$AppStateNotifier {
   void changePresetData(final PresetData data) {
     ref.read(appStateStorageProvider).setPresetData(data);
     state = callChangePresetDataUseCase(state, data);
+  }
+
+  /// Changes the dark mode.
+  // ignore: avoid_positional_boolean_parameters
+  void changeDarkMode(final bool value) {
+    ref.read(appStateStorageProvider).setDarkMode(value);
+    state = callChangeDarkModeUseCase(state, value);
   }
 }

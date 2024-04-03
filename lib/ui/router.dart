@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
+import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/route/category/category.dart';
 import 'package:genshin_mod_manager/ui/route/home_shell.dart';
@@ -9,17 +10,18 @@ import 'package:genshin_mod_manager/ui/route/nahida_store/nahida_store.dart';
 import 'package:genshin_mod_manager/ui/route/setting.dart';
 import 'package:genshin_mod_manager/ui/route/welcome.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// The main application widget.
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerStatefulWidget {
   /// Creates a [MyApp].
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  ConsumerState<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends ConsumerState<MyApp> {
   final _router = GoRouter(
     debugLogDiagnostics: true,
     initialLocation: kLoadingRoute,
@@ -66,10 +68,17 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
-  Widget build(final BuildContext context) => FluentApp.router(
-        title: 'Genshin Mod Manager',
-        routerDelegate: _router.routerDelegate,
-        routeInformationParser: _router.routeInformationParser,
-        routeInformationProvider: _router.routeInformationProvider,
-      );
+  Widget build(final BuildContext context) {
+    final darkMode = ref.watch(
+      appStateNotifierProvider.select((final value) => value.darkMode),
+    );
+    return FluentApp.router(
+      darkTheme: FluentThemeData.dark(),
+      themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
+      title: 'Genshin Mod Manager',
+      routerDelegate: _router.routerDelegate,
+      routeInformationParser: _router.routeInformationParser,
+      routeInformationProvider: _router.routeInformationProvider,
+    );
+  }
 }
