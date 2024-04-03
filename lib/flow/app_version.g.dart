@@ -36,7 +36,7 @@ final remoteVersionProvider = AutoDisposeFutureProvider<String?>.internal(
 );
 
 typedef RemoteVersionRef = AutoDisposeFutureProviderRef<String?>;
-String _$isOutdatedHash() => r'7810b2ee80310fe8d609e94acf7ddbcdbc06ce94';
+String _$isOutdatedHash() => r'05ab3cf877bd691c08ec8a3ca33f7f75afada54f';
 
 /// See also [isOutdated].
 @ProviderFor(isOutdated)
