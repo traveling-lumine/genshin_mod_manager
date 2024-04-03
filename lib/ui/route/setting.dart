@@ -96,60 +96,45 @@ class _SettingRoute extends ConsumerWidget {
                 .read(appStateNotifierProvider.notifier)
                 .changeShowEnabledModsFirst,
           ),
-          Padding(
-            padding: _itemPadding,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Licenses',
-                    style: FluentTheme.of(context).typography.bodyLarge,
-                  ),
-                ),
-                RepaintBoundary(
-                  child: Button(
-                    onPressed: () => unawaited(context.push(kLicenseRoute)),
-                    child: const Text('View'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: _itemPadding,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Consumer(
-                    builder: (final context, final ref, final child) {
-                      final curVersion = ref.watch(versionStringProvider).when(
-                            data: (final version) => version,
-                            error: (final error, final stackTrace) => '(error)',
-                            loading: () => 'Loading...',
-                          );
-                      final isOutdated = ref.watch(isOutdatedProvider).when(
-                            data: (final value) =>
-                                value ? '(new version available)' : '',
-                            error: (final error, final stackTrace) => '',
-                            loading: () => '',
-                          );
-                      return Text(
-                        'Version: $curVersion $isOutdated',
-                        style: FluentTheme.of(context).typography.caption,
-                      );
-                    },
-                  ),
-                ),
-                Button(
-                  child: const Text('Check'),
-                  onPressed: () {
-                    ref.invalidate(remoteVersionProvider);
-                  },
-                ),
-              ],
-            ),
-          ),
+          _buildLicense(context),
+          _buildVersion(ref),
         ],
+      );
+
+  Widget _buildLicense(final BuildContext context) => ListTile(
+        title: const Text('Licenses'),
+        trailing: Button(
+          onPressed: () => unawaited(context.push(kLicenseRoute)),
+          child: const Text('View'),
+        ),
+      );
+
+  Widget _buildVersion(final WidgetRef ref) => ListTile(
+        title: Consumer(
+          builder: (final context, final ref, final child) {
+            final curVersion = ref.watch(versionStringProvider).when(
+                  data: (final version) => version,
+                  error: (final error, final stackTrace) => '(error)',
+                  loading: () => 'Loading...',
+                );
+            final isOutdated = ref.watch(isOutdatedProvider).maybeWhen(
+                  data: (final value) => value ? '(new version available)' : '',
+                  orElse: () => '',
+                );
+            return Text(
+              'Version: $curVersion $isOutdated',
+              style: FluentTheme.of(context).typography.caption,
+            );
+          },
+        ),
+        trailing: RepaintBoundary(
+          child: Button(
+            child: const Icon(FluentIcons.refresh),
+            onPressed: () {
+              ref.invalidate(remoteVersionProvider);
+            },
+          ),
+        ),
       );
 }
 
@@ -167,39 +152,19 @@ class _PathSelectItem extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(final BuildContext context) => Padding(
-        padding: _itemPadding,
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: FluentTheme.of(context).typography.bodyLarge,
-                  ),
-                  const SizedBox(height: 4),
-                  Consumer(
-                    builder: (final context, final ref, final child) {
-                      final value =
-                          ref.watch(appStateNotifierProvider.select(selector));
-                      return Text(
-                        value ?? 'Please select...',
-                        style: FluentTheme.of(context).typography.caption,
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-            RepaintBoundary(
-              child: Button(
-                onPressed: onPressed,
-                child: Icon(icon),
-              ),
-            ),
-          ],
+  Widget build(final BuildContext context) => ListTile(
+        title: Text(title),
+        subtitle: Consumer(
+          builder: (final context, final ref, final child) {
+            final value = ref.watch(appStateNotifierProvider.select(selector));
+            return Text(value ?? 'Please select...');
+          },
+        ),
+        trailing: RepaintBoundary(
+          child: Button(
+            onPressed: onPressed,
+            child: Icon(icon),
+          ),
         ),
       );
 
@@ -231,29 +196,18 @@ class _SwitchItem extends StatelessWidget {
   final void Function(bool value) onChanged;
 
   @override
-  Widget build(final BuildContext context) => Padding(
-        padding: _itemPadding,
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                text,
-                style: FluentTheme.of(context).typography.bodyLarge,
+  Widget build(final BuildContext context) => ListTile(
+        title: Text(text),
+        trailing: Consumer(
+          builder: (final context, final ref, final child) {
+            final value = ref.watch(appStateNotifierProvider.select(selector));
+            return RepaintBoundary(
+              child: ToggleSwitch(
+                checked: value,
+                onChanged: onChanged,
               ),
-            ),
-            Consumer(
-              builder: (final context, final ref, final child) {
-                final value =
-                    ref.watch(appStateNotifierProvider.select(selector));
-                return RepaintBoundary(
-                  child: ToggleSwitch(
-                    checked: value,
-                    onChanged: onChanged,
-                  ),
-                );
-              },
-            ),
-          ],
+            );
+          },
         ),
       );
 

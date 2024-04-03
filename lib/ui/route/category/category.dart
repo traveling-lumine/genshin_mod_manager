@@ -100,7 +100,8 @@ class CategoryRoute extends StatelessWidget {
                     mainAxisExtent: _mainAxisExtent,
                   ),
                   itemCount: children.length,
-                  itemBuilder: (final context, final index) => children[index],
+                  itemBuilder: (final context, final index) =>
+                      RevertScrollbar(child: children[index]),
                 );
               },
               error: (final error, final stackTrace) => Center(

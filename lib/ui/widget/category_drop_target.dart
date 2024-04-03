@@ -55,6 +55,13 @@ class CategoryDropTarget extends ConsumerWidget {
         continue;
       }
 
+      if (sourceDir.path.pIsWithin(newPath) || sourceDir.path == newPath) {
+        throw FileSystemException(
+          'Cannot move a folder into itself',
+          sourceDir.path,
+          const OSError("", 87),
+        );
+      }
       if (moveInsteadOfCopy) {
         try {
           sourceDir.renameSync(newPath);
