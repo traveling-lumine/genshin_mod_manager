@@ -11,9 +11,9 @@ import 'package:genshin_mod_manager/ui/widget/third_party/flutter/no_deref_file_
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-const _itemPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 16);
-
+/// A route that shows the settings.
 class SettingRoute extends StatelessWidget {
+  /// Creates a [SettingRoute].
   const SettingRoute({super.key});
 
   @override
@@ -193,6 +193,7 @@ class _SwitchItem extends StatelessWidget {
 
   final String text;
   final bool Function(AppState vm) selector;
+  // ignore: avoid_positional_boolean_parameters
   final void Function(bool value) onChanged;
 
   @override
@@ -223,6 +224,7 @@ class _SwitchItem extends StatelessWidget {
         ),
       )
       ..add(
+        // ignore: avoid_positional_boolean_parameters
         ObjectFlagProperty<void Function(bool value)>.has(
           'onChanged',
           onChanged,

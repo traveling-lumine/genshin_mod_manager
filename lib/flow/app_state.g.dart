@@ -8,7 +8,9 @@ part of 'app_state.dart';
 
 String _$sharedPreferenceHash() => r'7c0ff0611471ae80ca3abfa6f6dd0e9495adcec3';
 
-/// See also [sharedPreference].
+/// The shared preference.
+///
+/// Copied from [sharedPreference].
 @ProviderFor(sharedPreference)
 final sharedPreferenceProvider =
     AutoDisposeFutureProvider<SharedPreferences>.internal(
@@ -25,7 +27,9 @@ typedef SharedPreferenceRef = AutoDisposeFutureProviderRef<SharedPreferences>;
 String _$sharedPreferenceStorageHash() =>
     r'87b1f4a3c3e07e078f8caae22137d1b618944c86';
 
-/// See also [sharedPreferenceStorage].
+/// The storage for the shared preference.
+///
+/// Copied from [sharedPreferenceStorage].
 @ProviderFor(sharedPreferenceStorage)
 final sharedPreferenceStorageProvider =
     AutoDisposeProvider<PersistentStorage>.internal(
@@ -41,7 +45,9 @@ final sharedPreferenceStorageProvider =
 typedef SharedPreferenceStorageRef = AutoDisposeProviderRef<PersistentStorage>;
 String _$appStateStorageHash() => r'8a88f855a6de6d5238c00e5473844fb4b1865173';
 
-/// See also [appStateStorage].
+/// The storage for the app state.
+///
+/// Copied from [appStateStorage].
 @ProviderFor(appStateStorage)
 final appStateStorageProvider = AutoDisposeProvider<AppStateStorage>.internal(
   appStateStorage,
@@ -54,9 +60,11 @@ final appStateStorageProvider = AutoDisposeProvider<AppStateStorage>.internal(
 );
 
 typedef AppStateStorageRef = AutoDisposeProviderRef<AppStateStorage>;
-String _$appStateNotifierHash() => r'4cbe8f907538c5de9f87f5fa7a89d5ae200b1ae3';
+String _$appStateNotifierHash() => r'b64bf3c556876be37f90d4438156967d2af8d9af';
 
-/// See also [AppStateNotifier].
+/// The notifier for the app state.
+///
+/// Copied from [AppStateNotifier].
 @ProviderFor(AppStateNotifier)
 final appStateNotifierProvider =
     AutoDisposeNotifierProvider<AppStateNotifier, AppState>.internal(

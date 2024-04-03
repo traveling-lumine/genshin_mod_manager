@@ -11,12 +11,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 part 'app_state.g.dart';
 
+/// The shared preference.
 @riverpod
 Future<SharedPreferences> sharedPreference(
   final SharedPreferenceRef ref,
 ) =>
     SharedPreferences.getInstance().timeout(const Duration(seconds: 5));
 
+/// The storage for the shared preference.
 @riverpod
 PersistentStorage sharedPreferenceStorage(
   final SharedPreferenceStorageRef ref,
@@ -29,12 +31,14 @@ PersistentStorage sharedPreferenceStorage(
   return SharedPreferenceStorage(sharedPreferences);
 }
 
+/// The storage for the app state.
 @riverpod
 AppStateStorage appStateStorage(final AppStateStorageRef ref) {
   final persistentStorage = ref.watch(sharedPreferenceStorageProvider);
   return AppStateStorageImpl(persistentStorage: persistentStorage);
 }
 
+/// The notifier for the app state.
 @riverpod
 class AppStateNotifier extends _$AppStateNotifier {
   @override
@@ -43,51 +47,55 @@ class AppStateNotifier extends _$AppStateNotifier {
     return callAppStateInitializationUseCase(storage);
   }
 
+  /// Changes the mod root.
   void changeModRoot(final String path) {
     ref.read(appStateStorageProvider).setModRoot(path);
-    final curState = state;
-    state = callChangeModRootUseCase(curState, path);
+    state = callChangeModRootUseCase(state, path);
   }
 
+  /// Changes the mod executable file.
   void changeModExecFile(final String path) {
     ref.read(appStateStorageProvider).setModExecFile(path);
-    final curState = state;
-    state = callChangeModExecFileUseCase(curState, path);
+    state = callChangeModExecFileUseCase(state, path);
   }
 
+  /// Changes the launcher file.
   void changeLauncherFile(final String path) {
     ref.read(appStateStorageProvider).setLauncherFile(path);
-    final curState = state;
-    state = callChangeLauncherFileUseCase(curState, path);
+    state = callChangeLauncherFileUseCase(state, path);
   }
 
+  /// Changes the run together.
+// ignore: avoid_positional_boolean_parameters
   void changeRunTogether(final bool value) {
     ref.read(appStateStorageProvider).setRunTogether(value);
-    final curState = state;
-    state = callChangeRunTogetherUseCase(curState, value);
+    state = callChangeRunTogetherUseCase(state, value);
   }
 
+  /// Changes the move on drag.
+// ignore: avoid_positional_boolean_parameters
   void changeMoveOnDrag(final bool value) {
     ref.read(appStateStorageProvider).setMoveOnDrag(value);
-    final curState = state;
-    state = callChangeMoveOnDragUseCase(curState, value);
+    state = callChangeMoveOnDragUseCase(state, value);
   }
 
+  /// Changes the show folder icon.
+// ignore: avoid_positional_boolean_parameters
   void changeShowFolderIcon(final bool value) {
     ref.read(appStateStorageProvider).setShowFolderIcon(value);
-    final curState = state;
-    state = callChangeShowFolderIconUseCase(curState, value);
+    state = callChangeShowFolderIconUseCase(state, value);
   }
 
+  /// Changes the show enabled mods first.
+// ignore: avoid_positional_boolean_parameters
   void changeShowEnabledModsFirst(final bool value) {
     ref.read(appStateStorageProvider).setShowEnabledModsFirst(value);
-    final curState = state;
-    state = callChangeShowEnabledModsFirstUseCase(curState, value);
+    state = callChangeShowEnabledModsFirstUseCase(state, value);
   }
 
+  /// Changes the preset data.
   void changePresetData(final PresetData data) {
     ref.read(appStateStorageProvider).setPresetData(data);
-    final curState = state;
-    state = callChangePresetDataUseCase(curState, data);
+    state = callChangePresetDataUseCase(state, data);
   }
 }

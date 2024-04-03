@@ -33,100 +33,120 @@ import 'package:window_manager/window_manager.dart';
 part 'ini_widget.dart';
 part 'mod_card.dart';
 
-class CategoryRoute extends StatelessWidget {
+/// A route that displays a category of mods
+class CategoryRoute extends HookWidget {
+  /// Creates a [CategoryRoute].
   const CategoryRoute({required this.category, super.key});
 
-  static const _minCrossAxisExtent = 440.0;
-  static const _mainAxisExtent = 400.0;
+  static const _sliverGridDelegateWithMinCrossAxisExtent =
+      SliverGridDelegateWithMinCrossAxisExtent(
+    mainAxisExtent: 400,
+    minCrossAxisExtent: 440,
+    crossAxisSpacing: 8,
+    mainAxisSpacing: 8,
+  );
+
+  /// The category to display
   final ModCategory category;
 
   @override
   Widget build(final BuildContext context) => CategoryDropTarget(
         category: category,
         child: ScaffoldPage(
-          header: _buildHeader(context),
+          header: _buildHeader(),
           content: _buildContent(),
         ),
       );
 
-  Widget _buildHeader(final BuildContext context) => PageHeader(
-        title: Text(category.name),
-        commandBar: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+  Widget _buildHeader() {
+    final context = useContext();
+    return PageHeader(
+      title: Text(category.name),
+      commandBar: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          PresetControlWidget(
+            isLocal: true,
+            category: category,
+          ),
+          const SizedBox(width: 16),
+          IntrinsicCommandBarCard(
+            child: CommandBar(
+              overflowBehavior: CommandBarOverflowBehavior.clip,
+              primaryItems: [
+                CommandBarButton(
+                  icon: const Icon(FluentIcons.folder_open),
+                  onPressed: _onFolderOpen,
+                ),
+                CommandBarButton(
+                  icon: const Icon(FluentIcons.download),
+                  onPressed: () => _onDownloadPressed(context),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent() => ThickScrollbar(
+        child: Consumer(
+          builder: (final context, final ref, final child) =>
+              ref.watch(categoryWatcherProvider(category)).when(
+                    skipLoadingOnReload: true,
+                    data: _buildData,
+                    error: _buildError,
+                    loading: _buildLoading,
+                  ),
+        ),
+      );
+
+  Widget _buildData(final List<Mod> data) {
+    final children = data.map((final e) => _ModCard(mod: e)).toList();
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: GridView.builder(
+        padding: const EdgeInsets.all(8),
+        gridDelegate: _sliverGridDelegateWithMinCrossAxisExtent,
+        itemCount: children.length,
+        itemBuilder: (final context, final index) =>
+            RevertScrollbar(child: children[index]),
+      ),
+    );
+  }
+
+  Widget _buildError(final error, final stackTrace) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            PresetControlWidget(
-              isLocal: true,
-              category: category,
-            ),
-            const SizedBox(width: 16),
-            IntrinsicCommandBarCard(
-              child: CommandBar(
-                overflowBehavior: CommandBarOverflowBehavior.clip,
-                primaryItems: [
-                  CommandBarButton(
-                    icon: const Icon(FluentIcons.folder_open),
-                    onPressed: () {
-                      openFolder(category.path);
-                    },
-                  ),
-                  CommandBarButton(
-                    icon: const Icon(FluentIcons.download),
-                    onPressed: () => unawaited(
-                      context.push(kNahidaStoreRoute, extra: category),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const Icon(FluentIcons.error),
+            Text('Error: $error\n$stackTrace'),
           ],
         ),
       );
 
-  Widget _buildContent() => ThickScrollbar(
-        child: Consumer(
-          builder: (final context, final ref, final child) {
-            final value = ref.watch(categoryWatcherProvider(category));
-            return value.when(
-              skipLoadingOnReload: true,
-              data: (final data) {
-                final children =
-                    data.map((final e) => _ModCard(mod: e)).toList();
-                return GridView.builder(
-                  padding: const EdgeInsets.all(8),
-                  gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
-                    minCrossAxisExtent: _minCrossAxisExtent,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                    mainAxisExtent: _mainAxisExtent,
-                  ),
-                  itemCount: children.length,
-                  itemBuilder: (final context, final index) =>
-                      RevertScrollbar(child: children[index]),
-                );
-              },
-              error: (final error, final stackTrace) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(FluentIcons.error),
-                    Text('Error: $error\n$stackTrace'),
-                  ],
-                ),
-              ),
-              loading: () => const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ProgressRing(),
-                    SizedBox(height: 16),
-                    Text('Loading...'),
-                  ],
-                ),
-              ),
-            );
-          },
+  Widget _buildLoading() => const AnimatedSwitcher(
+        duration: Duration.zero,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ProgressRing(),
+              SizedBox(height: 16),
+              Text('Loading...'),
+            ],
+          ),
         ),
+      );
+
+  void _onFolderOpen() {
+    openFolder(category.path);
+  }
+
+  void _onDownloadPressed(final BuildContext context) => unawaited(
+        context.push(kNahidaStoreRoute, extra: category),
       );
 
   @override

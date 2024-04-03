@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
@@ -101,11 +102,7 @@ class ModCardModel {
     final previewPath = findPreviewFileInString(getUnderSync<File>(_mod.path));
     if (previewPath != null) {
       setPreview(
-        Future(() async {
-          final fileImage = FileImage(File(previewPath));
-          await fileImage.evict();
-          return fileImage;
-        }),
+        SynchronousFuture(FileImage(File(previewPath))),
       );
     } else {
       setPreview(null);

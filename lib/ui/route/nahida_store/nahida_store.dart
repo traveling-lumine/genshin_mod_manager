@@ -268,7 +268,7 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Icon(FluentIcons.error),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text('Failed to load data: ${e.runtimeType}'),
         ],
       ),

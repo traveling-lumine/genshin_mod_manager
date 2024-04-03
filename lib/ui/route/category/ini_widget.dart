@@ -111,11 +111,7 @@ class _IniWidget extends ConsumerWidget {
       Row(
         children: [
           Text(data),
-          Expanded(
-            child: _EditorText(
-              iniSection: iniSection,
-            ),
-          ),
+          Expanded(child: _EditorText(iniSection: iniSection)),
         ],
       );
 
@@ -127,7 +123,7 @@ class _IniWidget extends ConsumerWidget {
 }
 
 class _EditorText extends HookConsumerWidget {
-  _EditorText({required this.iniSection}) : super(key: Key(iniSection.section));
+  const _EditorText({required this.iniSection});
 
   final IniSection iniSection;
 
@@ -164,7 +160,6 @@ class _EditorText extends HookConsumerWidget {
       return;
     }
     textEditingController.text = iniSection.value;
-    return;
   }
 
   @override

@@ -23,41 +23,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+import 'dart:async';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/oss_licenses.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// A route that shows the open source licenses.
 class OssLicensesRoute extends StatelessWidget {
+  /// Creates a [OssLicensesRoute].
   const OssLicensesRoute({super.key});
 
-  static Future<List<Package>> loadLicenses() async {
+  static Future<List<Package>> _loadLicenses() async {
     // merging non-dart dependency list using LicenseRegistry.
     final lm = <String, List<String>>{};
     await for (final l in LicenseRegistry.licenses) {
       for (final p in l.packages) {
-        final lp = lm.putIfAbsent(p, () => []);
-        lp.addAll(l.paragraphs.map((final p) => p.text));
+        lm
+            .putIfAbsent(p, () => [])
+            .addAll(l.paragraphs.map((final p) => p.text));
       }
     }
     final licenses =
         ossLicenses.where((final e) => e.isDirectDependency).toList();
-    // for (final key in lm.keys) {
-    //   licenses.add(Package(
-    //     name: key,
-    //     description: '',
-    //     authors: [],
-    //     version: '',
-    //     license: lm[key]!.join('\n\n'),
-    //     isMarkdown: false,
-    //     isSdk: false,
-    //     isDirectDependency: false,
-    //   ));
-    // }
     return licenses..sort((final a, final b) => a.name.compareTo(b.name));
   }
 
-  static final _licenses = loadLicenses();
+  static final _licenses = _loadLicenses();
 
   @override
   Widget build(final BuildContext context) => NavigationView(
@@ -79,10 +72,12 @@ class OssLicensesRoute extends StatelessWidget {
                       ? Text(package.description)
                       : null,
                   trailing: const Icon(FluentIcons.chevron_right),
-                  onPressed: () => Navigator.of(context).push(
-                    FluentPageRoute(
-                      builder: (final context) =>
-                          MiscOssLicenseSingle(package: package),
+                  onPressed: () => unawaited(
+                    Navigator.of(context).push(
+                      FluentPageRoute(
+                        builder: (final context) =>
+                            _MiscOssLicenseSingle(package: package),
+                      ),
                     ),
                   ),
                 );
@@ -94,8 +89,8 @@ class OssLicensesRoute extends StatelessWidget {
       );
 }
 
-class MiscOssLicenseSingle extends StatelessWidget {
-  const MiscOssLicenseSingle({required this.package, super.key});
+class _MiscOssLicenseSingle extends StatelessWidget {
+  const _MiscOssLicenseSingle({required this.package});
 
   final Package package;
 
@@ -131,7 +126,8 @@ class MiscOssLicenseSingle extends StatelessWidget {
                         decoration: TextDecoration.underline,
                       ),
                     ),
-                    onTap: () => launchUrl(Uri.parse(package.homepage!)),
+                    onTap: () =>
+                        unawaited(launchUrl(Uri.parse(package.homepage!))),
                   ),
                 ),
               if (package.description.isNotEmpty || package.homepage != null)
