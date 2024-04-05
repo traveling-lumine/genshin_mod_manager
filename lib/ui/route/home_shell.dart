@@ -12,6 +12,7 @@ import 'package:genshin_mod_manager/domain/constant.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/flow/app_version.dart';
+import 'package:genshin_mod_manager/flow/exe_arg.dart';
 import 'package:genshin_mod_manager/flow/home_shell.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
@@ -48,6 +49,44 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   void initState() {
     super.initState();
     WindowManager.instance.addListener(this);
+
+    final args = ref.read(argProviderProvider);
+    if (args.isNotEmpty) {
+      SchedulerBinding.instance.addPostFrameCallback(
+        (final timeStamp) {
+          final arg = args.first;
+          if (arg == AcceptedArg.run3dm.cmd) {
+            _runMigoto();
+          } else if (arg == AcceptedArg.rungame.cmd) {
+            _runLauncher();
+          } else if (arg == AcceptedArg.runboth.cmd) {
+            _runBoth();
+          } else {
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (final dCtx) {
+                  final validArgs =
+                      AcceptedArg.values.map((final e) => e.cmd).join(', ');
+                  return ContentDialog(
+                    title: const Text('Invalid argument'),
+                    content: Text('Unknown argument: $arg.\n'
+                        'Valid args are: $validArgs'),
+                    actions: [
+                      FilledButton(
+                        onPressed: Navigator.of(dCtx).pop,
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            );
+          }
+          ref.read(argProviderProvider.notifier).clear();
+        },
+      );
+    }
   }
 
   @override
