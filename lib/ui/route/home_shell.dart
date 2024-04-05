@@ -23,6 +23,7 @@ import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import 'package:window_manager/window_manager.dart';
 
 const _kRepoReleases = '$kRepoBase/releases/latest';
@@ -43,6 +44,20 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   @override
   void onWindowFocus() {
     ref.read(homeShellListProvider.notifier).refresh();
+  }
+
+  @override
+  void onWindowResized() {
+    super.onWindowResized();
+    final read = ref.read(sharedPreferenceStorageProvider);
+    unawaited(
+      WindowManager.instance.getSize().then((final value) {
+        read
+          ..setString('windowWidth', value.width.toString())
+          ..setString('windowHeight', value.height.toString());
+        Logger().d('Window size: $value');
+      }),
+    );
   }
 
   @override
@@ -86,6 +101,16 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           ref.read(argProviderProvider.notifier).clear();
         },
       );
+    }
+
+    final read = ref.read(sharedPreferenceStorageProvider);
+    try {
+      final width = double.parse(read.getString('windowWidth') ?? '');
+      final height = double.parse(read.getString('windowHeight') ?? '');
+      unawaited(WindowManager.instance.setSize(Size(width, height)));
+      Logger().d('Restored window size: $width x $height');
+    } on Exception catch (e) {
+      Logger().e('Failed to restore window size: $e');
     }
   }
 
