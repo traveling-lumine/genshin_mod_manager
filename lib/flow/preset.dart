@@ -30,7 +30,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
 
   @override
   void addPreset(final String name) {
-    final presetTargetData = PresetTargetData(
+    final presetTargetData = PresetList(
       mods: getUnder<Directory>(category.path)
           .where((final e) => e.pIsEnabled)
           .map((final e) => e.pBasename)
@@ -42,21 +42,21 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
     if (presetData != null) {
       final localPresets = presetData.local;
       final categoryPresets = localPresets[category.name];
-      final Map<String, PresetTargetData> modString;
+      final Map<String, PresetList> modString;
       if (categoryPresets != null) {
         modString = {...categoryPresets.bundledPresets}..[name] =
             presetTargetData;
       } else {
         modString = {name: presetTargetData};
       }
-      final newCategoryPresets = BundledPresetData(bundledPresets: modString);
+      final newCategoryPresets = PresetListMap(bundledPresets: modString);
       final newLocalPresets = {...localPresets}..[category.name] =
           newCategoryPresets;
       final res = presetData.copyWith(local: newLocalPresets);
       ref.read(appStateNotifierProvider.notifier).changePresetData(res);
     } else {
       final bundledPreset =
-          BundledPresetData(bundledPresets: {name: presetTargetData});
+          PresetListMap(bundledPresets: {name: presetTargetData});
       final res = PresetData(global: {}, local: {category.name: bundledPreset});
       ref.read(appStateNotifierProvider.notifier).changePresetData(res);
     }
@@ -85,7 +85,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
       return;
     }
     final modString = {...categoryPresets.bundledPresets}..remove(name);
-    final newCategoryPresets = BundledPresetData(bundledPresets: modString);
+    final newCategoryPresets = PresetListMap(bundledPresets: modString);
     final newLocalPresets = {...localPresets}..[category.name] =
         newCategoryPresets;
     final res = presetData.copyWith(local: newLocalPresets);
@@ -154,10 +154,10 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
     if (rootPath == null) {
       return;
     }
-    final bpd = BundledPresetData(
+    final bpd = PresetListMap(
       bundledPresets: {
         for (final categoryDir in getUnder<Directory>(rootPath))
-          categoryDir.pBasename: PresetTargetData(
+          categoryDir.pBasename: PresetList(
             mods: getUnder<Directory>(categoryDir)
                 .map((final e) => e.pBasename)
                 .where((final e) => e.pIsEnabled)

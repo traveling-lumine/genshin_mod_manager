@@ -20,10 +20,8 @@ PresetData _$PresetDataFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$PresetData {
-  Map<String, BundledPresetData> get global =>
-      throw _privateConstructorUsedError;
-  Map<String, BundledPresetData> get local =>
-      throw _privateConstructorUsedError;
+  Map<String, PresetListMap> get global => throw _privateConstructorUsedError;
+  Map<String, PresetListMap> get local => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -38,8 +36,7 @@ abstract class $PresetDataCopyWith<$Res> {
       _$PresetDataCopyWithImpl<$Res, PresetData>;
   @useResult
   $Res call(
-      {Map<String, BundledPresetData> global,
-      Map<String, BundledPresetData> local});
+      {Map<String, PresetListMap> global, Map<String, PresetListMap> local});
 }
 
 /// @nodoc
@@ -62,11 +59,11 @@ class _$PresetDataCopyWithImpl<$Res, $Val extends PresetData>
       global: null == global
           ? _value.global
           : global // ignore: cast_nullable_to_non_nullable
-              as Map<String, BundledPresetData>,
+              as Map<String, PresetListMap>,
       local: null == local
           ? _value.local
           : local // ignore: cast_nullable_to_non_nullable
-              as Map<String, BundledPresetData>,
+              as Map<String, PresetListMap>,
     ) as $Val);
   }
 }
@@ -80,8 +77,7 @@ abstract class _$$PresetDataImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {Map<String, BundledPresetData> global,
-      Map<String, BundledPresetData> local});
+      {Map<String, PresetListMap> global, Map<String, PresetListMap> local});
 }
 
 /// @nodoc
@@ -102,11 +98,11 @@ class __$$PresetDataImplCopyWithImpl<$Res>
       global: null == global
           ? _value._global
           : global // ignore: cast_nullable_to_non_nullable
-              as Map<String, BundledPresetData>,
+              as Map<String, PresetListMap>,
       local: null == local
           ? _value._local
           : local // ignore: cast_nullable_to_non_nullable
-              as Map<String, BundledPresetData>,
+              as Map<String, PresetListMap>,
     ));
   }
 }
@@ -115,25 +111,25 @@ class __$$PresetDataImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$PresetDataImpl with DiagnosticableTreeMixin implements _PresetData {
   const _$PresetDataImpl(
-      {required final Map<String, BundledPresetData> global,
-      required final Map<String, BundledPresetData> local})
+      {required final Map<String, PresetListMap> global,
+      required final Map<String, PresetListMap> local})
       : _global = global,
         _local = local;
 
   factory _$PresetDataImpl.fromJson(Map<String, dynamic> json) =>
       _$$PresetDataImplFromJson(json);
 
-  final Map<String, BundledPresetData> _global;
+  final Map<String, PresetListMap> _global;
   @override
-  Map<String, BundledPresetData> get global {
+  Map<String, PresetListMap> get global {
     if (_global is EqualUnmodifiableMapView) return _global;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableMapView(_global);
   }
 
-  final Map<String, BundledPresetData> _local;
+  final Map<String, PresetListMap> _local;
   @override
-  Map<String, BundledPresetData> get local {
+  Map<String, PresetListMap> get local {
     if (_local is EqualUnmodifiableMapView) return _local;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableMapView(_local);
@@ -185,50 +181,50 @@ class _$PresetDataImpl with DiagnosticableTreeMixin implements _PresetData {
 
 abstract class _PresetData implements PresetData {
   const factory _PresetData(
-      {required final Map<String, BundledPresetData> global,
-      required final Map<String, BundledPresetData> local}) = _$PresetDataImpl;
+      {required final Map<String, PresetListMap> global,
+      required final Map<String, PresetListMap> local}) = _$PresetDataImpl;
 
   factory _PresetData.fromJson(Map<String, dynamic> json) =
       _$PresetDataImpl.fromJson;
 
   @override
-  Map<String, BundledPresetData> get global;
+  Map<String, PresetListMap> get global;
   @override
-  Map<String, BundledPresetData> get local;
+  Map<String, PresetListMap> get local;
   @override
   @JsonKey(ignore: true)
   _$$PresetDataImplCopyWith<_$PresetDataImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
-BundledPresetData _$BundledPresetDataFromJson(Map<String, dynamic> json) {
-  return _BundledPresetData.fromJson(json);
+PresetListMap _$PresetListMapFromJson(Map<String, dynamic> json) {
+  return _PresetListMap.fromJson(json);
 }
 
 /// @nodoc
-mixin _$BundledPresetData {
-  Map<String, PresetTargetData> get bundledPresets =>
+mixin _$PresetListMap {
+  Map<String, PresetList> get bundledPresets =>
       throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $BundledPresetDataCopyWith<BundledPresetData> get copyWith =>
+  $PresetListMapCopyWith<PresetListMap> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $BundledPresetDataCopyWith<$Res> {
-  factory $BundledPresetDataCopyWith(
-          BundledPresetData value, $Res Function(BundledPresetData) then) =
-      _$BundledPresetDataCopyWithImpl<$Res, BundledPresetData>;
+abstract class $PresetListMapCopyWith<$Res> {
+  factory $PresetListMapCopyWith(
+          PresetListMap value, $Res Function(PresetListMap) then) =
+      _$PresetListMapCopyWithImpl<$Res, PresetListMap>;
   @useResult
-  $Res call({Map<String, PresetTargetData> bundledPresets});
+  $Res call({Map<String, PresetList> bundledPresets});
 }
 
 /// @nodoc
-class _$BundledPresetDataCopyWithImpl<$Res, $Val extends BundledPresetData>
-    implements $BundledPresetDataCopyWith<$Res> {
-  _$BundledPresetDataCopyWithImpl(this._value, this._then);
+class _$PresetListMapCopyWithImpl<$Res, $Val extends PresetListMap>
+    implements $PresetListMapCopyWith<$Res> {
+  _$PresetListMapCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
@@ -244,28 +240,28 @@ class _$BundledPresetDataCopyWithImpl<$Res, $Val extends BundledPresetData>
       bundledPresets: null == bundledPresets
           ? _value.bundledPresets
           : bundledPresets // ignore: cast_nullable_to_non_nullable
-              as Map<String, PresetTargetData>,
+              as Map<String, PresetList>,
     ) as $Val);
   }
 }
 
 /// @nodoc
-abstract class _$$BundledPresetDataImplCopyWith<$Res>
-    implements $BundledPresetDataCopyWith<$Res> {
-  factory _$$BundledPresetDataImplCopyWith(_$BundledPresetDataImpl value,
-          $Res Function(_$BundledPresetDataImpl) then) =
-      __$$BundledPresetDataImplCopyWithImpl<$Res>;
+abstract class _$$PresetListMapImplCopyWith<$Res>
+    implements $PresetListMapCopyWith<$Res> {
+  factory _$$PresetListMapImplCopyWith(
+          _$PresetListMapImpl value, $Res Function(_$PresetListMapImpl) then) =
+      __$$PresetListMapImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({Map<String, PresetTargetData> bundledPresets});
+  $Res call({Map<String, PresetList> bundledPresets});
 }
 
 /// @nodoc
-class __$$BundledPresetDataImplCopyWithImpl<$Res>
-    extends _$BundledPresetDataCopyWithImpl<$Res, _$BundledPresetDataImpl>
-    implements _$$BundledPresetDataImplCopyWith<$Res> {
-  __$$BundledPresetDataImplCopyWithImpl(_$BundledPresetDataImpl _value,
-      $Res Function(_$BundledPresetDataImpl) _then)
+class __$$PresetListMapImplCopyWithImpl<$Res>
+    extends _$PresetListMapCopyWithImpl<$Res, _$PresetListMapImpl>
+    implements _$$PresetListMapImplCopyWith<$Res> {
+  __$$PresetListMapImplCopyWithImpl(
+      _$PresetListMapImpl _value, $Res Function(_$PresetListMapImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -273,30 +269,30 @@ class __$$BundledPresetDataImplCopyWithImpl<$Res>
   $Res call({
     Object? bundledPresets = null,
   }) {
-    return _then(_$BundledPresetDataImpl(
+    return _then(_$PresetListMapImpl(
       bundledPresets: null == bundledPresets
           ? _value._bundledPresets
           : bundledPresets // ignore: cast_nullable_to_non_nullable
-              as Map<String, PresetTargetData>,
+              as Map<String, PresetList>,
     ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$BundledPresetDataImpl
+class _$PresetListMapImpl
     with DiagnosticableTreeMixin
-    implements _BundledPresetData {
-  const _$BundledPresetDataImpl(
-      {required final Map<String, PresetTargetData> bundledPresets})
+    implements _PresetListMap {
+  const _$PresetListMapImpl(
+      {required final Map<String, PresetList> bundledPresets})
       : _bundledPresets = bundledPresets;
 
-  factory _$BundledPresetDataImpl.fromJson(Map<String, dynamic> json) =>
-      _$$BundledPresetDataImplFromJson(json);
+  factory _$PresetListMapImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PresetListMapImplFromJson(json);
 
-  final Map<String, PresetTargetData> _bundledPresets;
+  final Map<String, PresetList> _bundledPresets;
   @override
-  Map<String, PresetTargetData> get bundledPresets {
+  Map<String, PresetList> get bundledPresets {
     if (_bundledPresets is EqualUnmodifiableMapView) return _bundledPresets;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableMapView(_bundledPresets);
@@ -304,14 +300,14 @@ class _$BundledPresetDataImpl
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'BundledPresetData(bundledPresets: $bundledPresets)';
+    return 'PresetListMap(bundledPresets: $bundledPresets)';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty('type', 'BundledPresetData'))
+      ..add(DiagnosticsProperty('type', 'PresetListMap'))
       ..add(DiagnosticsProperty('bundledPresets', bundledPresets));
   }
 
@@ -319,7 +315,7 @@ class _$BundledPresetDataImpl
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$BundledPresetDataImpl &&
+            other is _$PresetListMapImpl &&
             const DeepCollectionEquality()
                 .equals(other._bundledPresets, _bundledPresets));
   }
@@ -332,61 +328,60 @@ class _$BundledPresetDataImpl
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$BundledPresetDataImplCopyWith<_$BundledPresetDataImpl> get copyWith =>
-      __$$BundledPresetDataImplCopyWithImpl<_$BundledPresetDataImpl>(
-          this, _$identity);
+  _$$PresetListMapImplCopyWith<_$PresetListMapImpl> get copyWith =>
+      __$$PresetListMapImplCopyWithImpl<_$PresetListMapImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$BundledPresetDataImplToJson(
+    return _$$PresetListMapImplToJson(
       this,
     );
   }
 }
 
-abstract class _BundledPresetData implements BundledPresetData {
-  const factory _BundledPresetData(
-          {required final Map<String, PresetTargetData> bundledPresets}) =
-      _$BundledPresetDataImpl;
+abstract class _PresetListMap implements PresetListMap {
+  const factory _PresetListMap(
+          {required final Map<String, PresetList> bundledPresets}) =
+      _$PresetListMapImpl;
 
-  factory _BundledPresetData.fromJson(Map<String, dynamic> json) =
-      _$BundledPresetDataImpl.fromJson;
+  factory _PresetListMap.fromJson(Map<String, dynamic> json) =
+      _$PresetListMapImpl.fromJson;
 
   @override
-  Map<String, PresetTargetData> get bundledPresets;
+  Map<String, PresetList> get bundledPresets;
   @override
   @JsonKey(ignore: true)
-  _$$BundledPresetDataImplCopyWith<_$BundledPresetDataImpl> get copyWith =>
+  _$$PresetListMapImplCopyWith<_$PresetListMapImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
-PresetTargetData _$PresetTargetDataFromJson(Map<String, dynamic> json) {
-  return _PresetTargetData.fromJson(json);
+PresetList _$PresetListFromJson(Map<String, dynamic> json) {
+  return _PresetList.fromJson(json);
 }
 
 /// @nodoc
-mixin _$PresetTargetData {
+mixin _$PresetList {
   List<String> get mods => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $PresetTargetDataCopyWith<PresetTargetData> get copyWith =>
+  $PresetListCopyWith<PresetList> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $PresetTargetDataCopyWith<$Res> {
-  factory $PresetTargetDataCopyWith(
-          PresetTargetData value, $Res Function(PresetTargetData) then) =
-      _$PresetTargetDataCopyWithImpl<$Res, PresetTargetData>;
+abstract class $PresetListCopyWith<$Res> {
+  factory $PresetListCopyWith(
+          PresetList value, $Res Function(PresetList) then) =
+      _$PresetListCopyWithImpl<$Res, PresetList>;
   @useResult
   $Res call({List<String> mods});
 }
 
 /// @nodoc
-class _$PresetTargetDataCopyWithImpl<$Res, $Val extends PresetTargetData>
-    implements $PresetTargetDataCopyWith<$Res> {
-  _$PresetTargetDataCopyWithImpl(this._value, this._then);
+class _$PresetListCopyWithImpl<$Res, $Val extends PresetList>
+    implements $PresetListCopyWith<$Res> {
+  _$PresetListCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
@@ -408,22 +403,22 @@ class _$PresetTargetDataCopyWithImpl<$Res, $Val extends PresetTargetData>
 }
 
 /// @nodoc
-abstract class _$$PresetTargetDataImplCopyWith<$Res>
-    implements $PresetTargetDataCopyWith<$Res> {
-  factory _$$PresetTargetDataImplCopyWith(_$PresetTargetDataImpl value,
-          $Res Function(_$PresetTargetDataImpl) then) =
-      __$$PresetTargetDataImplCopyWithImpl<$Res>;
+abstract class _$$PresetListImplCopyWith<$Res>
+    implements $PresetListCopyWith<$Res> {
+  factory _$$PresetListImplCopyWith(
+          _$PresetListImpl value, $Res Function(_$PresetListImpl) then) =
+      __$$PresetListImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({List<String> mods});
 }
 
 /// @nodoc
-class __$$PresetTargetDataImplCopyWithImpl<$Res>
-    extends _$PresetTargetDataCopyWithImpl<$Res, _$PresetTargetDataImpl>
-    implements _$$PresetTargetDataImplCopyWith<$Res> {
-  __$$PresetTargetDataImplCopyWithImpl(_$PresetTargetDataImpl _value,
-      $Res Function(_$PresetTargetDataImpl) _then)
+class __$$PresetListImplCopyWithImpl<$Res>
+    extends _$PresetListCopyWithImpl<$Res, _$PresetListImpl>
+    implements _$$PresetListImplCopyWith<$Res> {
+  __$$PresetListImplCopyWithImpl(
+      _$PresetListImpl _value, $Res Function(_$PresetListImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -431,7 +426,7 @@ class __$$PresetTargetDataImplCopyWithImpl<$Res>
   $Res call({
     Object? mods = null,
   }) {
-    return _then(_$PresetTargetDataImpl(
+    return _then(_$PresetListImpl(
       mods: null == mods
           ? _value._mods
           : mods // ignore: cast_nullable_to_non_nullable
@@ -442,14 +437,11 @@ class __$$PresetTargetDataImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$PresetTargetDataImpl
-    with DiagnosticableTreeMixin
-    implements _PresetTargetData {
-  const _$PresetTargetDataImpl({required final List<String> mods})
-      : _mods = mods;
+class _$PresetListImpl with DiagnosticableTreeMixin implements _PresetList {
+  const _$PresetListImpl({required final List<String> mods}) : _mods = mods;
 
-  factory _$PresetTargetDataImpl.fromJson(Map<String, dynamic> json) =>
-      _$$PresetTargetDataImplFromJson(json);
+  factory _$PresetListImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PresetListImplFromJson(json);
 
   final List<String> _mods;
   @override
@@ -461,14 +453,14 @@ class _$PresetTargetDataImpl
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'PresetTargetData(mods: $mods)';
+    return 'PresetList(mods: $mods)';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty('type', 'PresetTargetData'))
+      ..add(DiagnosticsProperty('type', 'PresetList'))
       ..add(DiagnosticsProperty('mods', mods));
   }
 
@@ -476,7 +468,7 @@ class _$PresetTargetDataImpl
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$PresetTargetDataImpl &&
+            other is _$PresetListImpl &&
             const DeepCollectionEquality().equals(other._mods, _mods));
   }
 
@@ -488,29 +480,28 @@ class _$PresetTargetDataImpl
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$PresetTargetDataImplCopyWith<_$PresetTargetDataImpl> get copyWith =>
-      __$$PresetTargetDataImplCopyWithImpl<_$PresetTargetDataImpl>(
-          this, _$identity);
+  _$$PresetListImplCopyWith<_$PresetListImpl> get copyWith =>
+      __$$PresetListImplCopyWithImpl<_$PresetListImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$PresetTargetDataImplToJson(
+    return _$$PresetListImplToJson(
       this,
     );
   }
 }
 
-abstract class _PresetTargetData implements PresetTargetData {
-  const factory _PresetTargetData({required final List<String> mods}) =
-      _$PresetTargetDataImpl;
+abstract class _PresetList implements PresetList {
+  const factory _PresetList({required final List<String> mods}) =
+      _$PresetListImpl;
 
-  factory _PresetTargetData.fromJson(Map<String, dynamic> json) =
-      _$PresetTargetDataImpl.fromJson;
+  factory _PresetList.fromJson(Map<String, dynamic> json) =
+      _$PresetListImpl.fromJson;
 
   @override
   List<String> get mods;
   @override
   @JsonKey(ignore: true)
-  _$$PresetTargetDataImplCopyWith<_$PresetTargetDataImpl> get copyWith =>
+  _$$PresetListImplCopyWith<_$PresetListImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -8,8 +8,8 @@ part 'preset.g.dart';
 @freezed
 class PresetData with _$PresetData {
   const factory PresetData({
-    required final Map<String, BundledPresetData> global,
-    required final Map<String, BundledPresetData> local,
+    required final Map<String, PresetListMap> global,
+    required final Map<String, PresetListMap> local,
   }) = _PresetData;
 
   factory PresetData.fromJson(final Map<String, dynamic> json) =>
@@ -17,23 +17,23 @@ class PresetData with _$PresetData {
 }
 
 @freezed
-class BundledPresetData with _$BundledPresetData {
-  const factory BundledPresetData({
-    required final Map<String, PresetTargetData> bundledPresets,
-  }) = _BundledPresetData;
+class PresetListMap with _$PresetListMap {
+  const factory PresetListMap({
+    required final Map<String, PresetList> bundledPresets,
+  }) = _PresetListMap;
 
-  factory BundledPresetData.fromJson(final Map<String, dynamic> json) =>
-      _$BundledPresetDataFromJson(json);
+  factory PresetListMap.fromJson(final Map<String, dynamic> json) =>
+      _$PresetListMapFromJson(json);
 }
 
 @freezed
-class PresetTargetData with _$PresetTargetData {
-  const factory PresetTargetData({
+class PresetList with _$PresetList {
+  const factory PresetList({
     required final List<String> mods,
-  }) = _PresetTargetData;
+  }) = _PresetList;
 
-  factory PresetTargetData.fromJson(
+  factory PresetList.fromJson(
     final Map<String, dynamic> json,
   ) =>
-      _$PresetTargetDataFromJson(json);
+      _$PresetListFromJson(json);
 }
