@@ -4,6 +4,7 @@ import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/domain/entity/app_state.dart';
+import 'package:genshin_mod_manager/domain/entity/game_enum.dart';
 import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/flow/app_version.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
@@ -254,7 +255,7 @@ class _ComboItem extends StatelessWidget {
   final String text;
 
   // ignore: avoid_positional_boolean_parameters
-  final void Function(String value) onChanged;
+  final void Function(TargetGames value) onChanged;
 
   @override
   Widget build(final BuildContext context) => ListTile(
@@ -263,11 +264,15 @@ class _ComboItem extends StatelessWidget {
           builder: (final context, final ref, final child) {
             final value = ref.watch(targetGameProvider);
             return RepaintBoundary(
-              child: ComboBox<String>(
-                items: const [
-                  ComboBoxItem<String>(value: '', child: Text("Genshin")),
-                  ComboBoxItem<String>(value: 's_', child: Text("Starrail")),
-                ],
+              child: ComboBox<TargetGames>(
+                items: TargetGames.values
+                    .map(
+                      (final e) => ComboBoxItem<TargetGames>(
+                        value: e,
+                        child: Text(e.displayName),
+                      ),
+                    )
+                    .toList(),
                 onChanged: (final value) {
                   if (value == null) {
                     unawaited(
@@ -297,7 +302,7 @@ class _ComboItem extends StatelessWidget {
     properties
       ..add(StringProperty('text', text))
       ..add(
-        ObjectFlagProperty<void Function(String value)>.has(
+        ObjectFlagProperty<void Function(TargetGames value)>.has(
           'onChanged',
           onChanged,
         ),

@@ -130,14 +130,14 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     }
 
     final game = ref.watch(targetGameProvider);
-    final gameName = game == 's_' ? 'Starrail' : 'Genshin';
 
+    final updateMarker = ref.watch(isOutdatedProvider).maybeWhen(
+          data: (final value) => value ? ' (update!)' : '',
+          orElse: () => '',
+        );
     return NavigationView(
       appBar: getAppbar(
-        '$gameName Mod Manager${ref.watch(isOutdatedProvider).maybeWhen(
-              data: (final value) => value ? ' (update!)' : '',
-              orElse: () => '',
-            )}',
+        '${game.displayName} Mod Manager$updateMarker',
         presetControl: true,
       ),
       pane: _buildPane(selected, items, footerItems),

@@ -1,6 +1,7 @@
 import 'package:genshin_mod_manager/data/repo/app_state_storage.dart';
 import 'package:genshin_mod_manager/data/repo/sharedpreference_storage.dart';
 import 'package:genshin_mod_manager/domain/entity/app_state.dart';
+import 'package:genshin_mod_manager/domain/entity/game_enum.dart';
 import 'package:genshin_mod_manager/domain/entity/preset.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state_storage.dart';
 import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
@@ -37,14 +38,18 @@ class TargetGame extends _$TargetGame {
   static const _key = 'targetGame';
 
   @override
-  String build() {
+  TargetGames build() {
     final storage = ref.watch(sharedPreferenceStorageProvider);
-    return storage.getString(_key) ?? '';
+    final savedValue = storage.getString(_key);
+    return TargetGames.values.firstWhere(
+      (final element) => element.prefix == savedValue,
+      orElse: () => TargetGames.gshin,
+    );
   }
 
   /// Sets the value.
-  void setValue(final String value) {
-    ref.read(sharedPreferenceStorageProvider).setString(_key, value);
+  void setValue(final TargetGames value) {
+    ref.read(sharedPreferenceStorageProvider).setString(_key, value.prefix);
     state = value;
   }
 }
@@ -56,7 +61,7 @@ AppStateStorage appStateStorage(final AppStateStorageRef ref) {
   final game = ref.watch(targetGameProvider);
   return AppStateStorageImpl(
     persistentStorage: persistentStorage,
-    prefix: game,
+    prefix: game.prefix,
   );
 }
 

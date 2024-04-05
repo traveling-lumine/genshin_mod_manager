@@ -39,8 +39,7 @@ class _WelcomeRouteState extends State<WelcomeRoute> {
               Consumer(
                 builder: (final context, final ref, final child) {
                   final game = ref.watch(targetGameProvider);
-                  final gameName = game == 's_' ? 'Starrail' : 'Genshin';
-                  return Text('Welcome to $gameName Mod Manager!');
+                  return Text('Welcome to ${game.displayName} Mod Manager!');
                 },
               ),
               const SizedBox(height: 16),
