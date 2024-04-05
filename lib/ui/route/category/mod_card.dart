@@ -88,6 +88,15 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
                 const SizedBox(width: 4),
                 RepaintBoundary(
                   child: Button(
+                    child: const Icon(FluentIcons.delete),
+                    onPressed: () {
+                      _onDeletePressed(context);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 4),
+                RepaintBoundary(
+                  child: Button(
                     child: const Icon(FluentIcons.folder_open),
                     onPressed: () => openFolder(widget.mod.path),
                   ),
@@ -235,6 +244,7 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
           );
         },
       );
+
   Widget _buildImageDesc(
     final BuildContext context,
     final BoxConstraints constraints,
@@ -297,6 +307,49 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
     _logger.d('Image pasted to $filePath');
     return;
   }
+
+  void _onDeletePressed(final BuildContext context) => unawaited(
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (final dCtx) => ContentDialog(
+            title: const Text('Delete mod?'),
+            content: const Text(
+              'Are you sure you want to delete this mod?',
+            ),
+            actions: [
+              Button(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.pop(dCtx);
+                },
+              ),
+              FluentTheme(
+                data: FluentTheme.of(context).copyWith(
+                  accentColor: Colors.red,
+                ),
+                child: FilledButton(
+                  child: const Text('Delete'),
+                  onPressed: () {
+                    Navigator.pop(dCtx);
+                    Directory(widget.mod.path).deleteSync(
+                      recursive: true,
+                    );
+                    displayInfoBarInContext(
+                      context,
+                      title: const Text('Mod deleted'),
+                      content: Text(
+                        'Mod deleted from ${widget.mod.path}',
+                      ),
+                      severity: InfoBarSeverity.warning,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
 
   void _onImageTap(final BuildContext context, final ImageProvider image) {
     unawaited(
