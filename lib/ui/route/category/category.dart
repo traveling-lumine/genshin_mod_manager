@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/mod_switcher.dart';
@@ -23,6 +23,7 @@ import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
 import 'package:genshin_mod_manager/ui/widget/thick_scrollbar.dart';
+import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_delegate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -38,27 +39,32 @@ class CategoryRoute extends HookWidget {
   /// Creates a [CategoryRoute].
   const CategoryRoute({required this.category, super.key});
 
-  static const _sliverGridDelegateWithMinCrossAxisExtent =
+  static const _mainAxisExtent = 400.0;
+  static const _mainAxisSpacing = 8.0;
+  static final _sliverGridDelegateWithMinCrossAxisExtent =
       SliverGridDelegateWithMinCrossAxisExtent(
-    mainAxisExtent: 400,
+    mainAxisExtent: _mainAxisExtent,
     minCrossAxisExtent: 440,
     crossAxisSpacing: 8,
-    mainAxisSpacing: 8,
+    mainAxisSpacing: _mainAxisSpacing,
   );
 
   /// The category to display
   final ModCategory category;
 
   @override
-  Widget build(final BuildContext context) => CategoryDropTarget(
-        category: category,
-        child: ScaffoldPage(
-          header: _buildHeader(),
-          content: _buildContent(),
-        ),
-      );
+  Widget build(final BuildContext context) {
+    final scrollController = useScrollController();
+    return CategoryDropTarget(
+      category: category,
+      child: ScaffoldPage(
+        header: _buildHeader(scrollController),
+        content: _buildContent(scrollController),
+      ),
+    );
+  }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(final ScrollController scrollController) {
     final context = useContext();
     return PageHeader(
       title: Text(category.name),
@@ -69,7 +75,10 @@ class CategoryRoute extends HookWidget {
             isLocal: true,
             category: category,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildSearchBox(scrollController),
+          ),
           IntrinsicCommandBarCard(
             child: CommandBar(
               overflowBehavior: CommandBarOverflowBehavior.clip,
@@ -90,23 +99,68 @@ class CategoryRoute extends HookWidget {
     );
   }
 
-  Widget _buildContent() => ThickScrollbar(
+  Widget _buildSearchBox(final ScrollController scrollController) => Consumer(
+        builder: (final context, final ref, final child) {
+          final whenOrNull =
+              ref.watch(categoryWatcherProvider(category)).whenOrNull(
+            data: (final data) {
+              final items = data.indexed.map(
+                (final e) => AutoSuggestBoxItem2(
+                  value: e.$2.displayName,
+                  label: e.$2.displayName,
+                  onSelected: () {
+                    _moveTo(scrollController, e.$1);
+                  },
+                ),
+              );
+              return AutoSuggestBox2(
+                items: items.toList(),
+                trailingIcon: const Icon(FluentIcons.search),
+                onSubmissionFailed: (final text) {
+                  if (text.isEmpty) {
+                    return;
+                  }
+                  final index = data.indexWhere((final e) {
+                    final name = e.displayName.toLowerCase();
+                    return name.startsWith(text.toLowerCase());
+                  });
+                  _moveTo(scrollController, index);
+                },
+              );
+            },
+          );
+          if (whenOrNull == null) {
+            return const SizedBox.shrink();
+          }
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: whenOrNull,
+          );
+        },
+      );
+
+  Widget _buildContent(final ScrollController scrollController) =>
+      ThickScrollbar(
         child: Consumer(
           builder: (final context, final ref, final child) =>
               ref.watch(categoryWatcherProvider(category)).when(
                     skipLoadingOnReload: true,
-                    data: _buildData,
+                    data: (final data) => _buildData(data, scrollController),
                     error: _buildError,
                     loading: _buildLoading,
                   ),
         ),
       );
 
-  Widget _buildData(final List<Mod> data) {
+  Widget _buildData(
+    final List<Mod> data,
+    final ScrollController scrollController,
+  ) {
     final children = data.map((final e) => _ModCard(mod: e)).toList();
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       child: GridView.builder(
+        controller: scrollController,
         padding: const EdgeInsets.all(8),
         gridDelegate: _sliverGridDelegateWithMinCrossAxisExtent,
         itemCount: children.length,
@@ -140,6 +194,24 @@ class CategoryRoute extends HookWidget {
           ),
         ),
       );
+
+  void _moveTo(final ScrollController scrollController, final int index) {
+    final latestCrossAxisCount =
+        _sliverGridDelegateWithMinCrossAxisExtent.latestCrossAxisCount;
+    if (latestCrossAxisCount == null) {
+      return;
+    }
+    final latest = latestCrossAxisCount;
+    final rowIdx = index ~/ latest;
+    final distanceToMove = rowIdx * (_mainAxisExtent + _mainAxisSpacing);
+    unawaited(
+      scrollController.animateTo(
+        distanceToMove,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
 
   void _onFolderOpen() {
     openFolder(category.path);

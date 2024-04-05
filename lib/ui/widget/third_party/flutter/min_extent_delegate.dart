@@ -40,7 +40,7 @@ class SliverGridDelegateWithMinCrossAxisExtent extends SliverGridDelegate {
   /// The [minCrossAxisExtent], [mainAxisExtent], [mainAxisSpacing],
   /// and [crossAxisSpacing] arguments must not be negative.
   /// The [childAspectRatio] argument must be greater than zero.
-  const SliverGridDelegateWithMinCrossAxisExtent({
+  SliverGridDelegateWithMinCrossAxisExtent({
     required this.minCrossAxisExtent,
     this.mainAxisSpacing = 0.0,
     this.crossAxisSpacing = 0.0,
@@ -88,6 +88,9 @@ class SliverGridDelegateWithMinCrossAxisExtent extends SliverGridDelegate {
     return true;
   }
 
+  /// The latest number of cross axis count calculated by the delegate.
+  int? latestCrossAxisCount;
+
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
     assert(_debugAssertIsValid(constraints.crossAxisExtent));
@@ -104,6 +107,7 @@ class SliverGridDelegateWithMinCrossAxisExtent extends SliverGridDelegate {
     final double childCrossAxisExtent = usableCrossAxisExtent / crossAxisCount;
     final double childMainAxisExtent =
         mainAxisExtent ?? childCrossAxisExtent / childAspectRatio;
+    latestCrossAxisCount = crossAxisCount;
     return SliverGridRegularTileLayout(
       crossAxisCount: crossAxisCount,
       mainAxisStride: childMainAxisExtent + mainAxisSpacing,
