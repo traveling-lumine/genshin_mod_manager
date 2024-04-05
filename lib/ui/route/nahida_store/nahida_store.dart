@@ -247,7 +247,7 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
         return ThickScrollbar(
           child: GridView.builder(
             controller: _scrollController,
-            gridDelegate: const SliverGridDelegateWithMinCrossAxisExtent(
+            gridDelegate: SliverGridDelegateWithMinCrossAxisExtent(
               minCrossAxisExtent: 500,
               mainAxisExtent: 500,
               crossAxisSpacing: 10,
