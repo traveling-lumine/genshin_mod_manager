@@ -55,29 +55,24 @@ class CategoryDropTarget extends ConsumerWidget {
         continue;
       }
 
-      if (sourceDir.path.pIsWithin(newPath) || sourceDir.path == newPath) {
-        throw FileSystemException(
-          'Cannot move a folder into itself',
-          sourceDir.path,
-          const OSError("", 87),
-        );
-      }
       if (moveInsteadOfCopy) {
         try {
           sourceDir.renameSync(newPath);
         } on FileSystemException catch (e) {
-          if (e.osError?.errorCode == 87) {
-            unawaited(
-              displayInfoBarInContext(
-                context,
-                title: const Text('Incorrect parameter'),
-                severity: InfoBarSeverity.error,
-              ),
-            );
-          } else {
+          if (e.osError?.errorCode == 17) {
+            // Moving across different drives
             sourceDir
               ..copyToPath(newPath)
               ..deleteSync(recursive: true);
+          } else {
+            unawaited(
+              displayInfoBarInContext(
+                context,
+                title: const Text('Error moving folder'),
+                content: Text('$e'),
+                severity: InfoBarSeverity.error,
+              ),
+            );
           }
         }
       } else {
