@@ -3,24 +3,7 @@ import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
 import 'package:window_manager/window_manager.dart';
 
 /// The width of window control button row.
-const kWindowButtonWidth = 138.0;
-
-/// A widget that provides window buttons.
-class WindowButtons extends StatelessWidget {
-  /// Creates a [WindowButtons].
-  const WindowButtons({super.key});
-
-  @override
-  Widget build(final BuildContext context) => SizedBox(
-        width: kWindowButtonWidth,
-        height: 50,
-        child: RepaintBoundary(
-          child: WindowCaption(
-            brightness: FluentTheme.of(context).brightness,
-          ),
-        ),
-      );
-}
+const _kWindowButtonWidth = 138.0;
 
 /// A widget that provides a navigation appbar.
 NavigationAppBar getAppbar(
@@ -49,14 +32,24 @@ NavigationAppBar getAppbar(
       children: [
         title,
         Positioned(
-          right: kWindowButtonWidth,
+          right: _kWindowButtonWidth,
           child: PresetControlWidget(isLocal: false),
         ),
       ],
     );
   }
   return NavigationAppBar(
-    actions: const WindowButtons(),
+    actions: SizedBox(
+      width: _kWindowButtonWidth,
+      height: 50,
+      child: RepaintBoundary(
+        child: Builder(
+          builder: (final context) => WindowCaption(
+            brightness: FluentTheme.of(context).brightness,
+          ),
+        ),
+      ),
+    ),
     automaticallyImplyLeading: false,
     title: title,
   );

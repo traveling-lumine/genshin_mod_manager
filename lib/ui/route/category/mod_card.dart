@@ -235,30 +235,6 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
           );
         },
       );
-
-  Future<void> _onPaste(final BuildContext context) async {
-    final image = await Pasteboard.image;
-    if (image == null) {
-      _logger.d('No image found in clipboard');
-      return;
-    }
-    final filePath = widget.mod.path.pJoin('preview.png');
-    await File(filePath).writeAsBytes(image);
-    if (!context.mounted) {
-      return;
-    }
-    await displayInfoBar(
-      context,
-      builder: (final _, final close) => InfoBar(
-        title: const Text('Image pasted'),
-        content: Text('to $filePath'),
-        onClose: close,
-      ),
-    );
-    _logger.d('Image pasted to $filePath');
-    return;
-  }
-
   Widget _buildImageDesc(
     final BuildContext context,
     final BoxConstraints constraints,
@@ -299,13 +275,35 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
         ),
       );
 
+  Future<void> _onPaste(final BuildContext context) async {
+    final image = await Pasteboard.image;
+    if (image == null) {
+      _logger.d('No image found in clipboard');
+      return;
+    }
+    final filePath = widget.mod.path.pJoin('preview.png');
+    await File(filePath).writeAsBytes(image);
+    if (!context.mounted) {
+      return;
+    }
+    await displayInfoBar(
+      context,
+      builder: (final _, final close) => InfoBar(
+        title: const Text('Image pasted'),
+        content: Text('to $filePath'),
+        onClose: close,
+      ),
+    );
+    _logger.d('Image pasted to $filePath');
+    return;
+  }
+
   void _onImageTap(final BuildContext context, final ImageProvider image) {
     unawaited(
       showDialog(
         context: context,
-        builder: (final dCtx) => GestureDetector(
-          onTap: Navigator.of(dCtx).pop,
-          onSecondaryTap: Navigator.of(dCtx).pop,
+        barrierDismissible: true,
+        builder: (final dCtx) => Center(
           child: Image(
             image: image,
             fit: BoxFit.contain,
@@ -334,9 +332,9 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
       _contextController.showFlyout(
         position: position,
         builder: (final fCtx) => FlyoutContent(
-          child: SizedBox(
-            width: 120,
+          child: IntrinsicWidth(
             child: CommandBar(
+              overflowBehavior: CommandBarOverflowBehavior.clip,
               primaryItems: [
                 CommandBarButton(
                   icon: const Icon(FluentIcons.delete),
@@ -375,15 +373,12 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
                   fileImage.file.deleteSync();
                   Navigator.of(dCtx).pop();
                   Navigator.of(context).pop();
-                  displayInfoBar(
+                  displayInfoBarInContext(
                     context,
-                    builder: (final context, final close) => InfoBar(
-                      title: const Text('Preview deleted'),
-                      content:
-                          Text('Preview deleted from ${fileImage.file.path}'),
-                      severity: InfoBarSeverity.warning,
-                      onClose: close,
-                    ),
+                    title: const Text('Preview deleted'),
+                    content:
+                        Text('Preview deleted from ${fileImage.file.path}'),
+                    severity: InfoBarSeverity.warning,
                   );
                 },
                 child: const Text('Delete'),

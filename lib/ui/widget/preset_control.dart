@@ -7,7 +7,9 @@ import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/flow/preset.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+/// A widget that provides a control for presets.
 class PresetControlWidget extends HookWidget {
+  /// Creates a [PresetControlWidget].
   PresetControlWidget({
     required this.isLocal,
     super.key,
@@ -18,120 +20,52 @@ class PresetControlWidget extends HookWidget {
     }
   }
 
-  /// Creates a [PresetControlWidget] for local presets.
+  /// Whether the preset control is local.
   final bool isLocal;
 
   /// The category of the local preset control.
   final ModCategory? category;
 
+  /// The prefix of the preset control.
   String get prefix => isLocal ? 'Local' : 'Global';
 
   @override
   Widget build(final BuildContext context) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildButton(context),
+          _buildButton(),
           const SizedBox(width: 8),
           _buildBox(),
         ],
       );
 
-  Widget _buildButton(final BuildContext context) {
+  Widget _buildButton() {
     final controller = useTextEditingController();
     return RepaintBoundary(
       child: Consumer(
         builder: (final context, final ref, final child) => IconButton(
           icon: const Icon(FluentIcons.add),
           onPressed: () {
-            _onPressed(context, controller, ref);
+            _onPresetAdd(context, controller, ref);
           },
         ),
       ),
     );
   }
 
-  Widget _buildBox() => Consumer(
-        builder: (final context, final ref, final child) {
-          final List<String> value;
-          if (isLocal) {
-            value = ref.watch(localPresetNotifierProvider(category!));
-          } else {
-            value = ref.watch(globalPresetNotifierProvider);
-          }
-          return RepaintBoundary(
-            child: ComboBox(
-              items: value
-                  .map((final e) => ComboBoxItem(value: e, child: Text(e)))
-                  .toList(),
-              placeholder: Text('$prefix Preset...'),
-              onChanged: (final value) => unawaited(
-                showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (final dCtx) => ContentDialog(
-                    title: Text('Apply $prefix Preset?'),
-                    content: Text('Preset name: ${value!}'),
-                    actions: [
-                      FluentTheme(
-                        data: FluentTheme.of(context)
-                            .copyWith(accentColor: Colors.red),
-                        child: FilledButton(
-                          onPressed: () {
-                            Navigator.of(dCtx).pop();
-                            if (isLocal) {
-                              ref
-                                  .read(
-                                    localPresetNotifierProvider(category!)
-                                        .notifier,
-                                  )
-                                  .removePreset(value);
-                            } else {
-                              ref
-                                  .read(globalPresetNotifierProvider.notifier)
-                                  .removePreset(value);
-                            }
-                          },
-                          child: const Text('Delete'),
-                        ),
-                      ),
-                      Button(
-                        onPressed: Navigator.of(dCtx).pop,
-                        child: const Text('Cancel'),
-                      ),
-                      FilledButton(
-                        onPressed: () {
-                          Navigator.of(dCtx).pop();
-                          if (isLocal) {
-                            ref
-                                .read(
-                                  localPresetNotifierProvider(category!)
-                                      .notifier,
-                                )
-                                .setPreset(value);
-                          } else {
-                            ref
-                                .read(globalPresetNotifierProvider.notifier)
-                                .setPreset(value);
-                          }
-                        },
-                        child: const Text('Apply'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      );
+  Widget _buildBox() =>
+      _PresetComboBox(isLocal: isLocal, category: category, prefix: prefix);
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('prefix', prefix));
+    properties
+      ..add(StringProperty('prefix', prefix))
+      ..add(DiagnosticsProperty<ModCategory?>('category', category))
+      ..add(DiagnosticsProperty<bool>('isLocal', isLocal));
   }
 
-  void _onPressed(
+  void _onPresetAdd(
     final BuildContext context,
     final TextEditingController controller,
     final WidgetRef ref,
@@ -142,8 +76,7 @@ class PresetControlWidget extends HookWidget {
         context: context,
         builder: (final dCtx) => ContentDialog(
           title: Text('Add $prefix Preset'),
-          content: SizedBox(
-            height: 40,
+          content: IntrinsicHeight(
             child: TextBox(
               controller: controller,
               placeholder: 'Preset Name',
@@ -159,15 +92,7 @@ class PresetControlWidget extends HookWidget {
                 Navigator.of(dCtx).pop();
                 final text = controller.text;
                 controller.clear();
-                if (isLocal) {
-                  ref
-                      .read(localPresetNotifierProvider(category!).notifier)
-                      .addPreset(text);
-                } else {
-                  ref
-                      .read(globalPresetNotifierProvider.notifier)
-                      .addPreset(text);
-                }
+                _getNotifier(ref).addPreset(text);
               },
               child: const Text('Add'),
             ),
@@ -175,5 +100,111 @@ class PresetControlWidget extends HookWidget {
         ),
       ),
     );
+  }
+
+  PresetNotifier _getNotifier(final WidgetRef ref) {
+    final PresetNotifier notifier;
+    if (isLocal) {
+      notifier = ref.read(localPresetNotifierProvider(category!).notifier);
+    } else {
+      notifier = ref.read(globalPresetNotifierProvider.notifier);
+    }
+    return notifier;
+  }
+}
+
+class _PresetComboBox extends ConsumerWidget {
+  const _PresetComboBox({
+    required this.isLocal,
+    required this.category,
+    required this.prefix,
+  });
+
+  final bool isLocal;
+  final ModCategory? category;
+  final String prefix;
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final value = _getPresets(ref);
+    return RepaintBoundary(
+      child: ComboBox(
+        items: value
+            .map((final e) => ComboBoxItem(value: e, child: Text(e)))
+            .toList(),
+        placeholder: Text('$prefix Preset...'),
+        onChanged: (final value) => _onBoxChanged(context, value!, ref),
+      ),
+    );
+  }
+
+  void _onBoxChanged(
+    final BuildContext context,
+    final String value,
+    final WidgetRef ref,
+  ) =>
+      unawaited(
+        showDialog(
+          barrierDismissible: true,
+          context: context,
+          builder: (final dCtx) => ContentDialog(
+            title: Text('Apply $prefix Preset?'),
+            content: Text('Preset name: $value'),
+            actions: [
+              FluentTheme(
+                data: FluentTheme.of(context).copyWith(accentColor: Colors.red),
+                child: FilledButton(
+                  onPressed: () {
+                    Navigator.of(dCtx).pop();
+                    _getNotifier(ref).removePreset(value);
+                  },
+                  child: const Text('Delete'),
+                ),
+              ),
+              Button(
+                onPressed: Navigator.of(dCtx).pop,
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.of(dCtx).pop();
+                  _getNotifier(ref).setPreset(value);
+                },
+                child: const Text('Apply'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+  List<String> _getPresets(final WidgetRef ref) {
+    final List<String> value;
+    if (isLocal) {
+      value = ref.watch(localPresetNotifierProvider(category!));
+    } else {
+      value = ref.watch(globalPresetNotifierProvider);
+    }
+    return value;
+  }
+
+  PresetNotifier _getNotifier(final WidgetRef ref) {
+    final PresetNotifier notifier;
+    if (isLocal) {
+      notifier = ref.read(
+        localPresetNotifierProvider(category!).notifier,
+      );
+    } else {
+      notifier = ref.read(globalPresetNotifierProvider.notifier);
+    }
+    return notifier;
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty<bool>('isLocal', isLocal))
+      ..add(DiagnosticsProperty<ModCategory?>('category', category))
+      ..add(StringProperty('prefix', prefix));
   }
 }

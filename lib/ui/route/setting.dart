@@ -4,9 +4,11 @@ import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/domain/entity/app_state.dart';
+import 'package:genshin_mod_manager/domain/entity/game_enum.dart';
 import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/flow/app_version.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
+import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/no_deref_file_opener.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -101,6 +103,10 @@ class _SettingRoute extends ConsumerWidget {
             selector: (final value) => value.darkMode,
             onChanged:
                 ref.read(appStateNotifierProvider.notifier).changeDarkMode,
+          ),
+          _ComboItem(
+            text: 'Target Game',
+            onChanged: ref.read(targetGameProvider.notifier).setValue,
           ),
           _buildLicense(context),
           _buildVersion(ref),
@@ -233,6 +239,70 @@ class _SwitchItem extends StatelessWidget {
       ..add(
         // ignore: avoid_positional_boolean_parameters
         ObjectFlagProperty<void Function(bool value)>.has(
+          'onChanged',
+          onChanged,
+        ),
+      );
+  }
+}
+
+class _ComboItem extends StatelessWidget {
+  const _ComboItem({
+    required this.text,
+    required this.onChanged,
+  });
+
+  final String text;
+
+  // ignore: avoid_positional_boolean_parameters
+  final void Function(TargetGames value) onChanged;
+
+  @override
+  Widget build(final BuildContext context) => ListTile(
+        title: Text(text),
+        leading: Consumer(
+          builder: (final context, final ref, final child) {
+            final value = ref.watch(targetGameProvider);
+            return RepaintBoundary(
+              child: ComboBox<TargetGames>(
+                items: TargetGames.values
+                    .map(
+                      (final e) => ComboBoxItem<TargetGames>(
+                        value: e,
+                        child: Text(e.displayName),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (final value) {
+                  if (value == null) {
+                    unawaited(
+                      displayInfoBarInContext(
+                        context,
+                        title: const Text("Whaat?"),
+                        severity: InfoBarSeverity.error,
+                        content: const Text(
+                          "Null value. This is a bug. Please report.",
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+                  onChanged(value);
+                },
+                value: value,
+              ),
+            );
+          },
+        ),
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('text', text))
+      ..add(
+        ObjectFlagProperty<void Function(TargetGames value)>.has(
           'onChanged',
           onChanged,
         ),

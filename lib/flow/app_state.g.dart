@@ -43,7 +43,7 @@ final sharedPreferenceStorageProvider =
 );
 
 typedef SharedPreferenceStorageRef = AutoDisposeProviderRef<PersistentStorage>;
-String _$appStateStorageHash() => r'8a88f855a6de6d5238c00e5473844fb4b1865173';
+String _$appStateStorageHash() => r'eddd58f04f26a226d58f13134d4dd54b884c0a9c';
 
 /// The storage for the app state.
 ///
@@ -60,6 +60,23 @@ final appStateStorageProvider = AutoDisposeProvider<AppStateStorage>.internal(
 );
 
 typedef AppStateStorageRef = AutoDisposeProviderRef<AppStateStorage>;
+String _$targetGameHash() => r'9884f7c559a7105604a616b197c8be43706b963e';
+
+/// The target game.
+///
+/// Copied from [TargetGame].
+@ProviderFor(TargetGame)
+final targetGameProvider =
+    AutoDisposeNotifierProvider<TargetGame, TargetGames>.internal(
+  TargetGame.new,
+  name: r'targetGameProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$targetGameHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$TargetGame = AutoDisposeNotifier<TargetGames>;
 String _$appStateNotifierHash() => r'6ac5deb95599e38e0026b0fbbb00354a2a968c59';
 
 /// The notifier for the app state.

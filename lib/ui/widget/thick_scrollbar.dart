@@ -1,11 +1,14 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
+/// A widget that provides a thick scrollbar.
 class ThickScrollbar extends StatelessWidget {
+  /// Creates a [ThickScrollbar].
   const ThickScrollbar({
     required this.child,
     super.key,
   });
 
+  /// The child of the scrollbar.
   final Widget child;
 
   @override
@@ -28,12 +31,15 @@ class ThickScrollbar extends StatelessWidget {
   }
 }
 
+/// A widget that reverts the scrollbar to the default.
 class RevertScrollbar extends StatelessWidget {
+  /// Creates a [RevertScrollbar].
   const RevertScrollbar({
     required this.child,
     super.key,
   });
 
+  /// The child of the scrollbar.
   final Widget child;
 
   @override

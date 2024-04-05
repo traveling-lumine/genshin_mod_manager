@@ -6,27 +6,37 @@ import 'package:logger/logger.dart';
 class AppStateStorageImpl implements AppStateStorage {
   const AppStateStorageImpl({
     required this.persistentStorage,
+    required this.prefix,
   });
 
   @Deprecated('Backwards compatibility only')
   static const String _targetDirKey = 'targetDir';
 
-  static const String _modRootKey = 'modRoot';
-  static const String _modExecFileKey = 'modExecFile';
-  static const String _launcherFileKey = 'launcherDir';
-  static const String _runTogetherKey = 'runTogether';
+  String get _modRootKey => '${prefix}modRoot';
+
+  String get _modExecFileKey => '${prefix}modExecFile';
+
+  String get _launcherFileKey => '${prefix}launcherDir';
+
+  String get _runTogetherKey => 'runTogether';
   static const bool _runTogetherDefaultValue = false;
-  static const String _moveOnDragKey = 'moveOnDrag';
+
+  String get _moveOnDragKey => 'moveOnDrag';
   static const bool _moveOnDragDefaultValue = true;
-  static const String _showFolderIconKey = 'showFolderIcon';
+
+  String get _showFolderIconKey => 'showFolderIcon';
   static const bool _showFolderIconDefaultValue = true;
-  static const String _showEnabledModsFirstKey = 'showEnabledModsFirst';
+
+  String get _showEnabledModsFirstKey => 'showEnabledModsFirst';
   static const bool _showEnabledModsFirstDefaultValue = false;
-  static const String _presetDatakey = 'presetData';
-  static const String _darkModeKey = 'darkMode';
+
+  String get _presetDatakey => '${prefix}presetData';
+
+  String get _darkModeKey => 'darkMode';
   static const bool _darkModeDefaultValue = true;
 
   final PersistentStorage persistentStorage;
+  final String prefix;
 
   @override
   String? getModRoot() => persistentStorage.getString(_modRootKey);
@@ -100,44 +110,28 @@ class AppStateStorageImpl implements AppStateStorage {
       final global = data['global'];
       final local = data['local'];
       return PresetData(
-        global: Map.fromEntries(
-          (global as Map<String, dynamic>).entries.map(
-                (final e) => MapEntry(
-                  e.key,
-                  BundledPresetData(
-                    bundledPresets: Map.fromEntries(
-                      (e.value as Map<String, dynamic>).entries.map(
-                            (final f) => MapEntry(
-                              f.key,
-                              PresetTargetData(
-                                mods: List<String>.from(f.value),
-                              ),
-                            ),
-                          ),
-                    ),
+        global: {
+          for (final e in global.entries)
+            e.key: PresetListMap(
+              bundledPresets: {
+                for (final f in e.value.entries)
+                  f.key: PresetList(
+                    mods: List<String>.from(f.value),
                   ),
-                ),
-              ),
-        ),
-        local: Map.fromEntries(
-          (local as Map<String, dynamic>).entries.map(
-                (final e) => MapEntry(
-                  e.key,
-                  BundledPresetData(
-                    bundledPresets: Map.fromEntries(
-                      (e.value as Map<String, dynamic>).entries.map(
-                            (final f) => MapEntry(
-                              f.key,
-                              PresetTargetData(
-                                mods: List<String>.from(f.value),
-                              ),
-                            ),
-                          ),
-                    ),
+              },
+            )
+        },
+        local: {
+          for (final e in local.entries)
+            e.key: PresetListMap(
+              bundledPresets: {
+                for (final f in e.value.entries)
+                  f.key: PresetList(
+                    mods: List<String>.from(f.value),
                   ),
-                ),
-              ),
-        ),
+              },
+            )
+        },
       );
     } on Exception catch (e) {
       Logger().e('Failed to parse preset data: $e');

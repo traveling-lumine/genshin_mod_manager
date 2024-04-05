@@ -66,6 +66,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     });
     final categories = ref.watch(homeShellListProvider);
     return categories.when(
+      skipLoadingOnReload: true,
       data: _buildData,
       error: _buildError,
       loading: _buildLoading,
@@ -128,12 +129,15 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       });
     }
 
+    final game = ref.watch(targetGameProvider);
+
+    final updateMarker = ref.watch(isOutdatedProvider).maybeWhen(
+          data: (final value) => value ? ' (update!)' : '',
+          orElse: () => '',
+        );
     return NavigationView(
       appBar: getAppbar(
-        'Genshin Mod Manager${ref.watch(isOutdatedProvider).maybeWhen(
-              data: (final value) => value ? ' (update!)' : '',
-              orElse: () => '',
-            )}',
+        '${game.displayName} Mod Manager$updateMarker',
         presetControl: true,
       ),
       pane: _buildPane(selected, items, footerItems),

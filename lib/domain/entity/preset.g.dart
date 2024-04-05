@@ -10,11 +10,11 @@ _$PresetDataImpl _$$PresetDataImplFromJson(Map<String, dynamic> json) =>
     _$PresetDataImpl(
       global: (json['global'] as Map<String, dynamic>).map(
         (k, e) =>
-            MapEntry(k, BundledPresetData.fromJson(e as Map<String, dynamic>)),
+            MapEntry(k, PresetListMap.fromJson(e as Map<String, dynamic>)),
       ),
       local: (json['local'] as Map<String, dynamic>).map(
         (k, e) =>
-            MapEntry(k, BundledPresetData.fromJson(e as Map<String, dynamic>)),
+            MapEntry(k, PresetListMap.fromJson(e as Map<String, dynamic>)),
       ),
     );
 
@@ -24,29 +24,24 @@ Map<String, dynamic> _$$PresetDataImplToJson(_$PresetDataImpl instance) =>
       'local': instance.local,
     };
 
-_$BundledPresetDataImpl _$$BundledPresetDataImplFromJson(
-        Map<String, dynamic> json) =>
-    _$BundledPresetDataImpl(
+_$PresetListMapImpl _$$PresetListMapImplFromJson(Map<String, dynamic> json) =>
+    _$PresetListMapImpl(
       bundledPresets: (json['bundledPresets'] as Map<String, dynamic>).map(
-        (k, e) =>
-            MapEntry(k, PresetTargetData.fromJson(e as Map<String, dynamic>)),
+        (k, e) => MapEntry(k, PresetList.fromJson(e as Map<String, dynamic>)),
       ),
     );
 
-Map<String, dynamic> _$$BundledPresetDataImplToJson(
-        _$BundledPresetDataImpl instance) =>
+Map<String, dynamic> _$$PresetListMapImplToJson(_$PresetListMapImpl instance) =>
     <String, dynamic>{
       'bundledPresets': instance.bundledPresets,
     };
 
-_$PresetTargetDataImpl _$$PresetTargetDataImplFromJson(
-        Map<String, dynamic> json) =>
-    _$PresetTargetDataImpl(
+_$PresetListImpl _$$PresetListImplFromJson(Map<String, dynamic> json) =>
+    _$PresetListImpl(
       mods: (json['mods'] as List<dynamic>).map((e) => e as String).toList(),
     );
 
-Map<String, dynamic> _$$PresetTargetDataImplToJson(
-        _$PresetTargetDataImpl instance) =>
+Map<String, dynamic> _$$PresetListImplToJson(_$PresetListImpl instance) =>
     <String, dynamic>{
       'mods': instance.mods,
     };

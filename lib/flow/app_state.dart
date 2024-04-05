@@ -1,6 +1,7 @@
 import 'package:genshin_mod_manager/data/repo/app_state_storage.dart';
 import 'package:genshin_mod_manager/data/repo/sharedpreference_storage.dart';
 import 'package:genshin_mod_manager/domain/entity/app_state.dart';
+import 'package:genshin_mod_manager/domain/entity/game_enum.dart';
 import 'package:genshin_mod_manager/domain/entity/preset.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state_storage.dart';
 import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
@@ -31,11 +32,37 @@ PersistentStorage sharedPreferenceStorage(
   return SharedPreferenceStorage(sharedPreferences);
 }
 
+/// The target game.
+@riverpod
+class TargetGame extends _$TargetGame {
+  static const _key = 'targetGame';
+
+  @override
+  TargetGames build() {
+    final storage = ref.watch(sharedPreferenceStorageProvider);
+    final savedValue = storage.getString(_key);
+    return TargetGames.values.firstWhere(
+      (final element) => element.prefix == savedValue,
+      orElse: () => TargetGames.gshin,
+    );
+  }
+
+  /// Sets the value.
+  void setValue(final TargetGames value) {
+    ref.read(sharedPreferenceStorageProvider).setString(_key, value.prefix);
+    state = value;
+  }
+}
+
 /// The storage for the app state.
 @riverpod
 AppStateStorage appStateStorage(final AppStateStorageRef ref) {
   final persistentStorage = ref.watch(sharedPreferenceStorageProvider);
-  return AppStateStorageImpl(persistentStorage: persistentStorage);
+  final game = ref.watch(targetGameProvider);
+  return AppStateStorageImpl(
+    persistentStorage: persistentStorage,
+    prefix: game.prefix,
+  );
 }
 
 /// The notifier for the app state.

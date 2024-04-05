@@ -1,7 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:genshin_mod_manager/domain/constant.dart';
+import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/ui/util/open_url.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// This route welcomes you!
 class WelcomeRoute extends StatefulWidget {
@@ -34,7 +36,12 @@ class _WelcomeRouteState extends State<WelcomeRoute> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Welcome to Genshin Mod Manager!'),
+              Consumer(
+                builder: (final context, final ref, final child) {
+                  final game = ref.watch(targetGameProvider);
+                  return Text('Welcome to ${game.displayName} Mod Manager!');
+                },
+              ),
               const SizedBox(height: 16),
               const Text('This is a work in progress.'),
               const SizedBox(height: 16),
