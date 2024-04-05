@@ -7,7 +7,7 @@ part of 'preset.dart';
 // **************************************************************************
 
 String _$localPresetNotifierHash() =>
-    r'd075c430d7f9658d539fd79f27ab3be820c53124';
+    r'facc3b912671e4842be0132251d6c1643950e4ab';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -173,7 +173,7 @@ class _LocalPresetNotifierProviderElement
 }
 
 String _$globalPresetNotifierHash() =>
-    r'56cf7115c7eb261a82d07175a64a37937ad2f54a';
+    r'ca75212c57a839eb7dd9c1a615a7dd3d21748524';
 
 /// See also [GlobalPresetNotifier].
 @ProviderFor(GlobalPresetNotifier)

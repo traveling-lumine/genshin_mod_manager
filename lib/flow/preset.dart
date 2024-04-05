@@ -11,8 +11,15 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'preset.g.dart';
 
+abstract interface class PresetNotifier {
+  void addPreset(final String name);
+  void setPreset(final String name);
+  void removePreset(final String name);
+}
+
 @riverpod
-class LocalPresetNotifier extends _$LocalPresetNotifier {
+class LocalPresetNotifier extends _$LocalPresetNotifier
+    implements PresetNotifier {
   @override
   List<String> build(final ModCategory category) {
     final presetData = ref.watch(
@@ -21,6 +28,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier {
     return presetData?.local[category.name]?.bundledPresets.keys.toList() ?? [];
   }
 
+  @override
   void addPreset(final String name) {
     final presetTargetData = PresetTargetData(
       mods: getUnder<Directory>(category.path)
@@ -54,6 +62,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier {
     }
   }
 
+  @override
   void setPreset(final String name) {
     final presetData = ref.read(appStateNotifierProvider).presetData;
     final directives =
@@ -64,6 +73,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier {
     _toggleLocal(category.path, directives);
   }
 
+  @override
   void removePreset(final String name) {
     final presetData = ref.read(appStateNotifierProvider).presetData;
     if (presetData == null) {
@@ -128,7 +138,8 @@ class LocalPresetNotifier extends _$LocalPresetNotifier {
 }
 
 @riverpod
-class GlobalPresetNotifier extends _$GlobalPresetNotifier {
+class GlobalPresetNotifier extends _$GlobalPresetNotifier
+    implements PresetNotifier {
   @override
   List<String> build() {
     final presetData = ref.watch(
@@ -137,6 +148,7 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier {
     return presetData?.global.keys.toList() ?? [];
   }
 
+  @override
   void addPreset(final String name) {
     final rootPath = ref.read(appStateNotifierProvider).modRoot;
     if (rootPath == null) {
@@ -164,6 +176,7 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier {
     }
   }
 
+  @override
   void setPreset(final String name) {
     final presetData = ref.read(appStateNotifierProvider).presetData;
     if (presetData == null) {
@@ -179,6 +192,7 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier {
     _toggleGlobal(directives);
   }
 
+  @override
   void removePreset(final String name) {
     final presetData = ref.read(appStateNotifierProvider).presetData;
     if (presetData == null) {
