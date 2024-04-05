@@ -456,13 +456,11 @@ Future<void> _runUpdateScript() async {
       'if not exist "genshin_mod_manager.exe" (\n'
       "    echo Maybe not in the mod manager folder? Exiting for safety.\n"
       "    pause\n"
-      "    start cmd /c del update.cmd\n"
       "    exit /b 1\n"
       ")\n"
       "if not exist %sourceFolder% (\n"
       "    echo Failed to download data! Go to the link and install manually.\n"
       "    pause\n"
-      "    start cmd /c del update.cmd\n"
       "    exit /b 2\n"
       ")\n"
       "echo So it's good to go. Let's update.\n"
@@ -471,7 +469,6 @@ Future<void> _runUpdateScript() async {
       "for /f \"delims=\" %%i in ('dir /b \"%sourceFolder%\"') do move /y \"%sourceFolder%\\%%i\" .\n"
       "rd /s /q %sourceFolder%\n"
       "start /b genshin_mod_manager.exe\n"
-      "start cmd /c del update.cmd\n"
       "endlocal\n";
   await File('update.cmd').writeAsString(updateScript);
   unawaited(
@@ -480,11 +477,12 @@ Future<void> _runUpdateScript() async {
       [
         'cmd',
         '/c',
-        'timeout /t 3 && call update.cmd > update.log',
+        'timeout /t 3 && call update.cmd > update.log & del update.cmd',
       ],
       runInShell: true,
     ),
   );
+  // delay needed. otherwise the process will die before the script runs.
   await Future.delayed(const Duration(milliseconds: 200));
   exit(0);
 }
