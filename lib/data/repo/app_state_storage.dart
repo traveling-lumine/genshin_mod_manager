@@ -6,16 +6,17 @@ import 'package:logger/logger.dart';
 class AppStateStorageImpl implements AppStateStorage {
   const AppStateStorageImpl({
     required this.persistentStorage,
+    required this.prefix,
   });
 
   @Deprecated('Backwards compatibility only')
   static const String _targetDirKey = 'targetDir';
 
-  String get _modRootKey => 'modRoot';
+  String get _modRootKey => '${prefix}modRoot';
 
-  String get _modExecFileKey => 'modExecFile';
+  String get _modExecFileKey => '${prefix}modExecFile';
 
-  String get _launcherFileKey => 'launcherDir';
+  String get _launcherFileKey => '${prefix}launcherDir';
 
   String get _runTogetherKey => 'runTogether';
   static const bool _runTogetherDefaultValue = false;
@@ -29,12 +30,13 @@ class AppStateStorageImpl implements AppStateStorage {
   String get _showEnabledModsFirstKey => 'showEnabledModsFirst';
   static const bool _showEnabledModsFirstDefaultValue = false;
 
-  String get _presetDatakey => 'presetData';
+  String get _presetDatakey => '${prefix}presetData';
 
   String get _darkModeKey => 'darkMode';
   static const bool _darkModeDefaultValue = true;
 
   final PersistentStorage persistentStorage;
+  final String prefix;
 
   @override
   String? getModRoot() => persistentStorage.getString(_modRootKey);

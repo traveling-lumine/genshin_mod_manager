@@ -31,11 +31,33 @@ PersistentStorage sharedPreferenceStorage(
   return SharedPreferenceStorage(sharedPreferences);
 }
 
+/// The target game.
+@riverpod
+class TargetGame extends _$TargetGame {
+  static const _key = 'targetGame';
+
+  @override
+  String build() {
+    final storage = ref.watch(sharedPreferenceStorageProvider);
+    return storage.getString(_key) ?? '';
+  }
+
+  /// Sets the value.
+  void setValue(final String value) {
+    ref.read(sharedPreferenceStorageProvider).setString(_key, value);
+    state = value;
+  }
+}
+
 /// The storage for the app state.
 @riverpod
 AppStateStorage appStateStorage(final AppStateStorageRef ref) {
   final persistentStorage = ref.watch(sharedPreferenceStorageProvider);
-  return AppStateStorageImpl(persistentStorage: persistentStorage);
+  final game = ref.watch(targetGameProvider);
+  return AppStateStorageImpl(
+    persistentStorage: persistentStorage,
+    prefix: game,
+  );
 }
 
 /// The notifier for the app state.
