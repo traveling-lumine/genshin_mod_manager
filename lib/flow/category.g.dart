@@ -6,7 +6,7 @@ part of 'category.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$categoryWatcherHash() => r'ecaf2695fc727e030c873b84a35f9aac1c63c632';
+String _$categoryWatcherHash() => r'2c4ea92f5594814e0616c1d955801287604d8016';
 
 /// Copied from Dart SDK
 class _SystemHash {

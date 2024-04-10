@@ -69,9 +69,7 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   Widget build(final BuildContext context) {
-    final darkMode = ref.watch(
-      appStateNotifierProvider.select((final value) => value.darkMode),
-    );
+    final darkMode = ref.watch(darkModeProvider);
     return FluentApp.router(
       darkTheme: FluentThemeData.dark(),
       themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,

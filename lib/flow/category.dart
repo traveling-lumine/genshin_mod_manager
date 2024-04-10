@@ -73,10 +73,7 @@ Stream<List<Mod>> categoryWatcher(
   final CategoryWatcherRef ref,
   final ModCategory category,
 ) {
-  final enabledModsFirst = ref.watch(
-    appStateNotifierProvider
-        .select((final value) => value.showEnabledModsFirst),
-  );
+  final enabledModsFirst = ref.watch(enabledFirstProvider);
   final categoryModel = CategoryModel(enabledModsFirst, category);
   ref.onDispose(categoryModel.dispose);
   return categoryModel.mods;

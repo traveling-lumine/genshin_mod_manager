@@ -285,6 +285,12 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
         ),
       );
 
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Mod>('mod', widget.mod));
+  }
+
   Future<void> _onPaste(final BuildContext context) async {
     final image = await Pasteboard.image;
     if (image == null) {
@@ -580,11 +586,5 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
         ),
       ),
     );
-  }
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Mod>('mod', widget.mod));
   }
 }

@@ -254,9 +254,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   List<PaneItemAction> _buildPaneItemActions() {
     const icon = Icon(FluentIcons.user_window);
-    final select = ref.watch(
-      appStateNotifierProvider.select((final value) => value.runTogether),
-    );
+    final select = ref.watch(runTogetherProvider);
     return select
         ? [
             PaneItemAction(
@@ -443,10 +441,7 @@ class _FolderPaneItem extends PaneItem {
 
   static Widget _getIcon(final File? imageFile) => Consumer(
         builder: (final context, final ref, final child) {
-          final value = ref.watch(
-            appStateNotifierProvider
-                .select((final value) => value.showFolderIcon),
-          );
+          final value = ref.watch(folderIconProvider);
           return value
               ? _buildImage(imageFile)
               : const Icon(FluentIcons.folder_open);

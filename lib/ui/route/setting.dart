@@ -74,35 +74,23 @@ class _SettingRoute extends ConsumerWidget {
           ),
           _SwitchItem(
             text: 'Run 3d migoto and launcher using one button',
-            selector: (final value) => value.runTogether,
-            onChanged:
-                ref.read(appStateNotifierProvider.notifier).changeRunTogether,
+            provider: runTogetherProvider,
           ),
           _SwitchItem(
             text: 'Move folder instead of copying for mod folder drag-and-drop',
-            selector: (final value) => value.moveOnDrag,
-            onChanged:
-                ref.read(appStateNotifierProvider.notifier).changeMoveOnDrag,
+            provider: moveOnDragProvider,
           ),
           _SwitchItem(
             text: 'Show folder icon images',
-            selector: (final value) => value.showFolderIcon,
-            onChanged: ref
-                .read(appStateNotifierProvider.notifier)
-                .changeShowFolderIcon,
+            provider: folderIconProvider,
           ),
           _SwitchItem(
             text: 'Show enabled mods first',
-            selector: (final value) => value.showEnabledModsFirst,
-            onChanged: ref
-                .read(appStateNotifierProvider.notifier)
-                .changeShowEnabledModsFirst,
+            provider: enabledFirstProvider,
           ),
           _SwitchItem(
             text: 'Dark mode',
-            selector: (final value) => value.darkMode,
-            onChanged:
-                ref.read(appStateNotifierProvider.notifier).changeDarkMode,
+            provider: darkModeProvider,
           ),
           _ComboItem(
             text: 'Target Game',
@@ -199,29 +187,24 @@ class _PathSelectItem extends StatelessWidget {
 class _SwitchItem extends StatelessWidget {
   const _SwitchItem({
     required this.text,
-    required this.selector,
-    required this.onChanged,
+    required this.provider,
   });
 
   final String text;
-  final bool Function(AppState vm) selector;
-
-  // ignore: avoid_positional_boolean_parameters
-  final void Function(bool value) onChanged;
+  final AutoDisposeNotifierProvider<ValueSettable, bool> provider;
 
   @override
   Widget build(final BuildContext context) => ListTile(
         title: Text(text),
         leading: Consumer(
-          builder: (final context, final ref, final child) {
-            final value = ref.watch(appStateNotifierProvider.select(selector));
-            return RepaintBoundary(
-              child: ToggleSwitch(
-                checked: value,
-                onChanged: onChanged,
-              ),
-            );
-          },
+          builder: (final context, final ref, final child) => RepaintBoundary(
+            child: ToggleSwitch(
+              checked: ref.watch(provider),
+              onChanged: (final value) {
+                ref.read(provider.notifier).setValue(value);
+              },
+            ),
+          ),
         ),
       );
 
@@ -231,17 +214,7 @@ class _SwitchItem extends StatelessWidget {
     properties
       ..add(StringProperty('text', text))
       ..add(
-        ObjectFlagProperty<bool Function(AppState vm)>.has(
-          'selector',
-          selector,
-        ),
-      )
-      ..add(
-        // ignore: avoid_positional_boolean_parameters
-        ObjectFlagProperty<void Function(bool value)>.has(
-          'onChanged',
-          onChanged,
-        ),
+        DiagnosticsProperty<ProviderListenable<bool>>('provider', provider),
       );
   }
 }
@@ -254,7 +227,6 @@ class _ComboItem extends StatelessWidget {
 
   final String text;
 
-  // ignore: avoid_positional_boolean_parameters
   final void Function(TargetGames value) onChanged;
 
   @override
