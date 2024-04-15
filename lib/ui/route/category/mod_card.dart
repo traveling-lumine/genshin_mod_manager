@@ -362,7 +362,9 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
       showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (final dCtx) => Center(
+        builder: (final dCtx) => GestureDetector(
+          onTap: Navigator.of(dCtx).pop,
+          onSecondaryTap: Navigator.of(dCtx).pop,
           child: Image(
             image: image,
             fit: BoxFit.contain,

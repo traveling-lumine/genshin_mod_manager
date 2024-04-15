@@ -1,83 +1,83 @@
-/// A tag parser that can parse a query string and evaluate it against a set of tags.
-library;
-
+/// Parses a tag query string into a tree of [TagParseElement]s.
+// ignore: one_member_abstracts
 abstract class TagParseElement {
-  bool evaluate(final Map<String, bool> tags);
+  /// Evaluates the element against a set of tags.
+  bool evaluate(final Set<String> tags);
 }
 
-class Literal extends TagParseElement {
-  Literal(this.value);
+class _Literal extends TagParseElement {
+  _Literal(this.value);
 
   final String value;
 
   @override
-  bool evaluate(final Map<String, bool> tags) => tags[value] ?? false;
+  bool evaluate(final Set<String> tags) => tags.contains(value);
 }
 
-class NotClause extends TagParseElement {
-  NotClause(this.child);
+class _NotClause extends TagParseElement {
+  _NotClause(this.child);
 
   final TagParseElement child;
 
   @override
-  bool evaluate(final Map<String, bool> tags) => !child.evaluate(tags);
+  bool evaluate(final Set<String> tags) => !child.evaluate(tags);
 }
 
-class AndClause extends TagParseElement {
-  AndClause(this.children);
+class _AndClause extends TagParseElement {
+  _AndClause(this.children);
 
   final List<TagParseElement> children;
 
   @override
-  bool evaluate(final Map<String, bool> tags) =>
+  bool evaluate(final Set<String> tags) =>
       children.every((final element) => element.evaluate(tags));
 }
 
-class OrClause extends TagParseElement {
-  OrClause(this.children);
+class _OrClause extends TagParseElement {
+  _OrClause(this.children);
 
   final List<TagParseElement> children;
 
   @override
-  bool evaluate(final Map<String, bool> tags) =>
+  bool evaluate(final Set<String> tags) =>
       children.any((final element) => element.evaluate(tags));
 }
 
-class Parenthesis extends TagParseElement {
-  Parenthesis(this.child);
+class _Parenthesis extends TagParseElement {
+  _Parenthesis(this.child);
 
   final TagParseElement child;
 
   @override
-  bool evaluate(final Map<String, bool> tags) => child.evaluate(tags);
+  bool evaluate(final Set<String> tags) => child.evaluate(tags);
 }
 
-enum TokenType { and, or, not, lParen, rParen, literal }
+enum _TokenType { and, or, not, lParen, rParen, literal }
 
-class Token {
-  Token(this.type, [this.value]);
+class _Token {
+  _Token(this.type, [this.value]);
 
-  final TokenType type;
+  final _TokenType type;
   final String? value;
 }
 
-class Lexer {
-  Lexer(this.text);
+class _Lexer {
+  _Lexer(this.text);
 
   static final literal = RegExp('[^&|!() ]');
-  static final Map<String, TokenType> keywords = {
-    '&': TokenType.and,
-    '|': TokenType.or,
-    '!': TokenType.not,
-    '(': TokenType.lParen,
-    ')': TokenType.rParen,
+  static final Map<String, _TokenType> keywords = {
+    '&': _TokenType.and,
+    '|': _TokenType.or,
+    '!': _TokenType.not,
+    '(': _TokenType.lParen,
+    ')': _TokenType.rParen,
   };
 
   final String text;
   int position = 0;
-  Token? currentToken;
+  _Token? currentToken;
 
-  Token? nextToken() {
+  _Token? nextToken() {
     if (position >= text.length) {
       return null;
     }
@@ -91,7 +91,7 @@ class Lexer {
     if (keywords.containsKey(currentChar)) {
       final type = keywords[currentChar]!;
       position++;
-      return Token(type);
+      return _Token(type);
     }
 
     if (literal.hasMatch(currentChar)) {
@@ -100,22 +100,22 @@ class Lexer {
         position++;
       }
       final value = text.substring(start, position);
-      return Token(TokenType.literal, value);
+      return _Token(_TokenType.literal, value);
     }
 
     throw Exception('Unexpected character $currentChar at position $position');
   }
 }
 
-class Parser {
-  Parser(this.lexer) {
+class _Parser {
+  _Parser(this.lexer) {
     currentToken = lexer.nextToken();
   }
 
-  final Lexer lexer;
-  Token? currentToken;
+  final _Lexer lexer;
+  _Token? currentToken;
 
-  void eat(final TokenType type) {
+  void eat(final _TokenType type) {
     if (currentToken?.type == type) {
       currentToken = lexer.nextToken();
     } else {
@@ -138,13 +138,13 @@ class Parser {
   TagParseElement orClause() {
     final nodes = [andClause()];
 
-    while (currentToken?.type == TokenType.or) {
-      eat(TokenType.or);
+    while (currentToken?.type == _TokenType.or) {
+      eat(_TokenType.or);
       nodes.add(andClause());
     }
 
     if (nodes.length > 1) {
-      return OrClause(nodes);
+      return _OrClause(nodes);
     } else {
       return nodes.first;
     }
@@ -153,45 +153,46 @@ class Parser {
   TagParseElement andClause() {
     final nodes = [notClause()];
 
-    while (currentToken?.type == TokenType.and) {
-      eat(TokenType.and);
+    while (currentToken?.type == _TokenType.and) {
+      eat(_TokenType.and);
       nodes.add(notClause());
     }
 
     if (nodes.length > 1) {
-      return AndClause(nodes);
+      return _AndClause(nodes);
     } else {
       return nodes.first;
     }
   }
 
   TagParseElement notClause() {
-    if (currentToken?.type == TokenType.not) {
-      eat(TokenType.not);
-      return NotClause(notClause());
+    if (currentToken?.type == _TokenType.not) {
+      eat(_TokenType.not);
+      return _NotClause(notClause());
     }
 
     return primary();
   }
 
   TagParseElement primary() {
-    if (currentToken?.type == TokenType.lParen) {
-      eat(TokenType.lParen);
+    if (currentToken?.type == _TokenType.lParen) {
+      eat(_TokenType.lParen);
       final node = expression();
-      eat(TokenType.rParen);
-      return Parenthesis(node);
-    } else if (currentToken?.type == TokenType.literal) {
+      eat(_TokenType.rParen);
+      return _Parenthesis(node);
+    } else if (currentToken?.type == _TokenType.literal) {
       final token = currentToken!;
-      eat(TokenType.literal);
-      return Literal(token.value!);
+      eat(_TokenType.literal);
+      return _Literal(token.value!);
     } else {
       throw Exception('Unexpected token: ${currentToken?.type}');
     }
   }
 }
 
+/// Parses a tag query string into a tree of [TagParseElement]s.
 TagParseElement parseTagQuery(final String query) {
-  final lexer = Lexer(query);
-  final parser = Parser(lexer);
+  final lexer = _Lexer(query);
+  final parser = _Parser(lexer);
   return parser.parse();
 }

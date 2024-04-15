@@ -202,48 +202,16 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
         child: TextFormBox(
           autovalidateMode: AutovalidateMode.always,
           placeholder: 'Search tags',
-          onChanged: (final value) {
-            try {
-              final filter = parseTagQuery(value);
-              setState(() {
-                _tagFilter = filter;
-              });
-            } on Exception {
-              setState(() {
-                _tagFilter = null;
-              });
-            }
-          },
-          validator: (final value) {
-            if (value == null || value.isEmpty) {
-              return null;
-            }
-            try {
-              parseTagQuery(value);
-            } on Exception catch (e) {
-              return e.toString();
-            }
-            return null;
-          },
+          onChanged: _onSearchChange,
+          validator: _onValidationCheck,
         ),
       );
 
   Widget _buildContent() {
     final data = ref.watch(akashaElementProvider);
     return data.when(
-      data: (final data2) {
-        final data = data2.where((final element) {
-          final tagMap = {for (final e in element.tags) e: true};
-          final filter = _tagFilter;
-          if (filter == null) {
-            return true;
-          }
-          try {
-            return filter.evaluate(tagMap);
-          } on Exception {
-            return true;
-          }
-        }).toList();
+      data: (final data) {
+        final filteredData = data.where(_dataFilter).toList();
         return ThickScrollbar(
           child: GridView.builder(
             controller: _scrollController,
@@ -253,11 +221,11 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
             ),
-            itemCount: data.length,
+            itemCount: filteredData.length,
             itemBuilder: (final context, final index) => RevertScrollbar(
               child: StoreElement(
                 passwordController: _textEditingController,
-                element: data[index],
+                element: filteredData[index],
                 category: widget.category,
               ),
             ),
@@ -274,5 +242,43 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
       ),
       loading: () => const Center(child: ProgressRing()),
     );
+  }
+
+  String? _onValidationCheck(final String? value) {
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+    try {
+      parseTagQuery(value);
+    } on Exception catch (e) {
+      return e.toString();
+    }
+    return null;
+  }
+
+  void _onSearchChange(final String value) {
+    try {
+      final filter = parseTagQuery(value);
+      setState(() {
+        _tagFilter = filter;
+      });
+    } on Exception {
+      setState(() {
+        _tagFilter = null;
+      });
+    }
+  }
+
+  bool _dataFilter(final NahidaliveElement element) {
+    final tagMap = {for (final e in element.tags) e};
+    final filter = _tagFilter;
+    if (filter == null) {
+      return true;
+    }
+    try {
+      return filter.evaluate(tagMap);
+    } on Exception {
+      return true;
+    }
   }
 }

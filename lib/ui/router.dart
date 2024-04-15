@@ -24,6 +24,7 @@ class MyApp extends ConsumerStatefulWidget {
 class _MyAppState extends ConsumerState<MyApp> {
   final _router = GoRouter(
     debugLogDiagnostics: true,
+    extraCodec: const ModCategoryCodec(),
     initialLocation: kLoadingRoute,
     routes: [
       GoRoute(
