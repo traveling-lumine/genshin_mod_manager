@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
@@ -58,11 +57,7 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
       }
     }
     final response = await _client.get(uri);
-    if (response.statusCode == 200) {
-      return NahidaliveDownloadElement.fromJson(jsonDecode(response.body));
-    } else {
-      throw HttpException('download url failed', uri: uri);
-    }
+    return NahidaliveDownloadElement.fromJson(jsonDecode(response.body));
   }
 
   @override
