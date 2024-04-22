@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
@@ -153,11 +152,7 @@ class NahidaliveAPI {
       }
     }
     final response = await client.get(uri);
-    if (response.statusCode == 200) {
-      return NahidaliveDownloadElement.fromJson(jsonDecode(response.body));
-    } else {
-      throw HttpException('download url failed', uri: uri);
-    }
+    return NahidaliveDownloadElement.fromJson(jsonDecode(response.body));
   }
 
   Future<Uint8List> download(NahidaliveDownloadElement downloadElement) async {
