@@ -486,9 +486,6 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
 
       try {
         Directory(widget.mod.path).deleteSync(recursive: true);
-        if (!context.mounted) {
-          throw Exception('context not mounted');
-        }
         final writer = createModWriter(category: widget.mod.category);
         await writer.write(
           modName: targetElement.title,
