@@ -2,7 +2,7 @@ name: genshin_mod_manager
 description: Genshin mod manager.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.4.4+9
+version: 1.5.0
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -25,7 +25,7 @@ dependencies:
   json_annotation: ^4.8.1
   logger: ^2.2.0
   meta: ^1.11.0
-  package_info_plus: ^6.0.0
+  package_info_plus: ^8.0.0
   pasteboard: ^0.2.0
   path: ^1.9.0
   riverpod_annotation: ^2.3.5
@@ -40,7 +40,7 @@ dev_dependencies:
   custom_lint: ^0.6.4
   dependency_validator: ^3.2.3
   flutter_lints: ^3.0.2
-  flutter_oss_licenses: ^2.0.1
+  flutter_oss_licenses: ^3.0.2
   flutter_test:
     sdk: flutter
   freezed: ^2.4.7
