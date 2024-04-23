@@ -16,11 +16,6 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$AppState {
-  bool get runTogether => throw _privateConstructorUsedError;
-  bool get moveOnDrag => throw _privateConstructorUsedError;
-  bool get showFolderIcon => throw _privateConstructorUsedError;
-  bool get showEnabledModsFirst => throw _privateConstructorUsedError;
-  bool get darkMode => throw _privateConstructorUsedError;
   String? get modRoot => throw _privateConstructorUsedError;
   String? get modExecFile => throw _privateConstructorUsedError;
   String? get launcherFile => throw _privateConstructorUsedError;
@@ -37,12 +32,7 @@ abstract class $AppStateCopyWith<$Res> {
       _$AppStateCopyWithImpl<$Res, AppState>;
   @useResult
   $Res call(
-      {bool runTogether,
-      bool moveOnDrag,
-      bool showFolderIcon,
-      bool showEnabledModsFirst,
-      bool darkMode,
-      String? modRoot,
+      {String? modRoot,
       String? modExecFile,
       String? launcherFile,
       PresetData? presetData});
@@ -63,37 +53,12 @@ class _$AppStateCopyWithImpl<$Res, $Val extends AppState>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? runTogether = null,
-    Object? moveOnDrag = null,
-    Object? showFolderIcon = null,
-    Object? showEnabledModsFirst = null,
-    Object? darkMode = null,
     Object? modRoot = freezed,
     Object? modExecFile = freezed,
     Object? launcherFile = freezed,
     Object? presetData = freezed,
   }) {
     return _then(_value.copyWith(
-      runTogether: null == runTogether
-          ? _value.runTogether
-          : runTogether // ignore: cast_nullable_to_non_nullable
-              as bool,
-      moveOnDrag: null == moveOnDrag
-          ? _value.moveOnDrag
-          : moveOnDrag // ignore: cast_nullable_to_non_nullable
-              as bool,
-      showFolderIcon: null == showFolderIcon
-          ? _value.showFolderIcon
-          : showFolderIcon // ignore: cast_nullable_to_non_nullable
-              as bool,
-      showEnabledModsFirst: null == showEnabledModsFirst
-          ? _value.showEnabledModsFirst
-          : showEnabledModsFirst // ignore: cast_nullable_to_non_nullable
-              as bool,
-      darkMode: null == darkMode
-          ? _value.darkMode
-          : darkMode // ignore: cast_nullable_to_non_nullable
-              as bool,
       modRoot: freezed == modRoot
           ? _value.modRoot
           : modRoot // ignore: cast_nullable_to_non_nullable
@@ -135,12 +100,7 @@ abstract class _$$AppStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {bool runTogether,
-      bool moveOnDrag,
-      bool showFolderIcon,
-      bool showEnabledModsFirst,
-      bool darkMode,
-      String? modRoot,
+      {String? modRoot,
       String? modExecFile,
       String? launcherFile,
       PresetData? presetData});
@@ -160,37 +120,12 @@ class __$$AppStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? runTogether = null,
-    Object? moveOnDrag = null,
-    Object? showFolderIcon = null,
-    Object? showEnabledModsFirst = null,
-    Object? darkMode = null,
     Object? modRoot = freezed,
     Object? modExecFile = freezed,
     Object? launcherFile = freezed,
     Object? presetData = freezed,
   }) {
     return _then(_$AppStateImpl(
-      runTogether: null == runTogether
-          ? _value.runTogether
-          : runTogether // ignore: cast_nullable_to_non_nullable
-              as bool,
-      moveOnDrag: null == moveOnDrag
-          ? _value.moveOnDrag
-          : moveOnDrag // ignore: cast_nullable_to_non_nullable
-              as bool,
-      showFolderIcon: null == showFolderIcon
-          ? _value.showFolderIcon
-          : showFolderIcon // ignore: cast_nullable_to_non_nullable
-              as bool,
-      showEnabledModsFirst: null == showEnabledModsFirst
-          ? _value.showEnabledModsFirst
-          : showEnabledModsFirst // ignore: cast_nullable_to_non_nullable
-              as bool,
-      darkMode: null == darkMode
-          ? _value.darkMode
-          : darkMode // ignore: cast_nullable_to_non_nullable
-              as bool,
       modRoot: freezed == modRoot
           ? _value.modRoot
           : modRoot // ignore: cast_nullable_to_non_nullable
@@ -215,26 +150,8 @@ class __$$AppStateImplCopyWithImpl<$Res>
 
 class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
   const _$AppStateImpl(
-      {required this.runTogether,
-      required this.moveOnDrag,
-      required this.showFolderIcon,
-      required this.showEnabledModsFirst,
-      required this.darkMode,
-      this.modRoot,
-      this.modExecFile,
-      this.launcherFile,
-      this.presetData});
+      {this.modRoot, this.modExecFile, this.launcherFile, this.presetData});
 
-  @override
-  final bool runTogether;
-  @override
-  final bool moveOnDrag;
-  @override
-  final bool showFolderIcon;
-  @override
-  final bool showEnabledModsFirst;
-  @override
-  final bool darkMode;
   @override
   final String? modRoot;
   @override
@@ -246,7 +163,7 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'AppState(runTogether: $runTogether, moveOnDrag: $moveOnDrag, showFolderIcon: $showFolderIcon, showEnabledModsFirst: $showEnabledModsFirst, darkMode: $darkMode, modRoot: $modRoot, modExecFile: $modExecFile, launcherFile: $launcherFile, presetData: $presetData)';
+    return 'AppState(modRoot: $modRoot, modExecFile: $modExecFile, launcherFile: $launcherFile, presetData: $presetData)';
   }
 
   @override
@@ -254,11 +171,6 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'AppState'))
-      ..add(DiagnosticsProperty('runTogether', runTogether))
-      ..add(DiagnosticsProperty('moveOnDrag', moveOnDrag))
-      ..add(DiagnosticsProperty('showFolderIcon', showFolderIcon))
-      ..add(DiagnosticsProperty('showEnabledModsFirst', showEnabledModsFirst))
-      ..add(DiagnosticsProperty('darkMode', darkMode))
       ..add(DiagnosticsProperty('modRoot', modRoot))
       ..add(DiagnosticsProperty('modExecFile', modExecFile))
       ..add(DiagnosticsProperty('launcherFile', launcherFile))
@@ -270,16 +182,6 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$AppStateImpl &&
-            (identical(other.runTogether, runTogether) ||
-                other.runTogether == runTogether) &&
-            (identical(other.moveOnDrag, moveOnDrag) ||
-                other.moveOnDrag == moveOnDrag) &&
-            (identical(other.showFolderIcon, showFolderIcon) ||
-                other.showFolderIcon == showFolderIcon) &&
-            (identical(other.showEnabledModsFirst, showEnabledModsFirst) ||
-                other.showEnabledModsFirst == showEnabledModsFirst) &&
-            (identical(other.darkMode, darkMode) ||
-                other.darkMode == darkMode) &&
             (identical(other.modRoot, modRoot) || other.modRoot == modRoot) &&
             (identical(other.modExecFile, modExecFile) ||
                 other.modExecFile == modExecFile) &&
@@ -290,17 +192,8 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      runTogether,
-      moveOnDrag,
-      showFolderIcon,
-      showEnabledModsFirst,
-      darkMode,
-      modRoot,
-      modExecFile,
-      launcherFile,
-      presetData);
+  int get hashCode =>
+      Object.hash(runtimeType, modRoot, modExecFile, launcherFile, presetData);
 
   @JsonKey(ignore: true)
   @override
@@ -311,26 +204,11 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
 
 abstract class _AppState implements AppState {
   const factory _AppState(
-      {required final bool runTogether,
-      required final bool moveOnDrag,
-      required final bool showFolderIcon,
-      required final bool showEnabledModsFirst,
-      required final bool darkMode,
-      final String? modRoot,
+      {final String? modRoot,
       final String? modExecFile,
       final String? launcherFile,
       final PresetData? presetData}) = _$AppStateImpl;
 
-  @override
-  bool get runTogether;
-  @override
-  bool get moveOnDrag;
-  @override
-  bool get showFolderIcon;
-  @override
-  bool get showEnabledModsFirst;
-  @override
-  bool get darkMode;
   @override
   String? get modRoot;
   @override

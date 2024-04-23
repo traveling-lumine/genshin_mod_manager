@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
+/// A shorthand function to display an [InfoBar] in the context.
 Future<void> displayInfoBarInContext(
   final BuildContext context, {
   required final Widget title,

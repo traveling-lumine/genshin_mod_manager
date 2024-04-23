@@ -30,7 +30,9 @@ final class AkashaDownloadUrlUseCase {
   }
 }
 
+/// The exception thrown when the password is wrong.
 @immutable
 class WrongPasswordException implements Exception {
+  /// Creates a new instance.
   const WrongPasswordException();
 }

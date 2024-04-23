@@ -7,7 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
 import 'package:window_manager/window_manager.dart';
 
-const _kMinWindowSize = Size(600, 600);
+const _kMinWindowSize = Size(800, 600);
 
 void main(final List<String> args) async {
   Logger().d('Starting app with args: $args');

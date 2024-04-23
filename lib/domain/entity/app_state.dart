@@ -7,11 +7,6 @@ part 'app_state.freezed.dart';
 @freezed
 class AppState with _$AppState {
   const factory AppState({
-    required final bool runTogether,
-    required final bool moveOnDrag,
-    required final bool showFolderIcon,
-    required final bool showEnabledModsFirst,
-    required final bool darkMode,
     final String? modRoot,
     final String? modExecFile,
     final String? launcherFile,

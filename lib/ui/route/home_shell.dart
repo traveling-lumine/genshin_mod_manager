@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
+import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/constant.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/flow/app_state.dart';
@@ -254,9 +255,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   List<PaneItemAction> _buildPaneItemActions() {
     const icon = Icon(FluentIcons.user_window);
-    final select = ref.watch(
-      appStateNotifierProvider.select((final value) => value.runTogether),
-    );
+    final select = ref.watch(runTogetherProvider);
     return select
         ? [
             PaneItemAction(
@@ -313,26 +312,61 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         action: FilledButton(
           onPressed: () => showDialog(
             context: context,
-            builder: (final dialogContext) => ContentDialog(
-              title: const Text('Start auto update?'),
-              content: _getAutoUpdateWarning(),
-              actions: [
-                Button(
-                  onPressed: Navigator.of(dialogContext).pop,
-                  child: const Text('Cancel'),
-                ),
-                FluentTheme(
-                  data: FluentThemeData(accentColor: Colors.red),
-                  child: FilledButton(
-                    child: const Text('Start'),
-                    onPressed: () async {
-                      Navigator.of(dialogContext).pop();
-                      await _runUpdateScript();
-                    },
+            builder: (final dialogContext) {
+              final execRoot = File(Platform.resolvedExecutable).parent.path;
+              final appState = ref.read(appStateNotifierProvider);
+              final modRoot = appState.modRoot;
+              final migotoRoot = appState.modExecFile;
+              final launcherRoot = appState.launcherFile;
+
+              final reason = <String>[];
+              if (modRoot?.pIsWithin(execRoot) ?? false) {
+                reason.add('mods');
+              }
+              if (migotoRoot?.pIsWithin(execRoot) ?? false) {
+                reason.add('3d migoto');
+              }
+              if (launcherRoot?.pIsWithin(execRoot) ?? false) {
+                reason.add('launcher');
+              }
+              final Widget filledButton;
+              if (reason.isNotEmpty) {
+                filledButton = MouseRegion(
+                  cursor: SystemMouseCursors.forbidden,
+                  child: Tooltip(
+                    message: "The auto-update will delete one or more of the"
+                        " following: ${reason.join(', ')}!",
+                    child: const FilledButton(
+                      onPressed: null,
+                      child: Text('Start'),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                );
+              } else {
+                filledButton = FilledButton(
+                  child: const Text('Start'),
+                  onPressed: () async {
+                    Navigator.of(dialogContext).pop();
+                    await _runUpdateScript();
+                  },
+                );
+              }
+
+              return ContentDialog(
+                title: const Text('Start auto update?'),
+                content: _getAutoUpdateWarning(),
+                actions: [
+                  Button(
+                    onPressed: Navigator.of(dialogContext).pop,
+                    child: const Text('Cancel'),
+                  ),
+                  FluentTheme(
+                    data: FluentThemeData(accentColor: Colors.red),
+                    child: filledButton,
+                  ),
+                ],
+              );
+            },
           ),
           child: const Text('Auto update'),
         ),
@@ -443,10 +477,7 @@ class _FolderPaneItem extends PaneItem {
 
   static Widget _getIcon(final File? imageFile) => Consumer(
         builder: (final context, final ref, final child) {
-          final value = ref.watch(
-            appStateNotifierProvider
-                .select((final value) => value.showFolderIcon),
-          );
+          final value = ref.watch(folderIconProvider);
           return value
               ? _buildImage(imageFile)
               : const Icon(FluentIcons.folder_open);

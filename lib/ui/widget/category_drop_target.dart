@@ -54,11 +54,7 @@ class CategoryDropTarget extends HookConsumerWidget {
     final ValueNotifier<bool> state,
   ) {
     final context = useContext();
-    final moveMethod = ref.watch(
-      appStateNotifierProvider.select((final value) => value.moveOnDrag),
-    )
-        ? 'move'
-        : 'copy';
+    final moveMethod = ref.watch(moveOnDragProvider) ? 'move' : 'copy';
     final text = RichText(
       text: TextSpan(
         text: 'Drop to $moveMethod to',
@@ -106,9 +102,7 @@ class CategoryDropTarget extends HookConsumerWidget {
     final BuildContext context,
     final WidgetRef ref,
   ) {
-    final moveInsteadOfCopy = ref.read(
-      appStateNotifierProvider.select((final value) => value.moveOnDrag),
-    );
+    final moveInsteadOfCopy = ref.read(moveOnDragProvider);
     final modRoot = category.path;
     final queue = <(Directory, String)>[];
     for (final xFile in details.files) {

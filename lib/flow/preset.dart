@@ -13,7 +13,9 @@ part 'preset.g.dart';
 
 abstract interface class PresetNotifier {
   void addPreset(final String name);
+
   void setPreset(final String name);
+
   void removePreset(final String name);
 }
 
@@ -96,44 +98,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
     final String categoryPath,
     final List<String> shouldBeEnabled,
   ) {
-    unawaited(_toggleCategory(categoryPath, shouldBeEnabled));
-  }
-
-  Future<void> _toggleCategory(
-    final String categoryPath,
-    final List<String> shouldBeEnabled,
-  ) async {
-    final latest2 = ref.read(appStateNotifierProvider).modExecFile;
-    if (latest2 == null) {
-      return;
-    }
-    final shaderFixes = latest2.pDirname.pJoin(kShaderFixes);
-    final currentEnabled = getUnder<Directory>(categoryPath)
-        .where((final e) => e.pIsEnabled)
-        .map((final e) => e.pBasename)
-        .toList();
-    final shouldBeOff =
-        currentEnabled.where((final e) => !shouldBeEnabled.contains(e));
-    final futures = <Future>[];
-    for (final mod in shouldBeOff) {
-      final modDir = categoryPath.pJoin(mod);
-      final future = disable(
-        shaderFixesPath: shaderFixes,
-        modPath: modDir,
-      );
-      futures.add(future);
-    }
-    final shouldBeOn =
-        shouldBeEnabled.where((final e) => !currentEnabled.contains(e));
-    for (final mod in shouldBeOn) {
-      final modDir = categoryPath.pJoin(mod.pDisabledForm);
-      final future = enable(
-        shaderFixesPath: shaderFixes,
-        modPath: modDir,
-      );
-      futures.add(future);
-    }
-    await Future.wait(futures);
+    unawaited(_toggleCategory(categoryPath, shouldBeEnabled, ref));
   }
 }
 
@@ -211,45 +176,45 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
         return;
       }
       final categoryDir = latest2.pJoin(category.key);
-      unawaited(_toggleCategory(categoryDir, shouldBeEnabled));
+      unawaited(_toggleCategory(categoryDir, shouldBeEnabled, ref));
     }
   }
+}
 
-  Future<void> _toggleCategory(
-    final String categoryPath,
-    final List<String> shouldBeEnabled,
-  ) async {
-    final modExecFile = ref.read(appStateNotifierProvider).modExecFile;
-    if (modExecFile == null) {
-      return;
-    }
-    final shaderFixes = modExecFile.pDirname.pJoin(kShaderFixes);
-    final currentEnabled = getUnder<Directory>(categoryPath)
-        .where((final e) => e.pIsEnabled)
-        .map((final e) => e.pBasename)
-        .toList();
-    final shouldBeOff =
-        currentEnabled.where((final e) => !shouldBeEnabled.contains(e));
-    final futures = <Future>[];
-    for (final mod in shouldBeOff) {
-      final modDir = categoryPath.pJoin(mod);
-      final future = disable(
-        shaderFixesPath: shaderFixes,
-        modPath: modDir,
-      );
-      futures.add(future);
-    }
-    final shouldBeOn =
-        shouldBeEnabled.where((final e) => !currentEnabled.contains(e));
-    for (final mod in shouldBeOn) {
-      final modDir = categoryPath.pJoin(mod.pDisabledForm);
-      final future = enable(
-        shaderFixesPath: shaderFixes,
-        modPath: modDir,
-      );
-      futures.add(future);
-    }
-    await Future.wait(futures);
+Future<void> _toggleCategory(
+  final String categoryPath,
+  final List<String> shouldBeEnabled,
+  final AutoDisposeNotifierProviderRef<List<String>> ref,
+) async {
+  final modExecFile = ref.read(appStateNotifierProvider).modExecFile;
+  if (modExecFile == null) {
     return;
   }
+  final shaderFixes = modExecFile.pDirname.pJoin(kShaderFixes);
+  final currentEnabled = getUnder<Directory>(categoryPath)
+      .where((final e) => e.pIsEnabled)
+      .map((final e) => e.pBasename)
+      .toList();
+  final shouldBeOff =
+      currentEnabled.where((final e) => !shouldBeEnabled.contains(e));
+  final futures = <Future>[];
+  for (final mod in shouldBeOff) {
+    final modDir = categoryPath.pJoin(mod);
+    final future = disable(
+      shaderFixesPath: shaderFixes,
+      modPath: modDir,
+    );
+    futures.add(future);
+  }
+  final shouldBeOn =
+      shouldBeEnabled.where((final e) => !currentEnabled.contains(e));
+  for (final mod in shouldBeOn) {
+    final modDir = categoryPath.pJoin(mod.pDisabledForm);
+    final future = enable(
+      shaderFixesPath: shaderFixes,
+      modPath: modDir,
+    );
+    futures.add(future);
+  }
+  await Future.wait(futures);
 }

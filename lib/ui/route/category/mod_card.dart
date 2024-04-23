@@ -40,23 +40,26 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
   }
 
   @override
-  Widget build(final BuildContext context) => FluentTheme(
-        data: FluentThemeData.light(),
-        child: GestureDetector(
-          onTap: () => _onToggle(context),
-          child: Card(
-            backgroundColor: widget.mod.isEnabled
-                ? Colors.green.lightest
-                : Colors.red.lightest.withOpacity(0.5),
-            padding: const EdgeInsets.all(6),
-            child: FocusTraversalGroup(
-              child: Column(
-                children: [
-                  _buildFolderHeader(context),
-                  const SizedBox(height: 4),
-                  _buildFolderContent(context),
-                ],
-              ),
+  Widget build(final BuildContext context) => GestureDetector(
+        onTap: () => _onToggle(context),
+        child: Card(
+          backgroundColor: switch ((
+            FluentTheme.of(context).brightness == Brightness.light,
+            widget.mod.isEnabled
+          )) {
+            (true, true) => Colors.green.lightest,
+            (true, false) => Colors.red.lightest.withOpacity(0.5),
+            (false, true) => Colors.green.darkest.withOpacity(0.8),
+            (false, false) => Colors.red.darkest.withOpacity(0.6),
+          },
+          padding: const EdgeInsets.all(6),
+          child: FocusTraversalGroup(
+            child: Column(
+              children: [
+                _buildFolderHeader(context),
+                const SizedBox(height: 4),
+                _buildFolderContent(context),
+              ],
             ),
           ),
         ),
@@ -285,6 +288,12 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
         ),
       );
 
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Mod>('mod', widget.mod));
+  }
+
   Future<void> _onPaste(final BuildContext context) async {
     final image = await Pasteboard.image;
     if (image == null) {
@@ -356,7 +365,9 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
       showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (final dCtx) => Center(
+        builder: (final dCtx) => GestureDetector(
+          onTap: Navigator.of(dCtx).pop,
+          onSecondaryTap: Navigator.of(dCtx).pop,
           child: Image(
             image: image,
             fit: BoxFit.contain,
@@ -475,9 +486,6 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
 
       try {
         Directory(widget.mod.path).deleteSync(recursive: true);
-        if (!context.mounted) {
-          throw Exception('context not mounted');
-        }
         final writer = createModWriter(category: widget.mod.category);
         await writer.write(
           modName: targetElement.title,
@@ -580,11 +588,5 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
         ),
       ),
     );
-  }
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Mod>('mod', widget.mod));
   }
 }

@@ -21,10 +21,5 @@ assignees: ''
 ## Screenshots/Recordings
 [Attach any screenshots, recordings, or error messages related to the bug.]
 
-## Environment
-* Operating System: [Specify the operating system you're using (e.g., Windows 10, macOS 12.3).]
-* Browser/Version: [Specify the browser and its version (e.g., Google Chrome 98.0.4758.102).]
-* Device: [Specify the device if applicable (e.g., iPhone 13).]
-
 ## Additional Context
 [Any additional information or context that might be helpful for understanding the bug.]
