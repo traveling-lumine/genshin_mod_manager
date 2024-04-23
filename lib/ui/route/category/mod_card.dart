@@ -49,8 +49,8 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
           )) {
             (true, true) => Colors.green.lightest,
             (true, false) => Colors.red.lightest.withOpacity(0.5),
-            (false, true) => Colors.green.darkest,
-            (false, false) => Colors.red.darkest.withOpacity(0.8),
+            (false, true) => Colors.green.darkest.withOpacity(0.8),
+            (false, false) => Colors.red.darkest.withOpacity(0.6),
           },
           padding: const EdgeInsets.all(6),
           child: FocusTraversalGroup(
