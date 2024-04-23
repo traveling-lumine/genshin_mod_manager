@@ -33,11 +33,7 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
   @override
   Future<NahidaliveElement> fetchNahidaliveElement(final String uuid) async {
     final response = await _client.get(Uri.parse('$_kAkashaList?uuid=$uuid'));
-    if (response.statusCode == 200) {
-      return NahidaliveElement.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('fetch element failed');
-    }
+    return NahidaliveElement.fromJson(jsonDecode(response.body));
   }
 
   @override
@@ -64,16 +60,11 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
   Future<Uint8List> download(
     final NahidaliveDownloadElement downloadElement,
   ) async {
-    if (downloadElement.status) {
-      final response =
-          await _client.get(Uri.parse(downloadElement.downloadUrl!));
-      if (response.statusCode == 200) {
-        return response.bodyBytes;
-      } else {
-        throw Exception('download failed');
-      }
+    final response = await _client.get(Uri.parse(downloadElement.downloadUrl!));
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
     } else {
-      throw Exception('Wrong download element status');
+      throw Exception('download failed');
     }
   }
 }
