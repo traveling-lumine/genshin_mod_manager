@@ -45,8 +45,7 @@ class OssLicensesRoute extends StatelessWidget {
             .addAll(l.paragraphs.map((final p) => p.text));
       }
     }
-    final licenses =
-        ossLicenses.where((final e) => e.isDirectDependency).toList();
+    final licenses = [...dependencies];
     return licenses..sort((final a, final b) => a.name.compareTo(b.name));
   }
 
