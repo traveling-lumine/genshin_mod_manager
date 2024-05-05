@@ -45,3 +45,4 @@ app.*.map.json
 
 error_log.txt
 /coverage/
+/lib/data/repo/akasha.dart
