@@ -9,8 +9,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: 'develop'
+      - run: |
+          echo @"
+          ${{ secrets.REMOTE_API_CODE }}
+          "@ > .\lib\data\repo\akasha.dart
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
