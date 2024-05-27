@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_annotation_target
+
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -33,4 +35,3 @@ class NahidaliveDownloadElement with _$NahidaliveDownloadElement {
       _$NahidaliveDownloadElementFromJson(json);
 }
 
-// ignore_for_file: invalid_annotation_target

@@ -77,14 +77,14 @@ final targetGameProvider =
 );
 
 typedef _$TargetGame = AutoDisposeNotifier<TargetGames>;
-String _$appStateNotifierHash() => r'b6eaceb6d3f1ba47d1c549fd922abda62b0c0412';
+String _$appStateNotifierHash() => r'36816aa699b73590bafd02b4608e1721c8070d1f';
 
 /// The notifier for the app state.
 ///
 /// Copied from [AppStateNotifier].
 @ProviderFor(AppStateNotifier)
 final appStateNotifierProvider =
-    AutoDisposeNotifierProvider<AppStateNotifier, AppState>.internal(
+    AutoDisposeNotifierProvider<AppStateNotifier, GameConfig>.internal(
   AppStateNotifier.new,
   name: r'appStateNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -94,7 +94,7 @@ final appStateNotifierProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$AppStateNotifier = AutoDisposeNotifier<AppState>;
+typedef _$AppStateNotifier = AutoDisposeNotifier<GameConfig>;
 String _$darkModeHash() => r'1281ddeac883b0c2bbbb64fe2d2c6660a51febfa';
 
 /// The notifier for the dark mode.

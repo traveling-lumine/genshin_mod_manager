@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'app_state.dart';
+part of 'game_config.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -15,21 +15,22 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
-mixin _$AppState {
+mixin _$GameConfig {
   String? get modRoot => throw _privateConstructorUsedError;
   String? get modExecFile => throw _privateConstructorUsedError;
   String? get launcherFile => throw _privateConstructorUsedError;
   PresetData? get presetData => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
-  $AppStateCopyWith<AppState> get copyWith =>
+  $GameConfigCopyWith<GameConfig> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $AppStateCopyWith<$Res> {
-  factory $AppStateCopyWith(AppState value, $Res Function(AppState) then) =
-      _$AppStateCopyWithImpl<$Res, AppState>;
+abstract class $GameConfigCopyWith<$Res> {
+  factory $GameConfigCopyWith(
+          GameConfig value, $Res Function(GameConfig) then) =
+      _$GameConfigCopyWithImpl<$Res, GameConfig>;
   @useResult
   $Res call(
       {String? modRoot,
@@ -41,9 +42,9 @@ abstract class $AppStateCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$AppStateCopyWithImpl<$Res, $Val extends AppState>
-    implements $AppStateCopyWith<$Res> {
-  _$AppStateCopyWithImpl(this._value, this._then);
+class _$GameConfigCopyWithImpl<$Res, $Val extends GameConfig>
+    implements $GameConfigCopyWith<$Res> {
+  _$GameConfigCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
@@ -92,11 +93,11 @@ class _$AppStateCopyWithImpl<$Res, $Val extends AppState>
 }
 
 /// @nodoc
-abstract class _$$AppStateImplCopyWith<$Res>
-    implements $AppStateCopyWith<$Res> {
-  factory _$$AppStateImplCopyWith(
-          _$AppStateImpl value, $Res Function(_$AppStateImpl) then) =
-      __$$AppStateImplCopyWithImpl<$Res>;
+abstract class _$$GameConfigImplCopyWith<$Res>
+    implements $GameConfigCopyWith<$Res> {
+  factory _$$GameConfigImplCopyWith(
+          _$GameConfigImpl value, $Res Function(_$GameConfigImpl) then) =
+      __$$GameConfigImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
@@ -110,11 +111,11 @@ abstract class _$$AppStateImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$AppStateImplCopyWithImpl<$Res>
-    extends _$AppStateCopyWithImpl<$Res, _$AppStateImpl>
-    implements _$$AppStateImplCopyWith<$Res> {
-  __$$AppStateImplCopyWithImpl(
-      _$AppStateImpl _value, $Res Function(_$AppStateImpl) _then)
+class __$$GameConfigImplCopyWithImpl<$Res>
+    extends _$GameConfigCopyWithImpl<$Res, _$GameConfigImpl>
+    implements _$$GameConfigImplCopyWith<$Res> {
+  __$$GameConfigImplCopyWithImpl(
+      _$GameConfigImpl _value, $Res Function(_$GameConfigImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -125,7 +126,7 @@ class __$$AppStateImplCopyWithImpl<$Res>
     Object? launcherFile = freezed,
     Object? presetData = freezed,
   }) {
-    return _then(_$AppStateImpl(
+    return _then(_$GameConfigImpl(
       modRoot: freezed == modRoot
           ? _value.modRoot
           : modRoot // ignore: cast_nullable_to_non_nullable
@@ -148,8 +149,8 @@ class __$$AppStateImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
-  const _$AppStateImpl(
+class _$GameConfigImpl with DiagnosticableTreeMixin implements _GameConfig {
+  const _$GameConfigImpl(
       {this.modRoot, this.modExecFile, this.launcherFile, this.presetData});
 
   @override
@@ -163,14 +164,14 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'AppState(modRoot: $modRoot, modExecFile: $modExecFile, launcherFile: $launcherFile, presetData: $presetData)';
+    return 'GameConfig(modRoot: $modRoot, modExecFile: $modExecFile, launcherFile: $launcherFile, presetData: $presetData)';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty('type', 'AppState'))
+      ..add(DiagnosticsProperty('type', 'GameConfig'))
       ..add(DiagnosticsProperty('modRoot', modRoot))
       ..add(DiagnosticsProperty('modExecFile', modExecFile))
       ..add(DiagnosticsProperty('launcherFile', launcherFile))
@@ -181,7 +182,7 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$AppStateImpl &&
+            other is _$GameConfigImpl &&
             (identical(other.modRoot, modRoot) || other.modRoot == modRoot) &&
             (identical(other.modExecFile, modExecFile) ||
                 other.modExecFile == modExecFile) &&
@@ -198,16 +199,16 @@ class _$AppStateImpl with DiagnosticableTreeMixin implements _AppState {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$AppStateImplCopyWith<_$AppStateImpl> get copyWith =>
-      __$$AppStateImplCopyWithImpl<_$AppStateImpl>(this, _$identity);
+  _$$GameConfigImplCopyWith<_$GameConfigImpl> get copyWith =>
+      __$$GameConfigImplCopyWithImpl<_$GameConfigImpl>(this, _$identity);
 }
 
-abstract class _AppState implements AppState {
-  const factory _AppState(
+abstract class _GameConfig implements GameConfig {
+  const factory _GameConfig(
       {final String? modRoot,
       final String? modExecFile,
       final String? launcherFile,
-      final PresetData? presetData}) = _$AppStateImpl;
+      final PresetData? presetData}) = _$GameConfigImpl;
 
   @override
   String? get modRoot;
@@ -219,6 +220,6 @@ abstract class _AppState implements AppState {
   PresetData? get presetData;
   @override
   @JsonKey(ignore: true)
-  _$$AppStateImplCopyWith<_$AppStateImpl> get copyWith =>
+  _$$GameConfigImplCopyWith<_$GameConfigImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

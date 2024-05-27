@@ -1,9 +1,7 @@
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/repo/akasha.dart';
 import 'package:genshin_mod_manager/domain/repo/mod_writer.dart';
-import 'package:meta/meta.dart';
 
-@immutable
 final class AkashaDownloadUrlUseCase {
   const AkashaDownloadUrlUseCase({
     required this.api,
@@ -31,7 +29,6 @@ final class AkashaDownloadUrlUseCase {
 }
 
 /// The exception thrown when the password is wrong.
-@immutable
 class WrongPasswordException implements Exception {
   /// Creates a new instance.
   const WrongPasswordException();

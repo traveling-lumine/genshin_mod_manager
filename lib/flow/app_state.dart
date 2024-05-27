@@ -1,7 +1,7 @@
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/data/repo/app_state_storage.dart';
 import 'package:genshin_mod_manager/data/repo/sharedpreference_storage.dart';
-import 'package:genshin_mod_manager/domain/entity/app_state.dart';
+import 'package:genshin_mod_manager/domain/entity/game_config.dart';
 import 'package:genshin_mod_manager/domain/entity/game_enum.dart';
 import 'package:genshin_mod_manager/domain/entity/preset.dart';
 import 'package:genshin_mod_manager/domain/repo/app_state_storage.dart';
@@ -68,7 +68,7 @@ AppStateStorage appStateStorage(final AppStateStorageRef ref) {
 @riverpod
 class AppStateNotifier extends _$AppStateNotifier {
   @override
-  AppState build() {
+  GameConfig build() {
     final storage = ref.watch(appStateStorageProvider);
     const dotString = '.';
     final tDirRaw = storage.getTargetDir();
@@ -87,7 +87,7 @@ class AppStateNotifier extends _$AppStateNotifier {
     if (targetDir != dotString) {
       storage.setTargetDir(dotString);
     }
-    return AppState(
+    return GameConfig(
       modRoot: modRoot,
       modExecFile: modExecFile,
       presetData: storage.getPresetData(),

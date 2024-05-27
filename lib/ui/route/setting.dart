@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/domain/entity/app_state.dart';
-import 'package:genshin_mod_manager/domain/entity/game_enum.dart';
+import 'package:genshin_mod_manager/domain/entity/game_config.dart';
 import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/flow/app_version.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
-import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
+import 'package:genshin_mod_manager/ui/widget/game_selector.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/no_deref_file_opener.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -92,9 +91,8 @@ class _SettingRoute extends ConsumerWidget {
             text: 'Dark mode',
             provider: darkModeProvider,
           ),
-          _ComboItem(
+          const _ComboItem(
             text: 'Target Game',
-            onChanged: ref.read(targetGameProvider.notifier).setValue,
           ),
           _buildLicense(context),
           _buildVersion(ref),
@@ -147,7 +145,7 @@ class _PathSelectItem extends StatelessWidget {
   });
 
   final String title;
-  final String? Function(AppState vm) selector;
+  final String? Function(GameConfig vm) selector;
   final IconData icon;
   final VoidCallback onPressed;
 
@@ -174,7 +172,7 @@ class _PathSelectItem extends StatelessWidget {
     properties
       ..add(StringProperty('title', title))
       ..add(
-        ObjectFlagProperty<String? Function(AppState vm)>.has(
+        ObjectFlagProperty<String? Function(GameConfig vm)>.has(
           'selector',
           selector,
         ),
@@ -222,62 +220,19 @@ class _SwitchItem extends StatelessWidget {
 class _ComboItem extends StatelessWidget {
   const _ComboItem({
     required this.text,
-    required this.onChanged,
   });
 
   final String text;
 
-  final void Function(TargetGames value) onChanged;
-
   @override
   Widget build(final BuildContext context) => ListTile(
         title: Text(text),
-        leading: Consumer(
-          builder: (final context, final ref, final child) {
-            final value = ref.watch(targetGameProvider);
-            return RepaintBoundary(
-              child: ComboBox<TargetGames>(
-                items: TargetGames.values
-                    .map(
-                      (final e) => ComboBoxItem<TargetGames>(
-                        value: e,
-                        child: Text(e.displayName),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (final value) {
-                  if (value == null) {
-                    unawaited(
-                      displayInfoBarInContext(
-                        context,
-                        title: const Text("Whaat?"),
-                        severity: InfoBarSeverity.error,
-                        content: const Text(
-                          "Null value. This is a bug. Please report.",
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-                  onChanged(value);
-                },
-                value: value,
-              ),
-            );
-          },
-        ),
+        leading: const GameSelector(),
       );
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-      ..add(StringProperty('text', text))
-      ..add(
-        ObjectFlagProperty<void Function(TargetGames value)>.has(
-          'onChanged',
-          onChanged,
-        ),
-      );
+    properties.add(StringProperty('text', text));
   }
 }
