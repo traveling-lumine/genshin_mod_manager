@@ -202,7 +202,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         );
     return NavigationView(
       appBar: getAppbar(
-        '${game.displayName} Mod Manager$updateMarker',
+        '$game Mod Manager$updateMarker',
         presetControl: true,
       ),
       pane: _buildPane(selected, items, footerItems),
@@ -314,7 +314,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
             context: context,
             builder: (final dialogContext) {
               final execRoot = File(Platform.resolvedExecutable).parent.path;
-              final appState = ref.read(appStateNotifierProvider);
+              final appState = ref.read(gameConfigNotifierProvider);
               final modRoot = appState.modRoot;
               final migotoRoot = appState.modExecFile;
               final launcherRoot = appState.launcherFile;
@@ -405,7 +405,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   }
 
   void _runMigoto() {
-    final path = ref.read(appStateNotifierProvider).modExecFile;
+    final path = ref.read(gameConfigNotifierProvider).modExecFile;
     if (path == null) {
       return;
     }
@@ -419,7 +419,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   }
 
   void _runLauncher() {
-    final launcher = ref.read(appStateNotifierProvider).launcherFile;
+    final launcher = ref.read(gameConfigNotifierProvider).launcherFile;
     if (launcher == null) {
       return;
     }

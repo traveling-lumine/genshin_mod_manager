@@ -39,7 +39,7 @@ class _SettingRoute extends ConsumerWidget {
                 return;
               }
               ref
-                  .read(appStateNotifierProvider.notifier)
+                  .read(gameConfigNotifierProvider.notifier)
                   .changeModRoot(dir.path);
             },
           ),
@@ -53,7 +53,7 @@ class _SettingRoute extends ConsumerWidget {
                 return;
               }
               ref
-                  .read(appStateNotifierProvider.notifier)
+                  .read(gameConfigNotifierProvider.notifier)
                   .changeModExecFile(file.path);
             },
           ),
@@ -67,7 +67,7 @@ class _SettingRoute extends ConsumerWidget {
                 return;
               }
               ref
-                  .read(appStateNotifierProvider.notifier)
+                  .read(gameConfigNotifierProvider.notifier)
                   .changeLauncherFile(file.path);
             },
           ),
@@ -154,7 +154,8 @@ class _PathSelectItem extends StatelessWidget {
         title: Text(title),
         subtitle: Consumer(
           builder: (final context, final ref, final child) {
-            final value = ref.watch(appStateNotifierProvider.select(selector));
+            final value =
+                ref.watch(gameConfigNotifierProvider.select(selector));
             return Text(value ?? 'Please select...');
           },
         ),
