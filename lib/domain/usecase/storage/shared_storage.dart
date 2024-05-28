@@ -9,11 +9,7 @@ void afterInitializationUseCase(final PersistentStorage storage) {
       storage
         ..setList('games', ['Genshin'])
         ..setString('lastGame', 'Genshin')
-        ..setInt('configVersion', 2)
-        ..setString('Genshin.modRoot', '')
-        ..setString('Genshin.modExecFile', '')
-        ..setString('Genshin.launcherDir', '')
-        ..setMap('Genshin.presetData', {});
+        ..setInt('configVersion', 2);
     } else {
       _convertToVersion1(storage);
     }
