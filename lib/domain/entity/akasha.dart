@@ -12,9 +12,9 @@ class NahidaliveElement with _$NahidaliveElement {
     required final String uuid,
     required final String version,
     required final String title,
-    required final String description,
     required final List<String> tags,
     @JsonKey(name: 'preview_url') required final String previewUrl,
+    final String? description,
     @JsonKey(name: 'arca_url') final String? arcaUrl,
     @JsonKey(name: 'virustotal_url') final String? virustotalUrl,
   }) = _NahidaliveElement;
@@ -34,4 +34,3 @@ class NahidaliveDownloadElement with _$NahidaliveDownloadElement {
   factory NahidaliveDownloadElement.fromJson(final Map<String, dynamic> json) =>
       _$NahidaliveDownloadElementFromJson(json);
 }
-

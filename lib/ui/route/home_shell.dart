@@ -15,6 +15,7 @@ import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/flow/app_version.dart';
 import 'package:genshin_mod_manager/flow/exe_arg.dart';
 import 'package:genshin_mod_manager/flow/home_shell.dart';
+import 'package:genshin_mod_manager/flow/storage.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/util/open_url.dart';
@@ -30,7 +31,7 @@ import 'package:window_manager/window_manager.dart';
 const _kRepoReleases = '$kRepoBase/releases/latest';
 
 class HomeShell extends ConsumerStatefulWidget {
-  const HomeShell({required this.child});
+  const HomeShell({required this.child, super.key});
 
   final Widget child;
 

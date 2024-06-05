@@ -6,10 +6,7 @@ void afterInitializationUseCase(final PersistentStorage storage) {
   var version = storage.getInt('configVersion');
   if (version == null) {
     if (storage.getEntries().isEmpty) {
-      storage
-        ..setList('games', ['Genshin'])
-        ..setString('lastGame', 'Genshin')
-        ..setInt('configVersion', 2);
+      storage.setInt('configVersion', 2);
     } else {
       _convertToVersion1(storage);
     }

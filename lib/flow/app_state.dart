@@ -1,40 +1,15 @@
-import 'package:genshin_mod_manager/data/repo/sharedpreference_storage.dart';
 import 'package:genshin_mod_manager/domain/entity/game_config.dart';
 import 'package:genshin_mod_manager/domain/entity/preset.dart';
-import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/dark_mode.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/enabled_first.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/folder_icon.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/game_config.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/move_on_drag.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/run_together.dart';
-import 'package:genshin_mod_manager/domain/usecase/storage/shared_storage.dart';
+import 'package:genshin_mod_manager/flow/storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 part 'app_state.g.dart';
-
-/// The shared preference.
-@riverpod
-Future<SharedPreferences> sharedPreference(
-  final SharedPreferenceRef ref,
-) =>
-    SharedPreferences.getInstance().timeout(const Duration(seconds: 5));
-
-/// The storage for the shared preference.
-@riverpod
-PersistentStorage sharedPreferenceStorage(
-  final SharedPreferenceStorageRef ref,
-) {
-  final sharedPreferences =
-      ref.watch(sharedPreferenceProvider).unwrapPrevious().valueOrNull;
-  if (sharedPreferences == null) {
-    return NullSharedPreferenceStorage();
-  }
-  final sharedPreferenceStorage = SharedPreferenceStorage(sharedPreferences);
-  afterInitializationUseCase(sharedPreferenceStorage);
-  return sharedPreferenceStorage;
-}
 
 @riverpod
 class GamesList extends _$GamesList {
@@ -42,8 +17,10 @@ class GamesList extends _$GamesList {
   List<String> build() {
     final storage = ref.watch(sharedPreferenceStorageProvider);
     final gamesList = storage.getList('games');
-    if (gamesList == null) {
-      return [];
+    if (gamesList == null || gamesList.isEmpty) {
+      final list = ["Genshin"];
+      storage.setList('games', list);
+      return list;
     }
     return gamesList;
   }
@@ -63,7 +40,7 @@ class GamesList extends _$GamesList {
     if (!state.contains(game)) {
       return;
     }
-    final newGamesList = state.where((e) => e != game).toList();
+    final newGamesList = state.where((final e) => e != game).toList();
     storage.setList('games', newGamesList);
     state = newGamesList;
   }
@@ -80,7 +57,9 @@ class TargetGame extends _$TargetGame {
     if (gamesList.contains(lastGame)) {
       return lastGame!;
     } else {
-      return gamesList.first;
+      final first = gamesList.first;
+      storage.setString('lastGame', first);
+      return first;
     }
   }
 
