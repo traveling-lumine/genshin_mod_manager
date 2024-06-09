@@ -16,12 +16,7 @@ class GamesList extends _$GamesList {
   @override
   List<String> build() {
     final storage = ref.watch(sharedPreferenceStorageProvider);
-    final gamesList = storage.getList('games');
-    if (gamesList == null || gamesList.isEmpty) {
-      final list = ["Genshin"];
-      storage.setList('games', list);
-      return list;
-    }
+    final gamesList = storage.getList('games') ?? [];
     return gamesList;
   }
 

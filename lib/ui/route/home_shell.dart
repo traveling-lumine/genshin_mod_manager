@@ -130,6 +130,36 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         _displayUpdateInfoBar(remote!);
       }
     });
+
+    if (ref.watch(gamesListProvider).isEmpty) {
+      return NavigationView(
+        appBar: getAppbar('Set the first game name'),
+        content: ScaffoldPage.withPadding(
+          header: const PageHeader(
+            title: Text('Set the first game name'),
+          ),
+          content: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('My game is...'),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: 200,
+                  child: TextFormBox(
+                    placeholder: 'Game name',
+                    onFieldSubmitted: (final value) {
+                      ref.read(gamesListProvider.notifier).addGame(value);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final categories = ref.watch(homeShellListProvider);
     return categories.when(
       skipLoadingOnReload: true,
