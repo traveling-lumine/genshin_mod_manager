@@ -52,10 +52,16 @@ class GameSelector extends HookConsumerWidget {
                   value: e,
                   child: GestureDetector(
                     onLongPress: () {
-                      Navigator.of(context).pop();
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
                       _onGameDelete(context, TextEditingController(), ref, e);
                     },
-                    child: Text(e),
+                    child: ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(minWidth: 50, maxWidth: 200),
+                      child: Text(e),
+                    ),
                   ),
                 ),
               )
