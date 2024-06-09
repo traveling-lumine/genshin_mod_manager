@@ -35,15 +35,15 @@ Map<String, dynamic> _$$NahidaliveElementImplToJson(
 _$NahidaliveDownloadElementImpl _$$NahidaliveDownloadElementImplFromJson(
         Map<String, dynamic> json) =>
     _$NahidaliveDownloadElementImpl(
-      status: json['status'] as bool,
+      success: json['success'] as bool,
       errorCodes: json['error-codes'] as String?,
-      downloadUrl: json['download_url'] as String?,
+      downloadUrl: json['presigned_url'] as String?,
     );
 
 Map<String, dynamic> _$$NahidaliveDownloadElementImplToJson(
         _$NahidaliveDownloadElementImpl instance) =>
     <String, dynamic>{
-      'status': instance.status,
+      'success': instance.success,
       'error-codes': instance.errorCodes,
-      'download_url': instance.downloadUrl,
+      'presigned_url': instance.downloadUrl,
     };

@@ -26,9 +26,9 @@ class NahidaliveElement with _$NahidaliveElement {
 @freezed
 class NahidaliveDownloadElement with _$NahidaliveDownloadElement {
   const factory NahidaliveDownloadElement({
-    required final bool status,
+    required final bool success,
     @JsonKey(name: 'error-codes') final String? errorCodes,
-    @JsonKey(name: 'download_url') final String? downloadUrl,
+    @JsonKey(name: 'presigned_url') final String? downloadUrl,
   }) = _NahidaliveDownloadElement;
 
   factory NahidaliveDownloadElement.fromJson(final Map<String, dynamic> json) =>

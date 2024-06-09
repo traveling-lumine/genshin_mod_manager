@@ -69,7 +69,7 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
           ),
         );
       },
-      onPasswordRequired: (final wrongPw) {
+      onPasswordRequired: (final wrongPw) async {
         if (!mounted) {
           return Future(() => null);
         }
@@ -218,7 +218,6 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
     final isLoading = useState(false);
     final timerReady = useState(true);
     final displayingNotSoFast = useState(false);
-    print('timerReady: ${timerReady.value}, isLoading: ${isLoading.value}');
     return data.when(
       data: (final data) {
         final filteredData = data.where(_dataFilter).toList();

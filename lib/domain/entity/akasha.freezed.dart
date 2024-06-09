@@ -348,10 +348,10 @@ NahidaliveDownloadElement _$NahidaliveDownloadElementFromJson(
 
 /// @nodoc
 mixin _$NahidaliveDownloadElement {
-  bool get status => throw _privateConstructorUsedError;
+  bool get success => throw _privateConstructorUsedError;
   @JsonKey(name: 'error-codes')
   String? get errorCodes => throw _privateConstructorUsedError;
-  @JsonKey(name: 'download_url')
+  @JsonKey(name: 'presigned_url')
   String? get downloadUrl => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -367,9 +367,9 @@ abstract class $NahidaliveDownloadElementCopyWith<$Res> {
       _$NahidaliveDownloadElementCopyWithImpl<$Res, NahidaliveDownloadElement>;
   @useResult
   $Res call(
-      {bool status,
+      {bool success,
       @JsonKey(name: 'error-codes') String? errorCodes,
-      @JsonKey(name: 'download_url') String? downloadUrl});
+      @JsonKey(name: 'presigned_url') String? downloadUrl});
 }
 
 /// @nodoc
@@ -386,14 +386,14 @@ class _$NahidaliveDownloadElementCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? status = null,
+    Object? success = null,
     Object? errorCodes = freezed,
     Object? downloadUrl = freezed,
   }) {
     return _then(_value.copyWith(
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
+      success: null == success
+          ? _value.success
+          : success // ignore: cast_nullable_to_non_nullable
               as bool,
       errorCodes: freezed == errorCodes
           ? _value.errorCodes
@@ -417,9 +417,9 @@ abstract class _$$NahidaliveDownloadElementImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {bool status,
+      {bool success,
       @JsonKey(name: 'error-codes') String? errorCodes,
-      @JsonKey(name: 'download_url') String? downloadUrl});
+      @JsonKey(name: 'presigned_url') String? downloadUrl});
 }
 
 /// @nodoc
@@ -435,14 +435,14 @@ class __$$NahidaliveDownloadElementImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? status = null,
+    Object? success = null,
     Object? errorCodes = freezed,
     Object? downloadUrl = freezed,
   }) {
     return _then(_$NahidaliveDownloadElementImpl(
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
+      success: null == success
+          ? _value.success
+          : success // ignore: cast_nullable_to_non_nullable
               as bool,
       errorCodes: freezed == errorCodes
           ? _value.errorCodes
@@ -462,25 +462,25 @@ class _$NahidaliveDownloadElementImpl
     with DiagnosticableTreeMixin
     implements _NahidaliveDownloadElement {
   const _$NahidaliveDownloadElementImpl(
-      {required this.status,
+      {required this.success,
       @JsonKey(name: 'error-codes') this.errorCodes,
-      @JsonKey(name: 'download_url') this.downloadUrl});
+      @JsonKey(name: 'presigned_url') this.downloadUrl});
 
   factory _$NahidaliveDownloadElementImpl.fromJson(Map<String, dynamic> json) =>
       _$$NahidaliveDownloadElementImplFromJson(json);
 
   @override
-  final bool status;
+  final bool success;
   @override
   @JsonKey(name: 'error-codes')
   final String? errorCodes;
   @override
-  @JsonKey(name: 'download_url')
+  @JsonKey(name: 'presigned_url')
   final String? downloadUrl;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'NahidaliveDownloadElement(status: $status, errorCodes: $errorCodes, downloadUrl: $downloadUrl)';
+    return 'NahidaliveDownloadElement(success: $success, errorCodes: $errorCodes, downloadUrl: $downloadUrl)';
   }
 
   @override
@@ -488,7 +488,7 @@ class _$NahidaliveDownloadElementImpl
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'NahidaliveDownloadElement'))
-      ..add(DiagnosticsProperty('status', status))
+      ..add(DiagnosticsProperty('success', success))
       ..add(DiagnosticsProperty('errorCodes', errorCodes))
       ..add(DiagnosticsProperty('downloadUrl', downloadUrl));
   }
@@ -498,7 +498,7 @@ class _$NahidaliveDownloadElementImpl
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$NahidaliveDownloadElementImpl &&
-            (identical(other.status, status) || other.status == status) &&
+            (identical(other.success, success) || other.success == success) &&
             (identical(other.errorCodes, errorCodes) ||
                 other.errorCodes == errorCodes) &&
             (identical(other.downloadUrl, downloadUrl) ||
@@ -507,7 +507,8 @@ class _$NahidaliveDownloadElementImpl
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, status, errorCodes, downloadUrl);
+  int get hashCode =>
+      Object.hash(runtimeType, success, errorCodes, downloadUrl);
 
   @JsonKey(ignore: true)
   @override
@@ -526,21 +527,21 @@ class _$NahidaliveDownloadElementImpl
 
 abstract class _NahidaliveDownloadElement implements NahidaliveDownloadElement {
   const factory _NahidaliveDownloadElement(
-          {required final bool status,
+          {required final bool success,
           @JsonKey(name: 'error-codes') final String? errorCodes,
-          @JsonKey(name: 'download_url') final String? downloadUrl}) =
+          @JsonKey(name: 'presigned_url') final String? downloadUrl}) =
       _$NahidaliveDownloadElementImpl;
 
   factory _NahidaliveDownloadElement.fromJson(Map<String, dynamic> json) =
       _$NahidaliveDownloadElementImpl.fromJson;
 
   @override
-  bool get status;
+  bool get success;
   @override
   @JsonKey(name: 'error-codes')
   String? get errorCodes;
   @override
-  @JsonKey(name: 'download_url')
+  @JsonKey(name: 'presigned_url')
   String? get downloadUrl;
   @override
   @JsonKey(ignore: true)

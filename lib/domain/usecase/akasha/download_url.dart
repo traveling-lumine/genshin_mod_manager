@@ -17,7 +17,7 @@ final class AkashaDownloadUrlUseCase {
 
   Future<void> call() async {
     final url = await api.downloadUrl(element.uuid, pw: pw); // HttpException
-    if (!url.status) {
+    if (!url.success) {
       throw const WrongPasswordException();
     }
     final data = await api.download(url);

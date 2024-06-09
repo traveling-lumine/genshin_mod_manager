@@ -86,11 +86,12 @@ class StoreElement extends ConsumerWidget {
             progressIndicatorBuilder:
                 (final context, final url, final progress) =>
                     ProgressRing(value: progress.progress),
-            errorWidget: (final context, final url, final error) => Column(
+            errorWidget: (final context, final url, final error) =>
+                const Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(FluentIcons.error),
-                SelectableText('Failed to load: $error'),
+                Icon(FluentIcons.error),
+                SelectableText('Failed to load'),
               ],
             ),
           ),
