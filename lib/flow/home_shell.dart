@@ -102,7 +102,7 @@ class NullRootWatcher implements RootWatcher {
 @riverpod
 RootWatcher rootWatcher(final RootWatcherRef ref) {
   final modRoot = ref
-      .watch(appStateNotifierProvider.select((final state) => state.modRoot));
+      .watch(gameConfigNotifierProvider.select((final state) => state.modRoot));
   final RootWatcher watcher;
   if (modRoot == null) {
     watcher = NullRootWatcher();

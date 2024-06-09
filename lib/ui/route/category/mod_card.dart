@@ -520,7 +520,7 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
 
   void _onToggle(final BuildContext context) {
     final shaderFixesPath = ref
-        .read(appStateNotifierProvider)
+        .read(gameConfigNotifierProvider)
         .modExecFile
         ?.pDirname
         .pJoin(kShaderFixes);

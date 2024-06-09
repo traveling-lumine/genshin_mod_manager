@@ -12,9 +12,9 @@ _$NahidaliveElementImpl _$$NahidaliveElementImplFromJson(
       uuid: json['uuid'] as String,
       version: json['version'] as String,
       title: json['title'] as String,
-      description: json['description'] as String,
       tags: (json['tags'] as List<dynamic>).map((e) => e as String).toList(),
       previewUrl: json['preview_url'] as String,
+      description: json['description'] as String?,
       arcaUrl: json['arca_url'] as String?,
       virustotalUrl: json['virustotal_url'] as String?,
     );
@@ -25,9 +25,9 @@ Map<String, dynamic> _$$NahidaliveElementImplToJson(
       'uuid': instance.uuid,
       'version': instance.version,
       'title': instance.title,
-      'description': instance.description,
       'tags': instance.tags,
       'preview_url': instance.previewUrl,
+      'description': instance.description,
       'arca_url': instance.arcaUrl,
       'virustotal_url': instance.virustotalUrl,
     };
@@ -35,15 +35,15 @@ Map<String, dynamic> _$$NahidaliveElementImplToJson(
 _$NahidaliveDownloadElementImpl _$$NahidaliveDownloadElementImplFromJson(
         Map<String, dynamic> json) =>
     _$NahidaliveDownloadElementImpl(
-      status: json['status'] as bool,
+      success: json['success'] as bool,
       errorCodes: json['error-codes'] as String?,
-      downloadUrl: json['download_url'] as String?,
+      downloadUrl: json['presigned_url'] as String?,
     );
 
 Map<String, dynamic> _$$NahidaliveDownloadElementImplToJson(
         _$NahidaliveDownloadElementImpl instance) =>
     <String, dynamic>{
-      'status': instance.status,
+      'success': instance.success,
       'error-codes': instance.errorCodes,
-      'download_url': instance.downloadUrl,
+      'presigned_url': instance.downloadUrl,
     };

@@ -23,10 +23,10 @@ mixin _$NahidaliveElement {
   String get uuid => throw _privateConstructorUsedError;
   String get version => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
-  String get description => throw _privateConstructorUsedError;
   List<String> get tags => throw _privateConstructorUsedError;
   @JsonKey(name: 'preview_url')
   String get previewUrl => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
   @JsonKey(name: 'arca_url')
   String? get arcaUrl => throw _privateConstructorUsedError;
   @JsonKey(name: 'virustotal_url')
@@ -48,9 +48,9 @@ abstract class $NahidaliveElementCopyWith<$Res> {
       {String uuid,
       String version,
       String title,
-      String description,
       List<String> tags,
       @JsonKey(name: 'preview_url') String previewUrl,
+      String? description,
       @JsonKey(name: 'arca_url') String? arcaUrl,
       @JsonKey(name: 'virustotal_url') String? virustotalUrl});
 }
@@ -71,9 +71,9 @@ class _$NahidaliveElementCopyWithImpl<$Res, $Val extends NahidaliveElement>
     Object? uuid = null,
     Object? version = null,
     Object? title = null,
-    Object? description = null,
     Object? tags = null,
     Object? previewUrl = null,
+    Object? description = freezed,
     Object? arcaUrl = freezed,
     Object? virustotalUrl = freezed,
   }) {
@@ -90,10 +90,6 @@ class _$NahidaliveElementCopyWithImpl<$Res, $Val extends NahidaliveElement>
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
       tags: null == tags
           ? _value.tags
           : tags // ignore: cast_nullable_to_non_nullable
@@ -102,6 +98,10 @@ class _$NahidaliveElementCopyWithImpl<$Res, $Val extends NahidaliveElement>
           ? _value.previewUrl
           : previewUrl // ignore: cast_nullable_to_non_nullable
               as String,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
       arcaUrl: freezed == arcaUrl
           ? _value.arcaUrl
           : arcaUrl // ignore: cast_nullable_to_non_nullable
@@ -126,9 +126,9 @@ abstract class _$$NahidaliveElementImplCopyWith<$Res>
       {String uuid,
       String version,
       String title,
-      String description,
       List<String> tags,
       @JsonKey(name: 'preview_url') String previewUrl,
+      String? description,
       @JsonKey(name: 'arca_url') String? arcaUrl,
       @JsonKey(name: 'virustotal_url') String? virustotalUrl});
 }
@@ -147,9 +147,9 @@ class __$$NahidaliveElementImplCopyWithImpl<$Res>
     Object? uuid = null,
     Object? version = null,
     Object? title = null,
-    Object? description = null,
     Object? tags = null,
     Object? previewUrl = null,
+    Object? description = freezed,
     Object? arcaUrl = freezed,
     Object? virustotalUrl = freezed,
   }) {
@@ -166,10 +166,6 @@ class __$$NahidaliveElementImplCopyWithImpl<$Res>
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
       tags: null == tags
           ? _value._tags
           : tags // ignore: cast_nullable_to_non_nullable
@@ -178,6 +174,10 @@ class __$$NahidaliveElementImplCopyWithImpl<$Res>
           ? _value.previewUrl
           : previewUrl // ignore: cast_nullable_to_non_nullable
               as String,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
       arcaUrl: freezed == arcaUrl
           ? _value.arcaUrl
           : arcaUrl // ignore: cast_nullable_to_non_nullable
@@ -199,9 +199,9 @@ class _$NahidaliveElementImpl
       {required this.uuid,
       required this.version,
       required this.title,
-      required this.description,
       required final List<String> tags,
       @JsonKey(name: 'preview_url') required this.previewUrl,
+      this.description,
       @JsonKey(name: 'arca_url') this.arcaUrl,
       @JsonKey(name: 'virustotal_url') this.virustotalUrl})
       : _tags = tags;
@@ -215,8 +215,6 @@ class _$NahidaliveElementImpl
   final String version;
   @override
   final String title;
-  @override
-  final String description;
   final List<String> _tags;
   @override
   List<String> get tags {
@@ -229,6 +227,8 @@ class _$NahidaliveElementImpl
   @JsonKey(name: 'preview_url')
   final String previewUrl;
   @override
+  final String? description;
+  @override
   @JsonKey(name: 'arca_url')
   final String? arcaUrl;
   @override
@@ -237,7 +237,7 @@ class _$NahidaliveElementImpl
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'NahidaliveElement(uuid: $uuid, version: $version, title: $title, description: $description, tags: $tags, previewUrl: $previewUrl, arcaUrl: $arcaUrl, virustotalUrl: $virustotalUrl)';
+    return 'NahidaliveElement(uuid: $uuid, version: $version, title: $title, tags: $tags, previewUrl: $previewUrl, description: $description, arcaUrl: $arcaUrl, virustotalUrl: $virustotalUrl)';
   }
 
   @override
@@ -248,9 +248,9 @@ class _$NahidaliveElementImpl
       ..add(DiagnosticsProperty('uuid', uuid))
       ..add(DiagnosticsProperty('version', version))
       ..add(DiagnosticsProperty('title', title))
-      ..add(DiagnosticsProperty('description', description))
       ..add(DiagnosticsProperty('tags', tags))
       ..add(DiagnosticsProperty('previewUrl', previewUrl))
+      ..add(DiagnosticsProperty('description', description))
       ..add(DiagnosticsProperty('arcaUrl', arcaUrl))
       ..add(DiagnosticsProperty('virustotalUrl', virustotalUrl));
   }
@@ -263,11 +263,11 @@ class _$NahidaliveElementImpl
             (identical(other.uuid, uuid) || other.uuid == uuid) &&
             (identical(other.version, version) || other.version == version) &&
             (identical(other.title, title) || other.title == title) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
             const DeepCollectionEquality().equals(other._tags, _tags) &&
             (identical(other.previewUrl, previewUrl) ||
                 other.previewUrl == previewUrl) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
             (identical(other.arcaUrl, arcaUrl) || other.arcaUrl == arcaUrl) &&
             (identical(other.virustotalUrl, virustotalUrl) ||
                 other.virustotalUrl == virustotalUrl));
@@ -280,9 +280,9 @@ class _$NahidaliveElementImpl
       uuid,
       version,
       title,
-      description,
       const DeepCollectionEquality().hash(_tags),
       previewUrl,
+      description,
       arcaUrl,
       virustotalUrl);
 
@@ -306,9 +306,9 @@ abstract class _NahidaliveElement implements NahidaliveElement {
           {required final String uuid,
           required final String version,
           required final String title,
-          required final String description,
           required final List<String> tags,
           @JsonKey(name: 'preview_url') required final String previewUrl,
+          final String? description,
           @JsonKey(name: 'arca_url') final String? arcaUrl,
           @JsonKey(name: 'virustotal_url') final String? virustotalUrl}) =
       _$NahidaliveElementImpl;
@@ -323,12 +323,12 @@ abstract class _NahidaliveElement implements NahidaliveElement {
   @override
   String get title;
   @override
-  String get description;
-  @override
   List<String> get tags;
   @override
   @JsonKey(name: 'preview_url')
   String get previewUrl;
+  @override
+  String? get description;
   @override
   @JsonKey(name: 'arca_url')
   String? get arcaUrl;
@@ -348,10 +348,10 @@ NahidaliveDownloadElement _$NahidaliveDownloadElementFromJson(
 
 /// @nodoc
 mixin _$NahidaliveDownloadElement {
-  bool get status => throw _privateConstructorUsedError;
+  bool get success => throw _privateConstructorUsedError;
   @JsonKey(name: 'error-codes')
   String? get errorCodes => throw _privateConstructorUsedError;
-  @JsonKey(name: 'download_url')
+  @JsonKey(name: 'presigned_url')
   String? get downloadUrl => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -367,9 +367,9 @@ abstract class $NahidaliveDownloadElementCopyWith<$Res> {
       _$NahidaliveDownloadElementCopyWithImpl<$Res, NahidaliveDownloadElement>;
   @useResult
   $Res call(
-      {bool status,
+      {bool success,
       @JsonKey(name: 'error-codes') String? errorCodes,
-      @JsonKey(name: 'download_url') String? downloadUrl});
+      @JsonKey(name: 'presigned_url') String? downloadUrl});
 }
 
 /// @nodoc
@@ -386,14 +386,14 @@ class _$NahidaliveDownloadElementCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? status = null,
+    Object? success = null,
     Object? errorCodes = freezed,
     Object? downloadUrl = freezed,
   }) {
     return _then(_value.copyWith(
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
+      success: null == success
+          ? _value.success
+          : success // ignore: cast_nullable_to_non_nullable
               as bool,
       errorCodes: freezed == errorCodes
           ? _value.errorCodes
@@ -417,9 +417,9 @@ abstract class _$$NahidaliveDownloadElementImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {bool status,
+      {bool success,
       @JsonKey(name: 'error-codes') String? errorCodes,
-      @JsonKey(name: 'download_url') String? downloadUrl});
+      @JsonKey(name: 'presigned_url') String? downloadUrl});
 }
 
 /// @nodoc
@@ -435,14 +435,14 @@ class __$$NahidaliveDownloadElementImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? status = null,
+    Object? success = null,
     Object? errorCodes = freezed,
     Object? downloadUrl = freezed,
   }) {
     return _then(_$NahidaliveDownloadElementImpl(
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
+      success: null == success
+          ? _value.success
+          : success // ignore: cast_nullable_to_non_nullable
               as bool,
       errorCodes: freezed == errorCodes
           ? _value.errorCodes
@@ -462,25 +462,25 @@ class _$NahidaliveDownloadElementImpl
     with DiagnosticableTreeMixin
     implements _NahidaliveDownloadElement {
   const _$NahidaliveDownloadElementImpl(
-      {required this.status,
+      {required this.success,
       @JsonKey(name: 'error-codes') this.errorCodes,
-      @JsonKey(name: 'download_url') this.downloadUrl});
+      @JsonKey(name: 'presigned_url') this.downloadUrl});
 
   factory _$NahidaliveDownloadElementImpl.fromJson(Map<String, dynamic> json) =>
       _$$NahidaliveDownloadElementImplFromJson(json);
 
   @override
-  final bool status;
+  final bool success;
   @override
   @JsonKey(name: 'error-codes')
   final String? errorCodes;
   @override
-  @JsonKey(name: 'download_url')
+  @JsonKey(name: 'presigned_url')
   final String? downloadUrl;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'NahidaliveDownloadElement(status: $status, errorCodes: $errorCodes, downloadUrl: $downloadUrl)';
+    return 'NahidaliveDownloadElement(success: $success, errorCodes: $errorCodes, downloadUrl: $downloadUrl)';
   }
 
   @override
@@ -488,7 +488,7 @@ class _$NahidaliveDownloadElementImpl
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'NahidaliveDownloadElement'))
-      ..add(DiagnosticsProperty('status', status))
+      ..add(DiagnosticsProperty('success', success))
       ..add(DiagnosticsProperty('errorCodes', errorCodes))
       ..add(DiagnosticsProperty('downloadUrl', downloadUrl));
   }
@@ -498,7 +498,7 @@ class _$NahidaliveDownloadElementImpl
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$NahidaliveDownloadElementImpl &&
-            (identical(other.status, status) || other.status == status) &&
+            (identical(other.success, success) || other.success == success) &&
             (identical(other.errorCodes, errorCodes) ||
                 other.errorCodes == errorCodes) &&
             (identical(other.downloadUrl, downloadUrl) ||
@@ -507,7 +507,8 @@ class _$NahidaliveDownloadElementImpl
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, status, errorCodes, downloadUrl);
+  int get hashCode =>
+      Object.hash(runtimeType, success, errorCodes, downloadUrl);
 
   @JsonKey(ignore: true)
   @override
@@ -526,21 +527,21 @@ class _$NahidaliveDownloadElementImpl
 
 abstract class _NahidaliveDownloadElement implements NahidaliveDownloadElement {
   const factory _NahidaliveDownloadElement(
-          {required final bool status,
+          {required final bool success,
           @JsonKey(name: 'error-codes') final String? errorCodes,
-          @JsonKey(name: 'download_url') final String? downloadUrl}) =
+          @JsonKey(name: 'presigned_url') final String? downloadUrl}) =
       _$NahidaliveDownloadElementImpl;
 
   factory _NahidaliveDownloadElement.fromJson(Map<String, dynamic> json) =
       _$NahidaliveDownloadElementImpl.fromJson;
 
   @override
-  bool get status;
+  bool get success;
   @override
   @JsonKey(name: 'error-codes')
   String? get errorCodes;
   @override
-  @JsonKey(name: 'download_url')
+  @JsonKey(name: 'presigned_url')
   String? get downloadUrl;
   @override
   @JsonKey(ignore: true)

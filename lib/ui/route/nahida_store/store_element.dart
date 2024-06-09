@@ -61,54 +61,42 @@ class StoreElement extends ConsumerWidget {
     );
   }
 
-  Widget _buildPreview(final BuildContext context) {
-    final networkImage = NetworkImage(element.previewUrl);
-    // networkImage to widget
-    return Center(
-      child: GestureDetector(
-        onTap: () => unawaited(
-          showDialog(
-            context: context,
-            barrierDismissible: true,
-            builder: (final dialogContext) => GestureDetector(
-              onTap: Navigator.of(dialogContext).pop,
-              onSecondaryTap: Navigator.of(dialogContext).pop,
-              child: Image(
-                image: networkImage,
-                fit: BoxFit.contain,
+  Widget _buildPreview(final BuildContext context) => Center(
+        child: GestureDetector(
+          onTap: () => unawaited(
+            showDialog(
+              context: context,
+              barrierDismissible: true,
+              builder: (final dialogContext) => GestureDetector(
+                onTap: Navigator.of(dialogContext).pop,
+                onSecondaryTap: Navigator.of(dialogContext).pop,
+                child: CachedNetworkImage(
+                  imageUrl: element.previewUrl,
+                  progressIndicatorBuilder:
+                      (final context, final url, final progress) =>
+                          ProgressRing(value: progress.progress),
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
           ),
-        ),
-        child: Image(
-          image: networkImage,
-          fit: BoxFit.contain,
-          loadingBuilder: (final context, final child, final loadingProgress) {
-            if (loadingProgress == null) {
-              return child;
-            }
-            final expectedTotalBytes = loadingProgress.expectedTotalBytes;
-            final value = expectedTotalBytes != null
-                ? loadingProgress.cumulativeBytesLoaded / expectedTotalBytes
-                : null;
-            return Center(
-              child: ProgressRing(
-                value: value,
-              ),
-            );
-          },
-          errorBuilder: (final context, final error, final stackTrace) =>
-              Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(FluentIcons.error),
-              Text('Failed to load image: ${error.runtimeType}'),
-            ],
+          child: CachedNetworkImage(
+            imageUrl: element.previewUrl,
+            fit: BoxFit.contain,
+            progressIndicatorBuilder:
+                (final context, final url, final progress) =>
+                    ProgressRing(value: progress.progress),
+            errorWidget: (final context, final url, final error) =>
+                const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(FluentIcons.error),
+                SelectableText('Failed to load'),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 
   Widget _buildDescriptionColumn(
     final BuildContext context,
@@ -139,7 +127,7 @@ class StoreElement extends ConsumerWidget {
             child: SingleChildScrollView(
               child: SizedBox(
                 width: double.infinity,
-                child: Text(element.description),
+                child: Text(element.description ?? "🧐"),
               ),
             ),
           ),

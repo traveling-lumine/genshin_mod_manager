@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/ui/widget/game_selector.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -33,7 +34,19 @@ NavigationAppBar getAppbar(
         title,
         Positioned(
           right: _kWindowButtonWidth,
-          child: PresetControlWidget(isLocal: false),
+          child: Row(
+            children: [
+              const GameSelector(),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Divider(
+                  direction: Axis.vertical,
+                  size: 30,
+                ),
+              ),
+              PresetControlWidget(isLocal: false),
+            ],
+          ),
         ),
       ],
     );

@@ -6,68 +6,29 @@ part of 'app_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$sharedPreferenceHash() => r'7c0ff0611471ae80ca3abfa6f6dd0e9495adcec3';
+String _$gamesListHash() => r'34ef463bc1f4436d8734d241004024a1068fd2ff';
 
-/// The shared preference.
-///
-/// Copied from [sharedPreference].
-@ProviderFor(sharedPreference)
-final sharedPreferenceProvider =
-    AutoDisposeFutureProvider<SharedPreferences>.internal(
-  sharedPreference,
-  name: r'sharedPreferenceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$sharedPreferenceHash,
+/// See also [GamesList].
+@ProviderFor(GamesList)
+final gamesListProvider =
+    AutoDisposeNotifierProvider<GamesList, List<String>>.internal(
+  GamesList.new,
+  name: r'gamesListProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$gamesListHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef SharedPreferenceRef = AutoDisposeFutureProviderRef<SharedPreferences>;
-String _$sharedPreferenceStorageHash() =>
-    r'87b1f4a3c3e07e078f8caae22137d1b618944c86';
-
-/// The storage for the shared preference.
-///
-/// Copied from [sharedPreferenceStorage].
-@ProviderFor(sharedPreferenceStorage)
-final sharedPreferenceStorageProvider =
-    AutoDisposeProvider<PersistentStorage>.internal(
-  sharedPreferenceStorage,
-  name: r'sharedPreferenceStorageProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$sharedPreferenceStorageHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef SharedPreferenceStorageRef = AutoDisposeProviderRef<PersistentStorage>;
-String _$appStateStorageHash() => r'eddd58f04f26a226d58f13134d4dd54b884c0a9c';
-
-/// The storage for the app state.
-///
-/// Copied from [appStateStorage].
-@ProviderFor(appStateStorage)
-final appStateStorageProvider = AutoDisposeProvider<AppStateStorage>.internal(
-  appStateStorage,
-  name: r'appStateStorageProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$appStateStorageHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef AppStateStorageRef = AutoDisposeProviderRef<AppStateStorage>;
-String _$targetGameHash() => r'9884f7c559a7105604a616b197c8be43706b963e';
+typedef _$GamesList = AutoDisposeNotifier<List<String>>;
+String _$targetGameHash() => r'13e6eec75fd42814f6e5d333323426288c7088cc';
 
 /// The target game.
 ///
 /// Copied from [TargetGame].
 @ProviderFor(TargetGame)
 final targetGameProvider =
-    AutoDisposeNotifierProvider<TargetGame, TargetGames>.internal(
+    AutoDisposeNotifierProvider<TargetGame, String>.internal(
   TargetGame.new,
   name: r'targetGameProvider',
   debugGetCreateSourceHash:
@@ -76,26 +37,27 @@ final targetGameProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$TargetGame = AutoDisposeNotifier<TargetGames>;
-String _$appStateNotifierHash() => r'b6eaceb6d3f1ba47d1c549fd922abda62b0c0412';
+typedef _$TargetGame = AutoDisposeNotifier<String>;
+String _$gameConfigNotifierHash() =>
+    r'5c2c03a2f0c150f8a7777099b64f40c3b46b398c';
 
 /// The notifier for the app state.
 ///
-/// Copied from [AppStateNotifier].
-@ProviderFor(AppStateNotifier)
-final appStateNotifierProvider =
-    AutoDisposeNotifierProvider<AppStateNotifier, AppState>.internal(
-  AppStateNotifier.new,
-  name: r'appStateNotifierProvider',
+/// Copied from [GameConfigNotifier].
+@ProviderFor(GameConfigNotifier)
+final gameConfigNotifierProvider =
+    AutoDisposeNotifierProvider<GameConfigNotifier, GameConfig>.internal(
+  GameConfigNotifier.new,
+  name: r'gameConfigNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$appStateNotifierHash,
+      : _$gameConfigNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$AppStateNotifier = AutoDisposeNotifier<AppState>;
-String _$darkModeHash() => r'1281ddeac883b0c2bbbb64fe2d2c6660a51febfa';
+typedef _$GameConfigNotifier = AutoDisposeNotifier<GameConfig>;
+String _$darkModeHash() => r'0e53ec369f142ad88d7a4d1fe3551043ee524823';
 
 /// The notifier for the dark mode.
 ///
@@ -111,7 +73,7 @@ final darkModeProvider = AutoDisposeNotifierProvider<DarkMode, bool>.internal(
 );
 
 typedef _$DarkMode = AutoDisposeNotifier<bool>;
-String _$enabledFirstHash() => r'b096b02e69b8a05c4be254510a0f16780b1a72cf';
+String _$enabledFirstHash() => r'ec48adf2069a75e15b86b32de6d8222a5f6d9e11';
 
 /// The notifier for the enabled first.
 ///
@@ -128,7 +90,7 @@ final enabledFirstProvider =
 );
 
 typedef _$EnabledFirst = AutoDisposeNotifier<bool>;
-String _$folderIconHash() => r'9af289a05a40d1ae11f88cf8d4599d15d5d6c97b';
+String _$folderIconHash() => r'381bef4b13a81a97089ce1a0d9c51f60960d928d';
 
 /// The notifier for the folder icon.
 ///
@@ -145,7 +107,7 @@ final folderIconProvider =
 );
 
 typedef _$FolderIcon = AutoDisposeNotifier<bool>;
-String _$moveOnDragHash() => r'766ec13afb52cf5effef5d8382761e824257bd9a';
+String _$moveOnDragHash() => r'8402407e4848c77d472ee2b767225fe590867f3f';
 
 /// The notifier for the move on drag.
 ///
@@ -162,7 +124,7 @@ final moveOnDragProvider =
 );
 
 typedef _$MoveOnDrag = AutoDisposeNotifier<bool>;
-String _$runTogetherHash() => r'dc385bbb0d7bb93591373dafbe0c16e13c2d0788';
+String _$runTogetherHash() => r'127f6350cf1b134f761bb3821962a3cbb88676e2';
 
 /// The notifier for the run together.
 ///

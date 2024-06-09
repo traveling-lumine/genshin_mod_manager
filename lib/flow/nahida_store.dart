@@ -15,9 +15,23 @@ part 'nahida_store.g.dart';
 NahidaliveAPI akashaApi(final AkashaApiRef ref) => createNahidaliveAPI();
 
 @riverpod
-Future<List<NahidaliveElement>> akashaElement(final AkashaElementRef ref) {
-  final api = ref.watch(akashaApiProvider);
-  return api.fetchNahidaliveElements();
+class AkashaElement extends _$AkashaElement {
+  int _pageNum = 1;
+
+  @override
+  Future<List<NahidaliveElement>> build() {
+    final api = ref.watch(akashaApiProvider);
+    _pageNum = 1;
+    return api.fetchNahidaliveElements(_pageNum);
+  }
+
+  Future<void> fetchNextPage() async {
+    final tryPageNum = _pageNum + 1;
+    final read = ref.read(akashaApiProvider);
+    final additional = await read.fetchNahidaliveElements(tryPageNum);
+    state = AsyncData([...state.requireValue, ...additional]);
+    _pageNum = tryPageNum;
+  }
 }
 
 @Riverpod(keepAlive: true)
