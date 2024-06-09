@@ -46,3 +46,5 @@ app.*.map.json
 error_log.txt
 /coverage/
 /lib/data/repo/akasha.dart
+/lib/data/repo/akasha.g.dart
+/lib/data/repo/akasha.freezed.dart

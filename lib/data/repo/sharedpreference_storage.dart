@@ -38,6 +38,31 @@ class SharedPreferenceStorage implements PersistentStorage {
   void setMap(final String key, final Map<String, dynamic> value) {
     unawaited(_sharedPreferences.setString(key, jsonEncode(value)));
   }
+
+  @override
+  void removeKey(final String key) {
+    unawaited(_sharedPreferences.remove(key));
+  }
+
+  @override
+  int? getInt(final String key) => _sharedPreferences.getInt(key);
+
+  @override
+  void setInt(final String key, final int value) {
+    unawaited(_sharedPreferences.setInt(key, value));
+  }
+
+  @override
+  Set<String> getEntries() => _sharedPreferences.getKeys();
+
+  @override
+  List<String>? getList(final String key) =>
+      _sharedPreferences.getStringList(key);
+
+  @override
+  void setList(final String key, final List<String> value) {
+    unawaited(_sharedPreferences.setStringList(key, value));
+  }
 }
 
 class NullSharedPreferenceStorage implements PersistentStorage {
@@ -58,4 +83,22 @@ class NullSharedPreferenceStorage implements PersistentStorage {
 
   @override
   void setMap(final String key, final Map<String, dynamic> value) {}
+
+  @override
+  void removeKey(final String key) {}
+
+  @override
+  int? getInt(final String key) => null;
+
+  @override
+  void setInt(final String key, final int value) {}
+
+  @override
+  Set<String> getEntries() => <String>{};
+
+  @override
+  List<String>? getList(final String key) => null;
+
+  @override
+  void setList(final String key, final List<String> value) {}
 }

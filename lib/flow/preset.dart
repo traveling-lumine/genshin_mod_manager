@@ -25,7 +25,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
   @override
   List<String> build(final ModCategory category) {
     final presetData = ref.watch(
-      appStateNotifierProvider.select((final value) => value.presetData),
+      gameConfigNotifierProvider.select((final value) => value.presetData),
     );
     return presetData?.local[category.name]?.bundledPresets.keys.toList() ?? [];
   }
@@ -39,7 +39,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
           .toList(),
     );
 
-    final presetData = ref.read(appStateNotifierProvider).presetData;
+    final presetData = ref.read(gameConfigNotifierProvider).presetData;
 
     if (presetData != null) {
       final localPresets = presetData.local;
@@ -55,18 +55,18 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
       final newLocalPresets = {...localPresets}..[category.name] =
           newCategoryPresets;
       final res = presetData.copyWith(local: newLocalPresets);
-      ref.read(appStateNotifierProvider.notifier).changePresetData(res);
+      ref.read(gameConfigNotifierProvider.notifier).changePresetData(res);
     } else {
       final bundledPreset =
           PresetListMap(bundledPresets: {name: presetTargetData});
       final res = PresetData(global: {}, local: {category.name: bundledPreset});
-      ref.read(appStateNotifierProvider.notifier).changePresetData(res);
+      ref.read(gameConfigNotifierProvider.notifier).changePresetData(res);
     }
   }
 
   @override
   void setPreset(final String name) {
-    final presetData = ref.read(appStateNotifierProvider).presetData;
+    final presetData = ref.read(gameConfigNotifierProvider).presetData;
     final directives =
         presetData?.local[category.name]?.bundledPresets[name]?.mods;
     if (directives == null) {
@@ -77,7 +77,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
 
   @override
   void removePreset(final String name) {
-    final presetData = ref.read(appStateNotifierProvider).presetData;
+    final presetData = ref.read(gameConfigNotifierProvider).presetData;
     if (presetData == null) {
       return;
     }
@@ -91,7 +91,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
     final newLocalPresets = {...localPresets}..[category.name] =
         newCategoryPresets;
     final res = presetData.copyWith(local: newLocalPresets);
-    ref.read(appStateNotifierProvider.notifier).changePresetData(res);
+    ref.read(gameConfigNotifierProvider.notifier).changePresetData(res);
   }
 
   void _toggleLocal(
@@ -108,14 +108,14 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
   @override
   List<String> build() {
     final presetData = ref.watch(
-      appStateNotifierProvider.select((final value) => value.presetData),
+      gameConfigNotifierProvider.select((final value) => value.presetData),
     );
     return presetData?.global.keys.toList() ?? [];
   }
 
   @override
   void addPreset(final String name) {
-    final rootPath = ref.read(appStateNotifierProvider).modRoot;
+    final rootPath = ref.read(gameConfigNotifierProvider).modRoot;
     if (rootPath == null) {
       return;
     }
@@ -130,20 +130,20 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
           ),
       },
     );
-    final presetData = ref.read(appStateNotifierProvider).presetData;
+    final presetData = ref.read(gameConfigNotifierProvider).presetData;
     if (presetData != null) {
       final newGlobalPresets = {...presetData.global}..[name] = bpd;
       final res = presetData.copyWith(global: newGlobalPresets);
-      ref.read(appStateNotifierProvider.notifier).changePresetData(res);
+      ref.read(gameConfigNotifierProvider.notifier).changePresetData(res);
     } else {
       final res = PresetData(global: {name: bpd}, local: {});
-      ref.read(appStateNotifierProvider.notifier).changePresetData(res);
+      ref.read(gameConfigNotifierProvider.notifier).changePresetData(res);
     }
   }
 
   @override
   void setPreset(final String name) {
-    final presetData = ref.read(appStateNotifierProvider).presetData;
+    final presetData = ref.read(gameConfigNotifierProvider).presetData;
     if (presetData == null) {
       return;
     }
@@ -159,19 +159,19 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
 
   @override
   void removePreset(final String name) {
-    final presetData = ref.read(appStateNotifierProvider).presetData;
+    final presetData = ref.read(gameConfigNotifierProvider).presetData;
     if (presetData == null) {
       return;
     }
     final res =
         presetData.copyWith(global: {...presetData.global}..remove(name));
-    ref.read(appStateNotifierProvider.notifier).changePresetData(res);
+    ref.read(gameConfigNotifierProvider.notifier).changePresetData(res);
   }
 
   void _toggleGlobal(final Map<String, List<String>> directives) {
     for (final category in directives.entries) {
       final shouldBeEnabled = category.value;
-      final latest2 = ref.read(appStateNotifierProvider).modRoot;
+      final latest2 = ref.read(gameConfigNotifierProvider).modRoot;
       if (latest2 == null) {
         return;
       }
@@ -186,7 +186,7 @@ Future<void> _toggleCategory(
   final List<String> shouldBeEnabled,
   final AutoDisposeNotifierProviderRef<List<String>> ref,
 ) async {
-  final modExecFile = ref.read(appStateNotifierProvider).modExecFile;
+  final modExecFile = ref.read(gameConfigNotifierProvider).modExecFile;
   if (modExecFile == null) {
     return;
   }

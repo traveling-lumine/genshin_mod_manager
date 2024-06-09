@@ -5,7 +5,7 @@ import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 /// An API to interact with Nahidalive.
 abstract interface class NahidaliveAPI {
   /// Fetches all Nahidalive elements.
-  Future<List<NahidaliveElement>> fetchNahidaliveElements();
+  Future<List<NahidaliveElement>> fetchNahidaliveElements(final int pageNum);
 
   /// Fetches a single Nahidalive element.
   Future<NahidaliveElement> fetchNahidaliveElement(final String uuid);

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
@@ -18,7 +20,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 part 'store_element.dart';
 
-class NahidaStoreRoute extends ConsumerStatefulWidget {
+class NahidaStoreRoute extends StatefulHookConsumerWidget {
   const NahidaStoreRoute({required this.category, super.key});
 
   final ModCategory category;
@@ -46,24 +48,28 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
         if (!mounted) {
           return;
         }
-        unawaited(displayInfoBarInContext(
-          context,
-          title: const Text('Download failed'),
-          content: Text('${e.uri}'),
-          severity: InfoBarSeverity.error,
-        ));
+        unawaited(
+          displayInfoBarInContext(
+            context,
+            title: const Text('Download failed'),
+            content: Text('${e.uri}'),
+            severity: InfoBarSeverity.error,
+          ),
+        );
       },
       onDownloadComplete: (final element) {
         if (!mounted) {
           return;
         }
-        unawaited(displayInfoBarInContext(
-          context,
-          title: Text('Downloaded ${element.title}'),
-          severity: InfoBarSeverity.success,
-        ));
+        unawaited(
+          displayInfoBarInContext(
+            context,
+            title: Text('Downloaded ${element.title}'),
+            severity: InfoBarSeverity.success,
+          ),
+        );
       },
-      onPasswordRequired: (final wrongPw) {
+      onPasswordRequired: (final wrongPw) async {
         if (!mounted) {
           return Future(() => null);
         }
@@ -209,36 +215,100 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
 
   Widget _buildContent() {
     final data = ref.watch(akashaElementProvider);
+    final isLoading = useState(false);
+    final timerReady = useState(true);
+    final displayingNotSoFast = useState(false);
     return data.when(
       data: (final data) {
         final filteredData = data.where(_dataFilter).toList();
         return ThickScrollbar(
-          child: GridView.builder(
-            controller: _scrollController,
-            gridDelegate: SliverGridDelegateWithMinCrossAxisExtent(
-              minCrossAxisExtent: 500,
-              mainAxisExtent: 500,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: filteredData.length,
-            itemBuilder: (final context, final index) => RevertScrollbar(
-              child: StoreElement(
-                passwordController: _textEditingController,
-                element: filteredData[index],
-                category: widget.category,
+          child: NotificationListener<ScrollEndNotification>(
+            onNotification: (final notification) {
+              if (notification.metrics.extentAfter < 500 && !isLoading.value) {
+                if (!timerReady.value) {
+                  if (displayingNotSoFast.value) {
+                    return false;
+                  }
+                  unawaited(
+                    displayInfoBarInContext(
+                      context,
+                      title: const Text('Not so fast!'),
+                      content: const Text(
+                        'Please wait a moment before loading more data.',
+                      ),
+                      severity: InfoBarSeverity.warning,
+                    ),
+                  );
+                  displayingNotSoFast.value = true;
+                  Timer(
+                    const Duration(seconds: 3),
+                    () => displayingNotSoFast.value = false,
+                  );
+                  return false;
+                }
+                isLoading.value = true;
+                timerReady.value = false;
+                Timer(
+                  const Duration(seconds: 3),
+                  () {
+                    timerReady.value = true;
+                  },
+                );
+                unawaited(
+                  ref
+                      .read(akashaElementProvider.notifier)
+                      .fetchNextPage()
+                      .then(
+                        (final _) => isLoading.value = false,
+                      )
+                      .catchError(
+                    (final e, final stackTrace) {
+                      isLoading.value = false;
+                      unawaited(
+                        displayInfoBarInContext(
+                          context,
+                          title: const Text('Failed to load data'),
+                          content: Text('$e'),
+                          severity: InfoBarSeverity.error,
+                        ),
+                      );
+                      return false;
+                    },
+                  ),
+                );
+                return true;
+              }
+              return false;
+            },
+            child: GridView.builder(
+              controller: _scrollController,
+              gridDelegate: SliverGridDelegateWithMinCrossAxisExtent(
+                minCrossAxisExtent: 500,
+                mainAxisExtent: 500,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+              ),
+              itemCount: filteredData.length,
+              itemBuilder: (final context, final index) => RevertScrollbar(
+                child: StoreElement(
+                  passwordController: _textEditingController,
+                  element: filteredData[index],
+                  category: widget.category,
+                ),
               ),
             ),
           ),
         );
       },
-      error: (final e, final stackTrace) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(FluentIcons.error),
-          const SizedBox(height: 8),
-          Text('Failed to load data: ${e.runtimeType}'),
-        ],
+      error: (final e, final stackTrace) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(FluentIcons.error),
+            const SizedBox(height: 8),
+            Text('Failed to load data: $e'),
+          ],
+        ),
       ),
       loading: () => const Center(child: ProgressRing()),
     );

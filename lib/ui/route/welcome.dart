@@ -39,7 +39,7 @@ class _WelcomeRouteState extends State<WelcomeRoute> {
               Consumer(
                 builder: (final context, final ref, final child) {
                   final game = ref.watch(targetGameProvider);
-                  return Text('Welcome to ${game.displayName} Mod Manager!');
+                  return Text('Welcome to $game Mod Manager!');
                 },
               ),
               const SizedBox(height: 16),

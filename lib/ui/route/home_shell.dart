@@ -15,6 +15,7 @@ import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/flow/app_version.dart';
 import 'package:genshin_mod_manager/flow/exe_arg.dart';
 import 'package:genshin_mod_manager/flow/home_shell.dart';
+import 'package:genshin_mod_manager/flow/storage.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/util/open_url.dart';
@@ -30,7 +31,7 @@ import 'package:window_manager/window_manager.dart';
 const _kRepoReleases = '$kRepoBase/releases/latest';
 
 class HomeShell extends ConsumerStatefulWidget {
-  const HomeShell({required this.child});
+  const HomeShell({required this.child, super.key});
 
   final Widget child;
 
@@ -129,6 +130,36 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         _displayUpdateInfoBar(remote!);
       }
     });
+
+    if (ref.watch(gamesListProvider).isEmpty) {
+      return NavigationView(
+        appBar: getAppbar('Set the first game name'),
+        content: ScaffoldPage.withPadding(
+          header: const PageHeader(
+            title: Text('Set the first game name'),
+          ),
+          content: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('My game is...'),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: 200,
+                  child: TextFormBox(
+                    placeholder: 'Game name',
+                    onFieldSubmitted: (final value) {
+                      ref.read(gamesListProvider.notifier).addGame(value);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final categories = ref.watch(homeShellListProvider);
     return categories.when(
       skipLoadingOnReload: true,
@@ -202,7 +233,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         );
     return NavigationView(
       appBar: getAppbar(
-        '${game.displayName} Mod Manager$updateMarker',
+        '$game Mod Manager$updateMarker',
         presetControl: true,
       ),
       pane: _buildPane(selected, items, footerItems),
@@ -314,7 +345,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
             context: context,
             builder: (final dialogContext) {
               final execRoot = File(Platform.resolvedExecutable).parent.path;
-              final appState = ref.read(appStateNotifierProvider);
+              final appState = ref.read(gameConfigNotifierProvider);
               final modRoot = appState.modRoot;
               final migotoRoot = appState.modExecFile;
               final launcherRoot = appState.launcherFile;
@@ -405,7 +436,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   }
 
   void _runMigoto() {
-    final path = ref.read(appStateNotifierProvider).modExecFile;
+    final path = ref.read(gameConfigNotifierProvider).modExecFile;
     if (path == null) {
       return;
     }
@@ -419,7 +450,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   }
 
   void _runLauncher() {
-    final launcher = ref.read(appStateNotifierProvider).launcherFile;
+    final launcher = ref.read(gameConfigNotifierProvider).launcherFile;
     if (launcher == null) {
       return;
     }

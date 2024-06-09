@@ -1,121 +1,115 @@
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/data/repo/app_state_storage.dart';
-import 'package:genshin_mod_manager/data/repo/sharedpreference_storage.dart';
-import 'package:genshin_mod_manager/domain/entity/app_state.dart';
-import 'package:genshin_mod_manager/domain/entity/game_enum.dart';
+import 'package:genshin_mod_manager/domain/entity/game_config.dart';
 import 'package:genshin_mod_manager/domain/entity/preset.dart';
-import 'package:genshin_mod_manager/domain/repo/app_state_storage.dart';
-import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
+import 'package:genshin_mod_manager/domain/usecase/app_state/dark_mode.dart';
+import 'package:genshin_mod_manager/domain/usecase/app_state/enabled_first.dart';
+import 'package:genshin_mod_manager/domain/usecase/app_state/folder_icon.dart';
+import 'package:genshin_mod_manager/domain/usecase/app_state/game_config.dart';
+import 'package:genshin_mod_manager/domain/usecase/app_state/move_on_drag.dart';
+import 'package:genshin_mod_manager/domain/usecase/app_state/run_together.dart';
+import 'package:genshin_mod_manager/flow/storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 part 'app_state.g.dart';
 
-/// The shared preference.
 @riverpod
-Future<SharedPreferences> sharedPreference(
-  final SharedPreferenceRef ref,
-) =>
-    SharedPreferences.getInstance().timeout(const Duration(seconds: 5));
-
-/// The storage for the shared preference.
-@riverpod
-PersistentStorage sharedPreferenceStorage(
-  final SharedPreferenceStorageRef ref,
-) {
-  final sharedPreferences =
-      ref.watch(sharedPreferenceProvider).unwrapPrevious().valueOrNull;
-  if (sharedPreferences == null) {
-    return NullSharedPreferenceStorage();
+class GamesList extends _$GamesList {
+  @override
+  List<String> build() {
+    final storage = ref.watch(sharedPreferenceStorageProvider);
+    final gamesList = storage.getList('games') ?? [];
+    return gamesList;
   }
-  return SharedPreferenceStorage(sharedPreferences);
+
+  void addGame(final String game) {
+    final storage = ref.read(sharedPreferenceStorageProvider);
+    if (state.contains(game)) {
+      return;
+    }
+    final newGamesList = [...state, game];
+    storage.setList('games', newGamesList);
+    state = newGamesList;
+  }
+
+  void removeGame(final String game) {
+    final storage = ref.read(sharedPreferenceStorageProvider);
+    if (!state.contains(game)) {
+      return;
+    }
+    final newGamesList = state.where((final e) => e != game).toList();
+    storage.setList('games', newGamesList);
+    state = newGamesList;
+  }
 }
 
 /// The target game.
 @riverpod
 class TargetGame extends _$TargetGame {
-  static const _key = 'targetGame';
-
   @override
-  TargetGames build() {
+  String build() {
     final storage = ref.watch(sharedPreferenceStorageProvider);
-    final savedValue = storage.getString(_key);
-    return TargetGames.values.firstWhere(
-      (final element) => element.prefix == savedValue,
-      orElse: () => TargetGames.gshin,
-    );
+    final gamesList = ref.watch(gamesListProvider);
+    final lastGame = storage.getString('lastGame');
+    if (gamesList.contains(lastGame)) {
+      return lastGame!;
+    } else {
+      final first = gamesList.first;
+      storage.setString('lastGame', first);
+      return first;
+    }
   }
 
   /// Sets the value.
-  void setValue(final TargetGames value) {
-    ref.read(sharedPreferenceStorageProvider).setString(_key, value.prefix);
+  void setValue(final String value) {
+    final read = ref.read(sharedPreferenceStorageProvider);
+    final gamesList = ref.read(gamesListProvider);
+    if (!gamesList.contains(value)) {
+      return;
+    }
+    read.setString('lastGame', value);
     state = value;
   }
 }
 
-/// The storage for the app state.
-@riverpod
-AppStateStorage appStateStorage(final AppStateStorageRef ref) {
-  final persistentStorage = ref.watch(sharedPreferenceStorageProvider);
-  final game = ref.watch(targetGameProvider);
-  return AppStateStorageImpl(
-    persistentStorage: persistentStorage,
-    prefix: game.prefix,
-  );
-}
-
 /// The notifier for the app state.
 @riverpod
-class AppStateNotifier extends _$AppStateNotifier {
+class GameConfigNotifier extends _$GameConfigNotifier {
   @override
-  AppState build() {
-    final storage = ref.watch(appStateStorageProvider);
-    const dotString = '.';
-    final tDirRaw = storage.getTargetDir();
-    final targetDir = tDirRaw ?? dotString;
-
-    var modRoot = storage.getModRoot();
-    if (modRoot == null && targetDir != dotString) {
-      modRoot = targetDir.pJoin('Mods');
-    }
-
-    var modExecFile = storage.getModExecFile();
-    if (modExecFile == null && targetDir != dotString) {
-      modExecFile = targetDir.pJoin('3DMigoto Loader.exe');
-    }
-
-    if (targetDir != dotString) {
-      storage.setTargetDir(dotString);
-    }
-    return AppState(
-      modRoot: modRoot,
-      modExecFile: modExecFile,
-      presetData: storage.getPresetData(),
-      launcherFile: storage.getLauncherFile(),
-    );
+  GameConfig build() {
+    final storage2 = ref.watch(sharedPreferenceStorageProvider);
+    final targetGame = ref.watch(targetGameProvider);
+    final gameConfig = initializeGameConfigUseCase(storage2, targetGame);
+    return gameConfig;
   }
 
   /// Changes the mod root.
   void changeModRoot(final String path) {
-    ref.read(appStateStorageProvider).setModRoot(path);
+    final read = ref.read(sharedPreferenceStorageProvider);
+    final targetGame = ref.read(targetGameProvider);
+    changeModRootUseCase(read, targetGame, path);
     state = state.copyWith(modRoot: path);
   }
 
   /// Changes the mod executable file.
   void changeModExecFile(final String path) {
-    ref.read(appStateStorageProvider).setModExecFile(path);
+    final read = ref.read(sharedPreferenceStorageProvider);
+    final targetGame = ref.read(targetGameProvider);
+    changeModExecFileUseCase(read, targetGame, path);
     state = state.copyWith(modExecFile: path);
   }
 
   /// Changes the launcher file.
   void changeLauncherFile(final String path) {
-    ref.read(appStateStorageProvider).setLauncherFile(path);
+    final read = ref.read(sharedPreferenceStorageProvider);
+    final targetGame = ref.read(targetGameProvider);
+    changeLauncherFileUseCase(read, targetGame, path);
     state = state.copyWith(launcherFile: path);
   }
 
   /// Changes the preset data.
   void changePresetData(final PresetData data) {
-    ref.read(appStateStorageProvider).setPresetData(data);
+    final read = ref.read(sharedPreferenceStorageProvider);
+    final targetGame = ref.read(targetGameProvider);
+    changePresetDataUseCase(data, read, targetGame);
     state = state.copyWith(presetData: data);
   }
 }
@@ -123,7 +117,6 @@ class AppStateNotifier extends _$AppStateNotifier {
 /// The notifier for boolean value.
 mixin ValueSettable on AutoDisposeNotifier<bool> {
   /// Sets the value.
-  // ignore: avoid_positional_boolean_parameters
   void setValue(final bool value);
 }
 
@@ -131,11 +124,15 @@ mixin ValueSettable on AutoDisposeNotifier<bool> {
 @riverpod
 class DarkMode extends _$DarkMode with ValueSettable {
   @override
-  bool build() => ref.watch(appStateStorageProvider).getDarkMode();
+  bool build() {
+    final watch = ref.watch(sharedPreferenceStorageProvider);
+    return initializeDarkModeUseCase(watch);
+  }
 
   @override
   void setValue(final bool value) {
-    ref.read(appStateStorageProvider).setDarkMode(value);
+    final read = ref.read(sharedPreferenceStorageProvider);
+    setDarkModeUseCase(read, value);
     state = value;
   }
 }
@@ -144,11 +141,16 @@ class DarkMode extends _$DarkMode with ValueSettable {
 @riverpod
 class EnabledFirst extends _$EnabledFirst with ValueSettable {
   @override
-  bool build() => ref.watch(appStateStorageProvider).getShowEnabledModsFirst();
+  bool build() {
+    final watch = ref.watch(sharedPreferenceStorageProvider);
+    final showEnabledModsFirst = initializeEnabledFirstUseCase(watch);
+    return showEnabledModsFirst;
+  }
 
   @override
   void setValue(final bool value) {
-    ref.read(appStateStorageProvider).setShowEnabledModsFirst(value);
+    final read = ref.read(sharedPreferenceStorageProvider);
+    setEnabledFirstUseCase(read, value);
     state = value;
   }
 }
@@ -157,11 +159,15 @@ class EnabledFirst extends _$EnabledFirst with ValueSettable {
 @riverpod
 class FolderIcon extends _$FolderIcon with ValueSettable {
   @override
-  bool build() => ref.watch(appStateStorageProvider).getShowFolderIcon();
+  bool build() {
+    final watch = ref.watch(sharedPreferenceStorageProvider);
+    return initializeFolderIconUseCase(watch);
+  }
 
   @override
   void setValue(final bool value) {
-    ref.read(appStateStorageProvider).setShowFolderIcon(value);
+    final read = ref.read(sharedPreferenceStorageProvider);
+    setFolderIconUseCase(read, value);
     state = value;
   }
 }
@@ -170,11 +176,15 @@ class FolderIcon extends _$FolderIcon with ValueSettable {
 @riverpod
 class MoveOnDrag extends _$MoveOnDrag with ValueSettable {
   @override
-  bool build() => ref.watch(appStateStorageProvider).getMoveOnDrag();
+  bool build() {
+    final watch = ref.watch(sharedPreferenceStorageProvider);
+    return initializeMoveOnDragUseCase(watch);
+  }
 
   @override
   void setValue(final bool value) {
-    ref.read(appStateStorageProvider).setMoveOnDrag(value);
+    final read = ref.read(sharedPreferenceStorageProvider);
+    setMoveOnDragUseCase(read, value);
     state = value;
   }
 }
@@ -183,11 +193,15 @@ class MoveOnDrag extends _$MoveOnDrag with ValueSettable {
 @riverpod
 class RunTogether extends _$RunTogether with ValueSettable {
   @override
-  bool build() => ref.watch(appStateStorageProvider).getRunTogether();
+  bool build() {
+    final watch = ref.watch(sharedPreferenceStorageProvider);
+    return initializeRunTogetherUseCase(watch);
+  }
 
   @override
   void setValue(final bool value) {
-    ref.read(appStateStorageProvider).setRunTogether(value);
+    final read = ref.read(sharedPreferenceStorageProvider);
+    setRunTogetherUseCase(read, value);
     state = value;
   }
 }
