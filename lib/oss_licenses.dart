@@ -52,6 +52,7 @@ const allDependencies = <Package>[
   _fluent_ui,
   _flutter,
   _flutter_cache_manager,
+  _flutter_colorpicker,
   _flutter_hooks,
   _flutter_lints,
   _flutter_oss_licenses,
@@ -166,6 +167,7 @@ const dependencies = <Package>[
   _filepicker_windows,
   _fluent_ui,
   _flutter,
+  _flutter_colorpicker,
   _flutter_hooks,
   _freezed_annotation,
   _go_router,
@@ -3115,6 +3117,27 @@ SOFTWARE.''',
     isMarkdown: false,
     isSdk: false,
     dependencies: [PackageRef('clock'), PackageRef('collection'), PackageRef('file'), PackageRef('flutter'), PackageRef('http'), PackageRef('path'), PackageRef('path_provider'), PackageRef('rxdart'), PackageRef('sqflite'), PackageRef('uuid')]
+  );
+
+/// flutter_colorpicker 1.1.0
+const _flutter_colorpicker = Package(
+    name: 'flutter_colorpicker',
+    description: 'HSV(HSB)/HSL/RGB/Material color picker inspired by all the good design for your amazing flutter apps.',
+    homepage: 'https://github.com/mchome/flutter_colorpicker',
+    authors: [],
+    version: '1.1.0',
+    license: '''MIT License
+
+Copyright (c) 2021 fuyumi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter')]
   );
 
 /// flutter_hooks 0.20.5

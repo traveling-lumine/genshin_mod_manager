@@ -141,5 +141,189 @@ final runTogetherProvider =
 );
 
 typedef _$RunTogether = AutoDisposeNotifier<bool>;
+String _$cardColorHash() => r'ee0b08b2f417baa2fbb91b853291ff40f890b809';
+
+/// Copied from Dart SDK
+class _SystemHash {
+  _SystemHash._();
+
+  static int combine(int hash, int value) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + value);
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    return hash ^ (hash >> 6);
+  }
+
+  static int finish(int hash) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+    // ignore: parameter_assignments
+    hash = hash ^ (hash >> 11);
+    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  }
+}
+
+abstract class _$CardColor extends BuildlessAutoDisposeNotifier<Color> {
+  late final bool isBright;
+  late final bool isEnabled;
+
+  Color build({
+    required bool isBright,
+    required bool isEnabled,
+  });
+}
+
+/// See also [CardColor].
+@ProviderFor(CardColor)
+const cardColorProvider = CardColorFamily();
+
+/// See also [CardColor].
+class CardColorFamily extends Family<Color> {
+  /// See also [CardColor].
+  const CardColorFamily();
+
+  /// See also [CardColor].
+  CardColorProvider call({
+    required bool isBright,
+    required bool isEnabled,
+  }) {
+    return CardColorProvider(
+      isBright: isBright,
+      isEnabled: isEnabled,
+    );
+  }
+
+  @override
+  CardColorProvider getProviderOverride(
+    covariant CardColorProvider provider,
+  ) {
+    return call(
+      isBright: provider.isBright,
+      isEnabled: provider.isEnabled,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'cardColorProvider';
+}
+
+/// See also [CardColor].
+class CardColorProvider
+    extends AutoDisposeNotifierProviderImpl<CardColor, Color> {
+  /// See also [CardColor].
+  CardColorProvider({
+    required bool isBright,
+    required bool isEnabled,
+  }) : this._internal(
+          () => CardColor()
+            ..isBright = isBright
+            ..isEnabled = isEnabled,
+          from: cardColorProvider,
+          name: r'cardColorProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$cardColorHash,
+          dependencies: CardColorFamily._dependencies,
+          allTransitiveDependencies: CardColorFamily._allTransitiveDependencies,
+          isBright: isBright,
+          isEnabled: isEnabled,
+        );
+
+  CardColorProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.isBright,
+    required this.isEnabled,
+  }) : super.internal();
+
+  final bool isBright;
+  final bool isEnabled;
+
+  @override
+  Color runNotifierBuild(
+    covariant CardColor notifier,
+  ) {
+    return notifier.build(
+      isBright: isBright,
+      isEnabled: isEnabled,
+    );
+  }
+
+  @override
+  Override overrideWith(CardColor Function() create) {
+    return ProviderOverride(
+      origin: this,
+      override: CardColorProvider._internal(
+        () => create()
+          ..isBright = isBright
+          ..isEnabled = isEnabled,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        isBright: isBright,
+        isEnabled: isEnabled,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeNotifierProviderElement<CardColor, Color> createElement() {
+    return _CardColorProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CardColorProvider &&
+        other.isBright == isBright &&
+        other.isEnabled == isEnabled;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, isBright.hashCode);
+    hash = _SystemHash.combine(hash, isEnabled.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+mixin CardColorRef on AutoDisposeNotifierProviderRef<Color> {
+  /// The parameter `isBright` of this provider.
+  bool get isBright;
+
+  /// The parameter `isEnabled` of this provider.
+  bool get isEnabled;
+}
+
+class _CardColorProviderElement
+    extends AutoDisposeNotifierProviderElement<CardColor, Color>
+    with CardColorRef {
+  _CardColorProviderElement(super.provider);
+
+  @override
+  bool get isBright => (origin as CardColorProvider).isBright;
+  @override
+  bool get isEnabled => (origin as CardColorProvider).isEnabled;
+}
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
