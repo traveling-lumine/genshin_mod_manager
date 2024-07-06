@@ -12,6 +12,7 @@ dependencies:
   archive: ^3.6.0
   cached_network_image: ^3.3.1
   collection: ^1.18.0
+  cp949_codec: ^1.0.2
   desktop_drop: ^0.4.4
   ffi: ^2.1.2
   filepicker_windows: ^2.1.3

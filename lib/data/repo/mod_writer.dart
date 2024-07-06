@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:archive/archive_io.dart';
+import 'package:archive/archive_io.dart' show ZipDecoder;
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
+import 'package:genshin_mod_manager/data/third_party.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/mod_writer.dart';
 
