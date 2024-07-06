@@ -430,13 +430,7 @@ class _ColorPickerDialog extends HookConsumerWidget {
               isBright: isBright,
               isEnabled: isEnabled,
             );
-            ref
-                .read(
-                  cardColorProvider(isBright: isBright, isEnabled: isEnabled)
-                      .notifier,
-                )
-                .setColor(defaultColor);
-            Navigator.of(context).pop();
+            currentColor.value = defaultColor;
           },
           child: const Text('Restore default'),
         ),
