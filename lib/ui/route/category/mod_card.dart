@@ -43,15 +43,12 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
   Widget build(final BuildContext context) => GestureDetector(
         onTap: () => _onToggle(context),
         child: Card(
-          backgroundColor: switch ((
-            FluentTheme.of(context).brightness == Brightness.light,
-            widget.mod.isEnabled
-          )) {
-            (true, true) => Colors.green.lightest,
-            (true, false) => Colors.red.lightest.withOpacity(0.5),
-            (false, true) => Colors.green.darkest.withOpacity(0.8),
-            (false, false) => Colors.red.darkest.withOpacity(0.6),
-          },
+          backgroundColor: ref.watch(
+            cardColorProvider(
+              isBright: FluentTheme.of(context).brightness == Brightness.light,
+              isEnabled: widget.mod.isEnabled,
+            ),
+          ),
           padding: const EdgeInsets.all(6),
           child: FocusTraversalGroup(
             child: Column(

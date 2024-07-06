@@ -3,7 +3,11 @@ import 'dart:async';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show AlertDialog;
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:genshin_mod_manager/domain/entity/game_config.dart';
+import 'package:genshin_mod_manager/domain/usecase/app_state/card_color.dart';
 import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/flow/app_version.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
@@ -28,7 +32,14 @@ class _SettingRoute extends ConsumerWidget {
   Widget build(final BuildContext context, final WidgetRef ref) =>
       ScaffoldPage.scrollable(
         header: const PageHeader(title: Text('Settings')),
+        bottomBar: Column(
+          children: [
+            _buildLicense(context),
+            _buildVersion(ref),
+          ],
+        ),
         children: [
+          const _SectionHeader(title: 'Paths'),
           _PathSelectItem(
             title: 'Select mod root folder',
             icon: FluentIcons.folder_open,
@@ -71,6 +82,7 @@ class _SettingRoute extends ConsumerWidget {
                   .changeLauncherFile(file.path);
             },
           ),
+          const _SectionHeader(title: 'Options'),
           _SwitchItem(
             text: 'Run 3d migoto and launcher using one button',
             provider: runTogetherProvider,
@@ -94,8 +106,14 @@ class _SettingRoute extends ConsumerWidget {
           const _ComboItem(
             text: 'Target Game',
           ),
-          _buildLicense(context),
-          _buildVersion(ref),
+          const _SectionHeader(title: 'Themes'),
+          const _SectionSubheader(
+            title: 'Card colors (hover on the icons to see details)',
+          ),
+          const _ColorChanger(isBright: true, isEnabled: true),
+          const _ColorChanger(isBright: true, isEnabled: false),
+          const _ColorChanger(isBright: false, isEnabled: true),
+          const _ColorChanger(isBright: false, isEnabled: false),
         ],
       );
 
@@ -235,5 +253,220 @@ class _ComboItem extends StatelessWidget {
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('text', text));
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(final BuildContext context) => Padding(
+        padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+        child: Text(
+          title,
+          style: FluentTheme.of(context).typography.subtitle,
+        ),
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+  }
+}
+
+class _SectionSubheader extends StatelessWidget {
+  const _SectionSubheader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(final BuildContext context) => Padding(
+        padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+        child: Text(
+          title,
+          style: FluentTheme.of(context).typography.bodyLarge,
+        ),
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+  }
+}
+
+class _ColorChanger extends ConsumerWidget {
+  const _ColorChanger({
+    required this.isBright,
+    required this.isEnabled,
+  });
+
+  final bool isBright;
+  final bool isEnabled;
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final description = "Changes the"
+        " ${isBright ? 'bright' : 'dark'} mode themed,"
+        " ${isEnabled ? 'enabled' : 'disabled'} card's color.";
+
+    Widget brightModeIcon = Padding(
+      padding: const EdgeInsets.all(4),
+      child: Icon(isBright ? FluentIcons.sunny : FluentIcons.clear_night),
+    );
+    if (isBright != ref.watch(darkModeProvider)) {
+      // add a green border to indicate that the color is visible
+      brightModeIcon = DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.green,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: brightModeIcon,
+      );
+    }
+    return ListTile(
+      title: FluentTheme(
+        data: FluentTheme.of(context).copyWith(
+          tooltipTheme: TooltipTheme.of(context).merge(
+            const TooltipThemeData(
+              waitDuration: Duration(milliseconds: 200),
+              showDuration: Duration(days: 1),
+            ),
+          ),
+        ),
+        child: Tooltip(
+          message: description,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              brightModeIcon,
+              const SizedBox(width: 8),
+              Icon(isEnabled ? FluentIcons.accept : FluentIcons.clear),
+            ],
+          ),
+        ),
+      ),
+      leading: Consumer(
+        builder: (final context, final ref, final child) => RepaintBoundary(
+          child: GestureDetector(
+            onTap: () {
+              unawaited(
+                showGeneralDialog(
+                  context: context,
+                  pageBuilder: (final context, final _, final __) =>
+                      _ColorPickerDialog(
+                    isBright: isBright,
+                    isEnabled: isEnabled,
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: ref.watch(
+                  cardColorProvider(
+                    isBright: isBright,
+                    isEnabled: isEnabled,
+                  ),
+                ),
+                border: Border.all(
+                  color: FluentTheme.of(context).inactiveColor,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(FlagProperty('isBright', value: isBright, ifTrue: 'bright'))
+      ..add(FlagProperty('isEnabled', value: isEnabled, ifTrue: 'enabled'));
+  }
+}
+
+class _ColorPickerDialog extends HookConsumerWidget {
+  const _ColorPickerDialog({
+    required this.isBright,
+    required this.isEnabled,
+  });
+
+  final bool isBright;
+  final bool isEnabled;
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final currentColor = useState(
+      ref.watch(
+        cardColorProvider(isBright: isBright, isEnabled: isEnabled),
+      ),
+    );
+    return AlertDialog(
+      title: const Text('Pick a color!'),
+      content: SingleChildScrollView(
+        child: ColorPicker(
+          pickerColor: currentColor.value,
+          onColorChanged: (final value) {
+            currentColor.value = value;
+          },
+        ),
+      ),
+      actions: [
+        Button(
+          onPressed: () {
+            final defaultColor = getDefaultValueUseCase(
+              isBright: isBright,
+              isEnabled: isEnabled,
+            );
+            ref
+                .read(
+                  cardColorProvider(isBright: isBright, isEnabled: isEnabled)
+                      .notifier,
+                )
+                .setColor(defaultColor);
+            Navigator.of(context).pop();
+          },
+          child: const Text('Restore default'),
+        ),
+        Button(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Close'),
+        ),
+        FilledButton(
+          onPressed: () {
+            ref
+                .read(
+                  cardColorProvider(isBright: isBright, isEnabled: isEnabled)
+                      .notifier,
+                )
+                .setColor(currentColor.value);
+            Navigator.of(context).pop();
+          },
+          child: const Text('Set'),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty<bool>('isBright', isBright))
+      ..add(DiagnosticsProperty<bool>('isEnabled', isEnabled));
   }
 }
