@@ -14,28 +14,36 @@ jobs:
     if: github.event.pull_request.merged && (contains(github.event.pull_request.labels.*.name, 'release') || contains(github.event.pull_request.labels.*.name, 'build'))
     runs-on: windows-latest
     steps:
+
       - uses: actions/checkout@v4
+
       - run: |
           echo @'
           ${{ secrets.REMOTE_API_CODE }}
           '@ > .\lib\data\repo\akasha.dart
+
       - uses: subosito/flutter-action@v2
+
       - name: Build Application
         run: flutter build windows
+
       - name: Pack Application
         run: |
           move build\windows\x64\runner\Release GenshinModManager
           tar -acf GenshinModManager.zip GenshinModManager
           certutil -hashfile GenshinModManager.zip SHA256
+
       - name: Get tag version
         run: |
           flutter pub global activate cider
           echo "TAG=v$(cider version)" >> $env:GITHUB_ENV
+
       - name: Create Tag
         uses: ydataai/create-tag@v1
         with:
           tag: ${{ env.TAG }}
           message: ${{ env.TAG }}
+          
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:

@@ -1,4 +1,4 @@
-name: PR label check
+name: PR label validation
 
 on:
   pull_request:
@@ -12,7 +12,6 @@ on:
 
 jobs:
   check:
-    name: PR label validation
     runs-on: ubuntu-latest
 
     steps:

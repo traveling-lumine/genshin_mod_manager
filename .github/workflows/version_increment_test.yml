@@ -1,4 +1,4 @@
-name: PR content check
+name: PR version increment check
 
 on:
   pull_request:
@@ -13,22 +13,7 @@ on:
     
 
 jobs:
-  flutter_test:
-    name: Flutter test
-    if: contains(github.event.pull_request.labels.*.name, 'release') || contains(github.event.pull_request.labels.*.name, 'build')
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Flutter
-      uses: subosito/flutter-action@v2
-
-    - name: Flutter test
-      run: flutter test
-      
   check_version_increment:
-    name: Check version increment
     if: contains(github.event.pull_request.labels.*.name, 'release') || contains(github.event.pull_request.labels.*.name, 'build')
     runs-on: ubuntu-latest
     steps:

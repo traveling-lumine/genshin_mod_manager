@@ -1,0 +1,24 @@
+name: Flutter test
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+    
+
+jobs:
+  flutter_test:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+
+    - name: Flutter test
+      run: flutter test
