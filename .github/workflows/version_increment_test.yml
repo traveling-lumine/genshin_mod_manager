@@ -1,0 +1,61 @@
+name: PR content check
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+    
+
+jobs:
+  flutter_test:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+
+    - name: Flutter test
+      run: flutter test
+
+  check_version_increment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@v2
+      - run: flutter pub global activate cider
+
+      - name: Run cider version at PR branch head
+        id: run_head
+        run: |
+          HEAD_OUTPUT=$(cider version)
+          echo "HEAD_OUTPUT=$HEAD_OUTPUT" >> $GITHUB_ENV
+
+      - name: Find PR branch root commit
+        id: find_root
+        run: |
+          ROOT_COMMIT=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD)
+          echo "ROOT_COMMIT=$ROOT_COMMIT" >> $GITHUB_ENV
+
+      - name: Run cider version at PR branch root
+        id: run_root
+        run: |
+          git checkout ${{ env.ROOT_COMMIT }}
+          ROOT_OUTPUT=$(cider version)
+          echo "ROOT_OUTPUT=$ROOT_OUTPUT" >> $GITHUB_ENV
+
+      - name: Check if versions are different
+        run: |
+          if [ "${{ env.HEAD_OUTPUT }}" == "${{ env.ROOT_OUTPUT }}" ]; then
+            echo "Version number has not changed in the PR."
+            exit 1
+          fi

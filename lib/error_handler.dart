@@ -8,7 +8,7 @@ void registerErrorHandlers() {
   ErrorWidget.builder = _errorWidgetBuilder;
 }
 
-void _onErrorHandler(final details) {
+void _onErrorHandler(final FlutterErrorDetails details) {
   final now = DateTime.now().toUtc().toIso8601String();
   final message = _errorToString(details);
   final stackTrace = _writeStacktrace(details);
@@ -27,7 +27,7 @@ void _onErrorHandler(final details) {
   }
 }
 
-Widget _errorWidgetBuilder(final details) => Center(
+Widget _errorWidgetBuilder(final FlutterErrorDetails details) => Center(
       child: SelectableText(
         _errorToString(details),
         style: TextStyle(color: Colors.red.darker),
@@ -46,7 +46,7 @@ String _writeStacktrace(final FlutterErrorDetails details) {
 String _elideLines(final String stackTrace) {
   // only choose lines that include genshin_mod_manager.
   // Lines that don't include it are shrunk to ...
-  final lines = [];
+  final lines = <String>[];
   var elidedLines = 0;
   for (final line in stackTrace.split('\n')) {
     if (!line.contains('genshin_mod_manager')) {

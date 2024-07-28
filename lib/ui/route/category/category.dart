@@ -170,7 +170,7 @@ class CategoryRoute extends HookWidget {
     );
   }
 
-  Widget _buildError(final error, final stackTrace) => Center(
+  Widget _buildError(final Object error, final StackTrace stackTrace) => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

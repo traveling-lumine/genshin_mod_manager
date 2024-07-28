@@ -34,7 +34,12 @@ class MockUrlLauncher extends Fake
 
   void setLaunchExpectations({
     required final String url,
-    required final bool enableJavaScript, required final bool enableDomStorage, required final bool universalLinksOnly, required final Map<String, String> headers, required final String? webOnlyWindowName, final PreferredLaunchMode? launchMode,
+    required final bool enableJavaScript,
+    required final bool enableDomStorage,
+    required final bool universalLinksOnly,
+    required final Map<String, String> headers,
+    required final String? webOnlyWindowName,
+    final PreferredLaunchMode? launchMode,
     final bool? useSafariVC,
     final bool? useWebView,
   }) {

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_slow_async_io, avoid_print
+
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -42,7 +44,7 @@ void main() {
         ', async: ${asyncDuration.inMicroseconds / other}');
     expect(syncDuration, lessThan(asyncDuration));
   });
-  test("Benchmark exists", () async {
+  test('Benchmark exists', () async {
     const other = 100;
     var stopwatch = Stopwatch()..start();
     for (var i = 0; i < other; i++) {

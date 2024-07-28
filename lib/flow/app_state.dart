@@ -1,5 +1,7 @@
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:genshin_mod_manager/domain/entity/game_config.dart';
 import 'package:genshin_mod_manager/domain/entity/preset.dart';
+import 'package:genshin_mod_manager/domain/usecase/app_state/card_color.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/dark_mode.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/enabled_first.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/folder_icon.dart';
@@ -203,5 +205,30 @@ class RunTogether extends _$RunTogether with ValueSettable {
     final read = ref.read(sharedPreferenceStorageProvider);
     setRunTogetherUseCase(read, value);
     state = value;
+  }
+}
+
+@riverpod
+class CardColor extends _$CardColor {
+  @override
+  Color build({required final bool isBright, required final bool isEnabled}) {
+    final repository = ref.watch(sharedPreferenceStorageProvider);
+    final color = initializeCardColorUseCase(
+      repository,
+      isBright: isBright,
+      isEnabled: isEnabled,
+    );
+    return color;
+  }
+
+  void setColor(final Color color) {
+    final repository = ref.read(sharedPreferenceStorageProvider);
+    setCardColorUseCase(
+      repository,
+      color,
+      isBright: isBright,
+      isEnabled: isEnabled,
+    );
+    state = color;
   }
 }
