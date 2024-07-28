@@ -1,9 +1,9 @@
-name: Build
+name: Release
 
 on:
   pull_request:
     branches:
-      - master
+      - main
     types:
       - closed
 
@@ -36,7 +36,8 @@ jobs:
         with:
           tag: ${{ env.TAG }}
           message: ${{ env.TAG }}
-      - uses: softprops/action-gh-release@v2
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
           files: GenshinModManager.zip
           tag_name: ${{ env.TAG }}
