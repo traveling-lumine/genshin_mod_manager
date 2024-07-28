@@ -8,10 +8,14 @@ on:
       - opened
       - synchronize
       - reopened
+      - labeled
+      - unlabeled
     
 
 jobs:
   flutter_test:
+    name: Flutter test
+    if: contains(github.event.pull_request.labels.*.name, 'release') || contains(github.event.pull_request.labels.*.name, 'build')
     runs-on: windows-latest
 
     steps:
@@ -22,14 +26,22 @@ jobs:
 
     - name: Flutter test
       run: flutter test
-
+      
   check_version_increment:
+    name: Check version increment
+    if: contains(github.event.pull_request.labels.*.name, 'release') || contains(github.event.pull_request.labels.*.name, 'build')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+    
+      - name: Get the latest tag name
+        id: get_latest_tag
+        run: |
+          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
 
       - uses: subosito/flutter-action@v2
       - run: flutter pub global activate cider
@@ -38,24 +50,11 @@ jobs:
         id: run_head
         run: |
           HEAD_OUTPUT=$(cider version)
-          echo "HEAD_OUTPUT=$HEAD_OUTPUT" >> $GITHUB_ENV
-
-      - name: Find PR branch root commit
-        id: find_root
-        run: |
-          ROOT_COMMIT=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD)
-          echo "ROOT_COMMIT=$ROOT_COMMIT" >> $GITHUB_ENV
-
-      - name: Run cider version at PR branch root
-        id: run_root
-        run: |
-          git checkout ${{ env.ROOT_COMMIT }}
-          ROOT_OUTPUT=$(cider version)
-          echo "ROOT_OUTPUT=$ROOT_OUTPUT" >> $GITHUB_ENV
+          echo "HEAD_OUTPUT=v$HEAD_OUTPUT" >> $GITHUB_ENV
 
       - name: Check if versions are different
         run: |
-          if [ "${{ env.HEAD_OUTPUT }}" == "${{ env.ROOT_OUTPUT }}" ]; then
+          if [ ${{ env.HEAD_OUTPUT }} == ${{ env.LATEST_TAG }} ]; then
             echo "Version number has not changed in the PR."
             exit 1
           fi
