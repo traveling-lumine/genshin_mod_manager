@@ -22,7 +22,8 @@ class RootWatcherImpl implements RootWatcher {
   RootWatcherImpl(final String modRoot)
       : _dir = Directory(modRoot),
         _iconDir = Directory(
-            Platform.resolvedExecutable.pDirname.pJoin(_resourceDir)) {
+          Platform.resolvedExecutable.pDirname.pJoin(_resourceDir),
+        ) {
     _iconDir.createSync(recursive: true);
     _add();
     _subscription = _dir
@@ -50,11 +51,13 @@ class RootWatcherImpl implements RootWatcher {
   late final StreamSubscription<FileSystemEvent> _subscription;
   late final StreamSubscription<FileSystemEvent> _subscription2;
 
+  @override
   Stream<List<ModCategory>> get categories => _controller.stream.distinct(
         (final previous, final next) =>
-            const ListEquality().equals(previous, next),
+            const ListEquality<ModCategory>().equals(previous, next),
       );
 
+  @override
   void dispose() {
     unawaited(_subscription2.cancel());
     unawaited(_subscription.cancel());
@@ -79,6 +82,7 @@ class RootWatcherImpl implements RootWatcher {
     _controller.add(res);
   }
 
+  @override
   void refresh() {
     _add();
   }

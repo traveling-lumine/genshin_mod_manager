@@ -309,7 +309,7 @@ class _ColorChanger extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final description = "Changes the"
+    final description = 'Changes the'
         " ${isBright ? 'bright' : 'dark'} mode themed,"
         " ${isEnabled ? 'enabled' : 'disabled'} card's color.";
 

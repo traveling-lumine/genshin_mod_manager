@@ -457,7 +457,7 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
   ) async {
     try {
       final fileContent = await File(findConfig).readAsString();
-      final Map<String, dynamic> config = jsonDecode(fileContent);
+      final config = jsonDecode(fileContent) as Map<String, dynamic>;
       final uuid = config['uuid'] as String;
       final version = config['version'] as String;
       final updateCode = config['update_code'] as String;

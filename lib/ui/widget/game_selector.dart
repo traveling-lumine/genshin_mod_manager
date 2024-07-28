@@ -71,10 +71,10 @@ class GameSelector extends HookConsumerWidget {
               unawaited(
                 displayInfoBarInContext(
                   context,
-                  title: const Text("Whaat?"),
+                  title: const Text('Whaat?'),
                   severity: InfoBarSeverity.error,
                   content: const Text(
-                    "Null value. This is a bug. Please report.",
+                    'Null value. This is a bug. Please report.',
                   ),
                 ),
               );
@@ -146,10 +146,10 @@ class GameSelector extends HookConsumerWidget {
       unawaited(
         displayInfoBarInContext(
           context,
-          title: const Text("Nope"),
+          title: const Text('Nope'),
           severity: InfoBarSeverity.error,
           content: const Text(
-            "You cannot delete the only game.",
+            'You cannot delete the only game.',
           ),
         ),
       );

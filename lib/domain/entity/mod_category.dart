@@ -50,6 +50,6 @@ class _Decoder extends Converter<String?, ModCategory?> {
     if (input == null) {
       return null;
     }
-    return ModCategory.fromJson(jsonDecode(input));
+    return ModCategory.fromJson(jsonDecode(input) as Map<String, dynamic>);
   }
 }

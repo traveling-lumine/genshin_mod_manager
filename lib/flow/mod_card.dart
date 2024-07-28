@@ -47,7 +47,7 @@ class ModCardModel {
   List<String> iniPathsCurVal = [];
 
   void setIniPaths(final List<String> val) {
-    if (!const ListEquality().equals(iniPathsCurVal, val)) {
+    if (!const ListEquality<String>().equals(iniPathsCurVal, val)) {
       iniPathsCurVal = val;
       _iniPathsController.add(val);
     }
