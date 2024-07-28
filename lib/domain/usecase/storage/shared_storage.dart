@@ -86,17 +86,16 @@ PresetData? getPresetDataUseCase(
   if (data == null) {
     return null;
   }
-  final global = data['global'] ?? {};
-  final local = data['local'] ?? {};
+  final global =
+      (data['global'] as Map).cast<String, Map<String, List<String>>>();
+  final local =
+      (data['local'] as Map).cast<String, Map<String, List<String>>>();
   return PresetData(
     global: {
       for (final e in global.entries)
         e.key: PresetListMap(
           bundledPresets: {
-            for (final f in e.value.entries)
-              f.key: PresetList(
-                mods: List<String>.from(f.value),
-              ),
+            for (final f in e.value.entries) f.key: PresetList(mods: f.value),
           },
         ),
     },
@@ -104,10 +103,7 @@ PresetData? getPresetDataUseCase(
       for (final e in local.entries)
         e.key: PresetListMap(
           bundledPresets: {
-            for (final f in e.value.entries)
-              f.key: PresetList(
-                mods: List<String>.from(f.value),
-              ),
+            for (final f in e.value.entries) f.key: PresetList(mods: f.value),
           },
         ),
     },

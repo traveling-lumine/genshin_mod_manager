@@ -1,38 +1,44 @@
 name: Build
+
 on:
-  push:
+  pull_request:
     branches:
-      - main
+      - master
+    types:
+      - closed
 
 jobs:
-  build:
+  release:
     permissions:
       contents: write
+    if: github.event.pull_request.merged && (contains(github.event.pull_request.labels.*.name, 'release') || contains(github.event.pull_request.labels.*.name, 'build'))
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: |
           echo @'
           ${{ secrets.REMOTE_API_CODE }}
           '@ > .\lib\data\repo\akasha.dart
       - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          architecture: x64
-      - run: flutter pub global activate cider
-      - run: flutter build windows
-      - run: move build\windows\x64\runner\Release GenshinModManager
-      - run: tar -acf GenshinModManager.zip GenshinModManager
-      - run: certutil -hashfile GenshinModManager.zip SHA256
+      - name: Build Application
+        run: flutter build windows
+      - name: Pack Application
+        run: |
+          move build\windows\x64\runner\Release GenshinModManager
+          tar -acf GenshinModManager.zip GenshinModManager
+          certutil -hashfile GenshinModManager.zip SHA256
       - name: Get tag version
-        run: 'echo "TAG=v$(cider version)" >> $env:GITHUB_ENV'
+        run: |
+          flutter pub global activate cider
+          echo "TAG=v$(cider version)" >> $env:GITHUB_ENV
       - name: Create Tag
         uses: ydataai/create-tag@v1
         with:
           tag: ${{ env.TAG }}
           message: ${{ env.TAG }}
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         with:
           files: GenshinModManager.zip
           tag_name: ${{ env.TAG }}
-          generate_release_notes: true
+          generate_release_notes: ${{ !contains(github.event.pull_request.labels.*.name, 'build') }}
+          prerelease: ${{ contains(github.event.pull_request.labels.*.name, 'build')}}

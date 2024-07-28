@@ -197,7 +197,7 @@ Future<void> _toggleCategory(
       .toList();
   final shouldBeOff =
       currentEnabled.where((final e) => !shouldBeEnabled.contains(e));
-  final futures = <Future>[];
+  final futures = <Future<void>>[];
   for (final mod in shouldBeOff) {
     final modDir = categoryPath.pJoin(mod);
     final future = disable(

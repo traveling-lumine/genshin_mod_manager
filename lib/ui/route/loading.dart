@@ -30,7 +30,7 @@ class LoadingRoute extends HookConsumerWidget {
       _goToMain(context);
     });
     return _TitledNavView(
-      title: "Done!",
+      title: 'Done!',
       children: [
         const Text('Done!'),
         const SizedBox(height: 16),
@@ -48,7 +48,7 @@ class LoadingRoute extends HookConsumerWidget {
     final WidgetRef ref,
   ) =>
       _TitledNavView(
-        title: "Error!",
+        title: 'Error!',
         children: [
           Text('Error: $error'),
           const SizedBox(height: 16),
@@ -70,7 +70,7 @@ class LoadingRoute extends HookConsumerWidget {
       );
 
   Widget _buildLoading() => const _TitledNavView(
-        title: "Loading...",
+        title: 'Loading...',
         children: [
           ProgressRing(),
           SizedBox(height: 16),

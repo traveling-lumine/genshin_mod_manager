@@ -37,11 +37,13 @@ class StoreElement extends ConsumerWidget {
     }
     buttons.add(
       CommandBarButton(
-        onPressed: () => showDialog(
-          context: context,
-          barrierDismissible: true,
-          builder: (final dialogContext) =>
-              _downloadDialog(dialogContext, context, ref),
+        onPressed: () => unawaited(
+          showDialog(
+            context: context,
+            barrierDismissible: true,
+            builder: (final dialogContext) =>
+                _downloadDialog(dialogContext, context, ref),
+          ),
         ),
         icon: const Icon(FluentIcons.download),
       ),
@@ -127,7 +129,7 @@ class StoreElement extends ConsumerWidget {
             child: SingleChildScrollView(
               child: SizedBox(
                 width: double.infinity,
-                child: Text(element.description ?? "🧐"),
+                child: Text(element.description ?? '🧐'),
               ),
             ),
           ),

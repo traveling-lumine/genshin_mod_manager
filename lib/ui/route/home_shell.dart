@@ -256,7 +256,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       );
 
   NavigationView _buildLoading() => NavigationView(
-        appBar: getAppbar("Reading categories..."),
+        appBar: getAppbar('Reading categories...'),
         content: const Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -365,7 +365,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
                 filledButton = MouseRegion(
                   cursor: SystemMouseCursors.forbidden,
                   child: Tooltip(
-                    message: "The auto-update will delete one or more of the"
+                    message: 'The auto-update will delete one or more of the'
                         " following: ${reason.join(', ')}!",
                     child: const FilledButton(
                       onPressed: null,
@@ -576,26 +576,26 @@ Future<void> _runUpdateScript() async {
     Directory.current.path,
     asyncWrite: true,
   );
-  const updateScript = "setlocal\n"
-      "echo update script running\n"
+  const updateScript = 'setlocal\n'
+      'echo update script running\n'
       'set "sourceFolder=GenshinModManager"\n'
       'if not exist "genshin_mod_manager.exe" (\n'
-      "    echo Maybe not in the mod manager folder? Exiting for safety.\n"
-      "    pause\n"
-      "    exit /b 1\n"
-      ")\n"
-      "if not exist %sourceFolder% (\n"
-      "    echo Failed to download data! Go to the link and install manually.\n"
-      "    pause\n"
-      "    exit /b 2\n"
-      ")\n"
+      '    echo Maybe not in the mod manager folder? Exiting for safety.\n'
+      '    pause\n'
+      '    exit /b 1\n'
+      ')\n'
+      'if not exist %sourceFolder% (\n'
+      '    echo Failed to download data! Go to the link and install manually.\n'
+      '    pause\n'
+      '    exit /b 2\n'
+      ')\n'
       "echo So it's good to go. Let's update.\n"
       "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd update.log error.log\"') do del \"%%i\"\n"
       "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources %sourceFolder%\"') do rd /s /q \"%%i\"\n"
       "for /f \"delims=\" %%i in ('dir /b \"%sourceFolder%\"') do move /y \"%sourceFolder%\\%%i\" .\n"
-      "rd /s /q %sourceFolder%\n"
-      "start /b genshin_mod_manager.exe\n"
-      "endlocal\n";
+      'rd /s /q %sourceFolder%\n'
+      'start /b genshin_mod_manager.exe\n'
+      'endlocal\n';
   await File('update.cmd').writeAsString(updateScript);
   unawaited(
     Process.run(
@@ -609,7 +609,7 @@ Future<void> _runUpdateScript() async {
     ),
   );
   // delay needed. otherwise the process will die before the script runs.
-  await Future.delayed(const Duration(milliseconds: 200));
+  await Future<void>.delayed(const Duration(milliseconds: 200));
   exit(0);
 }
 

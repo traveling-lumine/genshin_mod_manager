@@ -14,13 +14,13 @@ class IniFile with _$IniFile {
 
 @freezed
 class IniSection with _$IniSection {
-  const IniSection._();
-
   const factory IniSection({
     required final IniFile iniFile,
     required final String section,
     required final String line,
   }) = _IniSection;
+
+  const IniSection._();
 
   String get key => line.split('=')[0].trim();
 

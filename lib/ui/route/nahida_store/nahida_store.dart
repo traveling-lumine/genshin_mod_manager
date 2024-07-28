@@ -90,7 +90,7 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
                     return null;
                   }
                   if (value == wrongPw) {
-                    return "Wrong password";
+                    return 'Wrong password';
                   }
                   return null;
                 },
@@ -262,7 +262,8 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
                         (final _) => isLoading.value = false,
                       )
                       .catchError(
-                    (final e, final stackTrace) {
+                    // ignore: avoid_annotating_with_dynamic
+                    (final dynamic e, final stackTrace) {
                       isLoading.value = false;
                       unawaited(
                         displayInfoBarInContext(

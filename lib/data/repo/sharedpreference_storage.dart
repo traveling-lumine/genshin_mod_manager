@@ -31,7 +31,7 @@ class SharedPreferenceStorage implements PersistentStorage {
     if (string == null) {
       return null;
     }
-    return jsonDecode(string);
+    return jsonDecode(string) as Map<String, dynamic>;
   }
 
   @override
