@@ -1,5 +1,3 @@
-name: PR label validation
-
 on:
   pull_request:
     branches:
@@ -11,12 +9,12 @@ on:
 
 
 jobs:
-  check:
+  pr-label-check:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check for PR tag
-      run: |
+    - run: |
         if [[ ${{contains(github.event.pull_request.labels.*.name, 'release') && contains(github.event.pull_request.labels.*.name, 'build')}} == "true" ]]; then
+          echo "This PR has both 'release' and 'build' labels. Those labels are mutually exclusive."
           exit 1
         fi

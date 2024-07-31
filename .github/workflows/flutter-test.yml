@@ -1,5 +1,3 @@
-name: Flutter test
-
 on:
   pull_request:
     branches:
@@ -8,10 +6,16 @@ on:
       - opened
       - synchronize
       - reopened
+    paths-ignore:
+      - '.github/**'
+      - '.vscode/**'
+      - '.gitignore'
+      - 'LICENSE'
+      - '*.md'
     
 
 jobs:
-  flutter_test:
+  flutter-test:
     runs-on: windows-latest
 
     steps:

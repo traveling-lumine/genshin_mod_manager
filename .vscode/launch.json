@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Flutter Tests",
+            "program": "test",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--branch-coverage"
+            ]
+        },
+        {
+            "name": "Flutter (Windows)",
+            "program": "lib/main.dart",
+            "deviceId": "windows",
+            "request": "launch",
+            "type": "dart"
+        }
+    ]
+}
