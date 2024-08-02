@@ -22,7 +22,6 @@ ModCategory _$ModCategoryFromJson(Map<String, dynamic> json) {
 mixin _$ModCategory {
   String get path => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
-  String? get iconPath => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -36,7 +35,7 @@ abstract class $ModCategoryCopyWith<$Res> {
           ModCategory value, $Res Function(ModCategory) then) =
       _$ModCategoryCopyWithImpl<$Res, ModCategory>;
   @useResult
-  $Res call({String path, String name, String? iconPath});
+  $Res call({String path, String name});
 }
 
 /// @nodoc
@@ -54,7 +53,6 @@ class _$ModCategoryCopyWithImpl<$Res, $Val extends ModCategory>
   $Res call({
     Object? path = null,
     Object? name = null,
-    Object? iconPath = freezed,
   }) {
     return _then(_value.copyWith(
       path: null == path
@@ -65,10 +63,6 @@ class _$ModCategoryCopyWithImpl<$Res, $Val extends ModCategory>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      iconPath: freezed == iconPath
-          ? _value.iconPath
-          : iconPath // ignore: cast_nullable_to_non_nullable
-              as String?,
     ) as $Val);
   }
 }
@@ -81,7 +75,7 @@ abstract class _$$ModCategoryImplCopyWith<$Res>
       __$$ModCategoryImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String path, String name, String? iconPath});
+  $Res call({String path, String name});
 }
 
 /// @nodoc
@@ -97,7 +91,6 @@ class __$$ModCategoryImplCopyWithImpl<$Res>
   $Res call({
     Object? path = null,
     Object? name = null,
-    Object? iconPath = freezed,
   }) {
     return _then(_$ModCategoryImpl(
       path: null == path
@@ -108,10 +101,6 @@ class __$$ModCategoryImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      iconPath: freezed == iconPath
-          ? _value.iconPath
-          : iconPath // ignore: cast_nullable_to_non_nullable
-              as String?,
     ));
   }
 }
@@ -119,8 +108,7 @@ class __$$ModCategoryImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$ModCategoryImpl with DiagnosticableTreeMixin implements _ModCategory {
-  const _$ModCategoryImpl(
-      {required this.path, required this.name, this.iconPath});
+  const _$ModCategoryImpl({required this.path, required this.name});
 
   factory _$ModCategoryImpl.fromJson(Map<String, dynamic> json) =>
       _$$ModCategoryImplFromJson(json);
@@ -129,12 +117,10 @@ class _$ModCategoryImpl with DiagnosticableTreeMixin implements _ModCategory {
   final String path;
   @override
   final String name;
-  @override
-  final String? iconPath;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'ModCategory(path: $path, name: $name, iconPath: $iconPath)';
+    return 'ModCategory(path: $path, name: $name)';
   }
 
   @override
@@ -143,8 +129,7 @@ class _$ModCategoryImpl with DiagnosticableTreeMixin implements _ModCategory {
     properties
       ..add(DiagnosticsProperty('type', 'ModCategory'))
       ..add(DiagnosticsProperty('path', path))
-      ..add(DiagnosticsProperty('name', name))
-      ..add(DiagnosticsProperty('iconPath', iconPath));
+      ..add(DiagnosticsProperty('name', name));
   }
 
   @override
@@ -153,14 +138,12 @@ class _$ModCategoryImpl with DiagnosticableTreeMixin implements _ModCategory {
         (other.runtimeType == runtimeType &&
             other is _$ModCategoryImpl &&
             (identical(other.path, path) || other.path == path) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.iconPath, iconPath) ||
-                other.iconPath == iconPath));
+            (identical(other.name, name) || other.name == name));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, path, name, iconPath);
+  int get hashCode => Object.hash(runtimeType, path, name);
 
   @JsonKey(ignore: true)
   @override
@@ -179,8 +162,7 @@ class _$ModCategoryImpl with DiagnosticableTreeMixin implements _ModCategory {
 abstract class _ModCategory implements ModCategory {
   const factory _ModCategory(
       {required final String path,
-      required final String name,
-      final String? iconPath}) = _$ModCategoryImpl;
+      required final String name}) = _$ModCategoryImpl;
 
   factory _ModCategory.fromJson(Map<String, dynamic> json) =
       _$ModCategoryImpl.fromJson;
@@ -189,8 +171,6 @@ abstract class _ModCategory implements ModCategory {
   String get path;
   @override
   String get name;
-  @override
-  String? get iconPath;
   @override
   @JsonKey(ignore: true)
   _$$ModCategoryImplCopyWith<_$ModCategoryImpl> get copyWith =>

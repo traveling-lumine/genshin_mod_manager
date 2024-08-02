@@ -11,7 +11,6 @@ class ModCategory with _$ModCategory {
   const factory ModCategory({
     required final String path,
     required final String name,
-    final String? iconPath,
   }) = _ModCategory;
 
   factory ModCategory.fromJson(final Map<String, dynamic> json) =>

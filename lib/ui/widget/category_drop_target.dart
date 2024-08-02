@@ -7,8 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:genshin_mod_manager/data/helper/copy_directory.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
+import 'package:genshin_mod_manager/di/app_state.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/flow/app_state.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 

@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:genshin_mod_manager/di/exe_arg.dart';
 import 'package:genshin_mod_manager/error_handler.dart';
-import 'package:genshin_mod_manager/flow/exe_arg.dart';
 import 'package:genshin_mod_manager/ui/router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
