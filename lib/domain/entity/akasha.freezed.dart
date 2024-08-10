@@ -32,8 +32,12 @@ mixin _$NahidaliveElement {
   @JsonKey(name: 'virustotal_url')
   String? get virustotalUrl => throw _privateConstructorUsedError;
 
+  /// Serializes this NahidaliveElement to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of NahidaliveElement
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $NahidaliveElementCopyWith<NahidaliveElement> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -65,6 +69,8 @@ class _$NahidaliveElementCopyWithImpl<$Res, $Val extends NahidaliveElement>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of NahidaliveElement
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -141,6 +147,8 @@ class __$$NahidaliveElementImplCopyWithImpl<$Res>
       $Res Function(_$NahidaliveElementImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of NahidaliveElement
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -273,7 +281,7 @@ class _$NahidaliveElementImpl
                 other.virustotalUrl == virustotalUrl));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -286,7 +294,9 @@ class _$NahidaliveElementImpl
       arcaUrl,
       virustotalUrl);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of NahidaliveElement
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$NahidaliveElementImplCopyWith<_$NahidaliveElementImpl> get copyWith =>
@@ -335,8 +345,11 @@ abstract class _NahidaliveElement implements NahidaliveElement {
   @override
   @JsonKey(name: 'virustotal_url')
   String? get virustotalUrl;
+
+  /// Create a copy of NahidaliveElement
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$NahidaliveElementImplCopyWith<_$NahidaliveElementImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -354,8 +367,12 @@ mixin _$NahidaliveDownloadElement {
   @JsonKey(name: 'presigned_url')
   String? get downloadUrl => throw _privateConstructorUsedError;
 
+  /// Serializes this NahidaliveDownloadElement to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of NahidaliveDownloadElement
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $NahidaliveDownloadElementCopyWith<NahidaliveDownloadElement> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -383,6 +400,8 @@ class _$NahidaliveDownloadElementCopyWithImpl<$Res,
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of NahidaliveDownloadElement
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -432,6 +451,8 @@ class __$$NahidaliveDownloadElementImplCopyWithImpl<$Res>
       $Res Function(_$NahidaliveDownloadElementImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of NahidaliveDownloadElement
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -505,12 +526,14 @@ class _$NahidaliveDownloadElementImpl
                 other.downloadUrl == downloadUrl));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
       Object.hash(runtimeType, success, errorCodes, downloadUrl);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of NahidaliveDownloadElement
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$NahidaliveDownloadElementImplCopyWith<_$NahidaliveDownloadElementImpl>
@@ -543,8 +566,11 @@ abstract class _NahidaliveDownloadElement implements NahidaliveDownloadElement {
   @override
   @JsonKey(name: 'presigned_url')
   String? get downloadUrl;
+
+  /// Create a copy of NahidaliveDownloadElement
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$NahidaliveDownloadElementImplCopyWith<_$NahidaliveDownloadElementImpl>
       get copyWith => throw _privateConstructorUsedError;
 }

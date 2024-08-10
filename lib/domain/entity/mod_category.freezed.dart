@@ -24,8 +24,12 @@ mixin _$ModCategory {
   String get name => throw _privateConstructorUsedError;
   String? get iconPath => throw _privateConstructorUsedError;
 
+  /// Serializes this ModCategory to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of ModCategory
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $ModCategoryCopyWith<ModCategory> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -49,6 +53,8 @@ class _$ModCategoryCopyWithImpl<$Res, $Val extends ModCategory>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of ModCategory
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -92,6 +98,8 @@ class __$$ModCategoryImplCopyWithImpl<$Res>
       _$ModCategoryImpl _value, $Res Function(_$ModCategoryImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of ModCategory
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -158,11 +166,13 @@ class _$ModCategoryImpl with DiagnosticableTreeMixin implements _ModCategory {
                 other.iconPath == iconPath));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, path, name, iconPath);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of ModCategory
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ModCategoryImplCopyWith<_$ModCategoryImpl> get copyWith =>
@@ -191,8 +201,11 @@ abstract class _ModCategory implements ModCategory {
   String get name;
   @override
   String? get iconPath;
+
+  /// Create a copy of ModCategory
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ModCategoryImplCopyWith<_$ModCategoryImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

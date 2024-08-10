@@ -19,7 +19,9 @@ mixin _$IniFile {
   String get path => throw _privateConstructorUsedError;
   Mod get mod => throw _privateConstructorUsedError;
 
-  @JsonKey(ignore: true)
+  /// Create a copy of IniFile
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $IniFileCopyWith<IniFile> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -43,6 +45,8 @@ class _$IniFileCopyWithImpl<$Res, $Val extends IniFile>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of IniFile
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -61,6 +65,8 @@ class _$IniFileCopyWithImpl<$Res, $Val extends IniFile>
     ) as $Val);
   }
 
+  /// Create a copy of IniFile
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $ModCopyWith<$Res> get mod {
@@ -91,6 +97,8 @@ class __$$IniFileImplCopyWithImpl<$Res>
       _$IniFileImpl _value, $Res Function(_$IniFileImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of IniFile
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -146,7 +154,9 @@ class _$IniFileImpl with DiagnosticableTreeMixin implements _IniFile {
   @override
   int get hashCode => Object.hash(runtimeType, path, mod);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of IniFile
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$IniFileImplCopyWith<_$IniFileImpl> get copyWith =>
@@ -161,8 +171,11 @@ abstract class _IniFile implements IniFile {
   String get path;
   @override
   Mod get mod;
+
+  /// Create a copy of IniFile
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$IniFileImplCopyWith<_$IniFileImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -173,7 +186,9 @@ mixin _$IniSection {
   String get section => throw _privateConstructorUsedError;
   String get line => throw _privateConstructorUsedError;
 
-  @JsonKey(ignore: true)
+  /// Create a copy of IniSection
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $IniSectionCopyWith<IniSection> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -199,6 +214,8 @@ class _$IniSectionCopyWithImpl<$Res, $Val extends IniSection>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of IniSection
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -222,6 +239,8 @@ class _$IniSectionCopyWithImpl<$Res, $Val extends IniSection>
     ) as $Val);
   }
 
+  /// Create a copy of IniSection
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $IniFileCopyWith<$Res> get iniFile {
@@ -253,6 +272,8 @@ class __$$IniSectionImplCopyWithImpl<$Res>
       _$IniSectionImpl _value, $Res Function(_$IniSectionImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of IniSection
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -319,7 +340,9 @@ class _$IniSectionImpl extends _IniSection with DiagnosticableTreeMixin {
   @override
   int get hashCode => Object.hash(runtimeType, iniFile, section, line);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of IniSection
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$IniSectionImplCopyWith<_$IniSectionImpl> get copyWith =>
@@ -339,8 +362,11 @@ abstract class _IniSection extends IniSection {
   String get section;
   @override
   String get line;
+
+  /// Create a copy of IniSection
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$IniSectionImplCopyWith<_$IniSectionImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

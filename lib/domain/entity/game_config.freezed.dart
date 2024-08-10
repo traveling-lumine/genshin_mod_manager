@@ -21,7 +21,9 @@ mixin _$GameConfig {
   String? get launcherFile => throw _privateConstructorUsedError;
   PresetData? get presetData => throw _privateConstructorUsedError;
 
-  @JsonKey(ignore: true)
+  /// Create a copy of GameConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $GameConfigCopyWith<GameConfig> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -51,6 +53,8 @@ class _$GameConfigCopyWithImpl<$Res, $Val extends GameConfig>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of GameConfig
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -79,6 +83,8 @@ class _$GameConfigCopyWithImpl<$Res, $Val extends GameConfig>
     ) as $Val);
   }
 
+  /// Create a copy of GameConfig
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $PresetDataCopyWith<$Res>? get presetData {
@@ -118,6 +124,8 @@ class __$$GameConfigImplCopyWithImpl<$Res>
       _$GameConfigImpl _value, $Res Function(_$GameConfigImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of GameConfig
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -196,7 +204,9 @@ class _$GameConfigImpl with DiagnosticableTreeMixin implements _GameConfig {
   int get hashCode =>
       Object.hash(runtimeType, modRoot, modExecFile, launcherFile, presetData);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of GameConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$GameConfigImplCopyWith<_$GameConfigImpl> get copyWith =>
@@ -218,8 +228,11 @@ abstract class _GameConfig implements GameConfig {
   String? get launcherFile;
   @override
   PresetData? get presetData;
+
+  /// Create a copy of GameConfig
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$GameConfigImplCopyWith<_$GameConfigImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

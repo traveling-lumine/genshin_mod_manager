@@ -21,7 +21,9 @@ mixin _$Mod {
   bool get isEnabled => throw _privateConstructorUsedError;
   ModCategory get category => throw _privateConstructorUsedError;
 
-  @JsonKey(ignore: true)
+  /// Create a copy of Mod
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $ModCopyWith<Mod> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -45,6 +47,8 @@ class _$ModCopyWithImpl<$Res, $Val extends Mod> implements $ModCopyWith<$Res> {
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of Mod
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -73,6 +77,8 @@ class _$ModCopyWithImpl<$Res, $Val extends Mod> implements $ModCopyWith<$Res> {
     ) as $Val);
   }
 
+  /// Create a copy of Mod
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $ModCategoryCopyWith<$Res> get category {
@@ -101,6 +107,8 @@ class __$$ModImplCopyWithImpl<$Res> extends _$ModCopyWithImpl<$Res, _$ModImpl>
   __$$ModImplCopyWithImpl(_$ModImpl _value, $Res Function(_$ModImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of Mod
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -182,7 +190,9 @@ class _$ModImpl with DiagnosticableTreeMixin implements _Mod {
   int get hashCode =>
       Object.hash(runtimeType, path, displayName, isEnabled, category);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of Mod
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ModImplCopyWith<_$ModImpl> get copyWith =>
@@ -204,8 +214,11 @@ abstract class _Mod implements Mod {
   bool get isEnabled;
   @override
   ModCategory get category;
+
+  /// Create a copy of Mod
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ModImplCopyWith<_$ModImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
