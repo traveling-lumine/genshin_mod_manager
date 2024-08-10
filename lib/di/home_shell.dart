@@ -39,21 +39,32 @@ class HomeShellList extends _$HomeShellList {
 }
 
 @riverpod
-Stream<List<String>> folderIcons(final FolderIconsRef ref) {
+Stream<List<(String, int)>> folderIcons(final FolderIconsRef ref) {
   final currentGame = ref.watch(targetGameProvider);
   final iconDir = Directory(
     Platform.resolvedExecutable.pDirname.pJoin('Resources', currentGame),
   )..createSync(recursive: true);
-  final watcher = FolderWatcher<File>(path: iconDir.path);
+  final watcher =
+      FolderWatcher<File>(path: iconDir.path, watchModifications: true);
   ref.onDispose(watcher.dispose);
-  return watcher.entities;
+  return watcher.entities.map(
+    (final event) => event
+        .map(
+          (final e) => (e, File(e).lastModifiedSync().millisecondsSinceEpoch),
+        )
+        .toList(),
+  );
 }
 
 @riverpod
-String? folderIconPath(final FolderIconPathRef ref, final String categoryName) {
+(String, int)? folderIconPath(
+  final FolderIconPathRef ref,
+  final String categoryName,
+) {
   final icons = ref.watch(folderIconsProvider);
   return icons.whenOrNull(
     skipLoadingOnRefresh: false,
-    data: (final data) => findPreviewFileInString(data, name: categoryName),
+    data: (final data) =>
+        findPreviewFileInStringTuple(data, name: categoryName),
   );
 }

@@ -9,15 +9,14 @@ import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/fs_watcher.dart';
 
 class FolderWatcher<T extends FileSystemEntity> {
-  FolderWatcher({required this.path}) {
+  FolderWatcher({required this.path, final bool watchModifications = false}) {
     _add(null);
-    _subscription = Directory(path)
-        .watch(
-          events: FileSystemEvent.delete |
-              FileSystemEvent.create |
-              FileSystemEvent.move,
-        )
-        .listen(_add);
+    var events =
+        FileSystemEvent.delete | FileSystemEvent.create | FileSystemEvent.move;
+    if (watchModifications) {
+      events |= FileSystemEvent.modify;
+    }
+    _subscription = Directory(path).watch(events: events).listen(_add);
   }
 
   final String path;

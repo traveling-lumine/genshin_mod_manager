@@ -514,13 +514,16 @@ class _FolderPaneItem extends PaneItem {
         },
       );
 
-  static Widget _buildImage(final String? imageFile) {
+  static Widget _buildImage(final (String, int)? imageFile) {
     final Image image;
     if (imageFile == null) {
       image = Image.asset('images/app_icon.ico');
     } else {
+      final file = File(imageFile.$1);
+      unawaited(FileImage(file).evict());
       image = Image.file(
-        File(imageFile),
+        key: ValueKey(imageFile.$2),
+        file,
         fit: BoxFit.contain,
       );
     }

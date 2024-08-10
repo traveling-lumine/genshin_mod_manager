@@ -265,6 +265,9 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
                     // ignore: avoid_annotating_with_dynamic
                     (final dynamic e, final stackTrace) {
                       isLoading.value = false;
+                      if (!mounted) {
+                        return false;
+                      }
                       unawaited(
                         displayInfoBarInContext(
                           context,

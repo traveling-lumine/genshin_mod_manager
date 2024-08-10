@@ -57,6 +57,25 @@ String? findPreviewFileInString(
   return null;
 }
 
+(String, int)? findPreviewFileInStringTuple(
+  final List<(String, int)> paths, {
+  final String name = 'preview',
+}) {
+  for (final element in paths) {
+    final filename = element.$1.pBNameWoExt;
+    if (!filename.pEquals(name)) {
+      continue;
+    }
+    final ext = element.$1.pExtension;
+    for (final previewExt in _previewExtensions) {
+      if (ext.pEquals(previewExt)) {
+        return element;
+      }
+    }
+  }
+  return null;
+}
+
 /// Runs a [program] by default method.
 void runProgram(final File program) {
   final pwd = program.parent.path;
