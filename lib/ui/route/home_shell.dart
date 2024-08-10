@@ -550,7 +550,7 @@ class _FolderPaneItem extends PaneItem {
   static Widget _buildImage(final (String, int)? imageFile) {
     final Widget image;
     if (imageFile == null) {
-      image = Image.asset('images/app_icon.ico');
+      image = Image.asset('images/idk_icon.png');
     } else {
       image = _PaneThumbnail(info: imageFile);
     }
