@@ -23,8 +23,12 @@ mixin _$PresetData {
   Map<String, PresetListMap> get global => throw _privateConstructorUsedError;
   Map<String, PresetListMap> get local => throw _privateConstructorUsedError;
 
+  /// Serializes this PresetData to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of PresetData
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $PresetDataCopyWith<PresetData> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -49,6 +53,8 @@ class _$PresetDataCopyWithImpl<$Res, $Val extends PresetData>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of PresetData
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -88,6 +94,8 @@ class __$$PresetDataImplCopyWithImpl<$Res>
       _$PresetDataImpl _value, $Res Function(_$PresetDataImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of PresetData
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -158,14 +166,16 @@ class _$PresetDataImpl with DiagnosticableTreeMixin implements _PresetData {
             const DeepCollectionEquality().equals(other._local, _local));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
       const DeepCollectionEquality().hash(_global),
       const DeepCollectionEquality().hash(_local));
 
-  @JsonKey(ignore: true)
+  /// Create a copy of PresetData
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$PresetDataImplCopyWith<_$PresetDataImpl> get copyWith =>
@@ -191,8 +201,11 @@ abstract class _PresetData implements PresetData {
   Map<String, PresetListMap> get global;
   @override
   Map<String, PresetListMap> get local;
+
+  /// Create a copy of PresetData
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$PresetDataImplCopyWith<_$PresetDataImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -206,8 +219,12 @@ mixin _$PresetListMap {
   Map<String, PresetList> get bundledPresets =>
       throw _privateConstructorUsedError;
 
+  /// Serializes this PresetListMap to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of PresetListMap
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $PresetListMapCopyWith<PresetListMap> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -231,6 +248,8 @@ class _$PresetListMapCopyWithImpl<$Res, $Val extends PresetListMap>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of PresetListMap
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -264,6 +283,8 @@ class __$$PresetListMapImplCopyWithImpl<$Res>
       _$PresetListMapImpl _value, $Res Function(_$PresetListMapImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of PresetListMap
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -320,12 +341,14 @@ class _$PresetListMapImpl
                 .equals(other._bundledPresets, _bundledPresets));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType, const DeepCollectionEquality().hash(_bundledPresets));
 
-  @JsonKey(ignore: true)
+  /// Create a copy of PresetListMap
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$PresetListMapImplCopyWith<_$PresetListMapImpl> get copyWith =>
@@ -349,8 +372,11 @@ abstract class _PresetListMap implements PresetListMap {
 
   @override
   Map<String, PresetList> get bundledPresets;
+
+  /// Create a copy of PresetListMap
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$PresetListMapImplCopyWith<_$PresetListMapImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -363,8 +389,12 @@ PresetList _$PresetListFromJson(Map<String, dynamic> json) {
 mixin _$PresetList {
   List<String> get mods => throw _privateConstructorUsedError;
 
+  /// Serializes this PresetList to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of PresetList
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $PresetListCopyWith<PresetList> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -388,6 +418,8 @@ class _$PresetListCopyWithImpl<$Res, $Val extends PresetList>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of PresetList
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -421,6 +453,8 @@ class __$$PresetListImplCopyWithImpl<$Res>
       _$PresetListImpl _value, $Res Function(_$PresetListImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of PresetList
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -472,12 +506,14 @@ class _$PresetListImpl with DiagnosticableTreeMixin implements _PresetList {
             const DeepCollectionEquality().equals(other._mods, _mods));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
       Object.hash(runtimeType, const DeepCollectionEquality().hash(_mods));
 
-  @JsonKey(ignore: true)
+  /// Create a copy of PresetList
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$PresetListImplCopyWith<_$PresetListImpl> get copyWith =>
@@ -500,8 +536,11 @@ abstract class _PresetList implements PresetList {
 
   @override
   List<String> get mods;
+
+  /// Create a copy of PresetList
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$PresetListImplCopyWith<_$PresetListImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
