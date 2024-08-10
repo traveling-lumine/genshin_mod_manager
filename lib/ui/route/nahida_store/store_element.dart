@@ -129,7 +129,7 @@ class StoreElement extends ConsumerWidget {
             child: SingleChildScrollView(
               child: SizedBox(
                 width: double.infinity,
-                child: Text(element.description ?? '🧐'),
+                child: SelectableText(element.description ?? '🧐'),
               ),
             ),
           ),

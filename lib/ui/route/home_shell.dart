@@ -490,6 +490,39 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       );
 }
 
+class _PaneThumbnail extends StatefulWidget {
+  const _PaneThumbnail({required this.info});
+
+  final (String, int) info;
+
+  @override
+  State<_PaneThumbnail> createState() => _PaneThumbnailState();
+}
+
+class _PaneThumbnailState extends State<_PaneThumbnail> {
+  @override
+  void didUpdateWidget(covariant final _PaneThumbnail oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.info.$2 != widget.info.$2 &&
+        oldWidget.info.$1 == widget.info.$1) {
+      unawaited(FileImage(File(widget.info.$1)).evict());
+    }
+  }
+
+  @override
+  Widget build(final BuildContext context) => Image.file(
+        key: ValueKey(widget.info.$2),
+        File(widget.info.$1),
+        fit: BoxFit.contain,
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<(String, int)>('info', widget.info));
+  }
+}
+
 class _FolderPaneItem extends PaneItem {
   _FolderPaneItem({
     required this.category,
@@ -515,17 +548,11 @@ class _FolderPaneItem extends PaneItem {
       );
 
   static Widget _buildImage(final (String, int)? imageFile) {
-    final Image image;
+    final Widget image;
     if (imageFile == null) {
       image = Image.asset('images/app_icon.ico');
     } else {
-      final file = File(imageFile.$1);
-      unawaited(FileImage(file).evict());
-      image = Image.file(
-        key: ValueKey(imageFile.$2),
-        file,
-        fit: BoxFit.contain,
-      );
+      image = _PaneThumbnail(info: imageFile);
     }
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: maxIconWidth),

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/di/nahida_store.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
@@ -21,7 +20,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 part 'store_element.dart';
 
-class NahidaStoreRoute extends StatefulHookConsumerWidget {
+class NahidaStoreRoute extends ConsumerStatefulWidget {
   const NahidaStoreRoute({required this.category, super.key});
 
   final ModCategory category;
@@ -39,7 +38,7 @@ class NahidaStoreRoute extends StatefulHookConsumerWidget {
 class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
   final _textEditingController = TextEditingController();
   TagParseElement? _tagFilter;
-  final _debouncer = _Debouncer(const Duration(milliseconds: 500));
+  final _debouncer = _Debouncer(const Duration(milliseconds: 700));
 
   final PagingController<int, NahidaliveElement?> _pagingController =
       PagingController(firstPageKey: 1);
@@ -54,13 +53,10 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
       if (newItems.isNotEmpty && filteredItems.isEmpty && pageKey == 1) {
         filteredItems = [null];
       }
-      print(newItems.length);
       if (isLastPage) {
-        print('last page');
         _pagingController.appendLastPage(filteredItems);
       } else {
         final nextPageKey = pageKey + 1;
-        print('next page $nextPageKey');
         _pagingController.appendPage(filteredItems, nextPageKey);
       }
     } catch (error) {
