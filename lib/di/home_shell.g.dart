@@ -6,7 +6,7 @@ part of 'home_shell.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$folderIconsHash() => r'ae55399573ec0767774d8c0d8e5e023705dffd37';
+String _$folderIconsHash() => r'70bb8233f7e87163185ea00af985cf810f92807f';
 
 /// See also [folderIcons].
 @ProviderFor(folderIcons)

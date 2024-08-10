@@ -25,7 +25,7 @@ final sharedPreferenceProvider =
 
 typedef SharedPreferenceRef = AutoDisposeFutureProviderRef<SharedPreferences>;
 String _$sharedPreferenceStorageHash() =>
-    r'652f6ab1e6c45e7453bbe9f1069a1b75710c197f';
+    r'510e9cefc899c22ef5b729c06db71aa75742dd0c';
 
 /// The storage for the shared preference.
 ///
