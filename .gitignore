@@ -48,4 +48,4 @@ app.*.map.json
 /lib/data/repo/akasha.dart
 /lib/data/repo/akasha.g.dart
 /lib/data/repo/akasha.freezed.dart
-/server protocol.txt
+/.vscode

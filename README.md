@@ -1,4 +1,6 @@
-한국어 | [EN](README_EN.md)
+한국어 | [EN](.readme/README_EN.md)
+
+![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/traveling-lumine/genshin_mod_manager/latest/total)
 
 # genshin_mod_manager
 

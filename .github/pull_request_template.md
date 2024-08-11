@@ -1,7 +1,7 @@
 ## Checklist
 
-- [ ] `cider bump <option>` (if merging to develop, use `cider bump build` instead)
-- [ ] `flutter pub run flutter_oss_licenses:generate.dart`
+- [ ] `cider bump < major | minor | patch | build>` if releasing/building
+- [ ] `dart run flutter_oss_licenses:generate`
 
 ## Related Issues
 - Fixes #(issue number)
