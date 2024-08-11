@@ -168,7 +168,7 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
             data: (final iniPaths) => Expanded(
               child: iniPaths.isNotEmpty
                   ? Card(
-                      backgroundColor: Colors.white.withOpacity(0.4),
+                      backgroundColor: Colors.white.withOpacity(0.05),
                       padding: const EdgeInsets.all(4),
                       child: ListView.builder(
                         itemBuilder: (final context, final index) {
