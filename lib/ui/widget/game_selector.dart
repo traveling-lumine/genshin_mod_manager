@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:genshin_mod_manager/flow/app_state.dart';
+import 'package:genshin_mod_manager/di/app_state.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 

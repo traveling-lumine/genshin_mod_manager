@@ -9,13 +9,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
+import 'package:genshin_mod_manager/di/app_state.dart';
+import 'package:genshin_mod_manager/di/app_version.dart';
+import 'package:genshin_mod_manager/di/exe_arg.dart';
+import 'package:genshin_mod_manager/di/home_shell.dart';
+import 'package:genshin_mod_manager/di/storage.dart';
 import 'package:genshin_mod_manager/domain/constant.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/flow/app_state.dart';
-import 'package:genshin_mod_manager/flow/app_version.dart';
-import 'package:genshin_mod_manager/flow/exe_arg.dart';
-import 'package:genshin_mod_manager/flow/home_shell.dart';
-import 'package:genshin_mod_manager/flow/storage.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/util/open_url.dart';
@@ -523,7 +523,6 @@ class _FolderPaneItem extends PaneItem {
       image = Image.file(
         imageFile,
         fit: BoxFit.contain,
-        filterQuality: FilterQuality.medium,
       );
     }
     return ConstrainedBox(

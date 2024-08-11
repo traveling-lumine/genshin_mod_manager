@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:genshin_mod_manager/di/storage.dart';
 import 'package:genshin_mod_manager/domain/entity/game_config.dart';
 import 'package:genshin_mod_manager/domain/entity/preset.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/card_color.dart';
@@ -8,7 +9,6 @@ import 'package:genshin_mod_manager/domain/usecase/app_state/folder_icon.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/game_config.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/move_on_drag.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/run_together.dart';
-import 'package:genshin_mod_manager/flow/storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_state.g.dart';

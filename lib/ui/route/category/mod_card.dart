@@ -277,7 +277,6 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
                 child: Image(
                   image: fileImage,
                   fit: BoxFit.contain,
-                  filterQuality: FilterQuality.medium,
                 ),
               ),
             );
@@ -368,7 +367,6 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
           child: Image(
             image: image,
             fit: BoxFit.contain,
-            filterQuality: FilterQuality.medium,
           ),
         ),
       ),
