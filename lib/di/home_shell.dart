@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/data/repo/fs_watcher.dart';
 import 'package:genshin_mod_manager/di/app_state.dart';
 import 'package:genshin_mod_manager/di/fs_interface.dart';

@@ -497,6 +497,12 @@ class _PaneThumbnail extends StatefulWidget {
 
   @override
   State<_PaneThumbnail> createState() => _PaneThumbnailState();
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<(String, int)>('info', info));
+  }
 }
 
 class _PaneThumbnailState extends State<_PaneThumbnail> {
