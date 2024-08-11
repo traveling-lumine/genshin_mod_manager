@@ -17,6 +17,7 @@ import 'package:genshin_mod_manager/ui/widget/thick_scrollbar.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_delegate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 part 'store_element.dart';
 
@@ -37,12 +38,40 @@ class NahidaStoreRoute extends StatefulHookConsumerWidget {
 
 class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
   final _textEditingController = TextEditingController();
-  ScrollController _scrollController = ScrollController();
   TagParseElement? _tagFilter;
+  final _debouncer = _Debouncer(const Duration(milliseconds: 500));
+
+  final PagingController<int, NahidaliveElement?> _pagingController =
+      PagingController(firstPageKey: 1);
+
+  Future<void> _fetchPage(final int pageKey) async {
+    try {
+      final newItems =
+          await ref.read(akashaApiProvider).fetchNahidaliveElements(pageKey);
+      final isLastPage = newItems.isEmpty;
+      List<NahidaliveElement?> filteredItems =
+          newItems.where(_dataFilter).toList();
+      if (newItems.isNotEmpty && filteredItems.isEmpty && pageKey == 1) {
+        filteredItems = [null];
+      }
+      print(newItems.length);
+      if (isLastPage) {
+        print('last page');
+        _pagingController.appendLastPage(filteredItems);
+      } else {
+        final nextPageKey = pageKey + 1;
+        print('next page $nextPageKey');
+        _pagingController.appendPage(filteredItems, nextPageKey);
+      }
+    } catch (error) {
+      _pagingController.error = error;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _pagingController.addPageRequestListener(_fetchPage);
     ref.read(downloadModelProvider).registerDownloadCallbacks(
       onApiException: (final e) {
         if (!mounted) {
@@ -144,7 +173,7 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
   @override
   void dispose() {
     _textEditingController.dispose();
-    _scrollController.dispose();
+    _pagingController.dispose();
     super.dispose();
   }
 
@@ -188,16 +217,7 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
           primaryItems: [
             CommandBarButton(
               icon: const Icon(FluentIcons.refresh),
-              onPressed: () {
-                ref.invalidate(akashaElementProvider);
-                setState(() {
-                  final prevController = _scrollController;
-                  _scrollController = ScrollController(
-                    initialScrollOffset: prevController.offset,
-                  );
-                  prevController.dispose();
-                });
-              },
+              onPressed: _onRefresh,
             ),
           ],
         ),
@@ -213,109 +233,36 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
         ),
       );
 
-  Widget _buildContent() {
-    final data = ref.watch(akashaElementProvider);
-    final isLoading = useState(false);
-    final timerReady = useState(true);
-    final displayingNotSoFast = useState(false);
-    return data.when(
-      data: (final data) {
-        final filteredData = data.where(_dataFilter).toList();
-        return ThickScrollbar(
-          child: NotificationListener<ScrollEndNotification>(
-            onNotification: (final notification) {
-              if (notification.metrics.extentAfter < 500 && !isLoading.value) {
-                if (!timerReady.value) {
-                  if (displayingNotSoFast.value) {
-                    return false;
-                  }
-                  unawaited(
-                    displayInfoBarInContext(
-                      context,
-                      title: const Text('Not so fast!'),
-                      content: const Text(
-                        'Please wait a moment before loading more data.',
-                      ),
-                      severity: InfoBarSeverity.warning,
-                    ),
-                  );
-                  displayingNotSoFast.value = true;
-                  Timer(
-                    const Duration(seconds: 3),
-                    () => displayingNotSoFast.value = false,
-                  );
-                  return false;
-                }
-                isLoading.value = true;
-                timerReady.value = false;
-                Timer(
-                  const Duration(seconds: 3),
-                  () {
-                    timerReady.value = true;
-                  },
+  Widget _buildContent() => ThickScrollbar(
+        child: PagedGridView<int, NahidaliveElement?>(
+          pagingController: _pagingController,
+          gridDelegate: SliverGridDelegateWithMinCrossAxisExtent(
+            minCrossAxisExtent: 500,
+            mainAxisExtent: 500,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+          ),
+          builderDelegate: PagedChildBuilderDelegate(
+            itemBuilder: (final context, final item, final index) {
+              if (item == null) {
+                return const Center(
+                  child: Text('Not found in the first page. Searching more...'),
                 );
-                unawaited(
-                  ref
-                      .read(akashaElementProvider.notifier)
-                      .fetchNextPage()
-                      .then(
-                        (final _) => isLoading.value = false,
-                      )
-                      .catchError(
-                    // ignore: avoid_annotating_with_dynamic
-                    (final dynamic e, final stackTrace) {
-                      isLoading.value = false;
-                      if (!mounted) {
-                        return false;
-                      }
-                      unawaited(
-                        displayInfoBarInContext(
-                          context,
-                          title: const Text('Failed to load data'),
-                          content: Text('$e'),
-                          severity: InfoBarSeverity.error,
-                        ),
-                      );
-                      return false;
-                    },
-                  ),
-                );
-                return true;
               }
-              return false;
-            },
-            child: GridView.builder(
-              controller: _scrollController,
-              gridDelegate: SliverGridDelegateWithMinCrossAxisExtent(
-                minCrossAxisExtent: 500,
-                mainAxisExtent: 500,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: filteredData.length,
-              itemBuilder: (final context, final index) => RevertScrollbar(
+              return RevertScrollbar(
                 child: StoreElement(
                   passwordController: _textEditingController,
-                  element: filteredData[index],
+                  element: item,
                   category: widget.category,
                 ),
-              ),
-            ),
+              );
+            },
           ),
-        );
-      },
-      error: (final e, final stackTrace) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(FluentIcons.error),
-            const SizedBox(height: 8),
-            Text('Failed to load data: $e'),
-          ],
         ),
-      ),
-      loading: () => const Center(child: ProgressRing()),
-    );
+      );
+
+  void _onRefresh() {
+    _pagingController.refresh();
   }
 
   String? _onValidationCheck(final String? value) {
@@ -331,16 +278,20 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
   }
 
   void _onSearchChange(final String value) {
+    TagParseElement? filter;
     try {
-      final filter = parseTagQuery(value);
-      setState(() {
-        _tagFilter = filter;
-      });
+      filter = parseTagQuery(value);
     } on Exception {
-      setState(() {
-        _tagFilter = null;
-      });
+      filter = null;
     }
+    _debouncer(
+      () {
+        setState(() {
+          _tagFilter = filter;
+          _pagingController.refresh();
+        });
+      },
+    );
   }
 
   bool _dataFilter(final NahidaliveElement element) {
@@ -354,5 +305,17 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
     } on Exception {
       return true;
     }
+  }
+}
+
+class _Debouncer {
+  _Debouncer(this.duration);
+
+  final Duration duration;
+  Timer? _timer;
+
+  void call(final VoidCallback action) {
+    _timer?.cancel();
+    _timer = Timer(duration, action);
   }
 }

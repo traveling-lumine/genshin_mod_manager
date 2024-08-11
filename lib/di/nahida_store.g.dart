@@ -35,21 +35,5 @@ final downloadModelProvider = Provider<NahidaDownloadModel>.internal(
 );
 
 typedef DownloadModelRef = ProviderRef<NahidaDownloadModel>;
-String _$akashaElementHash() => r'7cde6d876d5f1d62857b0bd9b566964f75886428';
-
-/// See also [AkashaElement].
-@ProviderFor(AkashaElement)
-final akashaElementProvider = AutoDisposeAsyncNotifierProvider<AkashaElement,
-    List<NahidaliveElement>>.internal(
-  AkashaElement.new,
-  name: r'akashaElementProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$akashaElementHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$AkashaElement = AutoDisposeAsyncNotifier<List<NahidaliveElement>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
