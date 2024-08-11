@@ -181,14 +181,14 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         onTap: () => context.go(kSettingRoute),
       ),
     ];
-    final items = categories.map((final e) {
-      final iconPath = e.iconPath;
-      return _FolderPaneItem(
-        category: e,
-        imageFile: iconPath != null ? File(iconPath) : null,
-        onTap: () => context.go(kCategoryRoute, extra: e),
-      );
-    }).toList();
+    final items = categories
+        .map(
+          (final e) => _FolderPaneItem(
+            category: e,
+            onTap: () => context.go(kCategoryRoute, extra: e),
+          ),
+        )
+        .toList();
 
     final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
           ..removeWhere((final i) => i is! PaneItem || i is PaneItemAction))
@@ -494,34 +494,33 @@ class _FolderPaneItem extends PaneItem {
   _FolderPaneItem({
     required this.category,
     super.onTap,
-    final File? imageFile,
   }) : super(
           key: ValueKey(category),
           title: Text(
             category.name,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          icon: _getIcon(imageFile),
+          icon: _getIcon(category.name),
           body: const SizedBox.shrink(),
         );
   static const maxIconWidth = 80.0;
 
-  static Widget _getIcon(final File? imageFile) => Consumer(
+  static Widget _getIcon(final String name) => Consumer(
         builder: (final context, final ref, final child) {
-          final value = ref.watch(folderIconProvider);
-          return value
-              ? _buildImage(imageFile)
+          final filePath = ref.watch(folderIconPathProvider(name));
+          return ref.watch(folderIconProvider)
+              ? _buildImage(filePath)
               : const Icon(FluentIcons.folder_open);
         },
       );
 
-  static Widget _buildImage(final File? imageFile) {
+  static Widget _buildImage(final String? imageFile) {
     final Image image;
     if (imageFile == null) {
       image = Image.asset('images/app_icon.ico');
     } else {
       image = Image.file(
-        imageFile,
+        File(imageFile),
         fit: BoxFit.contain,
       );
     }

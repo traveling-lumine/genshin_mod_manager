@@ -1,129 +1,59 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
+import 'package:genshin_mod_manager/data/repo/fs_watcher.dart';
 import 'package:genshin_mod_manager/di/app_state.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
+import 'package:genshin_mod_manager/domain/repo/fs_watcher.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_shell.g.dart';
 
-abstract interface class RootWatcher {
-  Stream<List<ModCategory>> get categories;
-
-  void dispose();
-
-  void refresh();
-}
-
-class RootWatcherImpl implements RootWatcher {
-  RootWatcherImpl(final String modRoot)
-      : _dir = Directory(modRoot),
-        _iconDir = Directory(
-          Platform.resolvedExecutable.pDirname.pJoin(_resourceDir),
-        ) {
-    _iconDir.createSync(recursive: true);
-    _add();
-    _subscription = _dir
-        .watch(
-          events: FileSystemEvent.delete |
-              FileSystemEvent.create |
-              FileSystemEvent.move,
-        )
-        .listen(_listen);
-    _subscription2 = _iconDir
-        .watch(
-          events: FileSystemEvent.delete |
-              FileSystemEvent.create |
-              FileSystemEvent.move,
-        )
-        .listen(_listen);
-  }
-
-  static const _resourceDir = 'Resources';
-
-  final StreamController<List<ModCategory>> _controller =
-      StreamController<List<ModCategory>>();
-  final Directory _dir;
-  final Directory _iconDir;
-  late final StreamSubscription<FileSystemEvent> _subscription;
-  late final StreamSubscription<FileSystemEvent> _subscription2;
-
-  @override
-  Stream<List<ModCategory>> get categories => _controller.stream.distinct(
-        (final previous, final next) =>
-            const ListEquality<ModCategory>().equals(previous, next),
-      );
-
-  @override
-  void dispose() {
-    unawaited(_subscription2.cancel());
-    unawaited(_subscription.cancel());
-    unawaited(_controller.close());
-  }
-
-  void _listen(final FileSystemEvent event) {
-    _add();
-  }
-
-  void _add() {
-    final icons = getUnderSync<File>(_iconDir.path);
-    final categories2 = getUnderSync<Directory>(_dir.path);
-    final res = categories2.map((final event) {
-      final name = event.pBasename;
-      return ModCategory(
-        path: event,
-        name: name,
-        iconPath: findPreviewFileInString(icons, name: name),
-      );
-    }).toList();
-    _controller.add(res);
-  }
-
-  @override
-  void refresh() {
-    _add();
-  }
-}
-
-class NullRootWatcher implements RootWatcher {
-  @override
-  Stream<List<ModCategory>> get categories => Stream.value([]);
-
-  @override
-  void dispose() {
-    // Do nothing.
-  }
-
-  @override
-  void refresh() {
-    // Do nothing.
-  }
-}
-
-@riverpod
-RootWatcher rootWatcher(final RootWatcherRef ref) {
-  final modRoot = ref
-      .watch(gameConfigNotifierProvider.select((final state) => state.modRoot));
-  final RootWatcher watcher;
-  if (modRoot == null) {
-    watcher = NullRootWatcher();
-  } else {
-    watcher = RootWatcherImpl(modRoot);
-  }
-  ref.onDispose(watcher.dispose);
-  return watcher;
-}
-
 @riverpod
 class HomeShellList extends _$HomeShellList {
+  RootWatcher? _watcher;
+
   @override
-  Stream<List<ModCategory>> build() =>
-      ref.watch(rootWatcherProvider).categories;
+  Stream<List<ModCategory>> build() {
+    final modRoot = ref.watch(
+      gameConfigNotifierProvider.select((final state) => state.modRoot),
+    );
+    if (modRoot == null) {
+      _watcher = null;
+    } else {
+      final rootWatcherImpl = RootWatcherImpl(modRoot);
+      _watcher = rootWatcherImpl;
+      ref.onDispose(() {
+        _watcher = null;
+        rootWatcherImpl.dispose();
+      });
+    }
+    return _watcher?.categories ?? Stream.value([]);
+  }
 
   void refresh() {
-    ref.read(rootWatcherProvider).refresh();
+    _watcher?.refresh();
   }
+}
+
+@riverpod
+Stream<List<String>> folderIcons(final FolderIconsRef ref) {
+  final currentGame = ref.watch(targetGameProvider);
+  final iconDir = Directory(
+    Platform.resolvedExecutable.pDirname.pJoin('Resources', currentGame),
+  )..createSync(recursive: true);
+  final watcher = FolderWatcher<File>(path: iconDir.path);
+  ref.onDispose(watcher.dispose);
+  return watcher.entities;
+}
+
+@riverpod
+String? folderIconPath(final FolderIconPathRef ref, final String categoryName) {
+  final icons = ref.watch(folderIconsProvider);
+  return icons.whenOrNull(
+    skipLoadingOnRefresh: false,
+    data: (final data) => findPreviewFileInString(data, name: categoryName),
+  );
 }
