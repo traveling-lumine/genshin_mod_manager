@@ -297,7 +297,8 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
       return;
     }
     final filePath = widget.mod.path.pJoin('preview.png');
-    await File(filePath).writeAsBytes(image);
+    final bytes = await image.pngUint8List;
+    await File(filePath).writeAsBytes(bytes);
     if (!context.mounted) {
       return;
     }

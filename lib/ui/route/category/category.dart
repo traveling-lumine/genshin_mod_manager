@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_image_converter/flutter_image_converter.dart';
 import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/mod_switcher.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
