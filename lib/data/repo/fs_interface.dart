@@ -12,7 +12,7 @@ class FileSystemInterfaceImpl implements FileSystemInterface {
   Directory iconDir(final String game) => Directory(iconDirRoot.pJoin(game));
 
   @override
-  void moveFilenames(
+  void copyFilenames(
     final Directory from,
     final Directory to,
     final List<String> filenames,
@@ -29,10 +29,6 @@ class FileSystemInterfaceImpl implements FileSystemInterface {
           file.copySync(toFile.path);
         }
       }
-    }
-    // delete files in from directory
-    for (final file in from.listSync().whereType<File>()) {
-      file.deleteSync();
     }
   }
 }

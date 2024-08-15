@@ -51,7 +51,7 @@ void _copyIcons(
       continue;
     }
     final modRootSubDirs = modRootDir.listSync().whereType<Directory>();
-    fsInterface.moveFilenames(
+    fsInterface.copyFilenames(
       iconDirRoot,
       iconDirGame,
       modRootSubDirs.map((final e) => e.path.pBasename).toList(),

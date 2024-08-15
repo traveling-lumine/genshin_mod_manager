@@ -5,7 +5,7 @@ abstract interface class FileSystemInterface {
 
   Directory iconDir(final String game);
 
-  void moveFilenames(
+  void copyFilenames(
     final Directory from,
     final Directory to,
     final List<String> filenames,
