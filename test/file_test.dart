@@ -6,6 +6,11 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('invalid file name', () {
+    final file = File('a file?');
+    expect(file.existsSync(), isFalse);
+    expect(file.createSync, throwsA(isA<FileSystemException>()));
+  });
   test(
     'file watch test',
     () async {
