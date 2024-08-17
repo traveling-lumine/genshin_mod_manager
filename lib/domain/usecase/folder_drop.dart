@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:genshin_mod_manager/data/helper/copy_directory.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/entity/folder_move_result.dart';
+import 'package:genshin_mod_manager/domain/entity/setting_data.dart';
 
-FolderMoveResult dragToMoveUseCase(
+FolderMoveResult dragToImportUseCase(
   final Iterable<String> dropPaths,
   final String categoryPath,
-  final bool moveInsteadOfCopy,
+  final DragImportType type,
 ) {
   final result = FolderMoveResult();
   for (final path in dropPaths) {
@@ -16,15 +17,20 @@ FolderMoveResult dragToMoveUseCase(
     }
     final newPath = categoryPath.pJoin(path.pBasename);
     if (FileSystemEntity.isDirectorySync(newPath)) {
-      result.addExists(path, newPath);
+      result.addExists(path.pBasename, newPath.pBasename);
       continue;
     }
 
     final sourceDir = Directory(path);
-    if (moveInsteadOfCopy) {
-      _moveDir(sourceDir, newPath, result);
-    } else {
-      sourceDir.copyToPath(newPath);
+    switch (type) {
+      case DragImportType.move:
+        try {
+          _moveDir(sourceDir, newPath, result);
+        } on FileSystemException catch (e) {
+          result.addError(e);
+        }
+      case DragImportType.copy:
+        sourceDir.copyToPath(newPath);
     }
   }
   return result;
@@ -44,7 +50,7 @@ void _moveDir(
         ..copyToPath(newPath)
         ..deleteSync(recursive: true);
     } else {
-      result.addError(e);
+      rethrow;
     }
   }
 }

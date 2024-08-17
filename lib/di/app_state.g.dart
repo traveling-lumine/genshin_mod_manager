@@ -57,7 +57,7 @@ final gameConfigNotifierProvider =
 );
 
 typedef _$GameConfigNotifier = AutoDisposeNotifier<GameConfig>;
-String _$darkModeHash() => r'0e53ec369f142ad88d7a4d1fe3551043ee524823';
+String _$darkModeHash() => r'62ce1869c943430f362a31f21a19f29a8eff8324';
 
 /// The notifier for the dark mode.
 ///
@@ -73,7 +73,7 @@ final darkModeProvider = AutoDisposeNotifierProvider<DarkMode, bool>.internal(
 );
 
 typedef _$DarkMode = AutoDisposeNotifier<bool>;
-String _$enabledFirstHash() => r'ec48adf2069a75e15b86b32de6d8222a5f6d9e11';
+String _$enabledFirstHash() => r'3aa5443f945470da9b4c8f34d931cc72aa6e4ce7';
 
 /// The notifier for the enabled first.
 ///
@@ -90,7 +90,7 @@ final enabledFirstProvider =
 );
 
 typedef _$EnabledFirst = AutoDisposeNotifier<bool>;
-String _$folderIconHash() => r'381bef4b13a81a97089ce1a0d9c51f60960d928d';
+String _$folderIconHash() => r'0ab5c55b07f064e3a765f16e329595ba55aaaf31';
 
 /// The notifier for the folder icon.
 ///
@@ -107,14 +107,14 @@ final folderIconProvider =
 );
 
 typedef _$FolderIcon = AutoDisposeNotifier<bool>;
-String _$moveOnDragHash() => r'8402407e4848c77d472ee2b767225fe590867f3f';
+String _$moveOnDragHash() => r'89bff979b02b9fea78f4f13157e74f2541d4d0d6';
 
 /// The notifier for the move on drag.
 ///
 /// Copied from [MoveOnDrag].
 @ProviderFor(MoveOnDrag)
 final moveOnDragProvider =
-    AutoDisposeNotifierProvider<MoveOnDrag, bool>.internal(
+    AutoDisposeNotifierProvider<MoveOnDrag, DragImportType>.internal(
   MoveOnDrag.new,
   name: r'moveOnDragProvider',
   debugGetCreateSourceHash:
@@ -123,8 +123,8 @@ final moveOnDragProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$MoveOnDrag = AutoDisposeNotifier<bool>;
-String _$runTogetherHash() => r'127f6350cf1b134f761bb3821962a3cbb88676e2';
+typedef _$MoveOnDrag = AutoDisposeNotifier<DragImportType>;
+String _$runTogetherHash() => r'5c512e38abdd444a68f51fe8a541be3f8a55c900';
 
 /// The notifier for the run together.
 ///

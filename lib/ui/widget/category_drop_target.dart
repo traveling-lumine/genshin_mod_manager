@@ -1,15 +1,12 @@
 import 'dart:async';
-import 'dart:collection';
-import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:genshin_mod_manager/data/helper/copy_directory.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/di/app_state.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
+import 'package:genshin_mod_manager/domain/entity/setting_data.dart';
 import 'package:genshin_mod_manager/domain/usecase/folder_drop.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -56,7 +53,10 @@ class CategoryDropTarget extends HookConsumerWidget {
     final ValueNotifier<bool> state,
   ) {
     final context = useContext();
-    final moveMethod = ref.watch(moveOnDragProvider) ? 'move' : 'copy';
+    final moveMethod = switch (ref.watch(moveOnDragProvider)) {
+      DragImportType.move => 'move',
+      DragImportType.copy => 'copy',
+    };
     final text = RichText(
       text: TextSpan(
         text: 'Drop to $moveMethod to',
@@ -105,7 +105,7 @@ class CategoryDropTarget extends HookConsumerWidget {
     final WidgetRef ref,
   ) {
     final moveInsteadOfCopy = ref.read(moveOnDragProvider);
-    final result = dragToMoveUseCase(
+    final result = dragToImportUseCase(
       details.files.map((final e) => e.path),
       category.path,
       moveInsteadOfCopy,
@@ -120,18 +120,22 @@ class CategoryDropTarget extends HookConsumerWidget {
         ),
       );
     }
-    if (result.exists.isEmpty) {
+    if (result.exists.isNotEmpty) {
       final join = result.exists
           .map(
-            (final e) => "'${e.$1.pBasename}' -> '${e.$2.pBasename}'",
+            (final e) => "'${e.source}' -> '${e.destination}'",
           )
           .join('\n');
+      final dragImportType = switch (moveInsteadOfCopy) {
+        DragImportType.move => 'moved',
+        DragImportType.copy => 'copied',
+      };
       unawaited(
         displayInfoBarInContext(
           context,
           title: const Text('Folder already exists'),
           content: Text('The following folders already exist'
-              ' and were not ${moveInsteadOfCopy ? 'moved' : 'copied'}: \n'
+              ' and were not $dragImportType: \n'
               '$join'),
           severity: InfoBarSeverity.warning,
         ),

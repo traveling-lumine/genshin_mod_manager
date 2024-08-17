@@ -9,6 +9,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:genshin_mod_manager/di/app_state.dart';
 import 'package:genshin_mod_manager/di/app_version.dart';
 import 'package:genshin_mod_manager/domain/entity/game_config.dart';
+import 'package:genshin_mod_manager/domain/entity/setting_data.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/card_color.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/widget/game_selector.dart';
@@ -90,6 +91,9 @@ class _SettingRoute extends ConsumerWidget {
           _SwitchItem(
             text: 'Move folder instead of copying for mod folder drag-and-drop',
             provider: moveOnDragProvider,
+            boolMapper: (final value) => value == DragImportType.move,
+            typedMapper: (final value) =>
+                value ? DragImportType.move : DragImportType.copy,
           ),
           _SwitchItem(
             text: 'Show folder icon images',
@@ -201,39 +205,48 @@ class _PathSelectItem extends StatelessWidget {
   }
 }
 
-class _SwitchItem extends StatelessWidget {
-  const _SwitchItem({
-    required this.text,
-    required this.provider,
-  });
+class _SwitchItem<T> extends StatelessWidget {
+  _SwitchItem({
+    required final String text,
+    required final AutoDisposeNotifierProvider<ValueSettable<T>, T> provider,
+    final bool Function(T)? boolMapper,
+    final T Function(bool)? typedMapper,
+  })  : _provider = provider,
+        _text = text,
+        _boolMapper = boolMapper ??
+            ((final value) {
+              if (T == bool) {
+                return value as bool;
+              }
+              throw ArgumentError('boolMapper must be provided for $T');
+            }),
+        _typedMapper = typedMapper ??
+            ((final value) {
+              if (T == bool) {
+                return value as T;
+              }
+              throw ArgumentError('typedMapper must be provided for $T');
+            });
 
-  final String text;
-  final AutoDisposeNotifierProvider<ValueSettable, bool> provider;
+  final String _text;
+  final AutoDisposeNotifierProvider<ValueSettable<T>, T> _provider;
+  final bool Function(T) _boolMapper;
+  final T Function(bool) _typedMapper;
 
   @override
   Widget build(final BuildContext context) => ListTile(
-        title: Text(text),
+        title: Text(_text),
         leading: Consumer(
           builder: (final context, final ref, final child) => RepaintBoundary(
             child: ToggleSwitch(
-              checked: ref.watch(provider),
+              checked: _boolMapper(ref.watch(_provider)),
               onChanged: (final value) {
-                ref.read(provider.notifier).setValue(value);
+                ref.read(_provider.notifier).setValue(_typedMapper(value));
               },
             ),
           ),
         ),
       );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(StringProperty('text', text))
-      ..add(
-        DiagnosticsProperty<ProviderListenable<bool>>('provider', provider),
-      );
-  }
 }
 
 class _ComboItem extends StatelessWidget {
