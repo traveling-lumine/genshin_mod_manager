@@ -7,11 +7,11 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/di/app_state.dart';
 import 'package:genshin_mod_manager/di/app_version.dart';
 import 'package:genshin_mod_manager/di/exe_arg.dart';
+import 'package:genshin_mod_manager/di/fs_interface.dart';
 import 'package:genshin_mod_manager/di/home_shell.dart';
 import 'package:genshin_mod_manager/di/storage.dart';
 import 'package:genshin_mod_manager/domain/constant.dart';
@@ -21,6 +21,7 @@ import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/util/open_url.dart';
 import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
+import 'package:genshin_mod_manager/ui/widget/custom_image.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest_box.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -344,22 +345,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           onPressed: () => showDialog(
             context: context,
             builder: (final dialogContext) {
-              final execRoot = File(Platform.resolvedExecutable).parent.path;
-              final appState = ref.read(gameConfigNotifierProvider);
-              final modRoot = appState.modRoot;
-              final migotoRoot = appState.modExecFile;
-              final launcherRoot = appState.launcherFile;
-
-              final reason = <String>[];
-              if (modRoot?.pIsWithin(execRoot) ?? false) {
-                reason.add('mods');
-              }
-              if (migotoRoot?.pIsWithin(execRoot) ?? false) {
-                reason.add('3d migoto');
-              }
-              if (launcherRoot?.pIsWithin(execRoot) ?? false) {
-                reason.add('launcher');
-              }
+              final reason = _findUpdateUnableReason();
               final Widget filledButton;
               if (reason.isNotEmpty) {
                 filledButton = MouseRegion(
@@ -405,6 +391,26 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     );
   }
 
+  List<String> _findUpdateUnableReason() {
+    final appState = ref.read(gameConfigNotifierProvider);
+    final modRoot = appState.modRoot;
+    final migotoRoot = appState.modExecFile;
+    final launcherRoot = appState.launcherFile;
+    final execRoot = File(Platform.resolvedExecutable).parent.path;
+
+    final reason = <String>[];
+    if (modRoot?.pIsWithin(execRoot) ?? false) {
+      reason.add('mods');
+    }
+    if (migotoRoot?.pIsWithin(execRoot) ?? false) {
+      reason.add('3d migoto');
+    }
+    if (launcherRoot?.pIsWithin(execRoot) ?? false) {
+      reason.add('launcher');
+    }
+    return reason;
+  }
+
   RichText _getAutoUpdateWarning() => RichText(
         textAlign: TextAlign.justify,
         text: TextSpan(
@@ -430,31 +436,34 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         ),
       );
 
-  void _runBoth() {
-    _runMigoto();
-    _runLauncher();
+  Future<void> _runBoth() async {
+    await _runMigoto();
+    await _runLauncher();
   }
 
-  void _runMigoto() {
+  Future<void> _runMigoto() async {
     final path = ref.read(gameConfigNotifierProvider).modExecFile;
+    final fsInterface = ref.read(fsInterfaceProvider);
     if (path == null) {
       return;
     }
-    runProgram(File(path));
-    unawaited(
-      displayInfoBarInContext(
-        context,
-        title: const Text('Ran 3d migoto'),
-      ),
+    await fsInterface.runProgram(File(path));
+    if (!mounted) {
+      return;
+    }
+    await displayInfoBarInContext(
+      context,
+      title: const Text('Ran 3d migoto'),
     );
   }
 
-  void _runLauncher() {
+  Future<void> _runLauncher() async {
     final launcher = ref.read(gameConfigNotifierProvider).launcherFile;
+    final fsInterface = ref.read(fsInterfaceProvider);
     if (launcher == null) {
       return;
     }
-    runProgram(File(launcher));
+    await fsInterface.runProgram(File(launcher));
   }
 
   Widget _buildAutoSuggestBox(
@@ -490,45 +499,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       );
 }
 
-class _PaneThumbnail extends StatefulWidget {
-  const _PaneThumbnail({required this.info});
-
-  final (String, int) info;
-
-  @override
-  State<_PaneThumbnail> createState() => _PaneThumbnailState();
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<(String, int)>('info', info));
-  }
-}
-
-class _PaneThumbnailState extends State<_PaneThumbnail> {
-  @override
-  void didUpdateWidget(covariant final _PaneThumbnail oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.info.$2 != widget.info.$2 &&
-        oldWidget.info.$1 == widget.info.$1) {
-      unawaited(FileImage(File(widget.info.$1)).evict());
-    }
-  }
-
-  @override
-  Widget build(final BuildContext context) => Image.file(
-        key: ValueKey(widget.info.$2),
-        File(widget.info.$1),
-        fit: BoxFit.contain,
-      );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<(String, int)>('info', widget.info));
-  }
-}
-
 class _FolderPaneItem extends PaneItem {
   _FolderPaneItem({
     required this.category,
@@ -553,12 +523,12 @@ class _FolderPaneItem extends PaneItem {
         },
       );
 
-  static Widget _buildImage(final (String, int)? imageFile) {
+  static Widget _buildImage(final String? imageFile) {
     final Widget image;
     if (imageFile == null) {
       image = Image.asset('images/idk_icon.png');
     } else {
-      image = _PaneThumbnail(info: imageFile);
+      image = TimeAwareFileImage(path: imageFile);
     }
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: maxIconWidth),

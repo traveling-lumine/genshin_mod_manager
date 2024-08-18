@@ -9,7 +9,13 @@ import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/fs_watcher.dart';
 
 class FolderWatcher<T extends FileSystemEntity> {
-  FolderWatcher({required this.path, final bool watchModifications = false}) {
+  FolderWatcher({
+    required this.path,
+    final bool watchModifications = false,
+    final bool broadcast = false,
+  }) : _controller = broadcast
+            ? StreamController<List<String>>.broadcast()
+            : StreamController<List<String>>() {
     _add(null);
     var events =
         FileSystemEvent.delete | FileSystemEvent.create | FileSystemEvent.move;
@@ -20,7 +26,7 @@ class FolderWatcher<T extends FileSystemEntity> {
   }
 
   final String path;
-  final _controller = StreamController<List<String>>();
+  final StreamController<List<String>> _controller;
   late final StreamSubscription<FileSystemEvent> _subscription;
 
   Stream<List<String>> get entities => _controller.stream;
@@ -28,6 +34,41 @@ class FolderWatcher<T extends FileSystemEntity> {
   void _add(final FileSystemEvent? event) {
     final files = getUnderSync<T>(path);
     _controller.add(files);
+  }
+
+  Future<void> dispose() async {
+    await _subscription.cancel();
+    await _controller.close();
+  }
+}
+
+class FileModificationWatcher {
+  FileModificationWatcher({
+    required final String path,
+    required final FolderWatcher<File> watcher,
+  })  : _path = path,
+        assert(FileSystemEntity.isFileSync(path), 'Should be a file'),
+        assert(watcher.path == path.pDirname, 'Should be the same directory') {
+    _updateMTime();
+    _subscription = watcher.entities.listen(_listen);
+  }
+
+  final String _path;
+  final _controller = StreamController<int>();
+  late final StreamSubscription<List<String>> _subscription;
+
+  Stream<int> get eventTime => _controller.stream;
+
+  void _listen(final List<String> event) {
+    final isIn = event.contains(_path);
+    if (!isIn) {
+      return;
+    }
+    _updateMTime();
+  }
+
+  void _updateMTime() {
+    _controller.add(File(_path).lastModifiedSync().millisecondsSinceEpoch);
   }
 
   Future<void> dispose() async {

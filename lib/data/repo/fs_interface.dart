@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
@@ -30,5 +31,17 @@ class FileSystemInterfaceImpl implements FileSystemInterface {
         }
       }
     }
+  }
+
+  @override
+  Future<void> openFolder(final String path) async {
+    await Process.start('explorer', [path], runInShell: true);
+  }
+
+  @override
+  Future<void> runProgram(final File program) async {
+    final pwd = program.parent.path;
+    final pName = program.path.pBasename;
+    await Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
   }
 }

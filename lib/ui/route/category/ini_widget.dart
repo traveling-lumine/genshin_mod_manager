@@ -10,13 +10,13 @@ class _IniWidget extends ConsumerWidget {
     final lines = ref.watch(iniLinesProvider(iniFile));
     return lines.when(
       skipLoadingOnReload: true,
-      data: _buildColumn,
+      data: (final data) => _buildColumn(data, ref),
       error: (final error, final stackTrace) => Text('Error: $error'),
       loading: () => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildIniHeader(iniFile.path),
+            _buildIniHeader(iniFile.path, ref),
             const ProgressRing(),
             const Text('Loading ini file'),
           ],
@@ -25,7 +25,7 @@ class _IniWidget extends ConsumerWidget {
     );
   }
 
-  Column _buildColumn(final List<String> data) {
+  Widget _buildColumn(final List<String> data, final WidgetRef ref) {
     final rowElements = <Widget>[];
     late String lastSection;
     var metSection = false;
@@ -72,13 +72,13 @@ class _IniWidget extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildIniHeader(iniFile.path),
+        _buildIniHeader(iniFile.path, ref),
         ...rowElements,
       ],
     );
   }
 
-  Widget _buildIniHeader(final String iniPath) {
+  Widget _buildIniHeader(final String iniPath, final WidgetRef ref) {
     final basenameString = iniPath.pBasename;
     return Row(
       children: [
@@ -97,7 +97,10 @@ class _IniWidget extends ConsumerWidget {
         RepaintBoundary(
           child: Button(
             child: const Icon(FluentIcons.document_management),
-            onPressed: () => runProgram(File(iniPath)),
+            onPressed: () async {
+              final fsInterface = ref.read(fsInterfaceProvider);
+              await fsInterface.runProgram(File(iniPath));
+            },
           ),
         ),
       ],

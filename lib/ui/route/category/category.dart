@@ -3,21 +3,22 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_image_converter/flutter_image_converter.dart';
-import 'package:genshin_mod_manager/data/helper/fsops.dart';
 import 'package:genshin_mod_manager/data/helper/mod_switcher.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/data/repo/akasha.dart';
 import 'package:genshin_mod_manager/data/repo/mod_writer.dart';
 import 'package:genshin_mod_manager/di/app_state.dart';
 import 'package:genshin_mod_manager/di/category.dart';
+import 'package:genshin_mod_manager/di/fs_interface.dart';
 import 'package:genshin_mod_manager/di/ini_widget.dart';
 import 'package:genshin_mod_manager/di/mod_card.dart';
 import 'package:genshin_mod_manager/domain/entity/ini.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
+import 'package:genshin_mod_manager/domain/usecase/file_system.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
@@ -36,7 +37,7 @@ part 'ini_widget.dart';
 part 'mod_card.dart';
 
 /// A route that displays a category of mods
-class CategoryRoute extends HookWidget {
+class CategoryRoute extends HookConsumerWidget {
   /// Creates a [CategoryRoute].
   const CategoryRoute({required this.category, super.key});
 
@@ -54,18 +55,19 @@ class CategoryRoute extends HookWidget {
   final ModCategory category;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final scrollController = useScrollController();
     return CategoryDropTarget(
       category: category,
       child: ScaffoldPage(
-        header: _buildHeader(scrollController),
+        header: _buildHeader(scrollController, ref),
         content: _buildContent(scrollController),
       ),
     );
   }
 
-  Widget _buildHeader(final ScrollController scrollController) {
+  Widget _buildHeader(
+      final ScrollController scrollController, final WidgetRef ref) {
     final context = useContext();
     return PageHeader(
       title: Text(category.name),
@@ -86,7 +88,7 @@ class CategoryRoute extends HookWidget {
               primaryItems: [
                 CommandBarButton(
                   icon: const Icon(FluentIcons.folder_open),
-                  onPressed: _onFolderOpen,
+                  onPressed: () => _onFolderOpen(ref),
                 ),
                 CommandBarButton(
                   icon: const Icon(FluentIcons.download),
@@ -214,13 +216,14 @@ class CategoryRoute extends HookWidget {
     );
   }
 
-  void _onFolderOpen() {
-    openFolder(category.path);
+  Future<void> _onFolderOpen(final WidgetRef ref) async {
+    final fsInterface = ref.read(fsInterfaceProvider);
+    await openFolderUseCase(fsInterface, category.path);
   }
 
-  void _onDownloadPressed(final BuildContext context) => unawaited(
-        context.push(kNahidaStoreRoute, extra: category),
-      );
+  void _onDownloadPressed(final BuildContext context) {
+    unawaited(context.push(kNahidaStoreRoute, extra: category));
+  }
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {

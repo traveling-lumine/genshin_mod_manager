@@ -98,7 +98,10 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
                 RepaintBoundary(
                   child: Button(
                     child: const Icon(FluentIcons.folder_open),
-                    onPressed: () => openFolder(widget.mod.path),
+                    onPressed: () async {
+                      final fsInterface = ref.read(fsInterfaceProvider);
+                      await fsInterface.openFolder(widget.mod.path);
+                    },
                   ),
                 ),
               ],
@@ -117,7 +120,10 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
                 RepaintBoundary(
                   child: Button(
                     child: const Icon(FluentIcons.folder_open),
-                    onPressed: () => openFolder(widget.mod.path),
+                    onPressed: () async {
+                      final fsInterface = ref.read(fsInterfaceProvider);
+                      await fsInterface.openFolder(widget.mod.path);
+                    },
                   ),
                 ),
               ],
@@ -136,7 +142,10 @@ class _ModCardState extends ConsumerState<_ModCard> with WindowListener {
                 RepaintBoundary(
                   child: Button(
                     child: const Icon(FluentIcons.folder_open),
-                    onPressed: () => openFolder(widget.mod.path),
+                    onPressed: () async {
+                      final fsInterface = ref.read(fsInterfaceProvider);
+                      await fsInterface.openFolder(widget.mod.path);
+                    },
                   ),
                 ),
               ],

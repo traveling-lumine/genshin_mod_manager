@@ -10,4 +10,8 @@ abstract interface class FileSystemInterface {
     final Directory to,
     final List<String> filenames,
   );
+
+  Future<void> openFolder(final String path);
+
+  Future<void> runProgram(final File program);
 }

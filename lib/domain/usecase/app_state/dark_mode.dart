@@ -1,5 +1,7 @@
-import 'package:genshin_mod_manager/domain/constant.dart';
 import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
+
+const darkModeKey = 'darkMode';
+const darkModeDefault = true;
 
 bool initializeDarkModeUseCase(final PersistentStorage watch) =>
     watch.getBool(darkModeKey) ?? darkModeDefault;

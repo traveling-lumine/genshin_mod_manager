@@ -6,12 +6,11 @@ part of 'home_shell.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$folderIconsHash() => r'70bb8233f7e87163185ea00af985cf810f92807f';
+String _$folderIconsHash() => r'2e6886d8a7bf11e35031094c8c08c99b9bc6655a';
 
 /// See also [folderIcons].
 @ProviderFor(folderIcons)
-final folderIconsProvider =
-    AutoDisposeStreamProvider<List<(String, int)>>.internal(
+final folderIconsProvider = AutoDisposeStreamProvider<List<String>>.internal(
   folderIcons,
   name: r'folderIconsProvider',
   debugGetCreateSourceHash:
@@ -20,8 +19,8 @@ final folderIconsProvider =
   allTransitiveDependencies: null,
 );
 
-typedef FolderIconsRef = AutoDisposeStreamProviderRef<List<(String, int)>>;
-String _$folderIconPathHash() => r'e24f10503c3be7133d86df65a79cb6c5e043d5b7';
+typedef FolderIconsRef = AutoDisposeStreamProviderRef<List<String>>;
+String _$folderIconPathHash() => r'2d1847dacc9ee4db9a2041c268ba0ea93c7859fc';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -49,7 +48,7 @@ class _SystemHash {
 const folderIconPathProvider = FolderIconPathFamily();
 
 /// See also [folderIconPath].
-class FolderIconPathFamily extends Family<(String, int)?> {
+class FolderIconPathFamily extends Family<String?> {
   /// See also [folderIconPath].
   const FolderIconPathFamily();
 
@@ -87,7 +86,7 @@ class FolderIconPathFamily extends Family<(String, int)?> {
 }
 
 /// See also [folderIconPath].
-class FolderIconPathProvider extends AutoDisposeProvider<(String, int)?> {
+class FolderIconPathProvider extends AutoDisposeProvider<String?> {
   /// See also [folderIconPath].
   FolderIconPathProvider(
     String categoryName,
@@ -122,7 +121,7 @@ class FolderIconPathProvider extends AutoDisposeProvider<(String, int)?> {
 
   @override
   Override overrideWith(
-    (String, int)? Function(FolderIconPathRef provider) create,
+    String? Function(FolderIconPathRef provider) create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -139,7 +138,7 @@ class FolderIconPathProvider extends AutoDisposeProvider<(String, int)?> {
   }
 
   @override
-  AutoDisposeProviderElement<(String, int)?> createElement() {
+  AutoDisposeProviderElement<String?> createElement() {
     return _FolderIconPathProviderElement(this);
   }
 
@@ -158,13 +157,13 @@ class FolderIconPathProvider extends AutoDisposeProvider<(String, int)?> {
   }
 }
 
-mixin FolderIconPathRef on AutoDisposeProviderRef<(String, int)?> {
+mixin FolderIconPathRef on AutoDisposeProviderRef<String?> {
   /// The parameter `categoryName` of this provider.
   String get categoryName;
 }
 
-class _FolderIconPathProviderElement
-    extends AutoDisposeProviderElement<(String, int)?> with FolderIconPathRef {
+class _FolderIconPathProviderElement extends AutoDisposeProviderElement<String?>
+    with FolderIconPathRef {
   _FolderIconPathProviderElement(super.provider);
 
   @override

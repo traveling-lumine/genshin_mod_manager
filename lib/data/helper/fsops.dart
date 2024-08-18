@@ -75,17 +75,3 @@ String? findPreviewFileInString(
   }
   return null;
 }
-
-/// Runs a [program] by default method.
-void runProgram(final File program) {
-  final pwd = program.parent.path;
-  final pName = program.path.pBasename;
-  unawaited(
-    Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true),
-  );
-}
-
-/// Opens a folder at [path].
-void openFolder(final String path) {
-  unawaited(Process.start('explorer', [path], runInShell: true));
-}
