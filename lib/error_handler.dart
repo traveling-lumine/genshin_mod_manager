@@ -1,3 +1,6 @@
+// Should catch all errors/exceptions
+// ignore_for_file: avoid_catches_without_on_clauses
+
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
@@ -76,5 +79,3 @@ String _errorToString(final FlutterErrorDetails details) {
     }
   }
 }
-
-// ignore_for_file: avoid_catches_without_on_clauses

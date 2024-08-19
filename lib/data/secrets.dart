@@ -2,6 +2,7 @@ import 'package:envied/envied.dart';
 
 part 'secrets.g.dart';
 
+// Since this package works this way
 // ignore: avoid_classes_with_only_static_members
 @Envied(obfuscate: true)
 abstract class Env {

@@ -1,3 +1,4 @@
+// As required in the package
 // ignore_for_file: invalid_annotation_target
 
 import 'package:flutter/foundation.dart';
