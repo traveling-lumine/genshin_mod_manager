@@ -1,26 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_image_converter/flutter_image_converter.dart';
-import 'package:genshin_mod_manager/data/helper/mod_switcher.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/data/repo/akasha.dart';
-import 'package:genshin_mod_manager/data/repo/mod_writer.dart';
-import 'package:genshin_mod_manager/di/app_state.dart';
-import 'package:genshin_mod_manager/di/category.dart';
 import 'package:genshin_mod_manager/di/fs_interface.dart';
-import 'package:genshin_mod_manager/di/ini_widget.dart';
-import 'package:genshin_mod_manager/di/mod_card.dart';
-import 'package:genshin_mod_manager/domain/entity/ini.dart';
+import 'package:genshin_mod_manager/di/fs_watcher.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/usecase/file_system.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
-import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
+import 'package:genshin_mod_manager/ui/route/category/mod_card.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
@@ -29,12 +18,6 @@ import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_delegate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:logger/logger.dart';
-import 'package:pasteboard/pasteboard.dart';
-import 'package:window_manager/window_manager.dart';
-
-part 'ini_widget.dart';
-part 'mod_card.dart';
 
 /// A route that displays a category of mods
 class CategoryRoute extends HookConsumerWidget {
@@ -67,7 +50,9 @@ class CategoryRoute extends HookConsumerWidget {
   }
 
   Widget _buildHeader(
-      final ScrollController scrollController, final WidgetRef ref) {
+    final ScrollController scrollController,
+    final WidgetRef ref,
+  ) {
     final context = useContext();
     return PageHeader(
       title: Text(category.name),
@@ -88,7 +73,7 @@ class CategoryRoute extends HookConsumerWidget {
               primaryItems: [
                 CommandBarButton(
                   icon: const Icon(FluentIcons.folder_open),
-                  onPressed: () => _onFolderOpen(ref),
+                  onPressed: () async => _onFolderOpen(ref),
                 ),
                 CommandBarButton(
                   icon: const Icon(FluentIcons.download),
@@ -105,7 +90,7 @@ class CategoryRoute extends HookConsumerWidget {
   Widget _buildSearchBox(final ScrollController scrollController) => Consumer(
         builder: (final context, final ref, final child) {
           final whenOrNull =
-              ref.watch(categoryWatcherProvider(category)).whenOrNull(
+              ref.watch(modsInCategoryProvider(category)).whenOrNull(
             data: (final data) {
               final items = data.indexed.map(
                 (final e) => AutoSuggestBoxItem2(
@@ -146,7 +131,7 @@ class CategoryRoute extends HookConsumerWidget {
       ThickScrollbar(
         child: Consumer(
           builder: (final context, final ref, final child) =>
-              ref.watch(categoryWatcherProvider(category)).when(
+              ref.watch(modsInCategoryProvider(category)).when(
                     skipLoadingOnReload: true,
                     data: (final data) => _buildData(data, scrollController),
                     error: _buildError,
@@ -159,7 +144,7 @@ class CategoryRoute extends HookConsumerWidget {
     final List<Mod> data,
     final ScrollController scrollController,
   ) {
-    final children = data.map((final e) => _ModCard(mod: e)).toList();
+    final children = data.map((final e) => ModCard(mod: e)).toList();
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       child: GridView.builder(

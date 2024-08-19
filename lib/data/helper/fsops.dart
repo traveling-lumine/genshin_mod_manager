@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';

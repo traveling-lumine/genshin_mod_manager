@@ -7,15 +7,14 @@ on:
       - labeled
       - unlabeled
 
-
 jobs:
   pr-label-check:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Mutually exclusive label check
-      run: |
-        if [[ ${{contains(github.event.pull_request.labels.*.name, 'release') && contains(github.event.pull_request.labels.*.name, 'build')}} == "true" ]]; then
-          echo "This PR has both 'release' and 'build' labels. Those labels are mutually exclusive."
-          exit 1
-        fi
+      - name: Mutually exclusive label check
+        run: |
+          if [[ ${{contains(github.event.pull_request.labels.*.name, 'release') && contains(github.event.pull_request.labels.*.name, 'build')}} == "true" ]]; then
+            echo "This PR has both 'release' and 'build' labels. Those labels are mutually exclusive."
+            exit 1
+          fi

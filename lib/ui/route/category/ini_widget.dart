@@ -1,28 +1,28 @@
-part of 'category.dart';
+import 'dart:io';
 
-class _IniWidget extends ConsumerWidget {
-  const _IniWidget({required this.iniFile});
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
+import 'package:genshin_mod_manager/di/fs_interface.dart';
+import 'package:genshin_mod_manager/di/ini_widget.dart';
+import 'package:genshin_mod_manager/domain/entity/ini.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+class IniWidget extends ConsumerWidget {
+  const IniWidget({required this.iniFile, super.key});
   final IniFile iniFile;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final lines = ref.watch(iniLinesProvider(iniFile));
-    return lines.when(
-      skipLoadingOnReload: true,
-      data: (final data) => _buildColumn(data, ref),
-      error: (final error, final stackTrace) => Text('Error: $error'),
-      loading: () => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildIniHeader(iniFile.path, ref),
-            const ProgressRing(),
-            const Text('Loading ini file'),
-          ],
-        ),
-      ),
-    );
+    return _buildColumn(lines, ref);
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<IniFile>('iniFile', iniFile));
   }
 
   Widget _buildColumn(final List<String> data, final WidgetRef ref) {
@@ -78,6 +78,17 @@ class _IniWidget extends ConsumerWidget {
     );
   }
 
+  Widget _buildIniFieldEditor(
+    final String data,
+    final IniSection iniSection,
+  ) =>
+      Row(
+        children: [
+          Text(data),
+          Expanded(child: _EditorText(iniSection: iniSection)),
+        ],
+      );
+
   Widget _buildIniHeader(final String iniPath, final WidgetRef ref) {
     final basenameString = iniPath.pBasename;
     return Row(
@@ -95,8 +106,8 @@ class _IniWidget extends ConsumerWidget {
           ),
         ),
         RepaintBoundary(
-          child: Button(
-            child: const Icon(FluentIcons.document_management),
+          child: IconButton(
+            icon: const Icon(FluentIcons.document_management),
             onPressed: () async {
               final fsInterface = ref.read(fsInterfaceProvider);
               await fsInterface.runProgram(File(iniPath));
@@ -106,34 +117,15 @@ class _IniWidget extends ConsumerWidget {
       ],
     );
   }
-
-  Widget _buildIniFieldEditor(
-    final String data,
-    final IniSection iniSection,
-  ) =>
-      Row(
-        children: [
-          Text(data),
-          Expanded(child: _EditorText(iniSection: iniSection)),
-        ],
-      );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<IniFile>('iniFile', iniFile));
-  }
 }
 
 class _EditorText extends HookConsumerWidget {
   const _EditorText({required this.iniSection});
-
   final IniSection iniSection;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final textEditingController =
-        useTextEditingController(text: iniSection.value);
+    final textEditingController = useTextEditingController();
     useEffect(
       () {
         textEditingController.text = iniSection.value;
@@ -155,6 +147,12 @@ class _EditorText extends HookConsumerWidget {
     );
   }
 
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<IniSection>('iniSection', iniSection));
+  }
+
   void _onFocusChange(
     final bool event,
     final TextEditingController textEditingController,
@@ -163,11 +161,5 @@ class _EditorText extends HookConsumerWidget {
       return;
     }
     textEditingController.text = iniSection.value;
-  }
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<IniSection>('iniSection', iniSection));
   }
 }

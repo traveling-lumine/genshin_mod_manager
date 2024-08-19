@@ -1,52 +1,28 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
+import 'package:genshin_mod_manager/di/fs_watcher.dart';
 import 'package:genshin_mod_manager/domain/entity/ini.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'ini_widget.g.dart';
 
-class IniModel {
-  IniModel(this._iniFile) {
-    final dir = Directory(_iniFile.path.pDirname);
-    _iniLinesController.add(
-      File(_iniFile.path)
-          .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true)),
-    );
-    _subscription = dir
-        .watch(events: FileSystemEvent.modify)
-        .where((final event) => event.path.pEquals(_iniFile.path))
-        .listen(_listen);
-  }
-
-  final IniFile _iniFile;
-  late final StreamSubscription<FileSystemEvent> _subscription;
-
-  Stream<List<String>> get iniLines => _iniLinesController.stream;
-  final _iniLinesController = StreamController<List<String>>();
-
-  void dispose() {
-    unawaited(_subscription.cancel());
-    unawaited(_iniLinesController.close());
-  }
-
-  void _listen(final FileSystemEvent event) {
-    _iniLinesController.add(
-      File(_iniFile.path)
-          .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true)),
-    );
-  }
-}
-
 @riverpod
 class IniLines extends _$IniLines {
   @override
-  Stream<List<String>> build(final IniFile iniFile) {
-    final model = IniModel(iniFile);
-    ref.onDispose(model.dispose);
-    return model.iniLines;
+  List<String> build(final IniFile iniFile) {
+    List<String> addData() => File(iniFile.path)
+        .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true));
+
+    final watcher = ref.watch(fileEventWatcherProvider(iniFile.path, true));
+    final subscription = watcher.listen((final event) {
+      if (event is FileSystemModifyEvent) {
+        state = addData();
+      }
+    });
+    ref.onDispose(subscription.cancel);
+
+    return addData();
   }
 
   void editIniFile(final IniSection section, final String value) {

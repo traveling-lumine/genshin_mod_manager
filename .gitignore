@@ -46,10 +46,12 @@ app.*.map.json
 # custom
 /error_log.txt
 /coverage/
-/lib/data/repo/akasha.dart
-/lib/data/repo/akasha.g.dart
-/lib/data/repo/akasha.freezed.dart
 /.vscode
 
+# generated files
+**/*.g.dart
+**/*.freezed.dart
+
+# secrets
 /lib/data/secrets.g.dart
 /.env

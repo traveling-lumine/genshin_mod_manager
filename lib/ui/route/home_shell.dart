@@ -12,10 +12,11 @@ import 'package:genshin_mod_manager/di/app_state.dart';
 import 'package:genshin_mod_manager/di/app_version.dart';
 import 'package:genshin_mod_manager/di/exe_arg.dart';
 import 'package:genshin_mod_manager/di/fs_interface.dart';
-import 'package:genshin_mod_manager/di/home_shell.dart';
+import 'package:genshin_mod_manager/di/fs_watcher.dart';
 import 'package:genshin_mod_manager/di/storage.dart';
-import 'package:genshin_mod_manager/domain/constant.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
+import 'package:genshin_mod_manager/domain/repo/github.dart';
+import 'package:genshin_mod_manager/error_handler.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/util/open_url.dart';
@@ -28,8 +29,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:window_manager/window_manager.dart';
-
-const _kRepoReleases = '$kRepoBase/releases/latest';
 
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({required this.child, super.key});
@@ -46,7 +45,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   @override
   void onWindowFocus() {
-    ref.read(homeShellListProvider.notifier).refresh();
+    ref.invalidate(categoriesProvider);
   }
 
   @override
@@ -74,11 +73,11 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         (final timeStamp) {
           final arg = args.first;
           if (arg == AcceptedArg.run3dm.cmd) {
-            _runMigoto();
+            unawaited(_runMigoto());
           } else if (arg == AcceptedArg.rungame.cmd) {
-            _runLauncher();
+            unawaited(_runLauncher());
           } else if (arg == AcceptedArg.runboth.cmd) {
-            _runBoth();
+            unawaited(_runBoth());
           } else {
             unawaited(
               showDialog(
@@ -161,7 +160,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       );
     }
 
-    final categories = ref.watch(homeShellListProvider);
+    final categories = ref.watch(categoriesProvider);
     return categories.when(
       skipLoadingOnReload: true,
       data: _buildData,
@@ -250,7 +249,9 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('Error: $error'),
-              Text('Stack trace: $stackTrace'),
+              SelectableText(
+                'Stack trace: ${elideLines(stackTrace.toString())}',
+              ),
             ],
           ),
         ),
@@ -335,7 +336,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
                   decoration: TextDecoration.underline,
                 ),
                 recognizer: TapGestureRecognizer()
-                  ..onTap = () => openUrl(_kRepoReleases),
+                  ..onTap = () => openUrl(kRepoReleases),
               ),
               const TextSpan(text: ' to open link.'),
             ],
@@ -572,7 +573,7 @@ class _FolderPaneItem extends PaneItem {
 }
 
 Future<void> _runUpdateScript() async {
-  final url = Uri.parse('$_kRepoReleases/download/GenshinModManager.zip');
+  final url = Uri.parse('$kRepoReleases/download/GenshinModManager.zip');
   final response = await http.get(url);
   final archive = ZipDecoder().decodeBytes(response.bodyBytes);
   await extractArchiveToDiskAsync(

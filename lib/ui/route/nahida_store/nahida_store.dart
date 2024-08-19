@@ -59,7 +59,7 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
         final nextPageKey = pageKey + 1;
         _pagingController.appendPage(filteredItems, nextPageKey);
       }
-    } catch (error) {
+    } on Exception catch (error) {
       _pagingController.error = error;
     }
   }

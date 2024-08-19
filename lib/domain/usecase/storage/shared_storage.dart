@@ -39,7 +39,7 @@ void _copyIcons(
       if (!iconDirGame.existsSync()) {
         iconDirGame.createSync(recursive: true);
       }
-    } catch (_) {
+    } on Exception catch (_) {
       continue;
     }
     final modRoot = getModRootUseCase(storage, game);

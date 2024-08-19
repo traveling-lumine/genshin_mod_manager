@@ -37,13 +37,13 @@ Widget _errorWidgetBuilder(final FlutterErrorDetails details) => Center(
 String _writeStacktrace(final FlutterErrorDetails details) {
   try {
     final stackTrace = details.stack.toString();
-    return _elideLines(stackTrace);
+    return elideLines(stackTrace);
   } catch (e) {
     return 'Stack trace not available';
   }
 }
 
-String _elideLines(final String stackTrace) {
+String elideLines(final String stackTrace) {
   // only choose lines that include genshin_mod_manager.
   // Lines that don't include it are shrunk to ...
   final lines = <String>[];

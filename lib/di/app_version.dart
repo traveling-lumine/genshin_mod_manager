@@ -1,11 +1,9 @@
-import 'package:genshin_mod_manager/domain/constant.dart';
+import 'package:genshin_mod_manager/domain/repo/github.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_version.g.dart';
-
-const _kRepoReleases = '$kRepoBase/releases/latest';
 
 @riverpod
 Future<String> versionString(final VersionStringRef ref) async {
@@ -20,7 +18,7 @@ Future<String> versionString(final VersionStringRef ref) async {
 
 @riverpod
 Future<String?> remoteVersion(final RemoteVersionRef ref) async {
-  final url = Uri.parse(_kRepoReleases);
+  final url = Uri.parse(kRepoReleases);
   final client = http.Client();
   final request = http.Request('GET', url)..followRedirects = false;
   final upstreamVersion = client.send(request).then((final value) {

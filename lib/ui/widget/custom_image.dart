@@ -27,18 +27,17 @@ class _TimeAwareFileImageState extends ConsumerState<TimeAwareFileImage> {
   @override
   Widget build(final BuildContext context) {
     ref.listen(
-      fileWatcherProvider(widget.path),
+      fileEventSnapshotProvider(widget.path, true),
       (final previous, final next) async {
-        if(previous?.value == null) {
+        if (previous?.value == null) {
           return;
         }
         if (previous == next) {
           return;
         }
         await FileImage(File(widget.path)).evict();
-        print('Evicted image cache for ${widget.path}');
         setState(() {
-          _curMTime = next.value;
+          _curMTime = DateTime.now().microsecondsSinceEpoch;
         });
       },
     );
