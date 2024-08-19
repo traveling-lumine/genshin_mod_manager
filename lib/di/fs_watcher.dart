@@ -125,37 +125,31 @@ Stream<List<Mod>> modsInCategory(
 }
 
 @riverpod
-Stream<List<ModCategory>> categories(final CategoriesRef ref) {
-  final modRoot = ref.watch(
-    gameConfigNotifierProvider.select((final state) => state.modRoot),
-  );
-  if (modRoot == null) {
-    return Stream.value([]);
-  }
-
-  final controller = StreamController<List<ModCategory>>();
-  ref.onDispose(controller.close);
-
-  void addData() {
-    controller.add(
-      getUnderSync<Directory>(modRoot)
-          .map(
-            (final e) => ModCategory(
-              path: e,
-              name: e.pBasename,
-            ),
-          )
-          .toList(),
+class Categories extends _$Categories {
+  @override
+  List<ModCategory> build() {
+    final modRoot = ref.watch(
+      gameConfigNotifierProvider.select((final state) => state.modRoot),
     );
+    if (modRoot == null) {
+      return [];
+    }
+
+    List<ModCategory> addData() => getUnderSync<Directory>(modRoot)
+        .map(
+          (final e) => ModCategory(
+            path: e,
+            name: e.pBasename,
+          ),
+        )
+        .toList();
+
+    final watcher = ref.watch(directoryInFolderProvider(modRoot));
+    final subscription = watcher.listen((final event) => state = addData());
+    ref.onDispose(subscription.cancel);
+
+    return addData();
   }
-
-  addData();
-
-  final watcher = ref.watch(directoryInFolderProvider(modRoot));
-  final subscription = watcher.listen((final event) => addData());
-  ref.onDispose(subscription.cancel);
-
-  return controller.stream;
 }
 
 @riverpod

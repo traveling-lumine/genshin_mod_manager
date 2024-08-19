@@ -161,12 +161,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     }
 
     final categories = ref.watch(categoriesProvider);
-    return categories.when(
-      skipLoadingOnReload: true,
-      data: _buildData,
-      error: _buildError,
-      loading: _buildLoading,
-    );
+    return _buildData(categories);
   }
 
   NavigationView _buildData(final List<ModCategory> categories) {
@@ -240,35 +235,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       paneBodyBuilder: (final item, final body) => widget.child,
     );
   }
-
-  NavigationView _buildError(final Object error, final StackTrace stackTrace) =>
-      NavigationView(
-        appBar: getAppbar('Error'),
-        content: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Error: $error'),
-              SelectableText(
-                'Stack trace: ${elideLines(stackTrace.toString())}',
-              ),
-            ],
-          ),
-        ),
-      );
-
-  NavigationView _buildLoading() => NavigationView(
-        appBar: getAppbar('Reading categories...'),
-        content: const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ProgressRing(),
-              Text('Reading categories...'),
-            ],
-          ),
-        ),
-      );
 
   NavigationPane _buildPane(
     final int? selected,

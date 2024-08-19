@@ -177,7 +177,7 @@ class CategoryRoute extends HookConsumerWidget {
             children: [
               ProgressRing(),
               SizedBox(height: 16),
-              Text('Loading...'),
+              Text('Collecting mods...'),
             ],
           ),
         ),
