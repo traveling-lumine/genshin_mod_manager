@@ -78,7 +78,7 @@ Future<List<String>> _getModShaders(final String modPath) async {
     final fseUnder = getUnder<File>(modShaderPath);
     shaderPaths.addAll(fseUnder);
   } on PathNotFoundException {
-    // _logger.i(e);
+    // pass
   }
   return shaderPaths;
 }

@@ -18,7 +18,6 @@ import 'package:genshin_mod_manager/ui/route/category/ini_widget.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/widget/custom_image.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:logger/logger.dart';
 import 'package:pasteboard/pasteboard.dart';
 
 class ModCard extends ConsumerStatefulWidget {
@@ -38,7 +37,6 @@ class ModCard extends ConsumerStatefulWidget {
 
 class _ModCardState extends ConsumerState<ModCard> {
   static const _minIniSectionWidth = 150.0;
-  static final _logger = Logger();
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
 
@@ -213,7 +211,6 @@ class _ModCardState extends ConsumerState<ModCard> {
   Future<void> _onPaste(final BuildContext context) async {
     final image = await Pasteboard.image;
     if (image == null) {
-      _logger.d('No image found in clipboard');
       return;
     }
     final filePath = widget.mod.path.pJoin('preview.png');
@@ -230,7 +227,6 @@ class _ModCardState extends ConsumerState<ModCard> {
         onClose: close,
       ),
     );
-    _logger.d('Image pasted to $filePath');
     return;
   }
 
