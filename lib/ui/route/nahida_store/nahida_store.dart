@@ -1,15 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/di/nahida_store.dart';
 import 'package:genshin_mod_manager/domain/entity/akasha.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
+import 'package:genshin_mod_manager/ui/route/nahida_store/store_element.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
-import 'package:genshin_mod_manager/ui/util/open_url.dart';
 import 'package:genshin_mod_manager/ui/util/tag_parser.dart';
 import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
 import 'package:genshin_mod_manager/ui/widget/thick_scrollbar.dart';
@@ -18,11 +17,8 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
-part 'store_element.dart';
-
 class NahidaStoreRoute extends ConsumerStatefulWidget {
   const NahidaStoreRoute({required this.category, super.key});
-
   final ModCategory category;
 
   @override
@@ -35,6 +31,18 @@ class NahidaStoreRoute extends ConsumerStatefulWidget {
   }
 }
 
+class _Debouncer {
+  _Debouncer(this.duration);
+  final Duration duration;
+
+  Timer? _timer;
+
+  void call(final VoidCallback action) {
+    _timer?.cancel();
+    _timer = Timer(duration, action);
+  }
+}
+
 class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
   final _textEditingController = TextEditingController();
   TagParseElement? _tagFilter;
@@ -43,25 +51,21 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
   final PagingController<int, NahidaliveElement?> _pagingController =
       PagingController(firstPageKey: 1);
 
-  Future<void> _fetchPage(final int pageKey) async {
-    try {
-      final newItems =
-          await ref.read(akashaApiProvider).fetchNahidaliveElements(pageKey);
-      final isLastPage = newItems.isEmpty;
-      List<NahidaliveElement?> filteredItems =
-          newItems.where(_dataFilter).toList();
-      if (newItems.isNotEmpty && filteredItems.isEmpty && pageKey == 1) {
-        filteredItems = [null];
-      }
-      if (isLastPage) {
-        _pagingController.appendLastPage(filteredItems);
-      } else {
-        final nextPageKey = pageKey + 1;
-        _pagingController.appendPage(filteredItems, nextPageKey);
-      }
-    } on Exception catch (error) {
-      _pagingController.error = error;
-    }
+  @override
+  Widget build(final BuildContext context) => ScaffoldPage.withPadding(
+        header: PageHeader(
+          title: Text('${widget.category.name} ← Akasha'),
+          leading: _buildLeading(),
+          commandBar: _buildCommandBar(),
+        ),
+        content: _buildContent(),
+      );
+
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    _pagingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -166,35 +170,6 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
     );
   }
 
-  @override
-  void dispose() {
-    _textEditingController.dispose();
-    _pagingController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(final BuildContext context) => ScaffoldPage.withPadding(
-        header: PageHeader(
-          title: Text('${widget.category.name} ← Akasha'),
-          leading: _buildLeading(),
-          commandBar: _buildCommandBar(),
-        ),
-        content: _buildContent(),
-      );
-
-  Widget? _buildLeading() => context.canPop()
-      ? Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: RepaintBoundary(
-            child: IconButton(
-              icon: const Icon(FluentIcons.back),
-              onPressed: context.pop,
-            ),
-          ),
-        )
-      : null;
-
   Widget _buildCommandBar() => RepaintBoundary(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -216,16 +191,6 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
               onPressed: _onRefresh,
             ),
           ],
-        ),
-      );
-
-  Widget _buildSearchBox() => ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 300),
-        child: TextFormBox(
-          autovalidateMode: AutovalidateMode.always,
-          placeholder: 'Search tags',
-          onChanged: _onSearchChange,
-          validator: _onValidationCheck,
         ),
       );
 
@@ -257,20 +222,64 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
         ),
       );
 
-  void _onRefresh() {
-    _pagingController.refresh();
-  }
+  Widget? _buildLeading() => context.canPop()
+      ? Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: RepaintBoundary(
+            child: IconButton(
+              icon: const Icon(FluentIcons.back),
+              onPressed: context.pop,
+            ),
+          ),
+        )
+      : null;
 
-  String? _onValidationCheck(final String? value) {
-    if (value == null || value.isEmpty) {
-      return null;
+  Widget _buildSearchBox() => ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 300),
+        child: TextFormBox(
+          autovalidateMode: AutovalidateMode.always,
+          placeholder: 'Search tags',
+          onChanged: _onSearchChange,
+          validator: _onValidationCheck,
+        ),
+      );
+
+  bool _dataFilter(final NahidaliveElement element) {
+    final tagMap = {for (final e in element.tags) e};
+    final filter = _tagFilter;
+    if (filter == null) {
+      return true;
     }
     try {
-      parseTagQuery(value);
-    } on Exception catch (e) {
-      return e.toString();
+      return filter.evaluate(tagMap);
+    } on Exception {
+      return true;
     }
-    return null;
+  }
+
+  Future<void> _fetchPage(final int pageKey) async {
+    try {
+      final newItems =
+          await ref.read(akashaApiProvider).fetchNahidaliveElements(pageKey);
+      final isLastPage = newItems.isEmpty;
+      List<NahidaliveElement?> filteredItems =
+          newItems.where(_dataFilter).toList();
+      if (newItems.isNotEmpty && filteredItems.isEmpty && pageKey == 1) {
+        filteredItems = [null];
+      }
+      if (isLastPage) {
+        _pagingController.appendLastPage(filteredItems);
+      } else {
+        final nextPageKey = pageKey + 1;
+        _pagingController.appendPage(filteredItems, nextPageKey);
+      }
+    } on Exception catch (error) {
+      _pagingController.error = error;
+    }
+  }
+
+  void _onRefresh() {
+    _pagingController.refresh();
   }
 
   void _onSearchChange(final String value) {
@@ -290,28 +299,15 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
     );
   }
 
-  bool _dataFilter(final NahidaliveElement element) {
-    final tagMap = {for (final e in element.tags) e};
-    final filter = _tagFilter;
-    if (filter == null) {
-      return true;
+  String? _onValidationCheck(final String? value) {
+    if (value == null || value.isEmpty) {
+      return null;
     }
     try {
-      return filter.evaluate(tagMap);
-    } on Exception {
-      return true;
+      parseTagQuery(value);
+    } on Exception catch (e) {
+      return e.toString();
     }
-  }
-}
-
-class _Debouncer {
-  _Debouncer(this.duration);
-
-  final Duration duration;
-  Timer? _timer;
-
-  void call(final VoidCallback action) {
-    _timer?.cancel();
-    _timer = Timer(duration, action);
+    return null;
   }
 }

@@ -16,7 +16,6 @@ import 'package:genshin_mod_manager/di/fs_watcher.dart';
 import 'package:genshin_mod_manager/di/storage.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:genshin_mod_manager/domain/repo/github.dart';
-import 'package:genshin_mod_manager/error_handler.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:genshin_mod_manager/ui/util/open_url.dart';
@@ -30,13 +29,147 @@ import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:window_manager/window_manager.dart';
 
+Future<void> _runUpdateScript() async {
+  final url = Uri.parse('$kRepoReleases/download/GenshinModManager.zip');
+  final response = await http.get(url);
+  final archive = ZipDecoder().decodeBytes(response.bodyBytes);
+  await extractArchiveToDiskAsync(
+    archive,
+    Directory.current.path,
+    asyncWrite: true,
+  );
+  const updateScript = 'setlocal\n'
+      'echo update script running\n'
+      'set "sourceFolder=GenshinModManager"\n'
+      'if not exist "genshin_mod_manager.exe" (\n'
+      '    echo Maybe not in the mod manager folder? Exiting for safety.\n'
+      '    pause\n'
+      '    exit /b 1\n'
+      ')\n'
+      'if not exist %sourceFolder% (\n'
+      '    echo Failed to download data! Go to the link and install manually.\n'
+      '    pause\n'
+      '    exit /b 2\n'
+      ')\n'
+      "echo So it's good to go. Let's update.\n"
+      "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd update.log error.log\"') do del \"%%i\"\n"
+      "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources %sourceFolder%\"') do rd /s /q \"%%i\"\n"
+      "for /f \"delims=\" %%i in ('dir /b \"%sourceFolder%\"') do move /y \"%sourceFolder%\\%%i\" .\n"
+      'rd /s /q %sourceFolder%\n'
+      'start /b genshin_mod_manager.exe\n'
+      'endlocal\n';
+  await File('update.cmd').writeAsString(updateScript);
+  unawaited(
+    Process.run(
+      'start',
+      [
+        'cmd',
+        '/c',
+        'timeout /t 3 && call update.cmd > update.log & del update.cmd',
+      ],
+      runInShell: true,
+    ),
+  );
+  // delay needed. otherwise the process will die before the script runs.
+  await Future<void>.delayed(const Duration(milliseconds: 200));
+  exit(0);
+}
+
+int _search(final List<ModCategory> categories, final ModCategory category) {
+  final length = categories.length;
+  var lo = 0;
+  var hi = length;
+  while (lo < hi) {
+    final mid = lo + ((hi - lo) >> 1);
+    if (compareNatural(categories[mid].name, category.name) < 0) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
+    }
+  }
+  if (lo >= length) {
+    return length - 1;
+  }
+  return lo;
+}
+
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({required this.child, super.key});
-
   final Widget child;
 
   @override
   ConsumerState<HomeShell> createState() => _HomeShellState();
+}
+
+class _FolderPaneItem extends PaneItem {
+  _FolderPaneItem({
+    required this.category,
+    super.onTap,
+  }) : super(
+          key: ValueKey(category),
+          title: Text(
+            category.name,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          icon: _getIcon(category.name),
+          body: const SizedBox.shrink(),
+        );
+  static const maxIconWidth = 80.0;
+  ModCategory category;
+
+  @override
+  Widget build(
+    final BuildContext context,
+    final bool selected,
+    final VoidCallback? onPressed, {
+    final PaneDisplayMode? displayMode,
+    final bool showTextOnTop = true,
+    final int? itemIndex,
+    final bool? autofocus,
+  }) =>
+      CategoryDropTarget(
+        category: category,
+        child: super.build(
+          context,
+          selected,
+          onPressed,
+          displayMode: displayMode,
+          showTextOnTop: showTextOnTop,
+          itemIndex: itemIndex,
+          autofocus: autofocus,
+        ),
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ModCategory>('category', category));
+  }
+
+  static Widget _buildImage(final String? imageFile) {
+    final Widget image;
+    if (imageFile == null) {
+      image = Image.asset('images/idk_icon.png');
+    } else {
+      image = TimeAwareFileImage(path: imageFile);
+    }
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: maxIconWidth),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: image,
+      ),
+    );
+  }
+
+  static Widget _getIcon(final String name) => Consumer(
+        builder: (final context, final ref, final child) {
+          final filePath = ref.watch(folderIconPathProvider(name));
+          return ref.watch(folderIconProvider)
+              ? _buildImage(filePath)
+              : const Icon(FluentIcons.folder_open);
+        },
+      );
 }
 
 class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
@@ -44,22 +177,51 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   static const _navigationPaneOpenWidth = 270.0;
 
   @override
-  void onWindowFocus() {
-    ref.invalidate(categoriesProvider);
+  Widget build(final BuildContext context) {
+    ref.listen(isOutdatedProvider, (final previous, final next) async {
+      if (next is AsyncData && next.requireValue) {
+        final remote = await ref.read(remoteVersionProvider.future);
+        _displayUpdateInfoBar(remote!);
+      }
+    });
+
+    if (ref.watch(gamesListProvider).isEmpty) {
+      return NavigationView(
+        appBar: getAppbar('Set the first game name'),
+        content: ScaffoldPage.withPadding(
+          header: const PageHeader(
+            title: Text('Set the first game name'),
+          ),
+          content: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('My game is...'),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: 200,
+                  child: TextFormBox(
+                    placeholder: 'Game name',
+                    onFieldSubmitted: (final value) {
+                      ref.read(gamesListProvider.notifier).addGame(value);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final categories = ref.watch(categoriesProvider);
+    return _buildData(categories);
   }
 
   @override
-  void onWindowResized() {
-    super.onWindowResized();
-    final read = ref.read(sharedPreferenceStorageProvider);
-    unawaited(
-      WindowManager.instance.getSize().then((final value) {
-        read
-          ..setString('windowWidth', value.width.toString())
-          ..setString('windowHeight', value.height.toString());
-        Logger().d('Window size: $value');
-      }),
-    );
+  void dispose() {
+    WindowManager.instance.removeListener(this);
+    super.dispose();
   }
 
   @override
@@ -117,52 +279,55 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   }
 
   @override
-  void dispose() {
-    WindowManager.instance.removeListener(this);
-    super.dispose();
+  void onWindowFocus() {
+    ref.invalidate(categoriesProvider);
   }
 
   @override
-  Widget build(final BuildContext context) {
-    ref.listen(isOutdatedProvider, (final previous, final next) async {
-      if (next is AsyncData && next.requireValue) {
-        final remote = await ref.read(remoteVersionProvider.future);
-        _displayUpdateInfoBar(remote!);
-      }
-    });
-
-    if (ref.watch(gamesListProvider).isEmpty) {
-      return NavigationView(
-        appBar: getAppbar('Set the first game name'),
-        content: ScaffoldPage.withPadding(
-          header: const PageHeader(
-            title: Text('Set the first game name'),
-          ),
-          content: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('My game is...'),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: 200,
-                  child: TextFormBox(
-                    placeholder: 'Game name',
-                    onFieldSubmitted: (final value) {
-                      ref.read(gamesListProvider.notifier).addGame(value);
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    final categories = ref.watch(categoriesProvider);
-    return _buildData(categories);
+  void onWindowResized() {
+    super.onWindowResized();
+    final read = ref.read(sharedPreferenceStorageProvider);
+    unawaited(
+      WindowManager.instance.getSize().then((final value) {
+        read
+          ..setString('windowWidth', value.width.toString())
+          ..setString('windowHeight', value.height.toString());
+        Logger().d('Window size: $value');
+      }),
+    );
   }
+
+  Widget _buildAutoSuggestBox(
+    final List<_FolderPaneItem> items,
+    final List<NavigationPaneItem> footerItems,
+  ) =>
+      AutoSuggestBox2(
+        items: items
+            .map(
+              (final e) => AutoSuggestBoxItem2(
+                value: e.key,
+                label: e.category.name,
+                onSelected: () => context.go(kCategoryRoute, extra: e.category),
+              ),
+            )
+            .toList(),
+        trailingIcon: const Icon(FluentIcons.search),
+        onSubmissionFailed: (final text) {
+          if (text.isEmpty) {
+            return;
+          }
+          final index = items.indexWhere((final e) {
+            final name =
+                (e.key! as ValueKey<ModCategory>).value.name.toLowerCase();
+            return name.startsWith(text.toLowerCase());
+          });
+          if (index == -1) {
+            return;
+          }
+          final category = items[index].category;
+          context.go(kCategoryRoute, extra: category);
+        },
+      );
 
   NavigationView _buildData(final List<ModCategory> categories) {
     final footerItems = [
@@ -408,6 +573,15 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     await _runLauncher();
   }
 
+  Future<void> _runLauncher() async {
+    final launcher = ref.read(gameConfigNotifierProvider).launcherFile;
+    final fsInterface = ref.read(fsInterfaceProvider);
+    if (launcher == null) {
+      return;
+    }
+    await fsInterface.runProgram(File(launcher));
+  }
+
   Future<void> _runMigoto() async {
     final path = ref.read(gameConfigNotifierProvider).modExecFile;
     final fsInterface = ref.read(fsInterfaceProvider);
@@ -423,181 +597,4 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       title: const Text('Ran 3d migoto'),
     );
   }
-
-  Future<void> _runLauncher() async {
-    final launcher = ref.read(gameConfigNotifierProvider).launcherFile;
-    final fsInterface = ref.read(fsInterfaceProvider);
-    if (launcher == null) {
-      return;
-    }
-    await fsInterface.runProgram(File(launcher));
-  }
-
-  Widget _buildAutoSuggestBox(
-    final List<_FolderPaneItem> items,
-    final List<NavigationPaneItem> footerItems,
-  ) =>
-      AutoSuggestBox2(
-        items: items
-            .map(
-              (final e) => AutoSuggestBoxItem2(
-                value: e.key,
-                label: e.category.name,
-                onSelected: () => context.go(kCategoryRoute, extra: e.category),
-              ),
-            )
-            .toList(),
-        trailingIcon: const Icon(FluentIcons.search),
-        onSubmissionFailed: (final text) {
-          if (text.isEmpty) {
-            return;
-          }
-          final index = items.indexWhere((final e) {
-            final name =
-                (e.key! as ValueKey<ModCategory>).value.name.toLowerCase();
-            return name.startsWith(text.toLowerCase());
-          });
-          if (index == -1) {
-            return;
-          }
-          final category = items[index].category;
-          context.go(kCategoryRoute, extra: category);
-        },
-      );
-}
-
-class _FolderPaneItem extends PaneItem {
-  _FolderPaneItem({
-    required this.category,
-    super.onTap,
-  }) : super(
-          key: ValueKey(category),
-          title: Text(
-            category.name,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          icon: _getIcon(category.name),
-          body: const SizedBox.shrink(),
-        );
-  static const maxIconWidth = 80.0;
-
-  static Widget _getIcon(final String name) => Consumer(
-        builder: (final context, final ref, final child) {
-          final filePath = ref.watch(folderIconPathProvider(name));
-          return ref.watch(folderIconProvider)
-              ? _buildImage(filePath)
-              : const Icon(FluentIcons.folder_open);
-        },
-      );
-
-  static Widget _buildImage(final String? imageFile) {
-    final Widget image;
-    if (imageFile == null) {
-      image = Image.asset('images/idk_icon.png');
-    } else {
-      image = TimeAwareFileImage(path: imageFile);
-    }
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: maxIconWidth),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: image,
-      ),
-    );
-  }
-
-  ModCategory category;
-
-  @override
-  Widget build(
-    final BuildContext context,
-    final bool selected,
-    final VoidCallback? onPressed, {
-    final PaneDisplayMode? displayMode,
-    final bool showTextOnTop = true,
-    final int? itemIndex,
-    final bool? autofocus,
-  }) =>
-      CategoryDropTarget(
-        category: category,
-        child: super.build(
-          context,
-          selected,
-          onPressed,
-          displayMode: displayMode,
-          showTextOnTop: showTextOnTop,
-          itemIndex: itemIndex,
-          autofocus: autofocus,
-        ),
-      );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ModCategory>('category', category));
-  }
-}
-
-Future<void> _runUpdateScript() async {
-  final url = Uri.parse('$kRepoReleases/download/GenshinModManager.zip');
-  final response = await http.get(url);
-  final archive = ZipDecoder().decodeBytes(response.bodyBytes);
-  await extractArchiveToDiskAsync(
-    archive,
-    Directory.current.path,
-    asyncWrite: true,
-  );
-  const updateScript = 'setlocal\n'
-      'echo update script running\n'
-      'set "sourceFolder=GenshinModManager"\n'
-      'if not exist "genshin_mod_manager.exe" (\n'
-      '    echo Maybe not in the mod manager folder? Exiting for safety.\n'
-      '    pause\n'
-      '    exit /b 1\n'
-      ')\n'
-      'if not exist %sourceFolder% (\n'
-      '    echo Failed to download data! Go to the link and install manually.\n'
-      '    pause\n'
-      '    exit /b 2\n'
-      ')\n'
-      "echo So it's good to go. Let's update.\n"
-      "for /f \"delims=\" %%i in ('dir /b /a-d ^| findstr /v /i \"update.cmd update.log error.log\"') do del \"%%i\"\n"
-      "for /f \"delims=\" %%i in ('dir /b /ad ^| findstr /v /i \"Resources %sourceFolder%\"') do rd /s /q \"%%i\"\n"
-      "for /f \"delims=\" %%i in ('dir /b \"%sourceFolder%\"') do move /y \"%sourceFolder%\\%%i\" .\n"
-      'rd /s /q %sourceFolder%\n'
-      'start /b genshin_mod_manager.exe\n'
-      'endlocal\n';
-  await File('update.cmd').writeAsString(updateScript);
-  unawaited(
-    Process.run(
-      'start',
-      [
-        'cmd',
-        '/c',
-        'timeout /t 3 && call update.cmd > update.log & del update.cmd',
-      ],
-      runInShell: true,
-    ),
-  );
-  // delay needed. otherwise the process will die before the script runs.
-  await Future<void>.delayed(const Duration(milliseconds: 200));
-  exit(0);
-}
-
-int _search(final List<ModCategory> categories, final ModCategory category) {
-  final length = categories.length;
-  var lo = 0;
-  var hi = length;
-  while (lo < hi) {
-    final mid = lo + ((hi - lo) >> 1);
-    if (compareNatural(categories[mid].name, category.name) < 0) {
-      lo = mid + 1;
-    } else {
-      hi = mid;
-    }
-  }
-  if (lo >= length) {
-    return length - 1;
-  }
-  return lo;
 }

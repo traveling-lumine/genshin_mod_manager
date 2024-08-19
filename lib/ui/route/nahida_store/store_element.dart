@@ -1,4 +1,14 @@
-part of 'nahida_store.dart';
+import 'dart:async';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
+import 'package:genshin_mod_manager/di/nahida_store.dart';
+import 'package:genshin_mod_manager/domain/entity/akasha.dart';
+import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
+import 'package:genshin_mod_manager/ui/util/open_url.dart';
+import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class StoreElement extends ConsumerWidget {
   const StoreElement({
@@ -7,8 +17,8 @@ class StoreElement extends ConsumerWidget {
     required this.passwordController,
     super.key,
   });
-
   final TextEditingController passwordController;
+
   final NahidaliveElement element;
   final ModCategory category;
 
@@ -63,42 +73,19 @@ class StoreElement extends ConsumerWidget {
     );
   }
 
-  Widget _buildPreview(final BuildContext context) => Center(
-        child: GestureDetector(
-          onTap: () => unawaited(
-            showDialog(
-              context: context,
-              barrierDismissible: true,
-              builder: (final dialogContext) => GestureDetector(
-                onTap: Navigator.of(dialogContext).pop,
-                onSecondaryTap: Navigator.of(dialogContext).pop,
-                child: CachedNetworkImage(
-                  imageUrl: element.previewUrl,
-                  progressIndicatorBuilder:
-                      (final context, final url, final progress) =>
-                          ProgressRing(value: progress.progress),
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ),
-          child: CachedNetworkImage(
-            imageUrl: element.previewUrl,
-            fit: BoxFit.contain,
-            progressIndicatorBuilder:
-                (final context, final url, final progress) =>
-                    ProgressRing(value: progress.progress),
-            errorWidget: (final context, final url, final error) =>
-                const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(FluentIcons.error),
-                SelectableText('Failed to load'),
-              ],
-            ),
-          ),
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(
+        DiagnosticsProperty<TextEditingController>(
+          'passwordController',
+          passwordController,
         ),
-      );
+      )
+      ..add(DiagnosticsProperty<NahidaliveElement>('element', element))
+      ..add(DiagnosticsProperty<ModCategory>('category', category));
+  }
 
   Widget _buildDescriptionColumn(
     final BuildContext context,
@@ -184,6 +171,43 @@ class StoreElement extends ConsumerWidget {
         ],
       );
 
+  Widget _buildPreview(final BuildContext context) => Center(
+        child: GestureDetector(
+          onTap: () => unawaited(
+            showDialog(
+              context: context,
+              barrierDismissible: true,
+              builder: (final dialogContext) => GestureDetector(
+                onTap: Navigator.of(dialogContext).pop,
+                onSecondaryTap: Navigator.of(dialogContext).pop,
+                child: CachedNetworkImage(
+                  imageUrl: element.previewUrl,
+                  progressIndicatorBuilder:
+                      (final context, final url, final progress) =>
+                          Center(child: ProgressRing(value: progress.progress)),
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+          child: CachedNetworkImage(
+            imageUrl: element.previewUrl,
+            fit: BoxFit.contain,
+            progressIndicatorBuilder:
+                (final context, final url, final progress) =>
+                    ProgressRing(value: progress.progress),
+            errorWidget: (final context, final url, final error) =>
+                const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(FluentIcons.error),
+                SelectableText('Failed to load'),
+              ],
+            ),
+          ),
+        ),
+      );
+
   Widget _downloadDialog(
     final BuildContext dialogContext,
     final BuildContext context,
@@ -210,18 +234,4 @@ class StoreElement extends ConsumerWidget {
           ),
         ],
       );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(
-        DiagnosticsProperty<TextEditingController>(
-          'passwordController',
-          passwordController,
-        ),
-      )
-      ..add(DiagnosticsProperty<NahidaliveElement>('element', element))
-      ..add(DiagnosticsProperty<ModCategory>('category', category));
-  }
 }

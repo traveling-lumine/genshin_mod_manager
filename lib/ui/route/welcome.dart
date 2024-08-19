@@ -18,18 +18,6 @@ class _WelcomeRouteState extends State<WelcomeRoute> {
   final _tapGestureRecognizer = TapGestureRecognizer();
 
   @override
-  void initState() {
-    super.initState();
-    _tapGestureRecognizer.onTap = () => openUrl(kRepoBase);
-  }
-
-  @override
-  void dispose() {
-    _tapGestureRecognizer.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(final BuildContext context) => ScaffoldPage(
         header: const PageHeader(title: Text('Welcome')),
         content: Center(
@@ -61,4 +49,16 @@ class _WelcomeRouteState extends State<WelcomeRoute> {
           ),
         ),
       );
+
+  @override
+  void dispose() {
+    _tapGestureRecognizer.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _tapGestureRecognizer.onTap = () => openUrl(kRepoBase);
+  }
 }

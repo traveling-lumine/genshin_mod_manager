@@ -17,17 +17,8 @@ import 'package:genshin_mod_manager/ui/widget/third_party/flutter/no_deref_file_
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-/// A route that shows the settings.
-class SettingRoute extends StatelessWidget {
-  /// Creates a [SettingRoute].
+class SettingRoute extends ConsumerWidget {
   const SettingRoute({super.key});
-
-  @override
-  Widget build(final BuildContext context) => const _SettingRoute();
-}
-
-class _SettingRoute extends ConsumerWidget {
-  const _SettingRoute();
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) =>
@@ -158,165 +149,11 @@ class _SettingRoute extends ConsumerWidget {
       );
 }
 
-class _PathSelectItem extends StatelessWidget {
-  const _PathSelectItem({
-    required this.title,
-    required this.icon,
-    required this.selector,
-    required this.onPressed,
-  });
-
-  final String title;
-  final String? Function(GameConfig vm) selector;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(final BuildContext context) => ListTile(
-        title: Text(title),
-        subtitle: Consumer(
-          builder: (final context, final ref, final child) {
-            final value =
-                ref.watch(gameConfigNotifierProvider.select(selector));
-            return Text(value ?? 'Please select...');
-          },
-        ),
-        leading: RepaintBoundary(
-          child: Button(
-            onPressed: onPressed,
-            child: Icon(icon),
-          ),
-        ),
-      );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(StringProperty('title', title))
-      ..add(
-        ObjectFlagProperty<String? Function(GameConfig vm)>.has(
-          'selector',
-          selector,
-        ),
-      )
-      ..add(DiagnosticsProperty<IconData>('icon', icon))
-      ..add(ObjectFlagProperty<VoidCallback>.has('onPressed', onPressed));
-  }
-}
-
-class _SwitchItem<T> extends StatelessWidget {
-  _SwitchItem({
-    required final String text,
-    required final AutoDisposeNotifierProvider<ValueSettable<T>, T> provider,
-    final bool Function(T)? boolMapper,
-    final T Function(bool)? typedMapper,
-  })  : _provider = provider,
-        _text = text,
-        _boolMapper = boolMapper ??
-            ((final value) {
-              if (T == bool) {
-                return value as bool;
-              }
-              throw ArgumentError('boolMapper must be provided for $T');
-            }),
-        _typedMapper = typedMapper ??
-            ((final value) {
-              if (T == bool) {
-                return value as T;
-              }
-              throw ArgumentError('typedMapper must be provided for $T');
-            });
-
-  final String _text;
-  final AutoDisposeNotifierProvider<ValueSettable<T>, T> _provider;
-  final bool Function(T) _boolMapper;
-  final T Function(bool) _typedMapper;
-
-  @override
-  Widget build(final BuildContext context) => ListTile(
-        title: Text(_text),
-        leading: Consumer(
-          builder: (final context, final ref, final child) => RepaintBoundary(
-            child: ToggleSwitch(
-              checked: _boolMapper(ref.watch(_provider)),
-              onChanged: (final value) {
-                ref.read(_provider.notifier).setValue(_typedMapper(value));
-              },
-            ),
-          ),
-        ),
-      );
-}
-
-class _ComboItem extends StatelessWidget {
-  const _ComboItem({
-    required this.text,
-  });
-
-  final String text;
-
-  @override
-  Widget build(final BuildContext context) => ListTile(
-        title: Text(text),
-        leading: const GameSelector(),
-      );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(StringProperty('text', text));
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(final BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-        child: Text(
-          title,
-          style: FluentTheme.of(context).typography.subtitle,
-        ),
-      );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(StringProperty('title', title));
-  }
-}
-
-class _SectionSubheader extends StatelessWidget {
-  const _SectionSubheader({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(final BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
-        child: Text(
-          title,
-          style: FluentTheme.of(context).typography.bodyLarge,
-        ),
-      );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(StringProperty('title', title));
-  }
-}
-
 class _ColorChanger extends ConsumerWidget {
   const _ColorChanger({
     required this.isBright,
     required this.isEnabled,
   });
-
   final bool isBright;
   final bool isEnabled;
 
@@ -415,7 +252,6 @@ class _ColorPickerDialog extends HookConsumerWidget {
     required this.isBright,
     required this.isEnabled,
   });
-
   final bool isBright;
   final bool isEnabled;
 
@@ -476,4 +312,154 @@ class _ColorPickerDialog extends HookConsumerWidget {
       ..add(DiagnosticsProperty<bool>('isBright', isBright))
       ..add(DiagnosticsProperty<bool>('isEnabled', isEnabled));
   }
+}
+
+class _ComboItem extends StatelessWidget {
+  const _ComboItem({
+    required this.text,
+  });
+  final String text;
+
+  @override
+  Widget build(final BuildContext context) => ListTile(
+        title: Text(text),
+        leading: const GameSelector(),
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('text', text));
+  }
+}
+
+class _PathSelectItem extends StatelessWidget {
+  const _PathSelectItem({
+    required this.title,
+    required this.icon,
+    required this.selector,
+    required this.onPressed,
+  });
+  final String title;
+  final String? Function(GameConfig vm) selector;
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(final BuildContext context) => ListTile(
+        title: Text(title),
+        subtitle: Consumer(
+          builder: (final context, final ref, final child) {
+            final value =
+                ref.watch(gameConfigNotifierProvider.select(selector));
+            return Text(value ?? 'Please select...');
+          },
+        ),
+        leading: RepaintBoundary(
+          child: Button(
+            onPressed: onPressed,
+            child: Icon(icon),
+          ),
+        ),
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('title', title))
+      ..add(
+        ObjectFlagProperty<String? Function(GameConfig vm)>.has(
+          'selector',
+          selector,
+        ),
+      )
+      ..add(DiagnosticsProperty<IconData>('icon', icon))
+      ..add(ObjectFlagProperty<VoidCallback>.has('onPressed', onPressed));
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title});
+  final String title;
+
+  @override
+  Widget build(final BuildContext context) => Padding(
+        padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+        child: Text(
+          title,
+          style: FluentTheme.of(context).typography.subtitle,
+        ),
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+  }
+}
+
+class _SectionSubheader extends StatelessWidget {
+  const _SectionSubheader({required this.title});
+  final String title;
+
+  @override
+  Widget build(final BuildContext context) => Padding(
+        padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+        child: Text(
+          title,
+          style: FluentTheme.of(context).typography.bodyLarge,
+        ),
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+  }
+}
+
+class _SwitchItem<T> extends StatelessWidget {
+  _SwitchItem({
+    required final String text,
+    required final AutoDisposeNotifierProvider<ValueSettable<T>, T> provider,
+    final bool Function(T)? boolMapper,
+    final T Function(bool)? typedMapper,
+  })  : _provider = provider,
+        _text = text,
+        _boolMapper = boolMapper ??
+            ((final value) {
+              if (T == bool) {
+                return value as bool;
+              }
+              throw ArgumentError('boolMapper must be provided for $T');
+            }),
+        _typedMapper = typedMapper ??
+            ((final value) {
+              if (T == bool) {
+                return value as T;
+              }
+              throw ArgumentError('typedMapper must be provided for $T');
+            });
+  final String _text;
+  final AutoDisposeNotifierProvider<ValueSettable<T>, T> _provider;
+
+  final bool Function(T) _boolMapper;
+  final T Function(bool) _typedMapper;
+
+  @override
+  Widget build(final BuildContext context) => ListTile(
+        title: Text(_text),
+        leading: Consumer(
+          builder: (final context, final ref, final child) => RepaintBoundary(
+            child: ToggleSwitch(
+              checked: _boolMapper(ref.watch(_provider)),
+              onChanged: (final value) {
+                ref.read(_provider.notifier).setValue(_typedMapper(value));
+              },
+            ),
+          ),
+        ),
+      );
 }
