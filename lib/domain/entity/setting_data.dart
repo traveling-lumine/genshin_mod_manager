@@ -1,0 +1,4 @@
+enum DragImportType {
+  move,
+  copy,
+}

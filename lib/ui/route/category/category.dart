@@ -1,24 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:genshin_mod_manager/data/helper/fsops.dart';
-import 'package:genshin_mod_manager/data/helper/mod_switcher.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/data/repo/akasha.dart';
-import 'package:genshin_mod_manager/data/repo/mod_writer.dart';
-import 'package:genshin_mod_manager/domain/entity/ini.dart';
+import 'package:genshin_mod_manager/di/fs_interface.dart';
+import 'package:genshin_mod_manager/di/fs_watcher.dart';
 import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/flow/app_state.dart';
-import 'package:genshin_mod_manager/flow/category.dart';
-import 'package:genshin_mod_manager/flow/ini_widget.dart';
-import 'package:genshin_mod_manager/flow/mod_card.dart';
+import 'package:genshin_mod_manager/domain/usecase/file_system.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
-import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
+import 'package:genshin_mod_manager/ui/route/category/mod_card.dart';
 import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
 import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
 import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
@@ -27,15 +18,9 @@ import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_delegate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:logger/logger.dart';
-import 'package:pasteboard/pasteboard.dart';
-import 'package:window_manager/window_manager.dart';
-
-part 'ini_widget.dart';
-part 'mod_card.dart';
 
 /// A route that displays a category of mods
-class CategoryRoute extends HookWidget {
+class CategoryRoute extends HookConsumerWidget {
   /// Creates a [CategoryRoute].
   const CategoryRoute({required this.category, super.key});
 
@@ -53,18 +38,21 @@ class CategoryRoute extends HookWidget {
   final ModCategory category;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final scrollController = useScrollController();
     return CategoryDropTarget(
       category: category,
       child: ScaffoldPage(
-        header: _buildHeader(scrollController),
+        header: _buildHeader(scrollController, ref),
         content: _buildContent(scrollController),
       ),
     );
   }
 
-  Widget _buildHeader(final ScrollController scrollController) {
+  Widget _buildHeader(
+    final ScrollController scrollController,
+    final WidgetRef ref,
+  ) {
     final context = useContext();
     return PageHeader(
       title: Text(category.name),
@@ -85,7 +73,7 @@ class CategoryRoute extends HookWidget {
               primaryItems: [
                 CommandBarButton(
                   icon: const Icon(FluentIcons.folder_open),
-                  onPressed: _onFolderOpen,
+                  onPressed: () async => _onFolderOpen(ref),
                 ),
                 CommandBarButton(
                   icon: const Icon(FluentIcons.download),
@@ -102,7 +90,7 @@ class CategoryRoute extends HookWidget {
   Widget _buildSearchBox(final ScrollController scrollController) => Consumer(
         builder: (final context, final ref, final child) {
           final whenOrNull =
-              ref.watch(categoryWatcherProvider(category)).whenOrNull(
+              ref.watch(modsInCategoryProvider(category)).whenOrNull(
             data: (final data) {
               final items = data.indexed.map(
                 (final e) => AutoSuggestBoxItem2(
@@ -143,7 +131,7 @@ class CategoryRoute extends HookWidget {
       ThickScrollbar(
         child: Consumer(
           builder: (final context, final ref, final child) =>
-              ref.watch(categoryWatcherProvider(category)).when(
+              ref.watch(modsInCategoryProvider(category)).when(
                     skipLoadingOnReload: true,
                     data: (final data) => _buildData(data, scrollController),
                     error: _buildError,
@@ -156,7 +144,7 @@ class CategoryRoute extends HookWidget {
     final List<Mod> data,
     final ScrollController scrollController,
   ) {
-    final children = data.map((final e) => _ModCard(mod: e)).toList();
+    final children = data.map((final e) => ModCard(mod: e)).toList();
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       child: GridView.builder(
@@ -189,7 +177,7 @@ class CategoryRoute extends HookWidget {
             children: [
               ProgressRing(),
               SizedBox(height: 16),
-              Text('Loading...'),
+              Text('Collecting mods...'),
             ],
           ),
         ),
@@ -213,13 +201,14 @@ class CategoryRoute extends HookWidget {
     );
   }
 
-  void _onFolderOpen() {
-    openFolder(category.path);
+  Future<void> _onFolderOpen(final WidgetRef ref) async {
+    final fsInterface = ref.read(fsInterfaceProvider);
+    await openFolderUseCase(fsInterface, category.path);
   }
 
-  void _onDownloadPressed(final BuildContext context) => unawaited(
-        context.push(kNahidaStoreRoute, extra: category),
-      );
+  void _onDownloadPressed(final BuildContext context) {
+    unawaited(context.push(kNahidaStoreRoute, extra: category));
+  }
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {

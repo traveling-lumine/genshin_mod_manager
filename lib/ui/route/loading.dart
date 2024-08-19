@@ -1,8 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:genshin_mod_manager/flow/storage.dart';
+import 'package:genshin_mod_manager/di/storage.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:go_router/go_router.dart';
@@ -16,19 +15,25 @@ class LoadingRoute extends HookConsumerWidget {
   static const String _destinationRoute = kHomeRoute;
 
   @override
-  Widget build(final BuildContext context, final WidgetRef ref) =>
-      ref.watch(sharedPreferenceProvider).when(
-            data: _buildData,
-            error: (final error, final stackTrace) =>
-                _buildError(error, context, ref),
-            loading: _buildLoading,
-          );
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    ref.listen(
+      sharedPreferenceProvider,
+      (final previous, final next) {
+        if (next is AsyncData) {
+          _goToMain(context);
+        }
+      },
+    );
+    return ref.watch(sharedPreferenceProvider).when(
+          data: _buildData,
+          error: (final error, final stackTrace) =>
+              _buildError(error, context, ref),
+          loading: _buildLoading,
+        );
+  }
 
   Widget _buildData(final Object? data) {
     final context = useContext();
-    SchedulerBinding.instance.addPostFrameCallback((final timeStamp) {
-      _goToMain(context);
-    });
     return _TitledNavView(
       title: 'Done!',
       children: [

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
@@ -57,16 +56,21 @@ String? findPreviewFileInString(
   return null;
 }
 
-/// Runs a [program] by default method.
-void runProgram(final File program) {
-  final pwd = program.parent.path;
-  final pName = program.path.pBasename;
-  unawaited(
-    Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true),
-  );
-}
-
-/// Opens a folder at [path].
-void openFolder(final String path) {
-  unawaited(Process.start('explorer', [path], runInShell: true));
+(String, int)? findPreviewFileInStringTuple(
+  final List<(String, int)> paths, {
+  final String name = 'preview',
+}) {
+  for (final element in paths) {
+    final filename = element.$1.pBNameWoExt;
+    if (!filename.pEquals(name)) {
+      continue;
+    }
+    final ext = element.$1.pExtension;
+    for (final previewExt in _previewExtensions) {
+      if (ext.pEquals(previewExt)) {
+        return element;
+      }
+    }
+  }
+  return null;
 }

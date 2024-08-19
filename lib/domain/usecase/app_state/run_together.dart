@@ -1,5 +1,7 @@
-import 'package:genshin_mod_manager/domain/constant.dart';
 import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
+
+const runTogetherKey = 'runTogether';
+const runTogetherDefault = false;
 
 bool initializeRunTogetherUseCase(final PersistentStorage watch) =>
     watch.getBool(runTogetherKey) ?? runTogetherDefault;

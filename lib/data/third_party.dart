@@ -3,6 +3,7 @@ library;
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:cp949_codec/cp949_codec.dart';
@@ -21,21 +22,11 @@ Future<void> extractArchiveToDiskAsync(
   }
   for (final file in archive.files) {
     var name = file.name;
-    // decode name into Uint8List, try decoding in utf-8, euc-kr.
-    // if both fail, use the original name.
-    final uint = name.codeUnits;
     try {
-      name = const Utf8Decoder().convert(uint);
+      cp949.encodeToString(name);
+      name = cp949.decodeString(name);
     } on FormatException {
-      try {
-        name = cp949.decodeString(name);
-      } on FormatException {
-        try {
-          name = cp949.decode(uint);
-        } on FormatException {
-          // do nothing
-        }
-      }
+      // do nothing
     }
     final filePath = path.join(outputPath, path.normalize(name));
 

@@ -1,6 +1,9 @@
-import 'package:fluent_ui/fluent_ui.dart';
+import 'dart:ui';
+
+import 'package:genshin_mod_manager/di/storage.dart';
 import 'package:genshin_mod_manager/domain/entity/game_config.dart';
 import 'package:genshin_mod_manager/domain/entity/preset.dart';
+import 'package:genshin_mod_manager/domain/entity/setting_data.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/card_color.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/dark_mode.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/enabled_first.dart';
@@ -8,7 +11,6 @@ import 'package:genshin_mod_manager/domain/usecase/app_state/folder_icon.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/game_config.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/move_on_drag.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/run_together.dart';
-import 'package:genshin_mod_manager/flow/storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_state.g.dart';
@@ -117,14 +119,14 @@ class GameConfigNotifier extends _$GameConfigNotifier {
 }
 
 /// The notifier for boolean value.
-mixin ValueSettable on AutoDisposeNotifier<bool> {
+abstract interface class ValueSettable<T> implements AutoDisposeNotifier<T> {
   /// Sets the value.
-  void setValue(final bool value);
+  void setValue(final T value);
 }
 
 /// The notifier for the dark mode.
 @riverpod
-class DarkMode extends _$DarkMode with ValueSettable {
+class DarkMode extends _$DarkMode implements ValueSettable<bool> {
   @override
   bool build() {
     final watch = ref.watch(sharedPreferenceStorageProvider);
@@ -141,7 +143,7 @@ class DarkMode extends _$DarkMode with ValueSettable {
 
 /// The notifier for the enabled first.
 @riverpod
-class EnabledFirst extends _$EnabledFirst with ValueSettable {
+class EnabledFirst extends _$EnabledFirst implements ValueSettable<bool> {
   @override
   bool build() {
     final watch = ref.watch(sharedPreferenceStorageProvider);
@@ -159,7 +161,7 @@ class EnabledFirst extends _$EnabledFirst with ValueSettable {
 
 /// The notifier for the folder icon.
 @riverpod
-class FolderIcon extends _$FolderIcon with ValueSettable {
+class FolderIcon extends _$FolderIcon implements ValueSettable<bool> {
   @override
   bool build() {
     final watch = ref.watch(sharedPreferenceStorageProvider);
@@ -176,24 +178,27 @@ class FolderIcon extends _$FolderIcon with ValueSettable {
 
 /// The notifier for the move on drag.
 @riverpod
-class MoveOnDrag extends _$MoveOnDrag with ValueSettable {
+class MoveOnDrag extends _$MoveOnDrag implements ValueSettable<DragImportType> {
   @override
-  bool build() {
+  DragImportType build() {
     final watch = ref.watch(sharedPreferenceStorageProvider);
-    return initializeMoveOnDragUseCase(watch);
+    return initializeMoveOnDragUseCase(watch)
+        ? DragImportType.move
+        : DragImportType.copy;
   }
 
   @override
-  void setValue(final bool value) {
+  void setValue(final DragImportType value) {
     final read = ref.read(sharedPreferenceStorageProvider);
-    setMoveOnDragUseCase(read, value);
+    final boolValue = value == DragImportType.move;
+    setMoveOnDragUseCase(read, boolValue);
     state = value;
   }
 }
 
 /// The notifier for the run together.
 @riverpod
-class RunTogether extends _$RunTogether with ValueSettable {
+class RunTogether extends _$RunTogether implements ValueSettable<bool> {
   @override
   bool build() {
     final watch = ref.watch(sharedPreferenceStorageProvider);

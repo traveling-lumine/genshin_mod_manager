@@ -8,18 +8,17 @@ on:
       - reopened
       - labeled
       - unlabeled
-    
 
 jobs:
   check_version_increment:
     if: contains(github.event.pull_request.labels.*.name, 'release') || contains(github.event.pull_request.labels.*.name, 'build')
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-    
+
       - name: Get the latest tag
         run: |
           LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)

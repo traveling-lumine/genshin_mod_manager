@@ -7,22 +7,29 @@ on:
       - synchronize
       - reopened
     paths-ignore:
-      - '.github/**'
-      - '.vscode/**'
-      - '.gitignore'
-      - 'LICENSE'
-      - '*.md'
-    
+      - ".github/**"
+      - ".readme/**"
+      - ".gitignore"
+      - "LICENSE"
+      - "*.md"
 
 jobs:
   flutter-test:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Flutter
-      uses: subosito/flutter-action@v2
+      - name: Set up secret file
+        run: |
+          echo @'
+          ${{ secrets.REMOTE_SECRET }}
+          '@ > .env
 
-    - name: Flutter test
-      run: flutter test
+      - uses: subosito/flutter-action@v2
+
+      - name: Run build_runner
+        run: dart run build_runner build -d
+
+      - name: Flutter test
+        run: flutter test
