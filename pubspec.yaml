@@ -2,7 +2,7 @@ name: genshin_mod_manager
 description: Genshin mod manager.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.5.5+2
+version: 1.5.5+3
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
