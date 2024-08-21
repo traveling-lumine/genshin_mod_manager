@@ -484,10 +484,9 @@ class _StringItem extends ConsumerWidget {
       title: Text(title),
       subtitle:
           const Text('Leave blank to use default. Use %0 for the file path.'),
-      trailing: Expanded(
+      trailing: Flexible(
         child: TextFormBox(
           onChanged: (final value) {
-            print(value);
             ref
                 .read(fsInterfaceProvider.notifier)
                 .setIniEditorArgument(value.isEmpty ? null : value);
