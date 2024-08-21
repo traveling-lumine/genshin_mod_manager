@@ -70,7 +70,7 @@ class FileSystemInterfaceImpl implements FileSystemInterface {
   Future<void> openTerminal(final String path) async {
     await Process.run(
       'start',
-      ['pwsh'],
+      ['powershell'],
       workingDirectory: path,
       runInShell: true,
     );
