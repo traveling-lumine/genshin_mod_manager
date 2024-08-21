@@ -11,6 +11,7 @@ import 'package:genshin_mod_manager/domain/usecase/app_state/folder_icon.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/game_config.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/move_on_drag.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/run_together.dart';
+import 'package:genshin_mod_manager/domain/usecase/app_state/separate_run.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_state.g.dart';
@@ -235,5 +236,22 @@ class CardColor extends _$CardColor {
       isEnabled: isEnabled,
     );
     state = color;
+  }
+}
+
+@riverpod
+class SeparateRunOverride extends _$SeparateRunOverride {
+  @override
+  bool? build() {
+    final repository = ref.watch(sharedPreferenceStorageProvider);
+    final currentGame = ref.watch(targetGameProvider);
+    return initializeSeparateRunOverrideUseCase(repository, currentGame);
+  }
+
+  void setValue(final bool? value) {
+    final repository = ref.read(sharedPreferenceStorageProvider);
+    final currentGame = ref.read(targetGameProvider);
+    setSeparateRunOverrideUseCase(repository, currentGame, value);
+    state = value;
   }
 }

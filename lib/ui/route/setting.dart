@@ -14,6 +14,7 @@ import 'package:genshin_mod_manager/domain/entity/setting_data.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/card_color.dart';
 import 'package:genshin_mod_manager/ui/constant.dart';
 import 'package:genshin_mod_manager/ui/widget/game_selector.dart';
+import 'package:genshin_mod_manager/ui/widget/setting_element.dart';
 import 'package:genshin_mod_manager/ui/widget/third_party/flutter/no_deref_file_opener.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -79,6 +80,27 @@ class SettingRoute extends ConsumerWidget {
           _SwitchItem(
             text: 'Run 3d migoto and launcher using one button',
             provider: runTogetherProvider,
+            content: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Checkbox(
+                    checked: ref.watch(separateRunOverrideProvider),
+                    onChanged: (final value) {
+                      final res = switch (value) {
+                        true => null,
+                        false => false,
+                        null => true,
+                      };
+                      ref
+                          .read(separateRunOverrideProvider.notifier)
+                          .setValue(res);
+                    },
+                  ),
+                ),
+                const Text('Per-game Override'),
+              ],
+            ),
           ),
           _SwitchItem(
             text: 'Move folder instead of copying for mod folder drag-and-drop',
@@ -103,13 +125,18 @@ class SettingRoute extends ConsumerWidget {
             text: 'Target Game',
           ),
           const _SectionHeader(title: 'Themes'),
-          const _SectionSubheader(
-            title: 'Card colors (hover on the icons to see details)',
+          const SettingElement(
+            text: 'Card colors (hover on the icons to see details)',
+            initiallyExpanded: true,
+            content: Column(
+              children: [
+                _ColorChanger(isBright: true, isEnabled: true),
+                _ColorChanger(isBright: true, isEnabled: false),
+                _ColorChanger(isBright: false, isEnabled: true),
+                _ColorChanger(isBright: false, isEnabled: false),
+              ],
+            ),
           ),
-          const _ColorChanger(isBright: true, isEnabled: true),
-          const _ColorChanger(isBright: true, isEnabled: false),
-          const _ColorChanger(isBright: false, isEnabled: true),
-          const _ColorChanger(isBright: false, isEnabled: false),
           const _SectionHeader(title: 'Misc'),
           const _StringItem(title: 'Ini file editor arguments'),
         ],
@@ -324,9 +351,9 @@ class _ComboItem extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(final BuildContext context) => ListTile(
-        title: Text(text),
-        leading: const GameSelector(),
+  Widget build(final BuildContext context) => SettingElement(
+        text: text,
+        trailing: const GameSelector(),
       );
 
   @override
@@ -350,20 +377,20 @@ class _PathSelectItem extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(final BuildContext context) => ListTile(
-        title: Text(title),
-        subtitle: Consumer(
+  Widget build(final BuildContext context) => SettingElement(
+        text: title,
+        trailing: RepaintBoundary(
+          child: Button(
+            onPressed: onPressed,
+            child: Icon(icon),
+          ),
+        ),
+        subTitle: Consumer(
           builder: (final context, final ref, final child) {
             final value =
                 ref.watch(gameConfigNotifierProvider.select(selector));
             return Text(value ?? 'Please select...');
           },
-        ),
-        leading: RepaintBoundary(
-          child: Button(
-            onPressed: onPressed,
-            child: Icon(icon),
-          ),
         ),
       );
 
@@ -389,7 +416,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+        padding: const EdgeInsets.all(16),
         child: Text(
           title,
           style: FluentTheme.of(context).typography.subtitle,
@@ -426,11 +453,15 @@ class _SectionSubheader extends StatelessWidget {
 class _SwitchItem<T> extends StatelessWidget {
   _SwitchItem({
     required final String text,
+    final String? subText,
     required final AutoDisposeNotifierProvider<ValueSettable<T>, T> provider,
+    this.content,
+    this.leading,
     final bool Function(T)? boolMapper,
     final T Function(bool)? typedMapper,
   })  : _provider = provider,
         _text = text,
+        _subText = subText,
         _boolMapper = boolMapper ??
             ((final value) {
               if (T == bool) {
@@ -446,15 +477,20 @@ class _SwitchItem<T> extends StatelessWidget {
               throw ArgumentError('typedMapper must be provided for $T');
             });
   final String _text;
+  final String? _subText;
   final AutoDisposeNotifierProvider<ValueSettable<T>, T> _provider;
 
   final bool Function(T) _boolMapper;
   final T Function(bool) _typedMapper;
+  final Widget? content;
+  final Widget? leading;
 
   @override
-  Widget build(final BuildContext context) => ListTile(
-        title: Text(_text),
-        leading: Consumer(
+  Widget build(final BuildContext context) => SettingElement(
+        text: _text,
+        subTitle: _subText == null ? null : Text(_subText),
+        content: content,
+        trailing: Consumer(
           builder: (final context, final ref, final child) => RepaintBoundary(
             child: ToggleSwitch(
               checked: _boolMapper(ref.watch(_provider)),
@@ -480,11 +516,12 @@ class _StringItem extends ConsumerWidget {
     } else {
       initString = initArguments.map((final e) => e ?? '%0').join(' ');
     }
-    return ListTile(
-      title: Text(title),
-      subtitle:
+    return SettingElement(
+      text: title,
+      subTitle:
           const Text('Leave blank to use default. Use %0 for the file path.'),
-      trailing: Flexible(
+      trailing: SizedBox(
+        width: 300,
         child: TextFormBox(
           onChanged: (final value) {
             ref
