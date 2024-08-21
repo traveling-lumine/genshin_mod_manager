@@ -90,86 +90,99 @@ class StoreElement extends ConsumerWidget {
   Widget _buildDescriptionColumn(
     final BuildContext context,
     final List<CommandBarItem> primaryItems,
-  ) =>
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  element.title,
-                  style: FluentTheme.of(context).typography.subtitle,
-                ),
-              ),
-              IntrinsicCommandBarCard(
-                child: CommandBar(
-                  overflowBehavior: CommandBarOverflowBehavior.clip,
-                  primaryItems: primaryItems,
-                ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: SizedBox(
-                width: double.infinity,
-                child: SelectableText(element.description ?? '🧐'),
+  ) {
+    final description = element.description;
+    final bodyStyle = FluentTheme.of(context).typography.body;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                element.title,
+                style: FluentTheme.of(context).typography.subtitle,
               ),
             ),
-          ),
-          const Expanded(
-            flex: 0,
-            child: SizedBox(),
-          ),
-          if (element.tags.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: Wrap(
-                runSpacing: 4,
-                children: [
-                  ...element.tags.map((final e) {
-                    final isBright = FluentTheme.of(context).brightness.isLight;
-                    var color = isBright ? Colors.grey : Colors.grey[40];
-                    final nsfwTags = [
-                      'nsfw',
-                      '18+',
-                      'r18',
-                      '19',
-                      'hentai',
-                    ];
-                    if (nsfwTags.contains(e.toLowerCase())) {
-                      color = Colors.red;
-                    }
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 1,
-                      ),
-                      margin: const EdgeInsets.symmetric(horizontal: 2),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: color,
-                        ),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Text(
-                        e,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: color,
-                        ),
-                      ),
-                    );
-                  }),
-                ],
+            IntrinsicCommandBarCard(
+              child: CommandBar(
+                overflowBehavior: CommandBarOverflowBehavior.clip,
+                primaryItems: primaryItems,
               ),
             ),
-          const SizedBox(height: 10),
-        ],
-      );
+          ],
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            child: SizedBox(
+              width: double.infinity,
+              child: description != null
+                  ? SelectableText(description)
+                  : SelectableText.rich(
+                      TextSpan(
+                        text: 'No description',
+                        style: bodyStyle?.copyWith(
+                          fontStyle: FontStyle.italic,
+                          color: bodyStyle.color?.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+        ),
+        const Expanded(
+          flex: 0,
+          child: SizedBox(),
+        ),
+        if (element.tags.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Wrap(
+              runSpacing: 4,
+              children: [
+                ...element.tags.map((final e) {
+                  final isBright = FluentTheme.of(context).brightness.isLight;
+                  var color = isBright ? Colors.grey : Colors.grey[40];
+                  final nsfwTags = [
+                    'nsfw',
+                    '18+',
+                    'r18',
+                    '19',
+                    'hentai',
+                  ];
+                  if (nsfwTags.contains(e.toLowerCase())) {
+                    color = Colors.red;
+                  }
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 1,
+                    ),
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: color,
+                      ),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Text(
+                      e,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        const SizedBox(height: 10),
+      ],
+    );
+  }
 
   Widget _buildPreview(final BuildContext context) => Center(
         child: GestureDetector(
