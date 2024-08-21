@@ -395,7 +395,7 @@ class _ModCardState extends ConsumerState<ModCard> {
       try {
         Directory(widget.mod.path).deleteSync(recursive: true);
         final writer = createModWriter(category: widget.mod.category);
-        await writer.write(
+        await writer(
           modName: targetElement.title,
           data: data,
         );

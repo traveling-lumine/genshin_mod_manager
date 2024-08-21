@@ -21,7 +21,7 @@ final class AkashaDownloadUrlUseCase {
       throw const WrongPasswordException();
     }
     final data = await api.download(url);
-    await writer.write(
+    await writer(
       modName: element.title,
       data: data,
     ); // ModZipExtractionException

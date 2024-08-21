@@ -18,12 +18,12 @@ void main() {
   });
 
   testWidgets('WelcomeRoute welcomes you', (final tester) async {
-    await tester.pumpWidget(buildWidget());
+    await pumpMainWidget(tester);
 
     expect(find.text('Welcome'), findsAny);
   });
   testWidgets('WelcomeRoute has a link to GitHub', (final tester) async {
-    await tester.pumpWidget(buildWidget());
+    await pumpMainWidget(tester);
 
     expect(find.text('Welcome'), findsAny);
 
@@ -55,9 +55,9 @@ class MockTargetGame extends _$MockTargetGame implements TargetGame {
   }
 }
 
-Widget buildWidget() => ProviderScope(
-      overrides: [
-        targetGameProvider.overrideWith(MockTargetGame.new),
-      ],
-      child: const FluentApp(home: WelcomeRoute()),
+Future<void> pumpMainWidget(final WidgetTester tester) => tester.pumpWidget(
+      ProviderScope(
+        overrides: [targetGameProvider.overrideWith(MockTargetGame.new)],
+        child: const FluentApp(home: WelcomeRoute()),
+      ),
     );
