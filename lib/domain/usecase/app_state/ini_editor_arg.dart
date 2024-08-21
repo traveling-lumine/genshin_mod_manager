@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
 import 'package:genshin_mod_manager/domain/repo/fs_interface.dart';
 import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
-import 'package:genshin_mod_manager/domain/usecase/storage/shared_storage.dart';
+import 'package:genshin_mod_manager/domain/usecase/app_state/game_config.dart';
 
 const _iniEditorArgKey = 'iniEditorArg';
 

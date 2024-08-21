@@ -1,7 +1,6 @@
 import 'package:genshin_mod_manager/domain/entity/game_config.dart';
 import 'package:genshin_mod_manager/domain/entity/preset.dart';
 import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
-import 'package:genshin_mod_manager/domain/usecase/storage/shared_storage.dart';
 
 /// Initializes the game configuration.
 GameConfig initializeGameConfigUseCase(
@@ -15,7 +14,13 @@ GameConfig initializeGameConfigUseCase(
       launcherFile: getLauncherFileUseCase(storage, prefix),
     );
 
-void changeModRootUseCase(
+String? getModRootUseCase(
+  final PersistentStorage storage,
+  final String prefix,
+) =>
+    storage.getString('$prefix.modRoot');
+
+void setModRootUseCase(
   final PersistentStorage read,
   final String targetGame,
   final String path,
@@ -23,7 +28,13 @@ void changeModRootUseCase(
   read.setString('$targetGame.modRoot', path);
 }
 
-void changeModExecFileUseCase(
+String? getModExecFileUseCase(
+  final PersistentStorage storage,
+  final String prefix,
+) =>
+    storage.getString('$prefix.modExecFile');
+
+void setModExecFileUseCase(
   final PersistentStorage read,
   final String targetGame,
   final String path,
@@ -31,7 +42,13 @@ void changeModExecFileUseCase(
   read.setString('$targetGame.modExecFile', path);
 }
 
-void changeLauncherFileUseCase(
+String? getLauncherFileUseCase(
+  final PersistentStorage storage,
+  final String prefix,
+) =>
+    storage.getString('$prefix.launcherDir');
+
+void setLauncherFileUseCase(
   final PersistentStorage read,
   final String targetGame,
   final String path,
@@ -39,7 +56,53 @@ void changeLauncherFileUseCase(
   read.setString('$targetGame.launcherDir', path);
 }
 
-void changePresetDataUseCase(
+PresetData? getPresetDataUseCase(
+  final PersistentStorage storage,
+  final String prefix,
+) {
+  final data = storage.getMap('$prefix.presetData');
+  if (data == null) {
+    return null;
+  }
+  final Map<String, PresetListMap> global2;
+  final globalData = data['global'];
+  if (globalData == null) {
+    global2 = {};
+  } else {
+    final global = (globalData as Map).cast<String, Map<String, dynamic>>();
+    global2 = {
+      for (final e in global.entries)
+        e.key: PresetListMap(
+          bundledPresets: {
+            for (final f in e.value.entries)
+              f.key: PresetList(mods: (f.value as List).cast<String>()),
+          },
+        ),
+    };
+  }
+  final Map<String, PresetListMap> local2;
+  final localData = data['local'];
+  if (localData == null) {
+    local2 = {};
+  } else {
+    final local = (localData as Map).cast<String, Map<String, dynamic>>();
+    local2 = {
+      for (final e in local.entries)
+        e.key: PresetListMap(
+          bundledPresets: {
+            for (final f in e.value.entries)
+              f.key: PresetList(mods: (f.value as List).cast<String>()),
+          },
+        ),
+    };
+  }
+  return PresetData(
+    global: global2,
+    local: local2,
+  );
+}
+
+void setPresetDataUseCase(
   final PresetData data,
   final PersistentStorage read,
   final String targetGame,
