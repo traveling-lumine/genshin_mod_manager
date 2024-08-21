@@ -92,6 +92,12 @@ class _ModCardState extends ConsumerState<ModCard> {
               ],
               RepaintBoundary(
                 child: IconButton(
+                  icon: const Icon(FluentIcons.command_prompt),
+                  onPressed: _onCommand,
+                ),
+              ),
+              RepaintBoundary(
+                child: IconButton(
                   icon: const Icon(FluentIcons.delete),
                   onPressed: () {
                     _onDeletePressed(context);
@@ -496,5 +502,9 @@ class _ModCardState extends ConsumerState<ModCard> {
         ),
       ),
     );
+  }
+
+  Future<void> _onCommand() async {
+    await ref.read(fsInterfaceProvider).openTerminal(widget.mod.path);
   }
 }

@@ -117,7 +117,7 @@ class IniWidget extends ConsumerWidget {
 
   Future<void> _onIniOpen(final WidgetRef ref, final String iniPath) async {
     final fsInterface = ref.read(fsInterfaceProvider);
-    await fsInterface.runProgram(File(iniPath));
+    await fsInterface.runIniEdit(File(iniPath));
   }
 }
 

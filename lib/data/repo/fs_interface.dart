@@ -45,6 +45,13 @@ class FileSystemInterfaceImpl implements FileSystemInterface {
   Future<void> runProgram(final File program) async {
     final pwd = program.parent.path;
     final pName = program.path.pBasename;
+    await Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
+  }
+
+  @override
+  Future<void> runIniEdit(final File program) async {
+    final pwd = program.parent.path;
+    final pName = program.path.pBasename;
     final List<String> arg;
     final iniEditorArgument2 = iniEditorArgument;
     if (iniEditorArgument2 != null) {
@@ -55,6 +62,16 @@ class FileSystemInterfaceImpl implements FileSystemInterface {
     await Process.run(
       'start',
       ['/b', '/d', pwd, '', ...arg],
+      runInShell: true,
+    );
+  }
+
+  @override
+  Future<void> openTerminal(final String path) async {
+    await Process.run(
+      'start',
+      ['pwsh'],
+      workingDirectory: path,
       runInShell: true,
     );
   }
