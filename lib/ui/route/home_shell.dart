@@ -417,7 +417,8 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   List<PaneItemAction> _buildPaneItemActions() {
     const icon = Icon(FluentIcons.user_window);
     final select = ref.watch(runTogetherProvider);
-    return select
+    final override = ref.watch(separateRunOverrideProvider);
+    return override ?? select
         ? [
             PaneItemAction(
               key: const ValueKey('<run_both>'),
