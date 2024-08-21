@@ -26,7 +26,6 @@ import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 import 'package:window_manager/window_manager.dart';
 
 Future<void> _runUpdateScript() async {
@@ -272,9 +271,8 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       final width = double.parse(read.getString('windowWidth') ?? '');
       final height = double.parse(read.getString('windowHeight') ?? '');
       unawaited(WindowManager.instance.setSize(Size(width, height)));
-      Logger().d('Restored window size: $width x $height');
-    } on Exception catch (e) {
-      Logger().e('Failed to restore window size: $e');
+    } on Exception {
+      // pass
     }
   }
 
@@ -292,7 +290,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         read
           ..setString('windowWidth', value.width.toString())
           ..setString('windowHeight', value.height.toString());
-        Logger().d('Window size: $value');
       }),
     );
   }

@@ -1,5 +1,4 @@
 import 'package:genshin_mod_manager/data/repo/sharedpreference_storage.dart';
-import 'package:genshin_mod_manager/di/fs_interface.dart';
 import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
 import 'package:genshin_mod_manager/domain/usecase/storage/shared_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -25,7 +24,6 @@ PersistentStorage sharedPreferenceStorage(
     return NullSharedPreferenceStorage();
   }
   final sharedPreferenceStorage = SharedPreferenceStorage(sharedPreferences);
-  final fsInterface = ref.watch(fsInterfaceProvider);
-  afterInitializationUseCase(sharedPreferenceStorage, fsInterface);
+  afterInitializationUseCase(sharedPreferenceStorage);
   return sharedPreferenceStorage;
 }

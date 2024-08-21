@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_slow_async_io, avoid_print
-
 import 'dart:async';
 import 'dart:io';
 
@@ -34,7 +32,6 @@ void main() {
     final asyncDuration = await _benchmark(trials, () async {
       await directory.list().toList();
     });
-    print('Sync: $syncDuration, async: $asyncDuration');
     expect(syncDuration, lessThan(asyncDuration));
   });
   test('Benchmark deleting', () async {
@@ -45,7 +42,6 @@ void main() {
     final asyncDuration =
         await _benchmark(trials, directory.delete, directory.create);
     directory.deleteSync();
-    print('Sync: $syncDuration, async: $asyncDuration');
     expect(syncDuration, lessThan(asyncDuration));
   });
   test('Benchmark exists', () async {
@@ -53,7 +49,6 @@ void main() {
     final directory = Directory('.');
     final syncDuration = await _benchmark(trials, directory.existsSync);
     final asyncDuration = await _benchmark(trials, directory.exists);
-    print('Sync: $syncDuration, async: $asyncDuration');
     expect(syncDuration, lessThan(asyncDuration));
   });
 }

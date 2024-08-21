@@ -18,30 +18,20 @@ class ModZipExtractionException implements Exception {
 }
 
 /// Writes mods to [category] directory.
-ModWriter createModWriter({required final ModCategory category}) =>
-    _ModWriterImpl(category: category);
-
-class _ModWriterImpl implements ModWriter {
-  _ModWriterImpl({required this.category});
-
-  final ModCategory category;
-
-  @override
-  Future<void> write({
-    required final String modName,
-    required final Uint8List data,
-  }) async {
-    final destDirName = await _getNonCollidingModName(category, modName);
-    final destDirPath = category.path.pJoin(destDirName);
-    await Directory(destDirPath).create(recursive: true);
-    try {
-      final archive = ZipDecoder().decodeBytes(data);
-      await extractArchiveToDiskAsync(archive, destDirPath, asyncWrite: true);
-    } on Exception {
-      throw ModZipExtractionException(data: data);
-    }
-  }
-}
+ModWriter createModWriter({required final ModCategory category}) => ({
+      required final modName,
+      required final data,
+    }) async {
+      final destDirName = await _getNonCollidingModName(category, modName);
+      final destDirPath = category.path.pJoin(destDirName);
+      await Directory(destDirPath).create(recursive: true);
+      try {
+        final archive = ZipDecoder().decodeBytes(data);
+        await extractArchiveToDiskAsync(archive, destDirPath, asyncWrite: true);
+      } on Exception {
+        throw ModZipExtractionException(data: data);
+      }
+    };
 
 Future<String> _getNonCollidingModName(
   final ModCategory category,

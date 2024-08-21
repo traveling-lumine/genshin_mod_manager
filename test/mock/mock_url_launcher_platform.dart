@@ -27,11 +27,6 @@ class MockUrlLauncher extends Fake
   bool canLaunchCalled = false;
   bool launchCalled = false;
 
-  // ignore: use_setters_to_change_properties
-  void setCanLaunchExpectations(final String url) {
-    this.url = url;
-  }
-
   void setLaunchExpectations({
     required final String url,
     required final bool enableJavaScript,
@@ -52,11 +47,6 @@ class MockUrlLauncher extends Fake
     this.universalLinksOnly = universalLinksOnly;
     this.headers = headers;
     this.webOnlyWindowName = webOnlyWindowName;
-  }
-
-  // ignore: use_setters_to_change_properties
-  void setResponse(final bool response) {
-    this.response = response;
   }
 
   @override

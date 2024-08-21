@@ -1,56 +1,20 @@
-/// Parses a tag query string into a tree of [TagParseElement]s.
-// ignore: one_member_abstracts
-abstract class TagParseElement {
-  /// Evaluates the element against a set of tags.
-  bool evaluate(final Set<String> tags);
-}
+// Parses a tag query string into a tree of [TagParseElement]s.
 
-class _Literal extends TagParseElement {
-  _Literal(this.value);
+typedef TagParseElement = bool Function(Set<String> tags);
 
-  final String value;
+TagParseElement _literal(final String value) =>
+    (final tags) => tags.contains(value);
 
-  @override
-  bool evaluate(final Set<String> tags) => tags.contains(value);
-}
+TagParseElement _notClause(final TagParseElement child) =>
+    (final tags) => !child(tags);
 
-class _NotClause extends TagParseElement {
-  _NotClause(this.child);
+TagParseElement _andClause(final List<TagParseElement> children) =>
+    (final tags) => children.every((final element) => element(tags));
 
-  final TagParseElement child;
+TagParseElement _orClause(final List<TagParseElement> children) =>
+    (final tags) => children.any((final element) => element(tags));
 
-  @override
-  bool evaluate(final Set<String> tags) => !child.evaluate(tags);
-}
-
-class _AndClause extends TagParseElement {
-  _AndClause(this.children);
-
-  final List<TagParseElement> children;
-
-  @override
-  bool evaluate(final Set<String> tags) =>
-      children.every((final element) => element.evaluate(tags));
-}
-
-class _OrClause extends TagParseElement {
-  _OrClause(this.children);
-
-  final List<TagParseElement> children;
-
-  @override
-  bool evaluate(final Set<String> tags) =>
-      children.any((final element) => element.evaluate(tags));
-}
-
-class _Parenthesis extends TagParseElement {
-  _Parenthesis(this.child);
-
-  final TagParseElement child;
-
-  @override
-  bool evaluate(final Set<String> tags) => child.evaluate(tags);
-}
+TagParseElement _parenthesis(final TagParseElement child) => child;
 
 enum _TokenType { and, or, not, lParen, rParen, literal }
 
@@ -144,7 +108,7 @@ class _Parser {
     }
 
     if (nodes.length > 1) {
-      return _OrClause(nodes);
+      return _orClause(nodes);
     } else {
       return nodes.first;
     }
@@ -159,7 +123,7 @@ class _Parser {
     }
 
     if (nodes.length > 1) {
-      return _AndClause(nodes);
+      return _andClause(nodes);
     } else {
       return nodes.first;
     }
@@ -168,7 +132,7 @@ class _Parser {
   TagParseElement notClause() {
     if (currentToken?.type == _TokenType.not) {
       eat(_TokenType.not);
-      return _NotClause(notClause());
+      return _notClause(notClause());
     }
 
     return primary();
@@ -179,11 +143,11 @@ class _Parser {
       eat(_TokenType.lParen);
       final node = expression();
       eat(_TokenType.rParen);
-      return _Parenthesis(node);
+      return _parenthesis(node);
     } else if (currentToken?.type == _TokenType.literal) {
       final token = currentToken!;
       eat(_TokenType.literal);
-      return _Literal(token.value!);
+      return _literal(token.value!);
     } else {
       throw Exception('Unexpected token: ${currentToken?.type}');
     }

@@ -108,14 +108,16 @@ class IniWidget extends ConsumerWidget {
         RepaintBoundary(
           child: IconButton(
             icon: const Icon(FluentIcons.document_management),
-            onPressed: () async {
-              final fsInterface = ref.read(fsInterfaceProvider);
-              await fsInterface.runProgram(File(iniPath));
-            },
+            onPressed: () async => _onIniOpen(ref, iniPath),
           ),
         ),
       ],
     );
+  }
+
+  Future<void> _onIniOpen(final WidgetRef ref, final String iniPath) async {
+    final fsInterface = ref.read(fsInterfaceProvider);
+    await fsInterface.runProgram(File(iniPath));
   }
 }
 

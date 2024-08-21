@@ -1,7 +1,6 @@
 abstract interface class PersistentStorage {
   bool? getBool(final String key);
 
-  // ignore: avoid_positional_boolean_parameters
   void setBool(final String key, final bool value);
 
   int? getInt(final String key);

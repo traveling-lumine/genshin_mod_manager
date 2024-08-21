@@ -89,7 +89,7 @@ class GameConfigNotifier extends _$GameConfigNotifier {
   void changeModRoot(final String path) {
     final read = ref.read(sharedPreferenceStorageProvider);
     final targetGame = ref.read(targetGameProvider);
-    changeModRootUseCase(read, targetGame, path);
+    setModRootUseCase(read, targetGame, path);
     state = state.copyWith(modRoot: path);
   }
 
@@ -97,7 +97,7 @@ class GameConfigNotifier extends _$GameConfigNotifier {
   void changeModExecFile(final String path) {
     final read = ref.read(sharedPreferenceStorageProvider);
     final targetGame = ref.read(targetGameProvider);
-    changeModExecFileUseCase(read, targetGame, path);
+    setModExecFileUseCase(read, targetGame, path);
     state = state.copyWith(modExecFile: path);
   }
 
@@ -105,7 +105,7 @@ class GameConfigNotifier extends _$GameConfigNotifier {
   void changeLauncherFile(final String path) {
     final read = ref.read(sharedPreferenceStorageProvider);
     final targetGame = ref.read(targetGameProvider);
-    changeLauncherFileUseCase(read, targetGame, path);
+    setLauncherFileUseCase(read, targetGame, path);
     state = state.copyWith(launcherFile: path);
   }
 
@@ -113,7 +113,7 @@ class GameConfigNotifier extends _$GameConfigNotifier {
   void changePresetData(final PresetData data) {
     final read = ref.read(sharedPreferenceStorageProvider);
     final targetGame = ref.read(targetGameProvider);
-    changePresetDataUseCase(data, read, targetGame);
+    setPresetDataUseCase(data, read, targetGame);
     state = state.copyWith(presetData: data);
   }
 }

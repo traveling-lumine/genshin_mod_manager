@@ -29,13 +29,13 @@ class _TimeAwareFileImageState extends ConsumerState<TimeAwareFileImage> {
     ref.listen(
       fileEventSnapshotProvider(widget.path, true),
       (final previous, final next) async {
-        if (previous?.value == null) {
-          return;
-        }
         if (previous == next) {
           return;
         }
         await FileImage(File(widget.path)).evict();
+        if (!mounted) {
+          return;
+        }
         setState(() {
           _curMTime = DateTime.now().microsecondsSinceEpoch;
         });

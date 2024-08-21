@@ -6,6 +6,9 @@ import 'package:genshin_mod_manager/domain/repo/fs_interface.dart';
 
 class FileSystemInterfaceImpl implements FileSystemInterface {
   @override
+  List<String?>? iniEditorArgument;
+
+  @override
   String get iconDirRoot =>
       Platform.resolvedExecutable.pDirname.pJoin('Resources');
 
@@ -42,6 +45,17 @@ class FileSystemInterfaceImpl implements FileSystemInterface {
   Future<void> runProgram(final File program) async {
     final pwd = program.parent.path;
     final pName = program.path.pBasename;
-    await Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
+    final List<String> arg;
+    final iniEditorArgument2 = iniEditorArgument;
+    if (iniEditorArgument2 != null) {
+      arg = iniEditorArgument2.map((final e) => e ?? pName).toList();
+    } else {
+      arg = [pName];
+    }
+    await Process.run(
+      'start',
+      ['/b', '/d', pwd, '', ...arg],
+      runInShell: true,
+    );
   }
 }

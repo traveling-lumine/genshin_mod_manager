@@ -23,8 +23,10 @@ Future<void> extractArchiveToDiskAsync(
   for (final file in archive.files) {
     var name = file.name;
     try {
-      cp949.encodeToString(name);
-      name = cp949.decodeString(name);
+      final decodeString = cp949.decodeString(name);
+      if (name == cp949.encodeToString(decodeString)) {
+        name = decodeString;
+      }
     } on FormatException {
       // do nothing
     }

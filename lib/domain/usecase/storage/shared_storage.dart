@@ -1,14 +1,8 @@
-import 'dart:io';
-
 import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/domain/entity/preset.dart';
-import 'package:genshin_mod_manager/domain/repo/fs_interface.dart';
 import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
+import 'package:genshin_mod_manager/domain/usecase/app_state/game_config.dart';
 
-void afterInitializationUseCase(
-  final PersistentStorage storage,
-  final FileSystemInterface fsInterface,
-) {
+void afterInitializationUseCase(final PersistentStorage storage) {
   var version = storage.getInt('configVersion');
   if (version == null) {
     if (storage.getEntries().isEmpty) {
@@ -20,42 +14,6 @@ void afterInitializationUseCase(
   version = storage.getInt('configVersion');
   if (version == 1) {
     _convertToVersion2(storage);
-  }
-  _copyIcons(storage, fsInterface);
-}
-
-void _copyIcons(
-  final PersistentStorage storage,
-  final FileSystemInterface fsInterface,
-) {
-  final games = storage.getList('games');
-  if (games == null) {
-    return;
-  }
-  final iconDirRoot = Directory(fsInterface.iconDirRoot);
-  for (final game in games) {
-    final iconDirGame = fsInterface.iconDir(game);
-    try {
-      if (!iconDirGame.existsSync()) {
-        iconDirGame.createSync(recursive: true);
-      }
-    } on Exception catch (_) {
-      continue;
-    }
-    final modRoot = getModRootUseCase(storage, game);
-    if (modRoot == null) {
-      continue;
-    }
-    final modRootDir = Directory(modRoot);
-    if (!modRootDir.existsSync()) {
-      continue;
-    }
-    final modRootSubDirs = modRootDir.listSync().whereType<Directory>();
-    fsInterface.copyFilenames(
-      iconDirRoot,
-      iconDirGame,
-      modRootSubDirs.map((final e) => e.path.pBasename).toList(),
-    );
   }
 }
 
@@ -100,68 +58,4 @@ void _convertToVersion2(final PersistentStorage storage2) {
     ..setString('Starrail.launcherDir', starrailLauncherDir)
     ..setMap('Starrail.presetData', starrailPresetData)
     ..setInt('configVersion', 2);
-}
-
-String? getModRootUseCase(
-  final PersistentStorage storage,
-  final String prefix,
-) =>
-    storage.getString('$prefix.modRoot');
-
-String? getModExecFileUseCase(
-  final PersistentStorage storage,
-  final String prefix,
-) =>
-    storage.getString('$prefix.modExecFile');
-
-String? getLauncherFileUseCase(
-  final PersistentStorage storage,
-  final String prefix,
-) =>
-    storage.getString('$prefix.launcherDir');
-
-PresetData? getPresetDataUseCase(
-  final PersistentStorage storage,
-  final String prefix,
-) {
-  final data = storage.getMap('$prefix.presetData');
-  if (data == null) {
-    return null;
-  }
-  final Map<String, PresetListMap> global2;
-  final globalData = data['global'];
-  if (globalData == null) {
-    global2 = {};
-  } else {
-    final global = (globalData as Map).cast<String, Map<String, dynamic>>();
-    global2 = {
-      for (final e in global.entries)
-        e.key: PresetListMap(
-          bundledPresets: {
-            for (final f in e.value.entries)
-              f.key: PresetList(mods: (f.value as List).cast<String>()),
-          },
-        ),
-    };
-  }
-  final Map<String, PresetListMap> local2;
-  final localData = data['local'];
-  if (localData == null) {
-    local2 = {};
-  } else {
-    final local = (localData as Map).cast<String, Map<String, dynamic>>();
-    local2 = {
-      for (final e in local.entries)
-        e.key: PresetListMap(
-          bundledPresets: {
-            for (final f in e.value.entries)
-              f.key: PresetList(mods: (f.value as List).cast<String>()),
-          },
-        ),
-    };
-  }
-  return PresetData(
-    global: global2,
-    local: local2,
-  );
 }

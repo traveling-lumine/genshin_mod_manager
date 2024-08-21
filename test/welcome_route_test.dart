@@ -4,7 +4,6 @@ import 'package:genshin_mod_manager/di/app_state.dart';
 import 'package:genshin_mod_manager/ui/route/welcome.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-// ignore: unreachable_from_main
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 import 'mock/mock_url_launcher_platform.dart';
@@ -19,12 +18,12 @@ void main() {
   });
 
   testWidgets('WelcomeRoute welcomes you', (final tester) async {
-    await tester.pumpWidget(buildWidget());
+    await pumpMainWidget(tester);
 
     expect(find.text('Welcome'), findsAny);
   });
   testWidgets('WelcomeRoute has a link to GitHub', (final tester) async {
-    await tester.pumpWidget(buildWidget());
+    await pumpMainWidget(tester);
 
     expect(find.text('Welcome'), findsAny);
 
@@ -38,7 +37,7 @@ void main() {
         headers: <String, String>{},
         webOnlyWindowName: null,
       )
-      ..setResponse(true);
+      ..response = true;
 
     await tester.tap(find.textContaining('http', findRichText: true));
     expect(mock.launchCalled, true);
@@ -56,10 +55,9 @@ class MockTargetGame extends _$MockTargetGame implements TargetGame {
   }
 }
 
-Widget buildWidget() => ProviderScope(
-      overrides: [
-        // ignore: scoped_providers_should_specify_dependencies
-        targetGameProvider.overrideWith(MockTargetGame.new),
-      ],
-      child: const FluentApp(home: WelcomeRoute()),
+Future<void> pumpMainWidget(final WidgetTester tester) => tester.pumpWidget(
+      ProviderScope(
+        overrides: [targetGameProvider.overrideWith(MockTargetGame.new)],
+        child: const FluentApp(home: WelcomeRoute()),
+      ),
     );

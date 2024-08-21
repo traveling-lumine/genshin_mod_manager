@@ -14,4 +14,6 @@ abstract interface class FileSystemInterface {
   Future<void> openFolder(final String path);
 
   Future<void> runProgram(final File program);
+
+  List<String?>? iniEditorArgument;
 }

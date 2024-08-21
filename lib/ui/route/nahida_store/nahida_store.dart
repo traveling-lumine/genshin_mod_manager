@@ -251,7 +251,7 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
       return true;
     }
     try {
-      return filter.evaluate(tagMap);
+      return filter(tagMap);
     } on Exception {
       return true;
     }
