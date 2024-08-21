@@ -8,6 +8,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:genshin_mod_manager/di/app_state.dart';
 import 'package:genshin_mod_manager/di/app_version.dart';
+import 'package:genshin_mod_manager/di/fs_interface.dart';
 import 'package:genshin_mod_manager/domain/entity/game_config.dart';
 import 'package:genshin_mod_manager/domain/entity/setting_data.dart';
 import 'package:genshin_mod_manager/domain/usecase/app_state/card_color.dart';
@@ -109,6 +110,8 @@ class SettingRoute extends ConsumerWidget {
           const _ColorChanger(isBright: true, isEnabled: false),
           const _ColorChanger(isBright: false, isEnabled: true),
           const _ColorChanger(isBright: false, isEnabled: false),
+          const _SectionHeader(title: 'Misc'),
+          const _StringItem(title: 'Ini file editor arguments'),
         ],
       );
 
@@ -462,4 +465,43 @@ class _SwitchItem<T> extends StatelessWidget {
           ),
         ),
       );
+}
+
+class _StringItem extends ConsumerWidget {
+  const _StringItem({required this.title});
+  final String title;
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final initArguments = ref.watch(fsInterfaceProvider).iniEditorArgument;
+    final String? initString;
+    if (initArguments == null) {
+      initString = null;
+    } else {
+      initString = initArguments.map((final e) => e ?? '%0').join(' ');
+    }
+    return ListTile(
+      title: Text(title),
+      subtitle:
+          const Text('Leave blank to use default. Use %0 for the file path.'),
+      trailing: Expanded(
+        child: TextFormBox(
+          onChanged: (final value) {
+            print(value);
+            ref
+                .read(fsInterfaceProvider.notifier)
+                .setIniEditorArgument(value.isEmpty ? null : value);
+          },
+          initialValue: initString,
+          placeholder: 'Arguments...',
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+  }
 }

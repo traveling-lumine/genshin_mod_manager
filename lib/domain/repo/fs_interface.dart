@@ -15,5 +15,5 @@ abstract interface class FileSystemInterface {
 
   Future<void> runProgram(final File program);
 
-  void setIniEditorArgument(final List<String?> arg);
+  List<String?>? iniEditorArgument;
 }
