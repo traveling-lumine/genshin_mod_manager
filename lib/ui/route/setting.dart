@@ -416,7 +416,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) => Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(top: 24, left: 8, right: 16, bottom: 8),
         child: Text(
           title,
           style: FluentTheme.of(context).typography.subtitle,
@@ -430,31 +430,11 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _SectionSubheader extends StatelessWidget {
-  const _SectionSubheader({required this.title});
-  final String title;
-
-  @override
-  Widget build(final BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
-        child: Text(
-          title,
-          style: FluentTheme.of(context).typography.bodyLarge,
-        ),
-      );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(StringProperty('title', title));
-  }
-}
-
 class _SwitchItem<T> extends StatelessWidget {
   _SwitchItem({
     required final String text,
-    final String? subText,
     required final AutoDisposeNotifierProvider<ValueSettable<T>, T> provider,
+    final String? subText,
     this.content,
     this.leading,
     final bool Function(T)? boolMapper,
