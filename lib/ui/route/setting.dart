@@ -139,6 +139,10 @@ class SettingRoute extends ConsumerWidget {
           ),
           const _SectionHeader(title: 'Misc'),
           const _StringItem(title: 'Ini file editor arguments'),
+          _SwitchItem(
+            text: 'Use Paimon for folders without icons',
+            provider: paimonIconProvider,
+          ),
         ],
       );
 
