@@ -148,7 +148,14 @@ class _FolderPaneItem extends PaneItem {
   static Widget _buildImage(final String? imageFile) {
     final Widget image;
     if (imageFile == null) {
-      image = Image.asset('images/idk_icon.png');
+      image = Consumer(
+        builder: (final context, final ref, final child) {
+          final usePaimon = ref.watch(paimonIconProvider);
+          return usePaimon
+              ? Image.asset('images/app_icon.ico')
+              : Image.asset('images/idk_icon.png');
+        },
+      );
     } else {
       image = TimeAwareFileImage(path: imageFile);
     }
