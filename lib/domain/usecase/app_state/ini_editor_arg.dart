@@ -14,6 +14,7 @@ void initializeIniEditorArgumentUseCase(
   final arg = storage.getString(_iniEditorArgKey);
   if (arg == null) {
     interface.iniEditorArgument = null;
+    _copyIcons(storage, interface);
     return;
   }
   final replaced =
