@@ -5,9 +5,9 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../di/nahida_store.dart';
-import '../../../domain/entity/akasha.dart';
-import '../../../domain/entity/mod_category.dart';
+import '../../../backend/structure/entity/mod_category.dart';
+import '../../../backend/akasha/di/nahida_store.dart';
+import '../../../backend/akasha/domain/entity/akasha.dart';
 import '../../util/open_url.dart';
 import '../../widget/intrinsic_command_bar.dart';
 

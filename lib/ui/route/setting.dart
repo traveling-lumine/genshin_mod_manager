@@ -9,12 +9,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../di/app_state.dart';
-import '../../di/app_version.dart';
-import '../../di/fs_interface.dart';
-import '../../domain/entity/game_config.dart';
-import '../../domain/entity/setting_data.dart';
-import '../../domain/usecase/app_state/card_color.dart';
+import '../../backend/storage/domain/entity/game_config.dart';
+import '../../backend/storage/di/app_state.dart';
+import '../../backend/app_version/di/app_version.dart';
+import '../../backend/fs_interface/di/fs_interface.dart';
+import '../../backend/fs_interface/domain/entity/setting_data.dart';
+import '../../backend/storage/domain/usecase/card_color.dart';
 import '../constant.dart';
 import '../widget/game_selector.dart';
 import '../widget/setting_element.dart';

@@ -4,7 +4,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../di/fs_watcher.dart';
+import '../../backend/fs_interface/di/fs_watcher.dart';
 
 class TimeAwareFileImage extends ConsumerStatefulWidget {
   const TimeAwareFileImage({required this.path, super.key});
