@@ -6,11 +6,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../backend/structure/entity/mod.dart';
-import '../../../backend/structure/entity/mod_category.dart';
 import '../../../backend/fs_interface/di/fs_interface.dart';
 import '../../../backend/fs_interface/di/fs_watcher.dart';
 import '../../../backend/fs_interface/domain/usecase/file_system.dart';
+import '../../../backend/structure/entity/mod.dart';
+import '../../../backend/structure/entity/mod_category.dart';
 import '../../constant.dart';
 import '../../widget/category_drop_target.dart';
 import '../../widget/intrinsic_command_bar.dart';

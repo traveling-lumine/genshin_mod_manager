@@ -2,8 +2,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../backend/storage/di/app_state.dart';
 import '../../backend/app_version/domain/github.dart';
+import '../../backend/storage/di/app_state.dart';
 import '../util/open_url.dart';
 
 /// This route welcomes you!

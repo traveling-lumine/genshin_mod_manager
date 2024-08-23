@@ -7,8 +7,8 @@ import '../../fs_interface/data/helper/fsops.dart';
 import '../../fs_interface/data/helper/mod_switcher.dart';
 import '../../fs_interface/data/helper/path_op_string.dart';
 import '../../structure/entity/mod_category.dart';
-import 'app_state.dart';
 import '../domain/entity/preset.dart';
+import 'app_state.dart';
 
 part 'preset.g.dart';
 

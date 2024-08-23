@@ -1,6 +1,6 @@
+import '../../../mod_writer/domain/mod_writer.dart';
 import '../entity/akasha.dart';
 import '../repo/akasha.dart';
-import '../../../mod_writer/domain/mod_writer.dart';
 
 final class AkashaDownloadUrlUseCase {
   const AkashaDownloadUrlUseCase({

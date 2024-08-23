@@ -4,10 +4,10 @@ import 'package:collection/collection.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../akasha/data/akasha.dart';
+import '../../structure/entity/mod.dart';
 import '../data/helper/fsops.dart';
 import '../data/helper/path_op_string.dart';
 import 'fs_watcher.dart';
-import '../../structure/entity/mod.dart';
 
 part 'mod_card.g.dart';
 
