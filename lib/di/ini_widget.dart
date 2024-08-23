@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:genshin_mod_manager/di/fs_watcher.dart';
-import 'package:genshin_mod_manager/domain/entity/ini.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../domain/entity/ini.dart';
+import 'fs_watcher.dart';
 
 part 'ini_widget.g.dart';
 

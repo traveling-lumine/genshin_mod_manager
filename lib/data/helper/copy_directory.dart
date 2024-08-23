@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
+import 'path_op_string.dart';
 
 /// Extension for [Directory] to copy the directory to another path.
 extension CopyDirectory on Directory {

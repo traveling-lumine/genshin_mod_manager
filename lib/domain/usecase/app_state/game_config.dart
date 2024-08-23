@@ -1,6 +1,6 @@
-import 'package:genshin_mod_manager/domain/entity/game_config.dart';
-import 'package:genshin_mod_manager/domain/entity/preset.dart';
-import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
+import '../../entity/game_config.dart';
+import '../../entity/preset.dart';
+import '../../repo/persistent_storage.dart';
 
 /// Initializes the game configuration.
 GameConfig initializeGameConfigUseCase(

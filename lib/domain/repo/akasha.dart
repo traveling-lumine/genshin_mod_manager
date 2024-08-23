@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:genshin_mod_manager/domain/entity/akasha.dart';
+import '../entity/akasha.dart';
 
 /// An API to interact with Nahidalive.
 abstract interface class NahidaliveAPI {

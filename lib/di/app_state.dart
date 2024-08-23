@@ -1,19 +1,20 @@
 import 'dart:ui';
 
-import 'package:genshin_mod_manager/di/storage.dart';
-import 'package:genshin_mod_manager/domain/entity/game_config.dart';
-import 'package:genshin_mod_manager/domain/entity/preset.dart';
-import 'package:genshin_mod_manager/domain/entity/setting_data.dart';
-import 'package:genshin_mod_manager/domain/usecase/app_state/card_color.dart';
-import 'package:genshin_mod_manager/domain/usecase/app_state/dark_mode.dart';
-import 'package:genshin_mod_manager/domain/usecase/app_state/enabled_first.dart';
-import 'package:genshin_mod_manager/domain/usecase/app_state/folder_icon.dart';
-import 'package:genshin_mod_manager/domain/usecase/app_state/game_config.dart';
-import 'package:genshin_mod_manager/domain/usecase/app_state/move_on_drag.dart';
-import 'package:genshin_mod_manager/domain/usecase/app_state/paimon_icon.dart';
-import 'package:genshin_mod_manager/domain/usecase/app_state/run_together.dart';
-import 'package:genshin_mod_manager/domain/usecase/app_state/separate_run.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../domain/entity/game_config.dart';
+import '../domain/entity/preset.dart';
+import '../domain/entity/setting_data.dart';
+import '../domain/usecase/app_state/card_color.dart';
+import '../domain/usecase/app_state/dark_mode.dart';
+import '../domain/usecase/app_state/enabled_first.dart';
+import '../domain/usecase/app_state/folder_icon.dart';
+import '../domain/usecase/app_state/game_config.dart';
+import '../domain/usecase/app_state/move_on_drag.dart';
+import '../domain/usecase/app_state/paimon_icon.dart';
+import '../domain/usecase/app_state/run_together.dart';
+import '../domain/usecase/app_state/separate_run.dart';
+import 'storage.dart';
 
 part 'app_state.g.dart';
 

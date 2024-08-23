@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/helper/fsops.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/di/app_state.dart';
-import 'package:genshin_mod_manager/di/fs_interface.dart';
-import 'package:genshin_mod_manager/domain/entity/mod.dart';
-import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../data/helper/fsops.dart';
+import '../data/helper/path_op_string.dart';
+import '../domain/entity/mod.dart';
+import '../domain/entity/mod_category.dart';
+import 'app_state.dart';
+import 'fs_interface.dart';
 
 part 'fs_watcher.g.dart';
 

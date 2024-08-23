@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/helper/copy_directory.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/domain/entity/folder_move_result.dart';
-import 'package:genshin_mod_manager/domain/entity/setting_data.dart';
+import '../../data/helper/copy_directory.dart';
+import '../../data/helper/path_op_string.dart';
+import '../entity/folder_move_result.dart';
+import '../entity/setting_data.dart';
 
 FolderMoveResult dragToImportUseCase(
   final Iterable<String> dropPaths,

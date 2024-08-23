@@ -3,21 +3,22 @@ import 'dart:async';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:genshin_mod_manager/di/fs_interface.dart';
-import 'package:genshin_mod_manager/di/fs_watcher.dart';
-import 'package:genshin_mod_manager/domain/entity/mod.dart';
-import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/usecase/file_system.dart';
-import 'package:genshin_mod_manager/ui/constant.dart';
-import 'package:genshin_mod_manager/ui/route/category/mod_card.dart';
-import 'package:genshin_mod_manager/ui/widget/category_drop_target.dart';
-import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
-import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
-import 'package:genshin_mod_manager/ui/widget/thick_scrollbar.dart';
-import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/auto_suggest_box.dart';
-import 'package:genshin_mod_manager/ui/widget/third_party/flutter/min_extent_delegate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import '../../../di/fs_interface.dart';
+import '../../../di/fs_watcher.dart';
+import '../../../domain/entity/mod.dart';
+import '../../../domain/entity/mod_category.dart';
+import '../../../domain/usecase/file_system.dart';
+import '../../constant.dart';
+import '../../widget/category_drop_target.dart';
+import '../../widget/intrinsic_command_bar.dart';
+import '../../widget/preset_control.dart';
+import '../../widget/thick_scrollbar.dart';
+import '../../widget/third_party/fluent_ui/auto_suggest_box.dart';
+import '../../widget/third_party/flutter/min_extent_delegate.dart';
+import 'mod_card.dart';
 
 /// A route that displays a category of mods
 class CategoryRoute extends HookConsumerWidget {

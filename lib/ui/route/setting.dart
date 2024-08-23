@@ -6,18 +6,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show AlertDialog;
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:genshin_mod_manager/di/app_state.dart';
-import 'package:genshin_mod_manager/di/app_version.dart';
-import 'package:genshin_mod_manager/di/fs_interface.dart';
-import 'package:genshin_mod_manager/domain/entity/game_config.dart';
-import 'package:genshin_mod_manager/domain/entity/setting_data.dart';
-import 'package:genshin_mod_manager/domain/usecase/app_state/card_color.dart';
-import 'package:genshin_mod_manager/ui/constant.dart';
-import 'package:genshin_mod_manager/ui/widget/game_selector.dart';
-import 'package:genshin_mod_manager/ui/widget/setting_element.dart';
-import 'package:genshin_mod_manager/ui/widget/third_party/flutter/no_deref_file_opener.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import '../../di/app_state.dart';
+import '../../di/app_version.dart';
+import '../../di/fs_interface.dart';
+import '../../domain/entity/game_config.dart';
+import '../../domain/entity/setting_data.dart';
+import '../../domain/usecase/app_state/card_color.dart';
+import '../constant.dart';
+import '../widget/game_selector.dart';
+import '../widget/setting_element.dart';
+import '../widget/third_party/flutter/no_deref_file_opener.dart';
 
 class SettingRoute extends ConsumerWidget {
   const SettingRoute({super.key});

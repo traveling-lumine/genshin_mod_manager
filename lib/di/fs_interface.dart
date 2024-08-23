@@ -1,8 +1,9 @@
-import 'package:genshin_mod_manager/data/repo/fs_interface.dart';
-import 'package:genshin_mod_manager/di/storage.dart';
-import 'package:genshin_mod_manager/domain/repo/fs_interface.dart';
-import 'package:genshin_mod_manager/domain/usecase/app_state/ini_editor_arg.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../data/repo/fs_interface.dart';
+import '../domain/repo/fs_interface.dart';
+import '../domain/usecase/app_state/ini_editor_arg.dart';
+import 'storage.dart';
 
 part 'fs_interface.g.dart';
 

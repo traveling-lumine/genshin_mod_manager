@@ -1,7 +1,8 @@
-import 'package:genshin_mod_manager/domain/repo/github.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../domain/repo/github.dart';
 
 part 'app_version.g.dart';
 

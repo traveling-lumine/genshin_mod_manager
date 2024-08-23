@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/ui/widget/third_party/fluent_ui/expander.dart';
+import 'third_party/fluent_ui/expander.dart';
 
 class SettingElement extends StatelessWidget {
   const SettingElement({

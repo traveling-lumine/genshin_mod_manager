@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/helper/fsops.dart';
+import '../helper/fsops.dart';
 
 class FolderWatcher<T extends FileSystemEntity> {
   FolderWatcher({

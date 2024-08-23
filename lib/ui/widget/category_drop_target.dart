@@ -4,12 +4,13 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:genshin_mod_manager/di/app_state.dart';
-import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/entity/setting_data.dart';
-import 'package:genshin_mod_manager/domain/usecase/folder_drop.dart';
-import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import '../../di/app_state.dart';
+import '../../domain/entity/mod_category.dart';
+import '../../domain/entity/setting_data.dart';
+import '../../domain/usecase/folder_drop.dart';
+import '../util/display_infobar.dart';
 
 /// A widget that acts as a drop target for files and directories.
 class CategoryDropTarget extends HookConsumerWidget {

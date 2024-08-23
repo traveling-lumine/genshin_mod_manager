@@ -1,6 +1,6 @@
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
-import 'package:genshin_mod_manager/domain/usecase/app_state/game_config.dart';
+import '../../../data/helper/path_op_string.dart';
+import '../../repo/persistent_storage.dart';
+import '../app_state/game_config.dart';
 
 void afterInitializationUseCase(final PersistentStorage storage) {
   var version = storage.getInt('configVersion');

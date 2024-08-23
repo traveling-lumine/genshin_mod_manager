@@ -1,8 +1,9 @@
-import 'package:genshin_mod_manager/data/repo/sharedpreference_storage.dart';
-import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
-import 'package:genshin_mod_manager/domain/usecase/storage/shared_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../data/repo/sharedpreference_storage.dart';
+import '../domain/repo/persistent_storage.dart';
+import '../domain/usecase/storage/shared_storage.dart';
 
 part 'storage.g.dart';
 

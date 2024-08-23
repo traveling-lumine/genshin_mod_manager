@@ -1,4 +1,4 @@
-import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
+import '../../repo/persistent_storage.dart';
 
 const showFolderIconKey = 'showFolderIcon';
 const showFolderIconDefault = true;

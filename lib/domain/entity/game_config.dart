@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:genshin_mod_manager/domain/entity/preset.dart';
+import 'preset.dart';
 
 part 'game_config.freezed.dart';
 

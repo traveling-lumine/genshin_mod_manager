@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../domain/repo/persistent_storage.dart';
 
 class SharedPreferenceStorage implements PersistentStorage {
   const SharedPreferenceStorage(this._sharedPreferences);

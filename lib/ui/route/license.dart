@@ -27,8 +27,8 @@ import 'dart:async';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/oss_licenses.dart';
-import 'package:genshin_mod_manager/ui/util/open_url.dart';
+import '../../oss_licenses.dart';
+import '../util/open_url.dart';
 
 /// A route that shows the open source licenses.
 class OssLicensesRoute extends StatelessWidget {

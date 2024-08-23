@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:genshin_mod_manager/data/secrets.dart';
-import 'package:genshin_mod_manager/domain/entity/akasha.dart';
-import 'package:genshin_mod_manager/domain/repo/akasha.dart';
 import 'package:http/http.dart' as http;
+
+import '../../domain/entity/akasha.dart';
+import '../../domain/repo/akasha.dart';
+import '../secrets.dart';
 
 /// The filename of Akasha's configuration file.
 const kAkashaConfigFilename = 'config.json';

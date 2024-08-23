@@ -1,5 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/domain/repo/persistent_storage.dart';
+import '../../repo/persistent_storage.dart';
 
 Color initializeCardColorUseCase(
   final PersistentStorage repository, {

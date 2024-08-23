@@ -1,12 +1,13 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:genshin_mod_manager/data/helper/fsops.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/data/repo/akasha.dart';
-import 'package:genshin_mod_manager/di/fs_watcher.dart';
-import 'package:genshin_mod_manager/domain/entity/mod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../data/helper/fsops.dart';
+import '../data/helper/path_op_string.dart';
+import '../data/repo/akasha.dart';
+import '../domain/entity/mod.dart';
+import 'fs_watcher.dart';
 
 part 'mod_card.g.dart';
 

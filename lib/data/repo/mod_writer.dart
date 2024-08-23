@@ -2,11 +2,12 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart' show ZipDecoder;
-import 'package:genshin_mod_manager/data/helper/fsops.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/data/third_party.dart';
-import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/repo/mod_writer.dart';
+
+import '../../domain/entity/mod_category.dart';
+import '../../domain/repo/mod_writer.dart';
+import '../helper/fsops.dart';
+import '../helper/path_op_string.dart';
+import '../third_party.dart';
 
 /// Exception thrown when a mod zip extraction fails.
 class ModZipExtractionException implements Exception {

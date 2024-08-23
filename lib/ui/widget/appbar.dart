@@ -1,7 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:genshin_mod_manager/ui/widget/game_selector.dart';
-import 'package:genshin_mod_manager/ui/widget/preset_control.dart';
 import 'package:window_manager/window_manager.dart';
+
+import 'game_selector.dart';
+import 'preset_control.dart';
 
 /// The width of window control button row.
 const _kWindowButtonWidth = 138.0;

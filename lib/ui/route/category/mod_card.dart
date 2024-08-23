@@ -5,20 +5,21 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_image_converter/flutter_image_converter.dart';
-import 'package:genshin_mod_manager/data/helper/mod_switcher.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/data/repo/akasha.dart';
-import 'package:genshin_mod_manager/data/repo/mod_writer.dart';
-import 'package:genshin_mod_manager/di/app_state.dart';
-import 'package:genshin_mod_manager/di/fs_interface.dart';
-import 'package:genshin_mod_manager/di/mod_card.dart';
-import 'package:genshin_mod_manager/domain/entity/ini.dart';
-import 'package:genshin_mod_manager/domain/entity/mod.dart';
-import 'package:genshin_mod_manager/ui/route/category/ini_widget.dart';
-import 'package:genshin_mod_manager/ui/util/display_infobar.dart';
-import 'package:genshin_mod_manager/ui/widget/custom_image.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
+
+import '../../../data/helper/mod_switcher.dart';
+import '../../../data/helper/path_op_string.dart';
+import '../../../data/repo/akasha.dart';
+import '../../../data/repo/mod_writer.dart';
+import '../../../di/app_state.dart';
+import '../../../di/fs_interface.dart';
+import '../../../di/mod_card.dart';
+import '../../../domain/entity/ini.dart';
+import '../../../domain/entity/mod.dart';
+import '../../util/display_infobar.dart';
+import '../../widget/custom_image.dart';
+import 'ini_widget.dart';
 
 class ModCard extends ConsumerStatefulWidget {
   const ModCard({required this.mod, super.key});

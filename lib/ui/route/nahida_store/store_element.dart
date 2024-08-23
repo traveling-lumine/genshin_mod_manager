@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/di/nahida_store.dart';
-import 'package:genshin_mod_manager/domain/entity/akasha.dart';
-import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/ui/util/open_url.dart';
-import 'package:genshin_mod_manager/ui/widget/intrinsic_command_bar.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import '../../../di/nahida_store.dart';
+import '../../../domain/entity/akasha.dart';
+import '../../../domain/entity/mod_category.dart';
+import '../../util/open_url.dart';
+import '../../widget/intrinsic_command_bar.dart';
 
 class StoreElement extends ConsumerWidget {
   const StoreElement({

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
+import 'path_op_string.dart';
 
 /// Returns a String path list under the given [path].
 List<String> getUnder<T extends FileSystemEntity>(

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:genshin_mod_manager/data/helper/fsops.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
+import 'fsops.dart';
+import 'path_op_string.dart';
 
 /// ShaderFixes directory name.
 const kShaderFixes = 'ShaderFixes';

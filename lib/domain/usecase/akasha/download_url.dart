@@ -1,6 +1,6 @@
-import 'package:genshin_mod_manager/domain/entity/akasha.dart';
-import 'package:genshin_mod_manager/domain/repo/akasha.dart';
-import 'package:genshin_mod_manager/domain/repo/mod_writer.dart';
+import '../../entity/akasha.dart';
+import '../../repo/akasha.dart';
+import '../../repo/mod_writer.dart';
 
 final class AkashaDownloadUrlUseCase {
   const AkashaDownloadUrlUseCase({

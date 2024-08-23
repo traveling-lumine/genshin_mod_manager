@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:genshin_mod_manager/data/helper/path_op_string.dart';
-import 'package:genshin_mod_manager/di/fs_interface.dart';
-import 'package:genshin_mod_manager/di/ini_widget.dart';
-import 'package:genshin_mod_manager/domain/entity/ini.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import '../../../data/helper/path_op_string.dart';
+import '../../../di/fs_interface.dart';
+import '../../../di/ini_widget.dart';
+import '../../../domain/entity/ini.dart';
 
 class IniWidget extends ConsumerWidget {
   const IniWidget({required this.iniFile, super.key});

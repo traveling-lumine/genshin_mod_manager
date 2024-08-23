@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:genshin_mod_manager/data/repo/akasha.dart';
-import 'package:genshin_mod_manager/data/repo/mod_writer.dart';
-import 'package:genshin_mod_manager/domain/entity/akasha.dart';
-import 'package:genshin_mod_manager/domain/entity/mod_category.dart';
-import 'package:genshin_mod_manager/domain/repo/akasha.dart';
-import 'package:genshin_mod_manager/domain/usecase/akasha/download_url.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../data/repo/akasha.dart';
+import '../data/repo/mod_writer.dart';
+import '../domain/entity/akasha.dart';
+import '../domain/entity/mod_category.dart';
+import '../domain/repo/akasha.dart';
+import '../domain/usecase/akasha/download_url.dart';
 
 part 'nahida_store.g.dart';
 

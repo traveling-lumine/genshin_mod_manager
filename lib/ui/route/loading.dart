@@ -1,11 +1,12 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:genshin_mod_manager/di/storage.dart';
-import 'package:genshin_mod_manager/ui/constant.dart';
-import 'package:genshin_mod_manager/ui/widget/appbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import '../../di/storage.dart';
+import '../constant.dart';
+import '../widget/appbar.dart';
 
 /// A route that shows a loading screen.
 class LoadingRoute extends HookConsumerWidget {

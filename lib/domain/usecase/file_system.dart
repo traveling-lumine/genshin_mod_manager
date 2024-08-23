@@ -1,4 +1,4 @@
-import 'package:genshin_mod_manager/domain/repo/fs_interface.dart';
+import '../repo/fs_interface.dart';
 
 Future<void> openFolderUseCase(
   final FileSystemInterface fsInterface,
