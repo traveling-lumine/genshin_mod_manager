@@ -73,6 +73,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   Widget build(final BuildContext context) {
     final darkMode = ref.watch(darkModeProvider);
     return FluentApp.router(
+      theme: FluentThemeData.light(),
       darkTheme: FluentThemeData.dark(),
       themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
       title: 'Genshin Mod Manager',
