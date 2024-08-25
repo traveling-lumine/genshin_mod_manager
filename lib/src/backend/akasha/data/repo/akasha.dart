@@ -8,10 +8,6 @@ import '../../domain/entity/nahida_element.dart';
 import '../../domain/repo/akasha.dart';
 import '../secrets.dart';
 
-/// The filename of Akasha's configuration file.
-const kAkashaConfigFilename = 'config.json';
-
-/// Creates a new [NahidaliveAPI] instance.
 NahidaliveAPI createNahidaliveAPI() => _NahidaliveAPIImpl();
 
 class _NahidaliveAPIImpl implements NahidaliveAPI {

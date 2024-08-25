@@ -1,9 +1,7 @@
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../backend/akasha/data/repo/akasha.dart';
 import '../backend/fs_interface/data/helper/fsops.dart';
 import '../backend/fs_interface/data/helper/path_op_string.dart';
 import '../backend/structure/entity/mod.dart';
@@ -21,24 +19,6 @@ class ModIconPath extends _$ModIconPath {
     ref.onDispose(subscription.cancel);
 
     return findPreviewFileInString(getUnderSync<File>(mod.path));
-  }
-}
-
-@riverpod
-class ConfigPath extends _$ConfigPath {
-  @override
-  String? build(final Mod mod) {
-    final files = ref.watch(fileInFolderProvider(mod.path));
-    final subscription = files.listen((final event) {
-      state = event.firstWhereOrNull(
-        (final path) => path.pBasename.pEquals(kAkashaConfigFilename),
-      );
-    });
-    ref.onDispose(subscription.cancel);
-
-    return getUnderSync<File>(mod.path).firstWhereOrNull(
-      (final path) => path.pBasename.pEquals(kAkashaConfigFilename),
-    );
   }
 }
 

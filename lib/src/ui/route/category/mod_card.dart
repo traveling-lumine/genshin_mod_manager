@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
@@ -8,10 +7,8 @@ import 'package:flutter_image_converter/flutter_image_converter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
 
-import '../../../backend/akasha/data/repo/akasha.dart';
 import '../../../backend/fs_interface/data/helper/mod_switcher.dart';
 import '../../../backend/fs_interface/data/helper/path_op_string.dart';
-import '../../../backend/mod_writer/data/mod_writer.dart';
 import '../../../backend/structure/entity/ini.dart';
 import '../../../backend/structure/entity/mod.dart';
 import '../../../di/app_state/card_color.dart';
@@ -19,6 +16,7 @@ import '../../../di/app_state/game_config.dart';
 import '../../../di/fs_interface.dart';
 import '../../../di/mod_card.dart';
 import '../../util/display_infobar.dart';
+import '../../util/show_prompt_dialog.dart';
 import '../../widget/custom_image.dart';
 import 'ini_widget.dart';
 
@@ -50,7 +48,7 @@ class _ModCardState extends ConsumerState<ModCard> {
 
   @override
   Widget build(final BuildContext context) => GestureDetector(
-        onTap: () => _onToggle(context),
+        onTap: _onToggle,
         child: Card(
           backgroundColor: ref.watch(
             cardColorProvider(
@@ -62,65 +60,50 @@ class _ModCardState extends ConsumerState<ModCard> {
           child: FocusTraversalGroup(
             child: Column(
               children: [
-                _buildFolderHeader(context),
+                _buildFolderHeader(),
                 const SizedBox(height: 4),
-                _buildFolderContent(context),
+                _buildFolderContent(),
               ],
             ),
           ),
         ),
       );
 
-  Widget _buildFolderHeader(final BuildContext context) => Consumer(
-        builder: (final context, final ref, final child) {
-          final value = ref.watch(configPathProvider(widget.mod));
-          return Row(
-            children: [
-              Expanded(
-                child: Text(
-                  widget.mod.displayName,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: FluentTheme.of(context).typography.bodyStrong,
-                ),
-              ),
-              if (value != null) ...[
-                RepaintBoundary(
-                  child: IconButton(
-                    icon: const Icon(FluentIcons.refresh),
-                    onPressed: () async => _onRefresh(context, value),
-                  ),
-                ),
-              ],
-              RepaintBoundary(
-                child: IconButton(
-                  icon: const Icon(FluentIcons.command_prompt),
-                  onPressed: _onCommand,
-                ),
-              ),
-              RepaintBoundary(
-                child: IconButton(
-                  icon: const Icon(FluentIcons.delete),
-                  onPressed: () {
-                    _onDeletePressed(context);
-                  },
-                ),
-              ),
-              RepaintBoundary(
-                child: IconButton(
-                  icon: const Icon(FluentIcons.folder_open),
-                  onPressed: () async {
-                    final fsInterface = ref.read(fsInterfaceProvider);
-                    await fsInterface.openFolder(widget.mod.path);
-                  },
-                ),
-              ),
-            ],
-          );
-        },
+  Widget _buildFolderHeader() => Row(
+        children: [
+          Expanded(
+            child: Text(
+              widget.mod.displayName,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: FluentTheme.of(context).typography.bodyStrong,
+            ),
+          ),
+          RepaintBoundary(
+            child: IconButton(
+              icon: const Icon(FluentIcons.command_prompt),
+              onPressed: _onCommand,
+            ),
+          ),
+          RepaintBoundary(
+            child: IconButton(
+              icon: const Icon(FluentIcons.delete),
+              onPressed: _onDeletePressed,
+            ),
+          ),
+          RepaintBoundary(
+            child: IconButton(
+              icon: const Icon(FluentIcons.folder_open),
+              onPressed: () async {
+                final fsInterface = ref.read(fsInterfaceProvider);
+                await fsInterface.openFolder(widget.mod.path);
+              },
+            ),
+          ),
+        ],
       );
 
-  Widget _buildFolderContent(final BuildContext context) => Expanded(
+  Widget _buildFolderContent() => Expanded(
         child: LayoutBuilder(
           builder: (final context, final constraints) => Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -199,7 +182,7 @@ class _ModCardState extends ConsumerState<ModCard> {
           maxWidth: constraints.maxWidth - _minIniSectionWidth,
         ),
         child: GestureDetector(
-          onTapUp: (final details) async => _onImageTap(context, imagePath),
+          onTapUp: (final details) async => _onImageTap(imagePath),
           onSecondaryTapUp: (final details) async =>
               _onImageRightClick(details, context, imagePath),
           child: FlyoutTarget(
@@ -238,53 +221,33 @@ class _ModCardState extends ConsumerState<ModCard> {
     return;
   }
 
-  void _onDeletePressed(final BuildContext context) => unawaited(
-        showDialog(
-          context: context,
-          barrierDismissible: true,
-          builder: (final dCtx) => ContentDialog(
-            title: const Text('Delete mod?'),
-            content: const Text(
-              'Are you sure you want to delete this mod?',
-            ),
-            actions: [
-              Button(
-                child: const Text('Cancel'),
-                onPressed: () {
-                  Navigator.pop(dCtx);
-                },
-              ),
-              FluentTheme(
-                data: FluentTheme.of(context).copyWith(
-                  accentColor: Colors.red,
-                ),
-                child: FilledButton(
-                  child: const Text('Delete'),
-                  onPressed: () {
-                    Navigator.pop(dCtx);
-                    Directory(widget.mod.path).deleteSync(
-                      recursive: true,
-                    );
-                    displayInfoBarInContext(
-                      context,
-                      title: const Text('Mod deleted'),
-                      content: Text(
-                        'Mod deleted from ${widget.mod.path}',
-                      ),
-                      severity: InfoBarSeverity.warning,
-                    );
-                  },
-                ),
-              ),
-            ],
+  Future<void> _onDeletePressed() async {
+    final userResponse = await showPromptDialog(
+      context: context,
+      title: 'Delete mod?',
+      content: const Text('Are you sure you want to delete this mod?'),
+      confirmButtonLabel: 'Delete',
+      redButton: true,
+    );
+    if (!userResponse) {
+      return;
+    }
+    Directory(widget.mod.path).deleteSync(recursive: true);
+    if (mounted) {
+      unawaited(
+        displayInfoBarInContext(
+          context,
+          title: const Text('Mod deleted'),
+          content: Text(
+            'Mod deleted from ${widget.mod.path}',
           ),
+          severity: InfoBarSeverity.warning,
         ),
       );
+    }
+  }
 
-  Future<void> _onImageTap(
-    final BuildContext context,
-    final String image,
-  ) async {
+  Future<void> _onImageTap(final String image) async {
     await showDialog(
       context: context,
       barrierDismissible: true,
@@ -311,7 +274,7 @@ class _ModCardState extends ConsumerState<ModCard> {
       ancestor: Navigator.of(context).context.findRenderObject(),
     );
 
-    await _contextController.showFlyout<void>(
+    final userResponse = await _contextController.showFlyout<bool?>(
       position: position,
       builder: (final fCtx) => FlyoutContent(
         child: IntrinsicWidth(
@@ -321,120 +284,43 @@ class _ModCardState extends ConsumerState<ModCard> {
               CommandBarButton(
                 icon: const Icon(FluentIcons.delete),
                 label: const Text('Delete'),
-                onPressed: () => _onImageDelete(context, imagePath),
+                onPressed: () async {
+                  final userResponse = await showPromptDialog(
+                    context: fCtx,
+                    title: 'Delete preview image?',
+                    content: const Text(
+                      'Are you sure you want to delete the preview image?',
+                    ),
+                    confirmButtonLabel: 'Delete',
+                    redButton: true,
+                  );
+                  if (context.mounted) {
+                    Navigator.of(fCtx).pop(userResponse);
+                  }
+                },
               ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  void _onImageDelete(final BuildContext context, final String imagePath) {
-    unawaited(
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (final dCtx) => ContentDialog(
-          title: const Text('Delete preview image?'),
-          content:
-              const Text('Are you sure you want to delete the preview image?'),
-          actions: [
-            Button(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(dCtx).pop();
-                Navigator.of(context).pop();
-              },
-            ),
-            FluentTheme(
-              data: FluentTheme.of(context).copyWith(accentColor: Colors.red),
-              child: FilledButton(
-                onPressed: () {
-                  File(imagePath).deleteSync();
-                  Navigator.of(dCtx).pop();
-                  Navigator.of(context).pop();
-                  displayInfoBarInContext(
-                    context,
-                    title: const Text('Preview deleted'),
-                    content: Text('Preview deleted from $imagePath'),
-                    severity: InfoBarSeverity.warning,
-                  );
-                },
-                child: const Text('Delete'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _onRefresh(
-    final BuildContext context,
-    final String findConfig,
-  ) async {
-    try {
-      final fileContent = await File(findConfig).readAsString();
-      final config = jsonDecode(fileContent) as Map<String, dynamic>;
-      final uuid = config['uuid'] as String;
-      final version = config['version'] as String;
-      final updateCode = config['update_code'] as String;
-      final api = createNahidaliveAPI();
-      final targetElement = await api.fetchNahidaliveElement(uuid);
-      final upstreamVersion = targetElement.version;
-      if (version == upstreamVersion) {
-        if (!context.mounted) {
-          return;
-        }
-        unawaited(
-          displayInfoBarInContext(
-            context,
-            title: const Text('No update available'),
-            content: const Text('The mod is up to date'),
-          ),
-        );
-        return;
-      }
-      final downloadElement =
-          await api.downloadUrl(uuid, updateCode: updateCode);
-      final data = await api.download(downloadElement);
-
-      try {
-        Directory(widget.mod.path).deleteSync(recursive: true);
-        final writer = createModWriter(category: widget.mod.category);
-        await writer(
-          modName: targetElement.title,
-          data: data,
-        );
-        if (!context.mounted) {
-          return;
-        }
-        unawaited(
-          displayInfoBarInContext(
-            context,
-            title: const Text('Update downloaded'),
-            content: Text('Update downloaded to ${widget.mod.path.pDirname}'),
-            severity: InfoBarSeverity.success,
-          ),
-        );
-      } finally {}
-    } on FormatException catch (e) {
-      if (!context.mounted) {
-        return;
-      }
+    if (userResponse != true) {
+      return;
+    }
+    File(imagePath).deleteSync();
+    if (context.mounted) {
       unawaited(
         displayInfoBarInContext(
           context,
-          title: const Text('Something went wrong'),
-          content: Text(e.toString()),
-          severity: InfoBarSeverity.error,
+          title: const Text('Preview deleted'),
+          content: Text('Preview deleted from $imagePath'),
+          severity: InfoBarSeverity.warning,
         ),
       );
     }
   }
 
-  void _onToggle(final BuildContext context) {
+  void _onToggle() {
     final shaderFixesPath = ref
         .read(gameConfigNotifierProvider)
         .modExecFile
@@ -492,13 +378,13 @@ class _ModCardState extends ConsumerState<ModCard> {
     unawaited(
       showDialog(
         context: context,
-        builder: (final context) => ContentDialog(
+        builder: (final dCtx) => ContentDialog(
           title: const Text('Error'),
           content: Text(text),
           actions: [
             FilledButton(
+              onPressed: Navigator.of(dCtx).pop,
               child: const Text('Ok'),
-              onPressed: () => Navigator.pop(context),
             ),
           ],
         ),
