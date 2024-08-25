@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import '../../../fs_interface/data/helper/path_op_string.dart';
-import '../../../fs_interface/domain/fs_interface.dart';
+import '../../../fs_interface/domain/repo/fs_interface.dart';
 import '../persistent_storage.dart';
 import 'game_config.dart';
 

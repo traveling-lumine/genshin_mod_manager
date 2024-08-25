@@ -8,7 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../backend/fs_interface/domain/entity/setting_data.dart';
 import '../../backend/fs_interface/domain/usecase/folder_drop.dart';
-import '../../backend/storage/di/app_state.dart';
+import '../di/app_state.dart';
 import '../../backend/structure/entity/mod_category.dart';
 import '../util/display_infobar.dart';
 

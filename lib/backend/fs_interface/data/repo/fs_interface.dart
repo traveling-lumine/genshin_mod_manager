@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../domain/fs_interface.dart';
-import 'helper/path_op_string.dart';
+import '../../domain/repo/fs_interface.dart';
+import '../helper/path_op_string.dart';
 
 class FileSystemInterfaceImpl implements FileSystemInterface {
   @override

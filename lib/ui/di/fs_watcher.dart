@@ -3,11 +3,11 @@ import 'dart:io';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../storage/di/app_state.dart';
-import '../../structure/entity/mod.dart';
-import '../../structure/entity/mod_category.dart';
-import '../data/helper/fsops.dart';
-import '../data/helper/path_op_string.dart';
+import 'app_state.dart';
+import '../../backend/structure/entity/mod.dart';
+import '../../backend/structure/entity/mod_category.dart';
+import '../../backend/fs_interface/data/helper/fsops.dart';
+import '../../backend/fs_interface/data/helper/path_op_string.dart';
 import 'fs_interface.dart';
 
 part 'fs_watcher.g.dart';

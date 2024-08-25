@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'backend/app_arg/di/exe_arg.dart';
+import 'ui/di/exe_arg.dart';
 import 'error_handler.dart';
 import 'ui/router.dart';
 

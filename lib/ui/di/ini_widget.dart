@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../structure/entity/ini.dart';
+import '../../backend/structure/entity/ini.dart';
 import 'fs_watcher.dart';
 
 part 'ini_widget.g.dart';

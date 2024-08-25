@@ -1,4 +1,4 @@
-import '../fs_interface.dart';
+import '../repo/fs_interface.dart';
 
 Future<void> openFolderUseCase(
   final FileSystemInterface fsInterface,

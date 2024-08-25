@@ -3,11 +3,11 @@ import 'dart:io';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../fs_interface/data/helper/fsops.dart';
-import '../../fs_interface/data/helper/mod_switcher.dart';
-import '../../fs_interface/data/helper/path_op_string.dart';
-import '../../structure/entity/mod_category.dart';
-import '../domain/entity/preset.dart';
+import '../../backend/fs_interface/data/helper/fsops.dart';
+import '../../backend/fs_interface/data/helper/mod_switcher.dart';
+import '../../backend/fs_interface/data/helper/path_op_string.dart';
+import '../../backend/structure/entity/mod_category.dart';
+import '../../backend/storage/domain/entity/preset.dart';
 import 'app_state.dart';
 
 part 'preset.g.dart';
@@ -34,7 +34,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
   @override
   void addPreset(final String name) {
     final presetTargetData = PresetList(
-      mods: getUnder<Directory>(category.path)
+      mods: getUnderSync<Directory>(category.path)
           .where((final e) => e.pIsEnabled)
           .map((final e) => e.pBasename)
           .toList(),
@@ -122,9 +122,9 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
     }
     final bpd = PresetListMap(
       bundledPresets: {
-        for (final categoryDir in getUnder<Directory>(rootPath))
+        for (final categoryDir in getUnderSync<Directory>(rootPath))
           categoryDir.pBasename: PresetList(
-            mods: getUnder<Directory>(categoryDir)
+            mods: getUnderSync<Directory>(categoryDir)
                 .map((final e) => e.pBasename)
                 .where((final e) => e.pIsEnabled)
                 .toList(),
@@ -192,7 +192,7 @@ Future<void> _toggleCategory(
     return;
   }
   final shaderFixes = modExecFile.pDirname.pJoin(kShaderFixes);
-  final currentEnabled = getUnder<Directory>(categoryPath)
+  final currentEnabled = getUnderSync<Directory>(categoryPath)
       .where((final e) => e.pIsEnabled)
       .map((final e) => e.pBasename)
       .toList();

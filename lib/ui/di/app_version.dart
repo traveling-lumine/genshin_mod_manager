@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../domain/github.dart';
+import '../../backend/app_version/domain/github.dart';
 
 part 'app_version.g.dart';
 

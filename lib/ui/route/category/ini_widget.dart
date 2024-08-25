@@ -6,8 +6,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../backend/fs_interface/data/helper/path_op_string.dart';
-import '../../../backend/fs_interface/di/fs_interface.dart';
-import '../../../backend/fs_interface/di/ini_widget.dart';
+import '../../di/fs_interface.dart';
+import '../../di/ini_widget.dart';
 import '../../../backend/structure/entity/ini.dart';
 
 class IniWidget extends ConsumerWidget {

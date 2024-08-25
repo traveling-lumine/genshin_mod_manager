@@ -8,10 +8,10 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
-import '../../../backend/akasha/di/nahida_store.dart';
+import '../../di/nahida_store.dart';
 import '../../../backend/akasha/domain/entity/akasha.dart';
 import '../../../backend/fs_interface/data/helper/path_op_string.dart';
-import '../../../backend/fs_interface/di/fs_watcher.dart';
+import '../../di/fs_watcher.dart';
 import '../../../backend/structure/entity/mod_category.dart';
 import '../../route_names.dart';
 import '../../util/display_infobar.dart';
