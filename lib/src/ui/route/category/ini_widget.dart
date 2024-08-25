@@ -7,8 +7,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../backend/fs_interface/data/helper/path_op_string.dart';
 import '../../../backend/structure/entity/ini.dart';
-import '../../di/fs_interface.dart';
-import '../../di/ini_widget.dart';
+import '../../../di/fs_interface.dart';
+import '../../../di/ini_widget.dart';
 
 class IniWidget extends ConsumerWidget {
   const IniWidget({required this.iniFile, super.key});

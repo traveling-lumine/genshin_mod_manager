@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../backend/akasha/data/akasha.dart';
-import '../../backend/fs_interface/data/helper/fsops.dart';
-import '../../backend/fs_interface/data/helper/path_op_string.dart';
-import '../../backend/structure/entity/mod.dart';
+import '../backend/akasha/data/akasha.dart';
+import '../backend/fs_interface/data/helper/fsops.dart';
+import '../backend/fs_interface/data/helper/path_op_string.dart';
+import '../backend/structure/entity/mod.dart';
 import 'fs_watcher.dart';
 
 part 'mod_card.g.dart';

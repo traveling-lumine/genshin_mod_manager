@@ -6,7 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../backend/structure/entity/mod_category.dart';
-import '../di/preset.dart';
+import '../../di/preset.dart';
 
 /// A widget that provides a control for presets.
 class PresetControlWidget extends HookWidget {

@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'src/di/exe_arg.dart';
 import 'src/error_handler.dart';
-import 'src/ui/di/exe_arg.dart';
 import 'src/ui/router.dart';
 
 const _kMinWindowSize = Size(800, 600);

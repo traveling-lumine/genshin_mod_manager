@@ -7,7 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../backend/akasha/domain/entity/akasha.dart';
 import '../../../backend/structure/entity/mod_category.dart';
-import '../../di/nahida_store.dart';
+import '../../../di/nahida_store.dart';
 import '../../util/open_url.dart';
 import '../../widget/intrinsic_command_bar.dart';
 

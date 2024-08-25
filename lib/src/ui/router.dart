@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'di/app_state.dart';
+import '../di/app_state.dart';
 import 'route/category/category.dart';
 import 'route/home_shell.dart';
 import 'route/license.dart';

@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../backend/storage/data/sharedpreference_storage.dart';
-import '../../backend/storage/domain/persistent_storage.dart';
-import '../../backend/storage/domain/usecase/shared_storage.dart';
+import '../backend/storage/data/sharedpreference_storage.dart';
+import '../backend/storage/domain/persistent_storage.dart';
+import '../backend/storage/domain/usecase/shared_storage.dart';
 
 part 'storage.g.dart';
 
