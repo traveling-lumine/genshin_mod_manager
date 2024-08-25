@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
@@ -23,8 +22,7 @@ import '../route_names.dart';
 import '../util/display_infobar.dart';
 import '../util/open_url.dart';
 import '../widget/appbar.dart';
-import '../widget/category_drop_target.dart';
-import '../widget/custom_image.dart';
+import '../widget/category_pane_item.dart';
 import '../widget/third_party/fluent_ui/auto_suggest_box.dart';
 
 Future<void> _runUpdateScript() async {
@@ -57,19 +55,15 @@ Future<void> _runUpdateScript() async {
       'start /b genshin_mod_manager.exe\n'
       'endlocal\n';
   await File('update.cmd').writeAsString(updateScript);
-  unawaited(
-    Process.run(
-      'start',
-      [
-        'cmd',
-        '/c',
-        'timeout /t 3 && call update.cmd > update.log & del update.cmd',
-      ],
-      runInShell: true,
-    ),
+  await Process.start(
+    'start',
+    [
+      'cmd',
+      '/c',
+      'timeout /t 3 && call update.cmd > update.log & del update.cmd',
+    ],
+    runInShell: true,
   );
-  // delay needed. otherwise the process will die before the script runs.
-  await Future<void>.delayed(const Duration(milliseconds: 200));
   exit(0);
 }
 
@@ -81,84 +75,6 @@ class HomeShell extends ConsumerStatefulWidget {
   ConsumerState<HomeShell> createState() => _HomeShellState();
 }
 
-class _FolderPaneItem extends PaneItem {
-  _FolderPaneItem({
-    required this.category,
-    required super.key,
-    super.onTap,
-  }) : super(
-          title: Text(
-            category.name,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          icon: _getIcon(category.name),
-          body: const SizedBox.shrink(),
-        );
-  static const maxIconWidth = 80.0;
-  ModCategory category;
-
-  @override
-  Widget build(
-    final BuildContext context,
-    final bool selected,
-    final VoidCallback? onPressed, {
-    final PaneDisplayMode? displayMode,
-    final bool showTextOnTop = true,
-    final int? itemIndex,
-    final bool? autofocus,
-  }) =>
-      CategoryDropTarget(
-        category: category,
-        child: super.build(
-          context,
-          selected,
-          onPressed,
-          displayMode: displayMode,
-          showTextOnTop: showTextOnTop,
-          itemIndex: itemIndex,
-          autofocus: autofocus,
-        ),
-      );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ModCategory>('category', category));
-  }
-
-  static Widget _buildImage(final String? imageFile) {
-    final Widget image;
-    if (imageFile == null) {
-      image = Consumer(
-        builder: (final context, final ref, final child) {
-          final usePaimon = ref.watch(paimonIconProvider);
-          return usePaimon
-              ? Image.asset('images/app_icon.ico')
-              : Image.asset('images/idk_icon.png');
-        },
-      );
-    } else {
-      image = TimeAwareFileImage(path: imageFile);
-    }
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: maxIconWidth),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: image,
-      ),
-    );
-  }
-
-  static Widget _getIcon(final String name) => Consumer(
-        builder: (final context, final ref, final child) {
-          final filePath = ref.watch(folderIconPathProvider(name));
-          return ref.watch(folderIconProvider)
-              ? _buildImage(filePath)
-              : const Icon(FluentIcons.folder_open);
-        },
-      );
-}
-
 class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     with WindowListener {
   static const _navigationPaneOpenWidth = 270.0;
@@ -168,7 +84,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     ref.listen(isOutdatedProvider, (final previous, final next) async {
       if (next is AsyncData && next.requireValue) {
         final remote = await ref.read(remoteVersionProvider.future);
-        _displayUpdateInfoBar(remote!);
+        unawaited(_showUpdateInfoBar(remote!));
       }
     });
 
@@ -228,26 +144,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           } else if (arg == AcceptedArg.runboth.cmd) {
             unawaited(_runBoth());
           } else {
-            unawaited(
-              showDialog(
-                context: context,
-                builder: (final dCtx) {
-                  final validArgs =
-                      AcceptedArg.values.map((final e) => e.cmd).join(', ');
-                  return ContentDialog(
-                    title: const Text('Invalid argument'),
-                    content: Text('Unknown argument: $arg.\n'
-                        'Valid args are: $validArgs'),
-                    actions: [
-                      FilledButton(
-                        onPressed: Navigator.of(dCtx).pop,
-                        child: const Text('OK'),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            );
+            unawaited(_showInvalidCommandDialog(arg));
           }
           ref.read(argProviderProvider.notifier).clear();
         },
@@ -276,7 +173,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   }
 
   Widget _buildAutoSuggestBox(
-    final List<_FolderPaneItem> items,
+    final List<FolderPaneItem> items,
     final List<NavigationPaneItem> footerItems,
   ) =>
       AutoSuggestBox2(
@@ -327,7 +224,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   NavigationPane _buildPane(final List<ModCategory> categories) {
     final items = categories
         .map(
-          (final e) => _FolderPaneItem(
+          (final e) => FolderPaneItem(
             category: e,
             key: Key('${RouteNames.category.name}/${e.name}'),
             onTap: () => context.go('${RouteNames.category.name}/${e.name}'),
@@ -397,84 +294,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           ];
   }
 
-  void _displayUpdateInfoBar(final String newVersion) {
-    unawaited(
-      displayInfoBarInContext(
-        context,
-        duration: const Duration(minutes: 1),
-        title: RichText(
-          text: TextSpan(
-            style: DefaultTextStyle.of(context).style,
-            children: [
-              const TextSpan(text: 'New version available: '),
-              TextSpan(
-                text: newVersion,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const TextSpan(text: '. Click '),
-              TextSpan(
-                text: 'here',
-                style: TextStyle(
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
-                ),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () => openUrl(kRepoReleases),
-              ),
-              const TextSpan(text: ' to open link.'),
-            ],
-          ),
-        ),
-        action: FilledButton(
-          onPressed: () => showDialog(
-            context: context,
-            builder: (final dialogContext) {
-              final reason = _findUpdateUnableReason();
-              final Widget filledButton;
-              if (reason.isNotEmpty) {
-                filledButton = MouseRegion(
-                  cursor: SystemMouseCursors.forbidden,
-                  child: Tooltip(
-                    message: 'The auto-update will delete one or more of the'
-                        " following: ${reason.join(', ')}!",
-                    child: const FilledButton(
-                      onPressed: null,
-                      child: Text('Start'),
-                    ),
-                  ),
-                );
-              } else {
-                filledButton = FilledButton(
-                  child: const Text('Start'),
-                  onPressed: () async {
-                    Navigator.of(dialogContext).pop();
-                    await _runUpdateScript();
-                  },
-                );
-              }
-
-              return ContentDialog(
-                title: const Text('Start auto update?'),
-                content: _getAutoUpdateWarning(),
-                actions: [
-                  Button(
-                    onPressed: Navigator.of(dialogContext).pop,
-                    child: const Text('Cancel'),
-                  ),
-                  FluentTheme(
-                    data: FluentThemeData(accentColor: Colors.red),
-                    child: filledButton,
-                  ),
-                ],
-              );
-            },
-          ),
-          child: const Text('Auto update'),
-        ),
-      ),
-    );
-  }
-
   List<String> _findUpdateUnableReason() {
     final appState = ref.read(gameConfigNotifierProvider);
     final modRoot = appState.modRoot;
@@ -494,31 +313,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     }
     return reason;
   }
-
-  RichText _getAutoUpdateWarning() => RichText(
-        textAlign: TextAlign.justify,
-        text: TextSpan(
-          style: DefaultTextStyle.of(context).style,
-          children: [
-            const TextSpan(
-              text: 'This will download the latest version'
-                  ' and replace the current one.'
-                  ' This feature is experimental'
-                  ' and may not work as expected.\n',
-              // justify
-            ),
-            TextSpan(
-              text: 'Please backup your mods'
-                  ' and resources before proceeding.\n'
-                  'DELETION OF UNRELATED FILES IS POSSIBLE.',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      );
 
   Future<void> _runBoth() async {
     await _runMigoto();
@@ -549,4 +343,125 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       title: const Text('Ran 3d migoto'),
     );
   }
+
+  Future<Q?> _showInvalidCommandDialog<Q extends Object?>(final String arg) =>
+      showDialog<Q>(
+        context: context,
+        builder: (final dCtx) {
+          final validArgs =
+              AcceptedArg.values.map((final e) => e.cmd).join(', ');
+          return ContentDialog(
+            title: const Text('Invalid argument'),
+            content: Text('Unknown argument: $arg.\n'
+                'Valid args are: $validArgs'),
+            actions: [
+              FilledButton(
+                onPressed: Navigator.of(dCtx).pop,
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+
+  Future<void> _showUpdateInfoBar(final String newVersion) =>
+      displayInfoBarInContext(
+        context,
+        duration: const Duration(minutes: 1),
+        title: RichText(
+          text: TextSpan(
+            style: DefaultTextStyle.of(context).style,
+            children: [
+              const TextSpan(text: 'New version available: '),
+              TextSpan(
+                text: newVersion,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const TextSpan(text: '. Click '),
+              TextSpan(
+                text: 'here',
+                style: TextStyle(
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () => openUrl(kRepoReleases),
+              ),
+              const TextSpan(text: ' to open link.'),
+            ],
+          ),
+        ),
+        action: FilledButton(
+          onPressed: () async {
+            final result = await _showUpdateConfirmDialog();
+            if (result ?? false) {
+              await _runUpdateScript();
+            }
+          },
+          child: const Text('Auto update'),
+        ),
+      );
+
+  Future<bool?> _showUpdateConfirmDialog() => showDialog<bool?>(
+        context: context,
+        builder: (final dialogContext) {
+          final reason = _findUpdateUnableReason();
+          final Widget filledButton;
+          if (reason.isNotEmpty) {
+            filledButton = MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: Tooltip(
+                message: 'The auto-update will delete one or more of the'
+                    " following: ${reason.join(', ')}!",
+                child: const FilledButton(
+                  onPressed: null,
+                  child: Text('Start'),
+                ),
+              ),
+            );
+          } else {
+            filledButton = FilledButton(
+              child: const Text('Start'),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            );
+          }
+
+          return ContentDialog(
+            title: const Text('Start auto update?'),
+            content: RichText(
+              textAlign: TextAlign.justify,
+              text: TextSpan(
+                style: DefaultTextStyle.of(context).style,
+                children: [
+                  const TextSpan(
+                    text: 'This will download the latest version'
+                        ' and replace the current one.'
+                        ' This feature is experimental'
+                        ' and may not work as expected.\n',
+                  ),
+                  TextSpan(
+                    text: 'Please backup your mods'
+                        ' and resources before proceeding.\n'
+                        'DELETION OF UNRELATED FILES IS POSSIBLE.',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              Button(
+                onPressed: Navigator.of(dialogContext).pop,
+                child: const Text('Cancel'),
+              ),
+              FluentTheme(
+                data: FluentThemeData(accentColor: Colors.red),
+                child: filledButton,
+              ),
+            ],
+          );
+        },
+      );
 }
