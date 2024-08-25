@@ -14,6 +14,7 @@ import '../backend/storage/domain/usecase/move_on_drag.dart';
 import '../backend/storage/domain/usecase/paimon_icon.dart';
 import '../backend/storage/domain/usecase/run_together.dart';
 import '../backend/storage/domain/usecase/separate_run.dart';
+import '../backend/storage/domain/usecase/window_size.dart';
 import 'storage.dart';
 
 part 'app_state.g.dart';
@@ -271,6 +272,21 @@ class SeparateRunOverride extends _$SeparateRunOverride {
     final repository = ref.read(sharedPreferenceStorageProvider);
     final currentGame = ref.read(targetGameProvider);
     setSeparateRunOverrideUseCase(repository, currentGame, value);
+    state = value;
+  }
+}
+
+@riverpod
+class WindowSize extends _$WindowSize {
+  @override
+  Size? build() {
+    final watch = ref.watch(sharedPreferenceStorageProvider);
+    return initializeWindowSizeUseCase(watch);
+  }
+
+  void setValue(final Size value) {
+    final read = ref.read(sharedPreferenceStorageProvider);
+    setWindowSizeUseCase(read, value);
     state = value;
   }
 }

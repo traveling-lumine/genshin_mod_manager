@@ -19,7 +19,6 @@ import '../../di/app_version.dart';
 import '../../di/exe_arg.dart';
 import '../../di/fs_interface.dart';
 import '../../di/fs_watcher.dart';
-import '../../di/storage.dart';
 import '../route_names.dart';
 import '../util/display_infobar.dart';
 import '../util/open_url.dart';
@@ -255,13 +254,9 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       );
     }
 
-    final read = ref.read(sharedPreferenceStorageProvider);
-    try {
-      final width = double.parse(read.getString('windowWidth') ?? '');
-      final height = double.parse(read.getString('windowHeight') ?? '');
-      unawaited(WindowManager.instance.setSize(Size(width, height)));
-    } on Exception {
-      // pass
+    final read = ref.read(windowSizeProvider);
+    if (read != null) {
+      unawaited(WindowManager.instance.setSize(read));
     }
   }
 
@@ -273,13 +268,10 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   @override
   void onWindowResized() {
     super.onWindowResized();
-    final read = ref.read(sharedPreferenceStorageProvider);
     unawaited(
-      WindowManager.instance.getSize().then((final value) {
-        read
-          ..setString('windowWidth', value.width.toString())
-          ..setString('windowHeight', value.height.toString());
-      }),
+      WindowManager.instance
+          .getSize()
+          .then(ref.read(windowSizeProvider.notifier).setValue),
     );
   }
 
