@@ -3,8 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../backend/storage/di/app_state.dart';
-import '../backend/structure/entity/mod_category.dart';
-import 'constant.dart';
+import 'route_names.dart';
 import 'route/category/category.dart';
 import 'route/home_shell.dart';
 import 'route/license.dart';
@@ -13,9 +12,7 @@ import 'route/nahida_store/nahida_store.dart';
 import 'route/setting.dart';
 import 'route/welcome.dart';
 
-/// The main application widget.
 class MyApp extends ConsumerStatefulWidget {
-  /// Creates a [MyApp].
   const MyApp({super.key});
 
   @override
@@ -25,11 +22,10 @@ class MyApp extends ConsumerStatefulWidget {
 class _MyAppState extends ConsumerState<MyApp> {
   final _router = GoRouter(
     debugLogDiagnostics: true,
-    extraCodec: const ModCategoryCodec(),
-    initialLocation: kLoadingRoute,
+    initialLocation: RouteNames.loading.name,
     routes: [
       GoRoute(
-        path: kLoadingRoute,
+        path: RouteNames.loading.name,
         builder: (final context, final state) => const LoadingRoute(),
       ),
       ShellRoute(
@@ -37,26 +33,30 @@ class _MyAppState extends ConsumerState<MyApp> {
             HomeShell(child: child),
         routes: [
           GoRoute(
-            path: kHomeRoute,
+            path: RouteNames.home.name,
             builder: (final context, final state) => const WelcomeRoute(),
           ),
           GoRoute(
-            path: kSettingRoute,
+            path: RouteNames.setting.name,
             builder: (final context, final state) => const SettingRoute(),
           ),
           GoRoute(
-            path: kLicenseRoute,
+            path: RouteNames.license.name,
             builder: (final context, final state) => const OssLicensesRoute(),
           ),
           GoRoute(
-            path: kCategoryRoute,
-            builder: (final context, final state) =>
-                CategoryRoute(category: state.extra! as ModCategory),
+            path: '${RouteNames.category.name}/:category',
+            builder: (final context, final state) {
+              final categoryName = state.pathParameters['category']!;
+              return CategoryRoute(categoryName: categoryName);
+            },
           ),
           GoRoute(
-            path: kNahidaStoreRoute,
-            builder: (final context, final state) =>
-                NahidaStoreRoute(category: state.extra! as ModCategory),
+            path: '${RouteNames.nahidastore.name}/:category',
+            builder: (final context, final state) {
+              final categoryName = state.pathParameters['category']!;
+              return NahidaStoreRoute(categoryName: categoryName);
+            },
           ),
         ],
       ),

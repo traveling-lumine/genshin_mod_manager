@@ -5,15 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../backend/storage/di/storage.dart';
-import '../constant.dart';
+import '../route_names.dart';
 import '../widget/appbar.dart';
 
 /// A route that shows a loading screen.
 class LoadingRoute extends HookConsumerWidget {
   /// Creates a [LoadingRoute].
   const LoadingRoute({super.key});
-
-  static const String _destinationRoute = kHomeRoute;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
@@ -84,7 +82,8 @@ class LoadingRoute extends HookConsumerWidget {
         ],
       );
 
-  void _goToMain(final BuildContext context) => context.go(_destinationRoute);
+  void _goToMain(final BuildContext context) =>
+      context.go(RouteNames.home.name);
 }
 
 class _TitledNavView extends StatelessWidget {

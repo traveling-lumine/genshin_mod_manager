@@ -21,7 +21,7 @@ import '../../backend/fs_interface/di/fs_watcher.dart';
 import '../../backend/storage/di/app_state.dart';
 import '../../backend/storage/di/storage.dart';
 import '../../backend/structure/entity/mod_category.dart';
-import '../constant.dart';
+import '../route_names.dart';
 import '../util/display_infobar.dart';
 import '../util/open_url.dart';
 import '../widget/appbar.dart';
@@ -104,9 +104,9 @@ class HomeShell extends ConsumerStatefulWidget {
 class _FolderPaneItem extends PaneItem {
   _FolderPaneItem({
     required this.category,
+    required super.key,
     super.onTap,
   }) : super(
-          key: ValueKey(category),
           title: Text(
             category.name,
             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -312,7 +312,8 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
               (final e) => AutoSuggestBoxItem2(
                 value: e.key,
                 label: e.category.name,
-                onSelected: () => context.go(kCategoryRoute, extra: e.category),
+                onSelected: () =>
+                    context.go(RouteNames.category.name, extra: e.category),
               ),
             )
             .toList(),
@@ -330,68 +331,12 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
             return;
           }
           final category = items[index].category;
-          context.go(kCategoryRoute, extra: category);
+          context.go(RouteNames.category.name, extra: category);
         },
       );
 
   NavigationView _buildData(final List<ModCategory> categories) {
-    final footerItems = [
-      PaneItemSeparator(),
-      ..._buildPaneItemActions(),
-      PaneItem(
-        key: const Key(kSettingRoute),
-        icon: const Icon(FluentIcons.settings),
-        title: const Text('Settings'),
-        body: const SizedBox.shrink(),
-        onTap: () => context.go(kSettingRoute),
-      ),
-    ];
-    final items = categories
-        .map(
-          (final e) => _FolderPaneItem(
-            category: e,
-            onTap: () => context.go(kCategoryRoute, extra: e),
-          ),
-        )
-        .toList();
-
-    final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
-          ..removeWhere((final i) => i is! PaneItem || i is PaneItemAction))
-        .cast<PaneItem>();
-
-    final currentRouteExtra = GoRouterState.of(context).extra;
-    final index = effectiveItems.indexWhere((final e) {
-      final key = e.key;
-      if (key is! ValueKey<ModCategory>) {
-        return false;
-      }
-      return key.value == currentRouteExtra;
-    });
-
-    final selected = index != -1 ? index : null;
-
-    final uri = GoRouterState.of(context).uri;
-    final uriSegments = uri.pathSegments;
-    if (uriSegments.length == 1 &&
-        uriSegments[0] == 'category' &&
-        !categories.any((final e) => e == currentRouteExtra)) {
-      final String destination;
-      final ModCategory? extra;
-      if (categories.isNotEmpty) {
-        final index = _search(categories, currentRouteExtra! as ModCategory);
-        destination = kCategoryRoute;
-        extra = categories[index];
-      } else {
-        destination = kHomeRoute;
-        extra = null;
-      }
-      SchedulerBinding.instance.addPostFrameCallback((final timeStamp) {
-        context.go(destination, extra: extra);
-      });
-    }
-
     final game = ref.watch(targetGameProvider);
-
     final updateMarker = ref.watch(isOutdatedProvider).maybeWhen(
           data: (final value) => value ? ' (update!)' : '',
           orElse: () => '',
@@ -401,26 +346,54 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         '$game Mod Manager$updateMarker',
         presetControl: true,
       ),
-      pane: _buildPane(selected, items, footerItems),
+      pane: _buildPane(categories),
       paneBodyBuilder: (final item, final body) => widget.child,
     );
   }
 
-  NavigationPane _buildPane(
-    final int? selected,
-    final List<_FolderPaneItem> items,
-    final List<NavigationPaneItem> footerItems,
-  ) =>
-      NavigationPane(
-        selected: selected,
-        items: items.cast<NavigationPaneItem>(),
-        footerItems: footerItems,
-        size: const NavigationPaneSize(
-          openWidth: _HomeShellState._navigationPaneOpenWidth,
-        ),
-        autoSuggestBox: _buildAutoSuggestBox(items, footerItems),
-        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-      );
+  NavigationPane _buildPane(final List<ModCategory> categories) {
+    final items = categories
+        .map(
+          (final e) => _FolderPaneItem(
+            category: e,
+            key: Key('${RouteNames.category.name}/${e.name}'),
+            onTap: () => context.go('${RouteNames.category.name}/${e.name}'),
+          ),
+        )
+        .toList();
+    final footerItems = [
+      PaneItemSeparator(),
+      ..._buildPaneItemActions(),
+      PaneItem(
+        key: Key(RouteNames.setting.name),
+        icon: const Icon(FluentIcons.settings),
+        title: const Text('Settings'),
+        body: const SizedBox.shrink(),
+        onTap: () => context.go(RouteNames.setting.name),
+      ),
+    ];
+
+    final effectiveItems = ((items.cast<NavigationPaneItem>() + footerItems)
+          ..removeWhere((final i) => i is! PaneItem || i is PaneItemAction))
+        .cast<PaneItem>();
+
+    final currentRoute = GoRouterState.of(context).uri.toString();
+    final index = effectiveItems.indexWhere((final e) {
+      final key = e.key;
+      return key is ValueKey<String> && currentRoute == key.value;
+    });
+
+    return NavigationPane(
+      selected: index != -1 ? index : null,
+      items: items.cast<NavigationPaneItem>(),
+      footerItems: footerItems,
+      size: const NavigationPaneSize(
+        openWidth: _HomeShellState._navigationPaneOpenWidth,
+      ),
+      autoSuggestBox: _buildAutoSuggestBox(items, footerItems),
+      autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+    );
+  }
 
   List<PaneItemAction> _buildPaneItemActions() {
     const icon = Icon(FluentIcons.user_window);
@@ -429,7 +402,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     return override ?? select
         ? [
             PaneItemAction(
-              key: const ValueKey('<run_both>'),
+              key: const Key('<run_both>'),
               icon: icon,
               title: const Text('Run 3d migoto & launcher'),
               onTap: _runBoth,
@@ -437,13 +410,13 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           ]
         : [
             PaneItemAction(
-              key: const ValueKey('<run_migoto>'),
+              key: const Key('<run_migoto>'),
               icon: icon,
               title: const Text('Run 3d migoto'),
               onTap: _runMigoto,
             ),
             PaneItemAction(
-              key: const ValueKey('<run_launcher>'),
+              key: const Key('<run_launcher>'),
               icon: icon,
               title: const Text('Run launcher'),
               onTap: _runLauncher,

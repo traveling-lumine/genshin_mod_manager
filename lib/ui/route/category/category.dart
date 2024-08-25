@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -11,7 +12,7 @@ import '../../../backend/fs_interface/di/fs_watcher.dart';
 import '../../../backend/fs_interface/domain/usecase/file_system.dart';
 import '../../../backend/structure/entity/mod.dart';
 import '../../../backend/structure/entity/mod_category.dart';
-import '../../constant.dart';
+import '../../route_names.dart';
 import '../../widget/category_drop_target.dart';
 import '../../widget/intrinsic_command_bar.dart';
 import '../../widget/preset_control.dart';
@@ -23,7 +24,7 @@ import 'mod_card.dart';
 /// A route that displays a category of mods
 class CategoryRoute extends HookConsumerWidget {
   /// Creates a [CategoryRoute].
-  const CategoryRoute({required this.category, super.key});
+  const CategoryRoute({required this.categoryName, super.key});
 
   static const _mainAxisExtent = 400.0;
   static const _mainAxisSpacing = 8.0;
@@ -36,21 +37,40 @@ class CategoryRoute extends HookConsumerWidget {
   );
 
   /// The category to display
-  final ModCategory category;
+  final String categoryName;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    ref.listen(
+      categoriesProvider,
+      (final previous, final next) {
+        final isIn = next.any((final e) => e.name == categoryName);
+        if (!isIn) {
+          context.go(RouteNames.home.name);
+        }
+      },
+    );
+
     final scrollController = useScrollController();
+    final category = ref.watch(categoriesProvider).firstWhereOrNull(
+          (final e) => e.name == categoryName,
+        );
+
+    if (category == null) {
+      return const SizedBox.shrink();
+    }
+
     return CategoryDropTarget(
       category: category,
       child: ScaffoldPage(
-        header: _buildHeader(scrollController, ref),
-        content: _buildContent(scrollController),
+        header: _buildHeader(category, scrollController, ref),
+        content: _buildContent(category, scrollController),
       ),
     );
   }
 
   Widget _buildHeader(
+    final ModCategory category,
     final ScrollController scrollController,
     final WidgetRef ref,
   ) {
@@ -66,7 +86,7 @@ class CategoryRoute extends HookConsumerWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildSearchBox(scrollController),
+            child: _buildSearchBox(category, scrollController),
           ),
           IntrinsicCommandBarCard(
             child: CommandBar(
@@ -74,7 +94,7 @@ class CategoryRoute extends HookConsumerWidget {
               primaryItems: [
                 CommandBarButton(
                   icon: const Icon(FluentIcons.folder_open),
-                  onPressed: () async => _onFolderOpen(ref),
+                  onPressed: () async => _onFolderOpen(category, ref),
                 ),
                 CommandBarButton(
                   icon: const Icon(FluentIcons.download),
@@ -88,7 +108,11 @@ class CategoryRoute extends HookConsumerWidget {
     );
   }
 
-  Widget _buildSearchBox(final ScrollController scrollController) => Consumer(
+  Widget _buildSearchBox(
+    final ModCategory category,
+    final ScrollController scrollController,
+  ) =>
+      Consumer(
         builder: (final context, final ref, final child) {
           final whenOrNull =
               ref.watch(modsInCategoryProvider(category)).whenOrNull(
@@ -128,7 +152,10 @@ class CategoryRoute extends HookConsumerWidget {
         },
       );
 
-  Widget _buildContent(final ScrollController scrollController) =>
+  Widget _buildContent(
+    final ModCategory category,
+    final ScrollController scrollController,
+  ) =>
       ThickScrollbar(
         child: Consumer(
           builder: (final context, final ref, final child) =>
@@ -202,18 +229,21 @@ class CategoryRoute extends HookConsumerWidget {
     );
   }
 
-  Future<void> _onFolderOpen(final WidgetRef ref) async {
+  Future<void> _onFolderOpen(
+    final ModCategory category,
+    final WidgetRef ref,
+  ) async {
     final fsInterface = ref.read(fsInterfaceProvider);
     await openFolderUseCase(fsInterface, category.path);
   }
 
   void _onDownloadPressed(final BuildContext context) {
-    unawaited(context.push(kNahidaStoreRoute, extra: category));
+    unawaited(context.push('${RouteNames.nahidastore.name}/$categoryName'));
   }
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ModCategory>('category', category));
+    properties.add(StringProperty('categoryName', categoryName));
   }
 }

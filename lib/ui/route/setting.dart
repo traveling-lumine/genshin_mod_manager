@@ -15,7 +15,7 @@ import '../../backend/fs_interface/domain/entity/setting_data.dart';
 import '../../backend/storage/di/app_state.dart';
 import '../../backend/storage/domain/entity/game_config.dart';
 import '../../backend/storage/domain/usecase/card_color.dart';
-import '../constant.dart';
+import '../route_names.dart';
 import '../widget/game_selector.dart';
 import '../widget/setting_element.dart';
 import '../widget/third_party/flutter/no_deref_file_opener.dart';
@@ -150,7 +150,7 @@ class SettingRoute extends ConsumerWidget {
   Widget _buildLicense(final BuildContext context) => ListTile(
         title: const Text('Licenses'),
         trailing: Button(
-          onPressed: () => unawaited(context.push(kLicenseRoute)),
+          onPressed: () => unawaited(context.push(RouteNames.license.name)),
           child: const Text('View'),
         ),
       );

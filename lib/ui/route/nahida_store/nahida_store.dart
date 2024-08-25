@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +11,9 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import '../../../backend/akasha/di/nahida_store.dart';
 import '../../../backend/akasha/domain/entity/akasha.dart';
 import '../../../backend/fs_interface/data/helper/path_op_string.dart';
+import '../../../backend/fs_interface/di/fs_watcher.dart';
 import '../../../backend/structure/entity/mod_category.dart';
+import '../../route_names.dart';
 import '../../util/display_infobar.dart';
 import '../../util/tag_parser.dart';
 import '../../widget/intrinsic_command_bar.dart';
@@ -19,8 +22,8 @@ import '../../widget/third_party/flutter/min_extent_delegate.dart';
 import 'store_element.dart';
 
 class NahidaStoreRoute extends ConsumerStatefulWidget {
-  const NahidaStoreRoute({required this.category, super.key});
-  final ModCategory category;
+  const NahidaStoreRoute({required this.categoryName, super.key});
+  final String categoryName;
 
   @override
   ConsumerState<NahidaStoreRoute> createState() => _NahidaStoreRouteState();
@@ -28,7 +31,7 @@ class NahidaStoreRoute extends ConsumerStatefulWidget {
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ModCategory>('category', category));
+    properties.add(StringProperty('categoryName', categoryName));
   }
 }
 
@@ -53,14 +56,34 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
       PagingController(firstPageKey: 1);
 
   @override
-  Widget build(final BuildContext context) => ScaffoldPage.withPadding(
-        header: PageHeader(
-          title: Text('${widget.category.name} ← Akasha'),
-          leading: _buildLeading(),
-          commandBar: _buildCommandBar(),
-        ),
-        content: _buildContent(),
-      );
+  Widget build(final BuildContext context) {
+    ref.listen(
+      categoriesProvider,
+      (final previous, final next) {
+        final isIn = next.any((final e) => e.name == widget.categoryName);
+        if (!isIn) {
+          context.go(RouteNames.home.name);
+        }
+      },
+    );
+
+    final category = ref.watch(categoriesProvider).firstWhereOrNull(
+          (final e) => e.name == widget.categoryName,
+        );
+
+    if (category == null) {
+      return const SizedBox.shrink();
+    }
+
+    return ScaffoldPage.withPadding(
+      header: PageHeader(
+        title: Text('${category.name} ← Akasha'),
+        leading: _buildLeading(),
+        commandBar: _buildCommandBar(),
+      ),
+      content: _buildContent(category),
+    );
+  }
 
   @override
   void dispose() {
@@ -195,7 +218,7 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
         ),
       );
 
-  Widget _buildContent() => ThickScrollbar(
+  Widget _buildContent(final ModCategory category) => ThickScrollbar(
         child: PagedGridView<int, NahidaliveElement?>(
           pagingController: _pagingController,
           gridDelegate: SliverGridDelegateWithMinCrossAxisExtent(
@@ -215,7 +238,7 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
                 child: StoreElement(
                   passwordController: _textEditingController,
                   element: item,
-                  category: widget.category,
+                  category: category,
                 ),
               );
             },
