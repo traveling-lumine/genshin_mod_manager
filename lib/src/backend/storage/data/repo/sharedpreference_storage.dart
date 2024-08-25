@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../domain/persistent_storage.dart';
+import '../../domain/repo/persistent_storage.dart';
 
 class SharedPreferenceStorage implements PersistentStorage {
   const SharedPreferenceStorage(this._sharedPreferences);

@@ -1,4 +1,4 @@
-import '../persistent_storage.dart';
+import '../repo/persistent_storage.dart';
 
 const showPaimonIconKey = 'showPaimonAsEmptyIconFolderIcon';
 const showPaimonIconDefault = true;

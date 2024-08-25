@@ -1,5 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import '../persistent_storage.dart';
+import '../repo/persistent_storage.dart';
 
 Color initializeCardColorUseCase(
   final PersistentStorage repository, {
@@ -7,7 +7,7 @@ Color initializeCardColorUseCase(
   required final bool isEnabled,
 }) {
   final accessKey =
-      getCardColorAccessKeyUseCase(isBright: isBright, isEnabled: isEnabled);
+      _getCardColorAccessKeyUseCase(isBright: isBright, isEnabled: isEnabled);
   final color = repository.getInt(accessKey);
   if (color == null) {
     final defaultValue =
@@ -18,26 +18,13 @@ Color initializeCardColorUseCase(
   return Color(color);
 }
 
-String getCardColorAccessKeyUseCase({
-  required final bool isBright,
-  required final bool isEnabled,
-}) {
-  final accessKey = switch ((isBright, isEnabled)) {
-    (true, true) => 'cardColorBrightEnabled',
-    (true, false) => 'cardColorBrightDisabled',
-    (false, true) => 'cardColorDarkEnabled',
-    (false, false) => 'cardColorDarkDisabled',
-  };
-  return accessKey;
-}
-
 void setCardColorUseCase(
   final PersistentStorage repository,
   final Color color, {
   required final bool isBright,
   required final bool isEnabled,
 }) {
-  final accessKey = getCardColorAccessKeyUseCase(
+  final accessKey = _getCardColorAccessKeyUseCase(
     isBright: isBright,
     isEnabled: isEnabled,
   );
@@ -54,3 +41,16 @@ Color getDefaultValueUseCase({
       (false, true) => Colors.green.darkest.withOpacity(0.8),
       (false, false) => Colors.red.darkest.withOpacity(0.6),
     };
+
+String _getCardColorAccessKeyUseCase({
+  required final bool isBright,
+  required final bool isEnabled,
+}) {
+  final accessKey = switch ((isBright, isEnabled)) {
+    (true, true) => 'cardColorBrightEnabled',
+    (true, false) => 'cardColorBrightDisabled',
+    (false, true) => 'cardColorDarkEnabled',
+    (false, false) => 'cardColorDarkDisabled',
+  };
+  return accessKey;
+}

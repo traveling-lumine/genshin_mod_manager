@@ -1,6 +1,6 @@
 
 import '../../../fs_interface/data/helper/path_op_string.dart';
-import '../persistent_storage.dart';
+import '../repo/persistent_storage.dart';
 import 'game_config.dart';
 
 void afterInitializationUseCase(final PersistentStorage storage) {

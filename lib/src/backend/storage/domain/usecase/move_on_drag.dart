@@ -1,4 +1,4 @@
-import '../persistent_storage.dart';
+import '../repo/persistent_storage.dart';
 
 const moveOnDragKey = 'moveOnDrag';
 const moveOnDragDefault = true;

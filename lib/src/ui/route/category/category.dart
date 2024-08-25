@@ -21,9 +21,7 @@ import '../../widget/third_party/fluent_ui/auto_suggest_box.dart';
 import '../../widget/third_party/flutter/min_extent_delegate.dart';
 import 'mod_card.dart';
 
-/// A route that displays a category of mods
 class CategoryRoute extends HookConsumerWidget {
-  /// Creates a [CategoryRoute].
   const CategoryRoute({required this.categoryName, super.key});
 
   static const _mainAxisExtent = 400.0;
