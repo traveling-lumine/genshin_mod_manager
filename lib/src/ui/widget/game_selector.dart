@@ -4,7 +4,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../di/app_state.dart';
+import '../../di/app_state/current_target_game.dart';
+import '../../di/app_state/games_list.dart';
 import '../util/display_infobar.dart';
 
 /// Game selector widget.

@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../backend/structure/entity/mod_category.dart';
-import '../../di/app_state.dart';
+import '../../di/app_state/folder_icon.dart';
+import '../../di/app_state/use_paimon.dart';
 import '../../di/fs_watcher.dart';
 import 'category_drop_target.dart';
 import 'custom_image.dart';

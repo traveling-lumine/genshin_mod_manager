@@ -4,8 +4,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'akasha.freezed.dart';
-part 'akasha.g.dart';
+part 'nahida_element.freezed.dart';
+part 'nahida_element.g.dart';
 
 @freezed
 class NahidaliveElement with _$NahidaliveElement {
@@ -22,16 +22,4 @@ class NahidaliveElement with _$NahidaliveElement {
 
   factory NahidaliveElement.fromJson(final Map<String, dynamic> json) =>
       _$NahidaliveElementFromJson(json);
-}
-
-@freezed
-class NahidaliveDownloadElement with _$NahidaliveDownloadElement {
-  const factory NahidaliveDownloadElement({
-    required final bool success,
-    @JsonKey(name: 'error-codes') final String? errorCodes,
-    @JsonKey(name: 'presigned_url') final String? downloadUrl,
-  }) = _NahidaliveDownloadElement;
-
-  factory NahidaliveDownloadElement.fromJson(final Map<String, dynamic> json) =>
-      _$NahidaliveDownloadElementFromJson(json);
 }

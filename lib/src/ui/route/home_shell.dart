@@ -13,7 +13,12 @@ import 'package:window_manager/window_manager.dart';
 import '../../backend/app_version/domain/github.dart';
 import '../../backend/fs_interface/data/helper/path_op_string.dart';
 import '../../backend/structure/entity/mod_category.dart';
-import '../../di/app_state.dart';
+import '../../di/app_state/current_target_game.dart';
+import '../../di/app_state/game_config.dart';
+import '../../di/app_state/games_list.dart';
+import '../../di/app_state/run_together.dart';
+import '../../di/app_state/separate_run_override.dart';
+import '../../di/app_state/window_size.dart';
 import '../../di/app_version.dart';
 import '../../di/exe_arg.dart';
 import '../../di/fs_interface.dart';
@@ -117,8 +122,19 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       );
     }
 
-    final categories = ref.watch(categoriesProvider);
-    return _buildData(categories);
+    final game = ref.watch(targetGameProvider);
+    final updateMarker = ref.watch(isOutdatedProvider).maybeWhen(
+          data: (final value) => value ? ' (update!)' : '',
+          orElse: () => '',
+        );
+    return NavigationView(
+      appBar: getAppbar(
+        '$game Mod Manager$updateMarker',
+        presetControl: true,
+      ),
+      pane: _buildPane(),
+      paneBodyBuilder: (final item, final body) => widget.child,
+    );
   }
 
   @override
@@ -205,24 +221,9 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         },
       );
 
-  NavigationView _buildData(final List<ModCategory> categories) {
-    final game = ref.watch(targetGameProvider);
-    final updateMarker = ref.watch(isOutdatedProvider).maybeWhen(
-          data: (final value) => value ? ' (update!)' : '',
-          orElse: () => '',
-        );
-    return NavigationView(
-      appBar: getAppbar(
-        '$game Mod Manager$updateMarker',
-        presetControl: true,
-      ),
-      pane: _buildPane(categories),
-      paneBodyBuilder: (final item, final body) => widget.child,
-    );
-  }
-
-  NavigationPane _buildPane(final List<ModCategory> categories) {
-    final items = categories
+  NavigationPane _buildPane() {
+    final items = ref
+        .watch(categoriesProvider)
         .map(
           (final e) => FolderPaneItem(
             category: e,

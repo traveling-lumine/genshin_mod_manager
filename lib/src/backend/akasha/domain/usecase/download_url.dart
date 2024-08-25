@@ -1,5 +1,5 @@
 import '../../../mod_writer/domain/mod_writer.dart';
-import '../entity/akasha.dart';
+import '../entity/nahida_element.dart';
 import '../repo/akasha.dart';
 
 final class AkashaDownloadUrlUseCase {

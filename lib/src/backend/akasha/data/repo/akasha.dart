@@ -3,9 +3,10 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
-import '../domain/entity/akasha.dart';
-import '../domain/repo/akasha.dart';
-import 'secrets.dart';
+import '../../domain/entity/download_element.dart';
+import '../../domain/entity/nahida_element.dart';
+import '../../domain/repo/akasha.dart';
+import '../secrets.dart';
 
 /// The filename of Akasha's configuration file.
 const kAkashaConfigFilename = 'config.json';

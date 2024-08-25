@@ -5,7 +5,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../backend/akasha/domain/entity/akasha.dart';
+import '../../../backend/akasha/domain/entity/nahida_element.dart';
 import '../../../backend/structure/entity/mod_category.dart';
 import '../../../di/nahida_store.dart';
 import '../../util/open_url.dart';

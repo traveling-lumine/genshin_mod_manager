@@ -7,7 +7,9 @@ import '../backend/fs_interface/data/helper/fsops.dart';
 import '../backend/fs_interface/data/helper/path_op_string.dart';
 import '../backend/structure/entity/mod.dart';
 import '../backend/structure/entity/mod_category.dart';
-import 'app_state.dart';
+import 'app_state/current_target_game.dart';
+import 'app_state/display_enabled_mods_first.dart';
+import 'app_state/game_config.dart';
 import 'fs_interface.dart';
 
 part 'fs_watcher.g.dart';
@@ -82,7 +84,7 @@ Stream<List<Mod>> modsInCategory(
   final ModsInCategoryRef ref,
   final ModCategory category,
 ) {
-  final enabledModsFirst = ref.watch(enabledFirstProvider);
+  final enabledModsFirst = ref.watch(displayEnabledModsFirstProvider);
 
   final controller = StreamController<List<Mod>>();
   ref.onDispose(controller.close);

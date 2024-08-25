@@ -8,7 +8,7 @@ import '../backend/fs_interface/data/helper/mod_switcher.dart';
 import '../backend/fs_interface/data/helper/path_op_string.dart';
 import '../backend/storage/domain/entity/preset.dart';
 import '../backend/structure/entity/mod_category.dart';
-import 'app_state.dart';
+import 'app_state/game_config.dart';
 
 part 'preset.g.dart';
 

@@ -4,11 +4,8 @@ import 'dart:io';
 import 'fsops.dart';
 import 'path_op_string.dart';
 
-
-/// ShaderFixes directory name.
 const kShaderFixes = 'ShaderFixes';
 
-/// Enables a mod.
 Future<void> enable({
   required final String shaderFixesPath,
   required final String modPath,
@@ -40,7 +37,6 @@ Future<void> enable({
   }
 }
 
-/// Disables a mod.
 Future<void> disable({
   required final String shaderFixesPath,
   required final String modPath,

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
-import '../entity/akasha.dart';
+import '../entity/download_element.dart';
+import '../entity/nahida_element.dart';
 
 /// An API to interact with Nahidalive.
 abstract interface class NahidaliveAPI {

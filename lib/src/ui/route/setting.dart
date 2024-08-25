@@ -12,7 +12,16 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../backend/fs_interface/domain/entity/setting_data.dart';
 import '../../backend/storage/domain/entity/game_config.dart';
 import '../../backend/storage/domain/usecase/card_color.dart';
-import '../../di/app_state.dart';
+import '../../di/app_state/card_color.dart';
+import '../../di/app_state/dark_mode.dart';
+import '../../di/app_state/display_enabled_mods_first.dart';
+import '../../di/app_state/folder_icon.dart';
+import '../../di/app_state/game_config.dart';
+import '../../di/app_state/move_on_drag.dart';
+import '../../di/app_state/run_together.dart';
+import '../../di/app_state/separate_run_override.dart';
+import '../../di/app_state/use_paimon.dart';
+import '../../di/app_state/value_settable.dart';
 import '../../di/app_version.dart';
 import '../../di/fs_interface.dart';
 import '../route_names.dart';
@@ -116,7 +125,7 @@ class SettingRoute extends ConsumerWidget {
           ),
           _SwitchItem(
             text: 'Show enabled mods first',
-            provider: enabledFirstProvider,
+            provider: displayEnabledModsFirstProvider,
           ),
           _SwitchItem(
             text: 'Dark mode',

@@ -8,13 +8,14 @@ import 'package:flutter_image_converter/flutter_image_converter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
 
-import '../../../backend/akasha/data/akasha.dart';
+import '../../../backend/akasha/data/repo/akasha.dart';
 import '../../../backend/fs_interface/data/helper/mod_switcher.dart';
 import '../../../backend/fs_interface/data/helper/path_op_string.dart';
 import '../../../backend/mod_writer/data/mod_writer.dart';
 import '../../../backend/structure/entity/ini.dart';
 import '../../../backend/structure/entity/mod.dart';
-import '../../../di/app_state.dart';
+import '../../../di/app_state/card_color.dart';
+import '../../../di/app_state/game_config.dart';
 import '../../../di/fs_interface.dart';
 import '../../../di/mod_card.dart';
 import '../../util/display_infobar.dart';

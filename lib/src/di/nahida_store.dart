@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../backend/akasha/data/akasha.dart';
-import '../backend/akasha/domain/entity/akasha.dart';
+import '../backend/akasha/data/repo/akasha.dart';
+import '../backend/akasha/domain/entity/nahida_element.dart';
 import '../backend/akasha/domain/repo/akasha.dart';
 import '../backend/akasha/domain/usecase/download_url.dart';
 import '../backend/mod_writer/data/mod_writer.dart';
