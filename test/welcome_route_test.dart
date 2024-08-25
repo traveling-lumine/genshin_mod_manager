@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genshin_mod_manager/ui/di/app_state.dart';
-import 'package:genshin_mod_manager/ui/route/welcome.dart';
+import 'package:genshin_mod_manager/src/ui/di/app_state.dart';
+import 'package:genshin_mod_manager/src/ui/route/welcome.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';

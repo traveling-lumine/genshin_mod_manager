@@ -8,8 +8,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../backend/fs_interface/domain/entity/setting_data.dart';
 import '../../backend/fs_interface/domain/usecase/folder_drop.dart';
-import '../di/app_state.dart';
 import '../../backend/structure/entity/mod_category.dart';
+import '../di/app_state.dart';
 import '../util/display_infobar.dart';
 
 /// A widget that acts as a drop target for files and directories.

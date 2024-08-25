@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
-import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -12,15 +11,15 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:window_manager/window_manager.dart';
 
-import '../di/exe_arg.dart';
-import '../di/app_version.dart';
 import '../../backend/app_version/domain/github.dart';
 import '../../backend/fs_interface/data/helper/path_op_string.dart';
-import '../di/app_state.dart';
-import '../di/storage.dart';
 import '../../backend/structure/entity/mod_category.dart';
+import '../di/app_state.dart';
+import '../di/app_version.dart';
+import '../di/exe_arg.dart';
 import '../di/fs_interface.dart';
 import '../di/fs_watcher.dart';
+import '../di/storage.dart';
 import '../route_names.dart';
 import '../util/display_infobar.dart';
 import '../util/open_url.dart';
@@ -73,24 +72,6 @@ Future<void> _runUpdateScript() async {
   // delay needed. otherwise the process will die before the script runs.
   await Future<void>.delayed(const Duration(milliseconds: 200));
   exit(0);
-}
-
-int _search(final List<ModCategory> categories, final ModCategory category) {
-  final length = categories.length;
-  var lo = 0;
-  var hi = length;
-  while (lo < hi) {
-    final mid = lo + ((hi - lo) >> 1);
-    if (compareNatural(categories[mid].name, category.name) < 0) {
-      lo = mid + 1;
-    } else {
-      hi = mid;
-    }
-  }
-  if (lo >= length) {
-    return length - 1;
-  }
-  return lo;
 }
 
 class HomeShell extends ConsumerStatefulWidget {

@@ -6,8 +6,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../backend/fs_interface/data/helper/fsops.dart';
 import '../../backend/fs_interface/data/helper/mod_switcher.dart';
 import '../../backend/fs_interface/data/helper/path_op_string.dart';
-import '../../backend/structure/entity/mod_category.dart';
 import '../../backend/storage/domain/entity/preset.dart';
+import '../../backend/structure/entity/mod_category.dart';
 import 'app_state.dart';
 
 part 'preset.g.dart';

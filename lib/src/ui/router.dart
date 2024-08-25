@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'di/app_state.dart';
-import 'route_names.dart';
 import 'route/category/category.dart';
 import 'route/home_shell.dart';
 import 'route/license.dart';
@@ -11,6 +10,7 @@ import 'route/loading.dart';
 import 'route/nahida_store/nahida_store.dart';
 import 'route/setting.dart';
 import 'route/welcome.dart';
+import 'route_names.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});

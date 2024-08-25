@@ -27,7 +27,7 @@ import 'dart:async';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import '../../oss_licenses.dart';
+import '../../../oss_licenses.dart';
 import '../util/open_url.dart';
 
 /// A route that shows the open source licenses.
