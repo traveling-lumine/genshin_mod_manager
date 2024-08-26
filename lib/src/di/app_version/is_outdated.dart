@@ -1,40 +1,8 @@
-import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'current_version.dart';
+import 'remote_version.dart';
 
-import '../backend/app_version/domain/github.dart';
-
-part 'app_version.g.dart';
-
-@riverpod
-Future<String> versionString(final VersionStringRef ref) async {
-  final info = await PackageInfo.fromPlatform();
-  final version = info.version;
-  final buildNumber = info.buildNumber;
-  if (buildNumber.isEmpty) {
-    return version;
-  }
-  return '$version+$buildNumber';
-}
-
-@riverpod
-Future<String?> remoteVersion(final RemoteVersionRef ref) async {
-  final url = Uri.parse(kRepoReleases);
-  final client = http.Client();
-  final request = http.Request('GET', url)..followRedirects = false;
-  final upstreamVersion = client.send(request).then((final value) {
-    final location = value.headers['location'];
-    if (location == null) {
-      return null;
-    }
-    final lastSlash = location.lastIndexOf('tag/v');
-    if (lastSlash == -1) {
-      return null;
-    }
-    return location.substring(lastSlash + 5, location.length);
-  });
-  return upstreamVersion;
-}
+part 'is_outdated.g.dart';
 
 @riverpod
 Future<bool> isOutdated(final IsOutdatedRef ref) async {
