@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import '../../domain/entity/mod_toggle_exception.dart';
 import 'fsops.dart';
 import 'path_op_string.dart';
 
@@ -9,9 +10,6 @@ const kShaderFixes = 'ShaderFixes';
 Future<void> enable({
   required final String shaderFixesPath,
   required final String modPath,
-  final void Function(String)? onModRenameClash,
-  final void Function(FileSystemException)? onShaderExists,
-  final void Function()? onModRenameFailed,
 }) async {
   if (!Directory(modPath).existsSync()) {
     return;
@@ -20,29 +18,29 @@ Future<void> enable({
   final shaderFilenames = await _getModShaders(modPath);
   final renameTarget = modPath.pEnabledForm;
   if (Directory(renameTarget).existsSync()) {
-    onModRenameClash?.call(renameTarget);
-    return;
+    throw ModRenameClashException(renameTarget.pBasename);
   }
   try {
     await _copyShaders(shaderFixesPath, shaderFilenames);
   } on FileSystemException catch (e) {
-    onShaderExists?.call(e);
-    return;
+    throw ShaderExistsException(e.path);
   }
+  var success = false;
   try {
     Directory(modPath).renameSync(renameTarget);
+    success = true;
   } on PathAccessException {
-    onModRenameFailed?.call();
-    await _deleteShaders(shaderFixesPath, shaderFilenames);
+    throw const ModRenameFailedException();
+  } finally {
+    if (!success) {
+      await _deleteShaders(shaderFixesPath, shaderFilenames);
+    }
   }
 }
 
 Future<void> disable({
   required final String shaderFixesPath,
   required final String modPath,
-  final void Function(String)? onModRenameClash,
-  final void Function(Object)? onShaderDeleteFailed,
-  final void Function()? onModRenameFailed,
 }) async {
   if (!Directory(modPath).existsSync()) {
     return;
@@ -51,20 +49,23 @@ Future<void> disable({
   final shaderFilenames = await _getModShaders(modPath);
   final renameTarget = modPath.pDisabledForm;
   if (Directory(renameTarget).existsSync()) {
-    onModRenameClash?.call(renameTarget);
-    return;
+    throw ModRenameClashException(renameTarget.pBasename);
   }
   try {
     await _deleteShaders(shaderFixesPath, shaderFilenames);
   } on FileSystemException catch (e) {
-    onShaderDeleteFailed?.call(e);
-    return;
+    throw ShaderDeleteFailedException(e.path);
   }
+  var success = false;
   try {
     Directory(modPath).renameSync(renameTarget);
+    success = true;
   } on PathAccessException {
-    onModRenameFailed?.call();
-    await _copyShaders(shaderFixesPath, shaderFilenames);
+    throw const ModRenameFailedException();
+  } finally {
+    if (!success) {
+      await _copyShaders(shaderFixesPath, shaderFilenames);
+    }
   }
 }
 
