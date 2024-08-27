@@ -16,17 +16,16 @@ class LoadingRoute extends HookConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     ref.listen(
-      sharedPreferenceProvider,
+      persistentStorageProvider,
       (final previous, final next) {
-        if (next is AsyncData) {
+        if (next.hasValue) {
           _goToMain(context);
         }
       },
     );
-    return ref.watch(sharedPreferenceProvider).when(
+    return ref.watch(persistentStorageProvider).when(
           data: _buildData,
-          error: (final error, final stackTrace) =>
-              _buildError(error, context, ref),
+          error: (final error, final stackTrace) => _buildError(error, ref),
           loading: _buildLoading,
         );
   }
@@ -48,7 +47,6 @@ class LoadingRoute extends HookConsumerWidget {
 
   Widget _buildError(
     final Object error,
-    final BuildContext context,
     final WidgetRef ref,
   ) =>
       _TitledNavView(
@@ -60,12 +58,14 @@ class LoadingRoute extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Button(
-                onPressed: () => ref.invalidate(sharedPreferenceProvider),
+                onPressed: () => ref.invalidate(persistentStorageProvider),
                 child: const Text('Retry'),
               ),
               const SizedBox(width: 16),
               Button(
-                onPressed: () => _goToMain(context),
+                onPressed: () {
+                  ref.read(persistentStorageProvider.notifier).useNullStorage();
+                },
                 child: const Text('Override'),
               ),
             ],
