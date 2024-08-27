@@ -8,13 +8,13 @@ part 'games_list.g.dart';
 class GamesList extends _$GamesList {
   @override
   List<String> build() {
-    final storage = ref.watch(sharedPreferenceStorageProvider);
+    final storage = ref.watch(persistentStorageProvider);
     final gamesList = storage.getList('games') ?? [];
     return gamesList;
   }
 
   void addGame(final String game) {
-    final storage = ref.read(sharedPreferenceStorageProvider);
+    final storage = ref.read(persistentStorageProvider);
     if (state.contains(game)) {
       return;
     }
@@ -24,7 +24,7 @@ class GamesList extends _$GamesList {
   }
 
   void removeGame(final String game) {
-    final storage = ref.read(sharedPreferenceStorageProvider);
+    final storage = ref.read(persistentStorageProvider);
     if (!state.contains(game)) {
       return;
     }

@@ -12,13 +12,13 @@ class FsInterface extends _$FsInterface {
   @override
   FileSystemInterface build() {
     final fileSystemInterfaceImpl = FileSystemInterfaceImpl();
-    final storage = ref.watch(sharedPreferenceStorageProvider);
+    final storage = ref.watch(persistentStorageProvider);
     initializeIniEditorArgumentUseCase(storage, fileSystemInterfaceImpl);
     return fileSystemInterfaceImpl;
   }
 
   void setIniEditorArgument(final String? arg) {
-    final storage = ref.read(sharedPreferenceStorageProvider);
+    final storage = ref.read(persistentStorageProvider);
     setIniEditorArgumentUseCase(storage, state, arg);
   }
 }

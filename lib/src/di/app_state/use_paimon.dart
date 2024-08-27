@@ -10,13 +10,13 @@ part 'use_paimon.g.dart';
 class PaimonIcon extends _$PaimonIcon implements ValueSettable<bool> {
   @override
   bool build() {
-    final watch = ref.watch(sharedPreferenceStorageProvider);
+    final watch = ref.watch(persistentStorageProvider);
     return initializePaimonIconUseCase(watch);
   }
 
   @override
   void setValue(final bool value) {
-    final read = ref.read(sharedPreferenceStorageProvider);
+    final read = ref.read(persistentStorageProvider);
     setPaimonIconUseCase(read, value);
     state = value;
   }

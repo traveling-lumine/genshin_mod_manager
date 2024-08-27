@@ -16,8 +16,8 @@ Future<SharedPreferences> sharedPreference(
 
 /// The storage for the shared preference.
 @riverpod
-PersistentStorage sharedPreferenceStorage(
-  final SharedPreferenceStorageRef ref,
+PersistentStorage persistentStorage(
+  final PersistentStorageRef ref,
 ) {
   final sharedPreferences =
       ref.watch(sharedPreferenceProvider).unwrapPrevious().valueOrNull;

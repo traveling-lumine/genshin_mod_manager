@@ -9,7 +9,7 @@ part 'current_target_game.g.dart';
 class TargetGame extends _$TargetGame {
   @override
   String build() {
-    final storage = ref.watch(sharedPreferenceStorageProvider);
+    final storage = ref.watch(persistentStorageProvider);
     final gamesList = ref.watch(gamesListProvider);
     final lastGame = storage.getString('lastGame');
     if (gamesList.contains(lastGame)) {
@@ -23,7 +23,7 @@ class TargetGame extends _$TargetGame {
 
   /// Sets the value.
   void setValue(final String value) {
-    final read = ref.read(sharedPreferenceStorageProvider);
+    final read = ref.read(persistentStorageProvider);
     final gamesList = ref.read(gamesListProvider);
     if (!gamesList.contains(value)) {
       return;
