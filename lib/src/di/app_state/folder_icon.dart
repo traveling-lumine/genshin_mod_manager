@@ -10,13 +10,13 @@ part 'folder_icon.g.dart';
 class FolderIcon extends _$FolderIcon implements ValueSettable<bool> {
   @override
   bool build() {
-    final watch = ref.watch(persistentStorageProvider);
+    final watch = ref.watch(persistentStorageProvider).valueOrNull;
     return initializeFolderIconUseCase(watch);
   }
 
   @override
   void setValue(final bool value) {
-    final read = ref.read(persistentStorageProvider);
+    final read = ref.read(persistentStorageProvider).valueOrNull;
     setFolderIconUseCase(read, value);
     state = value;
   }

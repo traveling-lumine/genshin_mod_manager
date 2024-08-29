@@ -12,14 +12,14 @@ class DisplayEnabledModsFirst extends _$DisplayEnabledModsFirst
     implements ValueSettable<bool> {
   @override
   bool build() {
-    final watch = ref.watch(persistentStorageProvider);
+    final watch = ref.watch(persistentStorageProvider).valueOrNull;
     final showEnabledModsFirst = initializeEnabledFirstUseCase(watch);
     return showEnabledModsFirst;
   }
 
   @override
   void setValue(final bool value) {
-    final read = ref.read(persistentStorageProvider);
+    final read = ref.read(persistentStorageProvider).valueOrNull;
     setEnabledFirstUseCase(read, value);
     state = value;
   }

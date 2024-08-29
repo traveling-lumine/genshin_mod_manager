@@ -5,7 +5,7 @@ import '../repo/persistent_storage.dart';
 
 /// Initializes the game configuration.
 GameConfig initializeGameConfigUseCase(
-  final PersistentStorage storage,
+  final PersistentStorage? storage,
   final String prefix,
 ) =>
     GameConfig(
@@ -16,52 +16,52 @@ GameConfig initializeGameConfigUseCase(
     );
 
 String? getModRootUseCase(
-  final PersistentStorage storage,
+  final PersistentStorage? storage,
   final String prefix,
 ) =>
-    storage.getString('$prefix.modRoot');
+    storage?.getString('$prefix.modRoot');
 
 void setModRootUseCase(
-  final PersistentStorage read,
+  final PersistentStorage? read,
   final String targetGame,
   final String path,
 ) {
-  read.setString('$targetGame.modRoot', path);
+  read?.setString('$targetGame.modRoot', path);
 }
 
 String? getModExecFileUseCase(
-  final PersistentStorage storage,
+  final PersistentStorage? storage,
   final String prefix,
 ) =>
-    storage.getString('$prefix.modExecFile');
+    storage?.getString('$prefix.modExecFile');
 
 void setModExecFileUseCase(
-  final PersistentStorage read,
+  final PersistentStorage? read,
   final String targetGame,
   final String path,
 ) {
-  read.setString('$targetGame.modExecFile', path);
+  read?.setString('$targetGame.modExecFile', path);
 }
 
 String? getLauncherFileUseCase(
-  final PersistentStorage storage,
+  final PersistentStorage? storage,
   final String prefix,
 ) =>
-    storage.getString('$prefix.launcherDir');
+    storage?.getString('$prefix.launcherDir');
 
 void setLauncherFileUseCase(
-  final PersistentStorage read,
+  final PersistentStorage? read,
   final String targetGame,
   final String path,
 ) {
-  read.setString('$targetGame.launcherDir', path);
+  read?.setString('$targetGame.launcherDir', path);
 }
 
 PresetData? getPresetDataUseCase(
-  final PersistentStorage storage,
+  final PersistentStorage? storage,
   final String prefix,
 ) {
-  final data = storage.getMap('$prefix.presetData');
+  final data = storage?.getMap('$prefix.presetData');
   if (data == null) {
     return null;
   }
@@ -105,7 +105,7 @@ PresetData? getPresetDataUseCase(
 
 void setPresetDataUseCase(
   final PresetData data,
-  final PersistentStorage read,
+  final PersistentStorage? read,
   final String targetGame,
 ) {
   final global = Map.fromEntries(
@@ -130,5 +130,5 @@ void setPresetDataUseCase(
       ),
     ),
   );
-  read.setMap('$targetGame.presetData', {'global': global, 'local': local});
+  read?.setMap('$targetGame.presetData', {'global': global, 'local': local});
 }

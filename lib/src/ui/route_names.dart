@@ -3,6 +3,7 @@ enum RouteNames {
   home,
   license,
   loading,
+  firstpage,
   nahidastore,
   setting;
 

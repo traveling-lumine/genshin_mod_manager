@@ -10,13 +10,13 @@ part 'dark_mode.g.dart';
 class DarkMode extends _$DarkMode implements ValueSettable<bool> {
   @override
   bool build() {
-    final watch = ref.watch(persistentStorageProvider);
+    final watch = ref.watch(persistentStorageProvider).valueOrNull;
     return initializeDarkModeUseCase(watch);
   }
 
   @override
   void setValue(final bool value) {
-    final read = ref.read(persistentStorageProvider);
+    final read = ref.read(persistentStorageProvider).valueOrNull;
     setDarkModeUseCase(read, value);
     state = value;
   }

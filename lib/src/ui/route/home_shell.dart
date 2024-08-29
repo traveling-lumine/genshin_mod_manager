@@ -87,41 +87,21 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   @override
   Widget build(final BuildContext context) {
-    ref.listen(isOutdatedProvider, (final previous, final next) async {
-      if (next is AsyncData && next.requireValue) {
-        final remote = await ref.read(remoteVersionProvider.future);
-        unawaited(_showUpdateInfoBar(remote!));
-      }
-    });
-
-    if (ref.watch(gamesListProvider).isEmpty) {
-      return NavigationView(
-        appBar: getAppbar('Set the first game name'),
-        content: ScaffoldPage.withPadding(
-          header: const PageHeader(
-            title: Text('Set the first game name'),
-          ),
-          content: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('My game is...'),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: 200,
-                  child: TextFormBox(
-                    placeholder: 'Game name',
-                    onFieldSubmitted: (final value) {
-                      ref.read(gamesListProvider.notifier).addGame(value);
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+    ref
+      ..listen(isOutdatedProvider, (final previous, final next) async {
+        if (next is AsyncData && next.requireValue) {
+          final remote = await ref.read(remoteVersionProvider.future);
+          unawaited(_showUpdateInfoBar(remote!));
+        }
+      })
+      ..listen(
+        gamesListProvider,
+        (final previous, final next) {
+          if (next.isEmpty) {
+            context.go(RouteNames.firstpage.name);
+          }
+        },
       );
-    }
 
     final game = ref.watch(targetGameProvider);
     final updateMarker = ref.watch(isOutdatedProvider).maybeWhen(

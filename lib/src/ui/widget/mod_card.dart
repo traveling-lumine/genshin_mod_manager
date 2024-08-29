@@ -6,20 +6,20 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
 
-import '../../../backend/fs_interface/data/helper/mod_switcher.dart';
-import '../../../backend/fs_interface/data/helper/path_op_string.dart';
-import '../../../backend/fs_interface/domain/entity/mod_toggle_exception.dart';
-import '../../../backend/fs_interface/domain/usecase/file_system.dart';
-import '../../../backend/fs_interface/domain/usecase/paste_image.dart';
-import '../../../backend/structure/entity/ini.dart';
-import '../../../backend/structure/entity/mod.dart';
-import '../../../di/app_state/card_color.dart';
-import '../../../di/app_state/game_config.dart';
-import '../../../di/fs_interface.dart';
-import '../../../di/mod_card.dart';
-import '../../util/display_infobar.dart';
-import '../../util/show_prompt_dialog.dart';
-import '../../widget/custom_image.dart';
+import '../../backend/fs_interface/data/helper/mod_switcher.dart';
+import '../../backend/fs_interface/data/helper/path_op_string.dart';
+import '../../backend/fs_interface/domain/entity/mod_toggle_exception.dart';
+import '../../backend/fs_interface/domain/usecase/file_system.dart';
+import '../../backend/fs_interface/domain/usecase/paste_image.dart';
+import '../../backend/structure/entity/ini.dart';
+import '../../backend/structure/entity/mod.dart';
+import '../../di/app_state/card_color.dart';
+import '../../di/app_state/game_config.dart';
+import '../../di/fs_interface.dart';
+import '../../di/mod_card.dart';
+import '../util/display_infobar.dart';
+import '../util/show_prompt_dialog.dart';
+import 'custom_image.dart';
 import 'ini_widget.dart';
 
 class ModCard extends ConsumerStatefulWidget {

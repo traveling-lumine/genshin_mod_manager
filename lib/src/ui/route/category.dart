@@ -7,19 +7,19 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../backend/fs_interface/domain/usecase/file_system.dart';
-import '../../../backend/structure/entity/mod.dart';
-import '../../../backend/structure/entity/mod_category.dart';
-import '../../../di/fs_interface.dart';
-import '../../../di/fs_watcher.dart';
-import '../../route_names.dart';
-import '../../widget/category_drop_target.dart';
-import '../../widget/intrinsic_command_bar.dart';
-import '../../widget/preset_control.dart';
-import '../../widget/thick_scrollbar.dart';
-import '../../widget/third_party/fluent_ui/auto_suggest_box.dart';
-import '../../widget/third_party/flutter/min_extent_delegate.dart';
-import 'mod_card.dart';
+import '../../backend/fs_interface/domain/usecase/file_system.dart';
+import '../../backend/structure/entity/mod.dart';
+import '../../backend/structure/entity/mod_category.dart';
+import '../../di/fs_interface.dart';
+import '../../di/fs_watcher.dart';
+import '../route_names.dart';
+import '../widget/category_drop_target.dart';
+import '../widget/intrinsic_command_bar.dart';
+import '../widget/preset_control.dart';
+import '../widget/thick_scrollbar.dart';
+import '../widget/third_party/fluent_ui/auto_suggest_box.dart';
+import '../widget/third_party/flutter/min_extent_delegate.dart';
+import '../widget/mod_card.dart';
 
 class CategoryRoute extends HookConsumerWidget {
   const CategoryRoute({required this.categoryName, super.key});

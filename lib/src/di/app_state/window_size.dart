@@ -11,12 +11,12 @@ part 'window_size.g.dart';
 class WindowSize extends _$WindowSize {
   @override
   Size? build() {
-    final watch = ref.watch(persistentStorageProvider);
+    final watch = ref.watch(persistentStorageProvider).valueOrNull;
     return initializeWindowSizeUseCase(watch);
   }
 
   void setValue(final Size value) {
-    final read = ref.read(persistentStorageProvider);
+    final read = ref.read(persistentStorageProvider).valueOrNull;
     setWindowSizeUseCase(read, value);
     state = value;
   }

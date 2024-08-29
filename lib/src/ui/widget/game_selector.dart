@@ -143,20 +143,6 @@ class GameSelector extends HookConsumerWidget {
     final WidgetRef ref,
     final String value,
   ) {
-    final gameList = ref.read(gamesListProvider);
-    if (gameList.length <= 1) {
-      unawaited(
-        displayInfoBarInContext(
-          context,
-          title: const Text('Nope'),
-          severity: InfoBarSeverity.error,
-          content: const Text(
-            'You cannot delete the only game.',
-          ),
-        ),
-      );
-      return;
-    }
     unawaited(
       showDialog(
         barrierDismissible: true,

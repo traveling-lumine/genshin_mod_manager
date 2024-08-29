@@ -21,8 +21,7 @@ class PersistentStorage extends _$PersistentStorage {
   }
 
   void useNullStorage() {
-    final currentState = state.valueOrNull;
-    if (currentState == null) {
+    if (state.hasValue) {
       return;
     }
     state = AsyncValue.data(NullSharedPreferenceStorage());

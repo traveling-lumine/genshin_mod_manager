@@ -11,7 +11,7 @@ part 'move_on_drag.g.dart';
 class MoveOnDrag extends _$MoveOnDrag implements ValueSettable<DragImportType> {
   @override
   DragImportType build() {
-    final watch = ref.watch(persistentStorageProvider);
+    final watch = ref.watch(persistentStorageProvider).valueOrNull;
     return initializeMoveOnDragUseCase(watch)
         ? DragImportType.move
         : DragImportType.copy;
@@ -19,7 +19,7 @@ class MoveOnDrag extends _$MoveOnDrag implements ValueSettable<DragImportType> {
 
   @override
   void setValue(final DragImportType value) {
-    final read = ref.read(persistentStorageProvider);
+    final read = ref.read(persistentStorageProvider).valueOrNull;
     final boolValue = value == DragImportType.move;
     setMoveOnDragUseCase(read, boolValue);
     state = value;

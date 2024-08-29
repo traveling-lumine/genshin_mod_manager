@@ -11,7 +11,7 @@ part 'card_color.g.dart';
 class CardColor extends _$CardColor {
   @override
   Color build({required final bool isBright, required final bool isEnabled}) {
-    final repository = ref.watch(persistentStorageProvider);
+    final repository = ref.watch(persistentStorageProvider).valueOrNull;
     final color = initializeCardColorUseCase(
       repository,
       isBright: isBright,
@@ -21,7 +21,7 @@ class CardColor extends _$CardColor {
   }
 
   void setColor(final Color color) {
-    final repository = ref.read(persistentStorageProvider);
+    final repository = ref.read(persistentStorageProvider).valueOrNull;
     setCardColorUseCase(
       repository,
       color,

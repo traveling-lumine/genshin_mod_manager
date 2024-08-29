@@ -10,13 +10,13 @@ part 'run_together.g.dart';
 class RunTogether extends _$RunTogether implements ValueSettable<bool> {
   @override
   bool build() {
-    final watch = ref.watch(persistentStorageProvider);
+    final watch = ref.watch(persistentStorageProvider).valueOrNull;
     return initializeRunTogetherUseCase(watch);
   }
 
   @override
   void setValue(final bool value) {
-    final read = ref.read(persistentStorageProvider);
+    final read = ref.read(persistentStorageProvider).valueOrNull;
     setRunTogetherUseCase(read, value);
     state = value;
   }

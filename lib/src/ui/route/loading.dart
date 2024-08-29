@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../di/app_state/games_list.dart';
 import '../../di/storage.dart';
 import '../route_names.dart';
 import '../widget/appbar.dart';
@@ -19,18 +20,18 @@ class LoadingRoute extends HookConsumerWidget {
       persistentStorageProvider,
       (final previous, final next) {
         if (next.hasValue) {
-          _goToMain(context);
+          _goToLanding(context, ref);
         }
       },
     );
     return ref.watch(persistentStorageProvider).when(
-          data: _buildData,
+          data: (final data) => _buildData(data, ref),
           error: (final error, final stackTrace) => _buildError(error, ref),
           loading: _buildLoading,
         );
   }
 
-  Widget _buildData(final Object? data) {
+  Widget _buildData(final Object? data, final WidgetRef ref) {
     final context = useContext();
     return _TitledNavView(
       title: 'Done!',
@@ -38,7 +39,7 @@ class LoadingRoute extends HookConsumerWidget {
         const Text('Done!'),
         const SizedBox(height: 16),
         Button(
-          onPressed: () => _goToMain(context),
+          onPressed: () => _goToLanding(context, ref),
           child: const Text('Go to Home'),
         ),
       ],
@@ -82,8 +83,12 @@ class LoadingRoute extends HookConsumerWidget {
         ],
       );
 
-  void _goToMain(final BuildContext context) =>
-      context.go(RouteNames.home.name);
+  void _goToLanding(final BuildContext context, final WidgetRef ref) {
+    final gamesEmpty = ref.read(gamesListProvider).isEmpty;
+    context.go(
+      gamesEmpty ? RouteNames.firstpage.name : RouteNames.home.name,
+    );
+  }
 }
 
 class _TitledNavView extends StatelessWidget {

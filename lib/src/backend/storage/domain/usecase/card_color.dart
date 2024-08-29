@@ -2,24 +2,24 @@ import 'package:fluent_ui/fluent_ui.dart';
 import '../repo/persistent_storage.dart';
 
 Color initializeCardColorUseCase(
-  final PersistentStorage repository, {
+  final PersistentStorage? repository, {
   required final bool isBright,
   required final bool isEnabled,
 }) {
   final accessKey =
       _getCardColorAccessKeyUseCase(isBright: isBright, isEnabled: isEnabled);
-  final color = repository.getInt(accessKey);
+  final color = repository?.getInt(accessKey);
   if (color == null) {
     final defaultValue =
         getDefaultValueUseCase(isBright: isBright, isEnabled: isEnabled);
-    repository.setInt(accessKey, defaultValue.value);
+    repository?.setInt(accessKey, defaultValue.value);
     return defaultValue;
   }
   return Color(color);
 }
 
 void setCardColorUseCase(
-  final PersistentStorage repository,
+  final PersistentStorage? repository,
   final Color color, {
   required final bool isBright,
   required final bool isEnabled,
@@ -28,7 +28,7 @@ void setCardColorUseCase(
     isBright: isBright,
     isEnabled: isEnabled,
   );
-  repository.setInt(accessKey, color.value);
+  repository?.setInt(accessKey, color.value);
 }
 
 Color getDefaultValueUseCase({

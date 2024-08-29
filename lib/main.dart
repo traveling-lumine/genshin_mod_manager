@@ -7,11 +7,12 @@ import 'package:window_manager/window_manager.dart';
 import 'src/di/app_state/dark_mode.dart';
 import 'src/di/exe_arg.dart';
 import 'src/error_handler.dart';
-import 'src/ui/route/category/category.dart';
+import 'src/ui/route/category.dart';
+import 'src/ui/route/first_page.dart';
 import 'src/ui/route/home_shell.dart';
 import 'src/ui/route/license.dart';
 import 'src/ui/route/loading.dart';
-import 'src/ui/route/nahida_store/nahida_store.dart';
+import 'src/ui/route/nahida_store.dart';
 import 'src/ui/route/setting.dart';
 import 'src/ui/route/welcome.dart';
 import 'src/ui/route_names.dart';
@@ -53,6 +54,10 @@ class _MyAppState extends ConsumerState<_MyApp> {
       GoRoute(
         path: RouteNames.loading.name,
         builder: (final context, final state) => const LoadingRoute(),
+      ),
+      GoRoute(
+        path: RouteNames.firstpage.name,
+        builder: (final context, final state) => const FirstRoute(),
       ),
       ShellRoute(
         builder: (final context, final state, final child) =>
