@@ -10,7 +10,7 @@ class Expander2 extends StatefulWidget {
     this.content,
     this.icon,
     this.trailing,
-    this.animationCurve,
+    this.animationCurve = Curves.easeOutExpo,
     this.animationDuration,
     this.direction = ExpanderDirection.down,
     this.initiallyExpanded = false,
