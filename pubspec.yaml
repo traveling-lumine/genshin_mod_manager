@@ -30,6 +30,7 @@ dependencies:
   infinite_scroll_pagination: ^4.0.0
   json_annotation: ^4.9.0
   logger: ^2.4.0
+  protocol_handler: ^0.2.0
   meta: ^1.15.0
   package_info_plus: ^8.0.2
   pasteboard: ^0.2.0

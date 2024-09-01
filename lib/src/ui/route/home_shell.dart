@@ -9,6 +9,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../backend/app_version/domain/github.dart';
@@ -82,7 +83,7 @@ class HomeShell extends ConsumerStatefulWidget {
 }
 
 class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
-    with WindowListener {
+    with WindowListener, ProtocolListener {
   static const _navigationPaneOpenWidth = 270.0;
 
   @override
@@ -121,12 +122,14 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   @override
   void dispose() {
     WindowManager.instance.removeListener(this);
+    protocolHandler.removeListener(this);
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+    protocolHandler.addListener(this);
     WindowManager.instance.addListener(this);
 
     final args = ref.read(argProviderProvider);
@@ -151,6 +154,23 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     final read = ref.read(windowSizeProvider);
     if (read != null) {
       unawaited(WindowManager.instance.setSize(read));
+    }
+  }
+
+  @override
+  void onProtocolUrlReceived(final String url) {
+    if (mounted) {
+      final uri = Uri.parse(url);
+      print(url);
+      print(uri.scheme);
+      print(uri.userInfo);
+      print(uri.host);
+      print(uri.port);
+      print(uri.authority);
+      print(uri.pathSegments);
+      print(uri.queryParametersAll);
+      print(uri.fragment);
+      unawaited(displayInfoBarInContext(context, title: Text(url)));
     }
   }
 
@@ -347,44 +367,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         },
       );
 
-  Future<void> _showUpdateInfoBar(final String newVersion) =>
-      displayInfoBarInContext(
-        context,
-        duration: const Duration(minutes: 1),
-        title: RichText(
-          text: TextSpan(
-            style: DefaultTextStyle.of(context).style,
-            children: [
-              const TextSpan(text: 'New version available: '),
-              TextSpan(
-                text: newVersion,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const TextSpan(text: '. Click '),
-              TextSpan(
-                text: 'here',
-                style: TextStyle(
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
-                ),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () => openUrl(kRepoReleases),
-              ),
-              const TextSpan(text: ' to open link.'),
-            ],
-          ),
-        ),
-        action: FilledButton(
-          onPressed: () async {
-            final result = await _showUpdateConfirmDialog();
-            if (result ?? false) {
-              await _runUpdateScript();
-            }
-          },
-          child: const Text('Auto update'),
-        ),
-      );
-
   Future<bool?> _showUpdateConfirmDialog() => showDialog<bool?>(
         context: context,
         builder: (final dialogContext) {
@@ -446,5 +428,43 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
             ],
           );
         },
+      );
+
+  Future<void> _showUpdateInfoBar(final String newVersion) =>
+      displayInfoBarInContext(
+        context,
+        duration: const Duration(minutes: 1),
+        title: RichText(
+          text: TextSpan(
+            style: DefaultTextStyle.of(context).style,
+            children: [
+              const TextSpan(text: 'New version available: '),
+              TextSpan(
+                text: newVersion,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const TextSpan(text: '. Click '),
+              TextSpan(
+                text: 'here',
+                style: TextStyle(
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () => openUrl(kRepoReleases),
+              ),
+              const TextSpan(text: ' to open link.'),
+            ],
+          ),
+        ),
+        action: FilledButton(
+          onPressed: () async {
+            final result = await _showUpdateConfirmDialog();
+            if (result ?? false) {
+              await _runUpdateScript();
+            }
+          },
+          child: const Text('Auto update'),
+        ),
       );
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../backend/fs_interface/data/helper/fsops.dart';
@@ -145,7 +146,8 @@ class Categories extends _$Categories {
             name: e.pBasename,
           ),
         )
-        .toList();
+        .toList()
+      ..sort((final a, final b) => compareNatural(a.name, b.name));
 
     final watcher = ref.watch(directoryInFolderProvider(modRoot));
     final subscription = watcher.listen((final event) => state = addData());

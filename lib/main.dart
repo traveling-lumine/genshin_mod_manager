@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'src/di/app_state/dark_mode.dart';
@@ -30,6 +31,7 @@ const _kMinWindowSize = Size(800, 600);
 
 Future<void> _initialize() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await protocolHandler.register('gmm-interop-uri');
   await windowManager.ensureInitialized();
   await windowManager.waitUntilReadyToShow(
     const WindowOptions(
