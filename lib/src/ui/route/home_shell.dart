@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
+import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
@@ -12,7 +13,6 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../backend/app_version/domain/github.dart';
 import '../../backend/fs_interface/data/helper/path_op_string.dart';
-import '../../backend/structure/entity/mod_category.dart';
 import '../../di/app_state/current_target_game.dart';
 import '../../di/app_state/game_config.dart';
 import '../../di/app_state/games_list.dart';
@@ -31,7 +31,7 @@ import '../widget/appbar.dart';
 import '../widget/category_pane_item.dart';
 import '../widget/third_party/fluent_ui/auto_suggest_box.dart';
 
-Future<void> _runUpdateScript() async {
+Future<Never> _runUpdateScript() async {
   final url = Uri.parse('$kRepoReleases/download/GenshinModManager.zip');
   final response = await http.get(url);
   final archive = ZipDecoder().decodeBytes(response.bodyBytes);
@@ -169,36 +169,37 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     );
   }
 
-  Widget _buildAutoSuggestBox(
-    final List<FolderPaneItem> items,
-    final List<NavigationPaneItem> footerItems,
-  ) =>
+  Widget _buildAutoSuggestBox(final List<FolderPaneItem> items) =>
       AutoSuggestBox2(
         items: items
             .map(
               (final e) => AutoSuggestBoxItem2(
-                value: e.key,
+                value: e.category,
                 label: e.category.name,
-                onSelected: () =>
-                    context.go(RouteNames.category.name, extra: e.category),
               ),
             )
             .toList(),
         trailingIcon: const Icon(FluentIcons.search),
+        onSelected: (final item) {
+          final category = item.value;
+          if (category == null) {
+            return;
+          }
+          context.go('${RouteNames.category.name}/${category.name}');
+        },
         onSubmissionFailed: (final text) {
           if (text.isEmpty) {
             return;
           }
-          final index = items.indexWhere((final e) {
-            final name =
-                (e.key! as ValueKey<ModCategory>).value.name.toLowerCase();
+          final item = items.firstWhereOrNull((final e) {
+            final name = e.category.name.toLowerCase();
             return name.startsWith(text.toLowerCase());
           });
-          if (index == -1) {
+          if (item == null) {
             return;
           }
-          final category = items[index].category;
-          context.go(RouteNames.category.name, extra: category);
+          final category = item.category;
+          context.go('${RouteNames.category.name}/${category.name}');
         },
       );
 
@@ -242,7 +243,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       size: const NavigationPaneSize(
         openWidth: _HomeShellState._navigationPaneOpenWidth,
       ),
-      autoSuggestBox: _buildAutoSuggestBox(items, footerItems),
+      autoSuggestBox: _buildAutoSuggestBox(items),
       autoSuggestBoxReplacement: const Icon(FluentIcons.search),
     );
   }

@@ -37,11 +37,6 @@ class FileSystemInterfaceImpl implements FileSystemInterface {
   }
 
   @override
-  Future<void> openFolder(final String path) async {
-    await Process.start('explorer', [path], runInShell: true);
-  }
-
-  @override
   Future<void> runProgram(final File program) async {
     final pwd = program.parent.path;
     final pName = program.path.pBasename;

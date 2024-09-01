@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,7 @@ import '../../backend/structure/entity/ini.dart';
 import '../../backend/structure/entity/mod.dart';
 import '../../di/app_state/card_color.dart';
 import '../../di/app_state/game_config.dart';
+import '../../di/folder_opener.dart';
 import '../../di/fs_interface.dart';
 import '../../di/mod_card.dart';
 import '../util/display_infobar.dart';
@@ -158,15 +160,38 @@ class _ModCardState extends ConsumerState<ModCard> {
         child: IconButton(icon: Icon(icon), onPressed: onPressed),
       );
 
-  Widget _buildImageDesc(final String imagePath) => GestureDetector(
-        onTapUp: (final details) async => _onImageTap(imagePath),
-        onSecondaryTapUp: (final details) async =>
-            _onImageRightClick(details, imagePath),
-        child: FlyoutTarget(
-          controller: _contextController,
-          key: _contextAttachKey,
-          child: TimeAwareFileImage(path: imagePath),
-        ),
+  Widget _buildImageDesc(final String imagePath) => Stack(
+        children: [
+          SizedBox.expand(
+            child: ClipRect(
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.5),
+                    BlendMode.darken,
+                  ),
+                  child: TimeAwareFileImage(
+                    path: imagePath,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Center(
+            child: GestureDetector(
+              onTapUp: (final details) async => _onImageTap(imagePath),
+              onSecondaryTapUp: (final details) async =>
+                  _onImageRightClick(details, imagePath),
+              child: FlyoutTarget(
+                controller: _contextController,
+                key: _contextAttachKey,
+                child: TimeAwareFileImage(path: imagePath),
+              ),
+            ),
+          ),
+        ],
       );
 
   Widget _buildIni(final List<String> iniPaths) => Row(
@@ -222,7 +247,7 @@ class _ModCardState extends ConsumerState<ModCard> {
   }
 
   Future<void> _onFolderOpen() async {
-    final fsInterface = ref.read(fsInterfaceProvider);
+    final fsInterface = ref.read(folderOpenerProvider);
     await openFolderUseCase(fsInterface, widget.mod.path);
   }
 

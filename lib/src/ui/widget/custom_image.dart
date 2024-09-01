@@ -7,9 +7,16 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../di/fs_watcher.dart';
 
 class TimeAwareFileImage extends ConsumerStatefulWidget {
-  const TimeAwareFileImage({required this.path, super.key});
+  const TimeAwareFileImage({
+    required this.path,
+    super.key,
+    this.frameBuilder,
+    this.fit = BoxFit.contain,
+  });
 
   final String path;
+  final BoxFit? fit;
+  final ImageFrameBuilder? frameBuilder;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -18,7 +25,15 @@ class TimeAwareFileImage extends ConsumerStatefulWidget {
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('path', path));
+    properties
+      ..add(StringProperty('path', path))
+      ..add(EnumProperty<BoxFit?>('fit', fit))
+      ..add(
+        ObjectFlagProperty<ImageFrameBuilder?>.has(
+          'frameBuilder',
+          frameBuilder,
+        ),
+      );
   }
 }
 
@@ -46,7 +61,8 @@ class _TimeAwareFileImageState extends ConsumerState<TimeAwareFileImage> {
     return Image.file(
       File(widget.path),
       key: ValueKey(_curMTime),
-      fit: BoxFit.contain,
+      fit: widget.fit,
+      frameBuilder: widget.frameBuilder,
     );
   }
 }

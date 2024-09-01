@@ -1,8 +1,7 @@
-import '../repo/fs_interface.dart';
+import '../repo/folder_opener.dart';
 
 Future<void> openFolderUseCase(
-  final FileSystemInterface fsInterface,
+  final FolderOpener opener,
   final String path,
-) async {
-  await fsInterface.openFolder(path);
-}
+) =>
+    opener(path);

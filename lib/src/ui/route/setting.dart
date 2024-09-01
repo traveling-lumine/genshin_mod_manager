@@ -155,6 +155,7 @@ class SettingRoute extends ConsumerWidget {
             text: 'Use Paimon for folders without icons',
             provider: paimonIconProvider,
           ),
+          const SizedBox(height: 200),
         ],
       );
 
