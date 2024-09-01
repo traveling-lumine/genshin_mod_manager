@@ -168,7 +168,7 @@ class _ModCardState extends ConsumerState<ModCard> {
                 imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.5),
+                    Colors.black.withOpacity(0.6),
                     BlendMode.darken,
                   ),
                   child: TimeAwareFileImage(
@@ -181,7 +181,7 @@ class _ModCardState extends ConsumerState<ModCard> {
           ),
           Center(
             child: GestureDetector(
-              onTapUp: (final details) async => _onImageTap(imagePath),
+              onLongPress: () async => _onImageTap(imagePath),
               onSecondaryTapUp: (final details) async =>
                   _onImageRightClick(details, imagePath),
               child: FlyoutTarget(

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -19,7 +20,6 @@ class StoreElement extends ConsumerWidget {
     super.key,
   });
   final TextEditingController passwordController;
-
   final NahidaliveElement element;
   final ModCategory category;
 
@@ -185,42 +185,41 @@ class StoreElement extends ConsumerWidget {
     );
   }
 
-  Widget _buildPreview(final BuildContext context) => Center(
-        child: GestureDetector(
-          onTap: () => unawaited(
-            showDialog(
-              context: context,
-              barrierDismissible: true,
-              builder: (final dialogContext) => GestureDetector(
-                onTap: Navigator.of(dialogContext).pop,
-                onSecondaryTap: Navigator.of(dialogContext).pop,
-                child: CachedNetworkImage(
-                  imageUrl: element.previewUrl,
-                  progressIndicatorBuilder:
-                      (final context, final url, final progress) =>
-                          Center(child: ProgressRing(value: progress.progress)),
-                  fit: BoxFit.contain,
+  Widget _buildPreview(final BuildContext context) {
+    final imageProvider = CachedNetworkImageProvider(element.previewUrl);
+    return Center(
+      child: Stack(
+        children: [
+          SizedBox.expand(
+            child: ClipRect(
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.6),
+                    BlendMode.darken,
+                  ),
+                  child: Image(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
           ),
-          child: CachedNetworkImage(
-            imageUrl: element.previewUrl,
-            fit: BoxFit.contain,
-            progressIndicatorBuilder:
-                (final context, final url, final progress) =>
-                    ProgressRing(value: progress.progress),
-            errorWidget: (final context, final url, final error) =>
-                const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(FluentIcons.error),
-                SelectableText('Failed to load'),
-              ],
+          Center(
+            child: GestureDetector(
+              onTap: () async => _showImageDialog(context, imageProvider),
+              child: Image(
+                image: imageProvider,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
-        ),
-      );
+        ],
+      ),
+    );
+  }
 
   Widget _downloadDialog(
     final BuildContext dialogContext,
@@ -247,5 +246,22 @@ class StoreElement extends ConsumerWidget {
             child: const Text('Download'),
           ),
         ],
+      );
+
+  Future<void> _showImageDialog(
+    final BuildContext context,
+    final ImageProvider image,
+  ) =>
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (final dialogContext) => GestureDetector(
+          onTap: Navigator.of(dialogContext).pop,
+          onSecondaryTap: Navigator.of(dialogContext).pop,
+          child: Image(
+            image: image,
+            fit: BoxFit.contain,
+          ),
+        ),
       );
 }

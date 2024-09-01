@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -14,6 +15,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../backend/app_version/domain/github.dart';
 import '../../backend/fs_interface/data/helper/path_op_string.dart';
+import '../../backend/structure/entity/mod_category.dart';
 import '../../di/app_state/current_target_game.dart';
 import '../../di/app_state/game_config.dart';
 import '../../di/app_state/games_list.dart';
@@ -160,17 +162,54 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   @override
   void onProtocolUrlReceived(final String url) {
     if (mounted) {
-      final uri = Uri.parse(url);
-      print(url);
-      print(uri.scheme);
-      print(uri.userInfo);
-      print(uri.host);
-      print(uri.port);
-      print(uri.authority);
-      print(uri.pathSegments);
-      print(uri.queryParametersAll);
-      print(uri.fragment);
-      unawaited(displayInfoBarInContext(context, title: Text(url)));
+      unawaited(
+        showDialog(
+          context: context,
+          builder: (final dCtx) => HookConsumer(
+            builder: (final hCtx, final ref, final child) {
+              final categories = ref.watch(categoriesProvider);
+              final currentSelected = useState<ModCategory?>(null);
+              return ContentDialog(
+                title: const Text('Protocol URL received'),
+                content: IntrinsicHeight(
+                  child: ComboboxFormField<ModCategory>(
+                    value: currentSelected.value,
+                    items: categories
+                        .map(
+                          (final e) => ComboBoxItem(
+                            value: e,
+                            child: Text(e.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (final value) {
+                      currentSelected.value = value;
+                    },
+                    validator: (final value) =>
+                        value == null ? 'Please select a category' : null,
+                    autovalidateMode: AutovalidateMode.always,
+                  ),
+                ),
+                actions: [
+                  Button(
+                    onPressed: Navigator.of(dCtx).pop,
+                    child: const Text('Cancel'),
+                  ),
+                  FilledButton(
+                    onPressed: currentSelected.value == null
+                        ? null
+                        : () {
+                            print('Selected: ${currentSelected.value}');
+                            Navigator.of(dCtx).pop();
+                          },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
     }
   }
 
