@@ -1,0 +1,27 @@
+{
+    "modManager": "{game} 모드매니저{updateMarker}",
+    "@modManager": {
+        "description": "Mod manager",
+        "placeholders": {
+            "game": {
+                "type": "String"
+            },
+            "updateMarker": {
+                "type": "String"
+            }
+        }
+    },
+    "updateMarker": " (업데이트!)",
+    "@updateMarker": {
+        "description": "Update marker"
+    },
+    "noDescription": "상세정보 없음",
+    "@noDescription": {
+        "description": "No description"
+    },
+    "searchTags": "태그 검색",
+    "@searchTags": {
+        "description": "Search tags"
+    },
+    "@@locale": "ko"
+}

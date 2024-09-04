@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -262,7 +263,7 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
         constraints: const BoxConstraints(maxWidth: 300),
         child: TextFormBox(
           autovalidateMode: AutovalidateMode.always,
-          placeholder: 'Search tags',
+          placeholder: AppLocalizations.of(context)!.searchTags,
           onChanged: _onSearchChange,
           validator: _onValidationCheck,
         ),

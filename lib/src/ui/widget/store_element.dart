@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../backend/akasha/domain/entity/nahida_element.dart';
@@ -123,9 +124,12 @@ class StoreElement extends ConsumerWidget {
                   ? SelectableText(description)
                   : SelectableText.rich(
                       TextSpan(
-                        text: 'No description',
+                        text: AppLocalizations.of(context)!.noDescription,
                         style: bodyStyle?.copyWith(
-                          fontStyle: FontStyle.italic,
+                          fontStyle:
+                              AppLocalizations.of(context)!.localeName == 'ko'
+                                  ? null
+                                  : FontStyle.italic,
                           color: bodyStyle.color?.withOpacity(0.5),
                         ),
                       ),

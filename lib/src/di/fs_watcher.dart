@@ -114,7 +114,7 @@ Stream<List<Mod>> modsInCategory(
           }
           final aLower = a.path.pEnabledForm.pBasename.toLowerCase();
           final bLower = b.path.pEnabledForm.pBasename.toLowerCase();
-          return aLower.compareTo(bLower);
+          return compareNatural(aLower, bLower);
         }),
     );
   }

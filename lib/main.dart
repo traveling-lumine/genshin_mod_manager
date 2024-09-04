@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protocol_handler/protocol_handler.dart';
@@ -100,6 +101,9 @@ class _MyAppState extends ConsumerState<_MyApp> {
   Widget build(final BuildContext context) {
     final darkMode = ref.watch(darkModeProvider);
     return FluentApp.router(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale.fromSubtags(languageCode: 'en'),
       theme: FluentThemeData.light(),
       darkTheme: FluentThemeData.dark(),
       themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,

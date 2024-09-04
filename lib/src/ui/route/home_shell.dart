@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -109,11 +110,11 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
     final game = ref.watch(targetGameProvider);
     final updateMarker = (ref.watch(isOutdatedProvider).valueOrNull ?? false)
-        ? ' (update!)'
+        ? AppLocalizations.of(context)!.updateMarker
         : '';
     return NavigationView(
       appBar: getAppbar(
-        '$game Mod Manager$updateMarker',
+        AppLocalizations.of(context)!.modManager(game, updateMarker),
         presetControl: true,
       ),
       pane: _buildPane(),
