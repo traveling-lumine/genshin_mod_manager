@@ -8,10 +8,10 @@ import 'game_config.dart';
 const _iniEditorArgKey = 'iniEditorArg';
 
 void initializeIniEditorArgumentUseCase(
-  final PersistentStorage? storage,
+  final PersistentStorage storage,
   final FileSystemInterface interface,
 ) {
-  final arg = storage?.getString(_iniEditorArgKey);
+  final arg = storage.getString(_iniEditorArgKey);
   if (arg == null) {
     interface.iniEditorArgument = null;
     _copyIcons(storage, interface);
@@ -24,26 +24,26 @@ void initializeIniEditorArgumentUseCase(
 }
 
 void setIniEditorArgumentUseCase(
-  final PersistentStorage? storage,
+  final PersistentStorage storage,
   final FileSystemInterface interface,
   final String? arg,
 ) {
   if (arg == null) {
     interface.iniEditorArgument = null;
-    storage?.removeKey(_iniEditorArgKey);
+    storage.removeKey(_iniEditorArgKey);
     return;
   }
-  storage?.setString(_iniEditorArgKey, arg);
+  storage.setString(_iniEditorArgKey, arg);
   final replaced =
       arg.split(' ').map((final e) => e == '%0' ? null : e).toList();
   interface.iniEditorArgument = replaced;
 }
 
 void _copyIcons(
-  final PersistentStorage? storage,
+  final PersistentStorage storage,
   final FileSystemInterface fsInterface,
 ) {
-  final games = storage?.getList('games');
+  final games = storage.getList('games');
   if (games == null) {
     return;
   }

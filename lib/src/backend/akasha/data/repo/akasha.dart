@@ -8,9 +8,7 @@ import '../../domain/entity/nahida_element.dart';
 import '../../domain/repo/akasha.dart';
 import '../secrets.dart';
 
-NahidaliveAPI createNahidaliveAPI() => _NahidaliveAPIImpl();
-
-class _NahidaliveAPIImpl implements NahidaliveAPI {
+class NahidaliveAPIImpl implements NahidaliveAPI {
   final _client = http.Client();
 
   @override
@@ -43,12 +41,12 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
     final response = await _client.get(
       Uri.https(
         Env.val10,
-        Env.val12,
-        {'uuid': uuid},
+        '${Env.val13}/$uuid',
       ),
     );
     return NahidaliveElement.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+      (jsonDecode(response.body) as Map<String, dynamic>)['data']
+          as Map<String, dynamic>,
     );
   }
 
@@ -87,10 +85,9 @@ class _NahidaliveAPIImpl implements NahidaliveAPI {
     final NahidaliveDownloadElement downloadElement,
   ) async {
     final response = await _client.get(Uri.parse(downloadElement.downloadUrl!));
-    if (response.statusCode == 200) {
-      return response.bodyBytes;
-    } else {
+    if (response.statusCode != 200) {
       throw Exception('download failed');
     }
+    return response.bodyBytes;
   }
 }

@@ -11,14 +11,14 @@ part 'fs_interface.g.dart';
 class FsInterface extends _$FsInterface {
   @override
   FileSystemInterface build() {
-    final storage = ref.watch(persistentStorageProvider).valueOrNull;
+    final storage = ref.watch(persistentStorageProvider).requireValue;
     final fileSystemInterfaceImpl = FileSystemInterfaceImpl();
     initializeIniEditorArgumentUseCase(storage, fileSystemInterfaceImpl);
     return fileSystemInterfaceImpl;
   }
 
   void setIniEditorArgument(final String? arg) {
-    final storage = ref.read(persistentStorageProvider).valueOrNull;
+    final storage = ref.read(persistentStorageProvider).requireValue;
     setIniEditorArgumentUseCase(storage, state, arg);
   }
 }

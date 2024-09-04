@@ -10,13 +10,12 @@ import 'package:pasteboard/pasteboard.dart';
 import '../../backend/fs_interface/data/helper/mod_switcher.dart';
 import '../../backend/fs_interface/data/helper/path_op_string.dart';
 import '../../backend/fs_interface/domain/entity/mod_toggle_exception.dart';
-import '../../backend/fs_interface/domain/usecase/file_system.dart';
+import '../../backend/fs_interface/domain/usecase/open_folder.dart';
 import '../../backend/fs_interface/domain/usecase/paste_image.dart';
 import '../../backend/structure/entity/ini.dart';
 import '../../backend/structure/entity/mod.dart';
 import '../../di/app_state/card_color.dart';
 import '../../di/app_state/game_config.dart';
-import '../../di/folder_opener.dart';
 import '../../di/fs_interface.dart';
 import '../../di/mod_card.dart';
 import '../util/display_infobar.dart';
@@ -247,8 +246,7 @@ class _ModCardState extends ConsumerState<ModCard> {
   }
 
   Future<void> _onFolderOpen() async {
-    final fsInterface = ref.read(folderOpenerProvider);
-    await openFolderUseCase(fsInterface, widget.mod.path);
+    await openFolderUseCase(widget.mod.path);
   }
 
   Future<void> _onImageFlyoutDeletePressed(final BuildContext fCtx) async {

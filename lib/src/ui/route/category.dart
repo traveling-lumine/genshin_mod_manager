@@ -7,10 +7,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../backend/fs_interface/domain/usecase/file_system.dart';
+import '../../backend/fs_interface/domain/usecase/open_folder.dart';
 import '../../backend/structure/entity/mod.dart';
 import '../../backend/structure/entity/mod_category.dart';
-import '../../di/folder_opener.dart';
 import '../../di/fs_watcher.dart';
 import '../route_names.dart';
 import '../widget/category_drop_target.dart';
@@ -92,7 +91,7 @@ class CategoryRoute extends HookConsumerWidget {
               primaryItems: [
                 CommandBarButton(
                   icon: const Icon(FluentIcons.folder_open),
-                  onPressed: () async => _onFolderOpen(category, ref),
+                  onPressed: () async => _onFolderOpen(category),
                 ),
                 CommandBarButton(
                   icon: const Icon(FluentIcons.download),
@@ -227,12 +226,8 @@ class CategoryRoute extends HookConsumerWidget {
     );
   }
 
-  Future<void> _onFolderOpen(
-    final ModCategory category,
-    final WidgetRef ref,
-  ) async {
-    final fsInterface = ref.read(folderOpenerProvider);
-    await openFolderUseCase(fsInterface, category.path);
+  Future<void> _onFolderOpen(final ModCategory category) async {
+    await openFolderUseCase(category.path);
   }
 
   void _onDownloadPressed(final BuildContext context) {

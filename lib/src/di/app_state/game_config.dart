@@ -12,7 +12,7 @@ part 'game_config.g.dart';
 class GameConfigNotifier extends _$GameConfigNotifier {
   @override
   GameConfig build() {
-    final storage2 = ref.watch(persistentStorageProvider).valueOrNull;
+    final storage2 = ref.watch(persistentStorageProvider).requireValue;
     final targetGame = ref.watch(targetGameProvider);
     final gameConfig = initializeGameConfigUseCase(storage2, targetGame);
     return gameConfig;
@@ -20,7 +20,7 @@ class GameConfigNotifier extends _$GameConfigNotifier {
 
   /// Changes the mod root.
   void changeModRoot(final String path) {
-    final read = ref.read(persistentStorageProvider).valueOrNull;
+    final read = ref.read(persistentStorageProvider).requireValue;
     final targetGame = ref.read(targetGameProvider);
     setModRootUseCase(read, targetGame, path);
     state = state.copyWith(modRoot: path);
@@ -28,7 +28,7 @@ class GameConfigNotifier extends _$GameConfigNotifier {
 
   /// Changes the mod executable file.
   void changeModExecFile(final String path) {
-    final read = ref.read(persistentStorageProvider).valueOrNull;
+    final read = ref.read(persistentStorageProvider).requireValue;
     final targetGame = ref.read(targetGameProvider);
     setModExecFileUseCase(read, targetGame, path);
     state = state.copyWith(modExecFile: path);
@@ -36,7 +36,7 @@ class GameConfigNotifier extends _$GameConfigNotifier {
 
   /// Changes the launcher file.
   void changeLauncherFile(final String path) {
-    final read = ref.read(persistentStorageProvider).valueOrNull;
+    final read = ref.read(persistentStorageProvider).requireValue;
     final targetGame = ref.read(targetGameProvider);
     setLauncherFileUseCase(read, targetGame, path);
     state = state.copyWith(launcherFile: path);
@@ -44,7 +44,7 @@ class GameConfigNotifier extends _$GameConfigNotifier {
 
   /// Changes the preset data.
   void changePresetData(final PresetData data) {
-    final read = ref.read(persistentStorageProvider).valueOrNull;
+    final read = ref.read(persistentStorageProvider).requireValue;
     final targetGame = ref.read(targetGameProvider);
     setPresetDataUseCase(data, read, targetGame);
     state = state.copyWith(presetData: data);

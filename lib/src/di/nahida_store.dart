@@ -13,7 +13,7 @@ import '../backend/structure/entity/mod_category.dart';
 part 'nahida_store.g.dart';
 
 @Riverpod(keepAlive: true)
-NahidaliveAPI akashaApi(final AkashaApiRef ref) => createNahidaliveAPI();
+NahidaliveAPI akashaApi(final AkashaApiRef ref) => NahidaliveAPIImpl();
 
 @Riverpod(keepAlive: true)
 NahidaDownloadModel downloadModel(final DownloadModelRef ref) {

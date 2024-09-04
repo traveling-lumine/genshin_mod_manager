@@ -27,6 +27,7 @@ import '../../di/app_version/remote_version.dart';
 import '../../di/exe_arg.dart';
 import '../../di/fs_interface.dart';
 import '../../di/fs_watcher.dart';
+import '../../di/nahida_store.dart';
 import '../route_names.dart';
 import '../util/display_infobar.dart';
 import '../util/open_url.dart';
@@ -76,7 +77,7 @@ Future<Never> _runUpdateScript() async {
   exit(0);
 }
 
-class HomeShell extends ConsumerStatefulWidget {
+class HomeShell extends StatefulHookConsumerWidget {
   const HomeShell({required this.child, super.key});
   final Widget child;
 
@@ -107,10 +108,9 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       );
 
     final game = ref.watch(targetGameProvider);
-    final updateMarker = ref.watch(isOutdatedProvider).maybeWhen(
-          data: (final value) => value ? ' (update!)' : '',
-          orElse: () => '',
-        );
+    final updateMarker = (ref.watch(isOutdatedProvider).valueOrNull ?? false)
+        ? ' (update!)'
+        : '';
     return NavigationView(
       appBar: getAppbar(
         '$game Mod Manager$updateMarker',
@@ -168,7 +168,17 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           builder: (final dCtx) => HookConsumer(
             builder: (final hCtx, final ref, final child) {
               final categories = ref.watch(categoriesProvider);
-              final currentSelected = useState<ModCategory?>(null);
+              final currentUri = GoRouterState.of(context).pathParameters;
+              final ModCategory? initialCategory;
+              if (currentUri.containsKey('category')) {
+                final categoryName = currentUri['category']!;
+                initialCategory = categories.firstWhereOrNull(
+                  (final e) => e.name == categoryName,
+                );
+              } else {
+                initialCategory = null;
+              }
+              final currentSelected = useState<ModCategory?>(initialCategory);
               return ContentDialog(
                 title: const Text('Protocol URL received'),
                 content: IntrinsicHeight(
@@ -198,9 +208,39 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
                   FilledButton(
                     onPressed: currentSelected.value == null
                         ? null
-                        : () {
+                        : () async {
                             print('Selected: ${currentSelected.value}');
-                            Navigator.of(dCtx).pop();
+                            final akasha = ref.read(akashaApiProvider);
+                            var uuid = Uri.parse(url).queryParameters['uuid'];
+                            if (uuid == null) {
+                              return;
+                            }
+                            // if uuid has no dashes, add it manually
+                            if (uuid.length == 32) {
+                              final sb = StringBuffer()
+                                ..writeAll(
+                                  [
+                                    uuid.substring(0, 8),
+                                    uuid.substring(8, 12),
+                                    uuid.substring(12, 16),
+                                    uuid.substring(16, 20),
+                                    uuid.substring(20, 32),
+                                  ],
+                                  '-',
+                                );
+                              uuid = sb.toString();
+                            }
+                            print('UUID: $uuid');
+                            final elem =
+                                await akasha.fetchNahidaliveElement(uuid);
+                            final model = ref.read(downloadModelProvider);
+                            await model.onModDownload(
+                              element: elem,
+                              category: currentSelected.value!,
+                            );
+                            if (dCtx.mounted) {
+                              Navigator.of(dCtx).pop();
+                            }
                           },
                     child: const Text('OK'),
                   ),

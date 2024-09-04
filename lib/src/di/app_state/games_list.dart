@@ -8,28 +8,28 @@ part 'games_list.g.dart';
 class GamesList extends _$GamesList {
   @override
   List<String> build() {
-    final storage = ref.watch(persistentStorageProvider).valueOrNull;
-    final gamesList = storage?.getList('games') ?? [];
+    final storage = ref.watch(persistentStorageProvider).requireValue;
+    final gamesList = storage.getList('games') ?? [];
     return gamesList;
   }
 
   void addGame(final String game) {
-    final storage = ref.read(persistentStorageProvider).valueOrNull;
+    final storage = ref.read(persistentStorageProvider).requireValue;
     if (state.contains(game)) {
       return;
     }
     final newGamesList = [...state, game];
-    storage?.setList('games', newGamesList);
+    storage.setList('games', newGamesList);
     state = newGamesList;
   }
 
   void removeGame(final String game) {
-    final storage = ref.read(persistentStorageProvider).valueOrNull;
+    final storage = ref.read(persistentStorageProvider).requireValue;
     if (!state.contains(game)) {
       return;
     }
     final newGamesList = state.where((final e) => e != game).toList();
-    storage?.setList('games', newGamesList);
+    storage.setList('games', newGamesList);
     state = newGamesList;
   }
 }

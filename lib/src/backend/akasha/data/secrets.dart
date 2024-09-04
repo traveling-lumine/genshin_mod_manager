@@ -30,4 +30,6 @@ abstract class Env {
   static final String val11 = _Env.val11;
   @EnviedField()
   static final String val12 = _Env.val12;
+  @EnviedField()
+  static final String val13 = _Env.val13;
 }

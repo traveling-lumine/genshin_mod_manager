@@ -45,7 +45,7 @@ Future<String> _getNonCollidingName(
   final String destDirName,
 ) async {
   final enabledFormDirNames = getUnderSync<Directory>(category.path)
-      .map((final e) => e.pDisabledForm.pBasename)
+      .map((final e) => e.pEnabledForm.pBasename)
       .toSet();
   var counter = 0;
   var noCollisionDestDirName = destDirName;

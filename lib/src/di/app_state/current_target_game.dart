@@ -9,26 +9,25 @@ part 'current_target_game.g.dart';
 class TargetGame extends _$TargetGame {
   @override
   String build() {
-    final storage = ref.watch(persistentStorageProvider).valueOrNull;
+    final storage = ref.watch(persistentStorageProvider).requireValue;
     final gamesList = ref.watch(gamesListProvider);
-    final lastGame = storage?.getString('lastGame');
+    final lastGame = storage.getString('lastGame');
     if (gamesList.contains(lastGame)) {
       return lastGame!;
     } else {
       final first = gamesList.first;
-      storage?.setString('lastGame', first);
+      storage.setString('lastGame', first);
       return first;
     }
   }
 
-  /// Sets the value.
   void setValue(final String value) {
-    final read = ref.read(persistentStorageProvider).valueOrNull;
+    final read = ref.read(persistentStorageProvider).requireValue;
     final gamesList = ref.read(gamesListProvider);
     if (!gamesList.contains(value)) {
       return;
     }
-    read?.setString('lastGame', value);
+    read.setString('lastGame', value);
     state = value;
   }
 }
