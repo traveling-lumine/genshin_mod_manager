@@ -15,7 +15,7 @@ Future<void> akashaDownloadUrlUseCase({
   }
   final data = await api.download(url);
   await writer(
-    modName: element.title,
+    modName: element.title.trim(),
     data: data,
   ); // ModZipExtractionException
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:collection/collection.dart';
@@ -14,9 +15,12 @@ import 'package:http/http.dart' as http;
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../backend/akasha/domain/entity/download_state.dart';
+import '../../backend/akasha/domain/entity/nahida_element.dart';
 import '../../backend/app_version/domain/github.dart';
 import '../../backend/fs_interface/data/helper/path_op_string.dart';
 import '../../backend/structure/entity/mod_category.dart';
+import '../../di/akasha_download_queue.dart';
 import '../../di/app_state/current_target_game.dart';
 import '../../di/app_state/game_config.dart';
 import '../../di/app_state/games_list.dart';
@@ -79,8 +83,8 @@ Future<Never> _runUpdateScript() async {
 }
 
 class HomeShell extends StatefulHookConsumerWidget {
-  const HomeShell({required this.child, super.key});
   final Widget child;
+  const HomeShell({required this.child, super.key});
 
   @override
   ConsumerState<HomeShell> createState() => _HomeShellState();
@@ -89,6 +93,7 @@ class HomeShell extends StatefulHookConsumerWidget {
 class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     with WindowListener, ProtocolListener {
   static const _navigationPaneOpenWidth = 270.0;
+  final _textEditingController = TextEditingController();
 
   @override
   Widget build(final BuildContext context) {
@@ -104,6 +109,35 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         (final previous, final next) {
           if (next.isEmpty) {
             context.go(RouteNames.firstpage.name);
+          }
+        },
+      )
+      ..listen(
+        nahidaDownloadQueueProvider,
+        (final previous, final next) async {
+          if (!next.hasValue) {
+            return;
+          }
+          switch (next.requireValue) {
+            case AkashaDownloadStateCompleted(:final element):
+              _showAkashaDownloadCompleteInfoBar(element);
+            case AkashaDownloadStateHttpException(:final exception):
+              _showAkashaApiErrorInfoBar(exception);
+            case AkashaDownloadStateWrongPassword(
+                :final completer,
+                :final wrongPw
+              ):
+              await _showAkashaWrongPasswdDialog(completer, wrongPw);
+            case AkashaDownloadStateModZipExtractionException(
+                :final category,
+                :final data,
+                :final element
+              ):
+              await _showAkashaZipExtractionErrorInfoBar(
+                element,
+                category,
+                data,
+              );
           }
         },
       );
@@ -126,6 +160,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   void dispose() {
     WindowManager.instance.removeListener(this);
     protocolHandler.removeListener(this);
+    _textEditingController.dispose();
     super.dispose();
   }
 
@@ -234,8 +269,9 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
                             print('UUID: $uuid');
                             final elem =
                                 await akasha.fetchNahidaliveElement(uuid);
-                            final model = ref.read(downloadModelProvider);
-                            await model.onModDownload(
+                            final model =
+                                ref.read(nahidaDownloadQueueProvider.notifier);
+                            await model.addDownload(
                               element: elem,
                               category: currentSelected.value!,
                             );
@@ -425,6 +461,109 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       context,
       title: const Text('Ran 3d migoto'),
     );
+  }
+
+  void _showAkashaApiErrorInfoBar(
+    final HttpException exception,
+  ) {
+    unawaited(
+      displayInfoBarInContext(
+        context,
+        title: const Text('Download failed'),
+        content: Text('${exception.uri}'),
+        severity: InfoBarSeverity.error,
+      ),
+    );
+  }
+
+  void _showAkashaDownloadCompleteInfoBar(
+    final NahidaliveElement element,
+  ) {
+    unawaited(
+      displayInfoBarInContext(
+        context,
+        title: Text('Downloaded ${element.title}'),
+        severity: InfoBarSeverity.success,
+      ),
+    );
+  }
+
+  Future<void> _showAkashaWrongPasswdDialog(
+    final Completer<String?> completer,
+    final String? wrongPw,
+  ) async {
+    final userResponse = await showDialog<String?>(
+      context: context,
+      builder: (final dialogContext) => ContentDialog(
+        title: const Text('Enter password'),
+        content: IntrinsicHeight(
+          child: TextFormBox(
+            autovalidateMode: AutovalidateMode.always,
+            autofocus: true,
+            controller: _textEditingController,
+            placeholder: 'Password',
+            onFieldSubmitted: (final value) =>
+                Navigator.of(dialogContext).pop(_textEditingController.text),
+            validator: (final value) {
+              if (wrongPw == null || value == null) {
+                return null;
+              }
+              if (value == wrongPw) {
+                return 'Wrong password';
+              }
+              return null;
+            },
+          ),
+        ),
+        actions: [
+          Button(
+            onPressed: Navigator.of(dialogContext).pop,
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(_textEditingController.text),
+            child: const Text('Download'),
+          ),
+        ],
+      ),
+    );
+    completer.complete(userResponse);
+  }
+
+  Future<void> _showAkashaZipExtractionErrorInfoBar(
+    final NahidaliveElement element,
+    final ModCategory category,
+    final Uint8List data,
+  ) async {
+    var writeSuccess = false;
+    Exception? exception;
+    final fileName = '${element.title}.zip';
+    try {
+      await File(category.path.pJoin(fileName)).writeAsBytes(data);
+      writeSuccess = true;
+    } on Exception catch (e) {
+      writeSuccess = false;
+      exception = e;
+    }
+    if (mounted) {
+      final contentString = switch (writeSuccess) {
+        true => 'Failed to extract archive. '
+            'Instead, the archive was saved as $fileName.',
+        false => 'Failed to extract archive. '
+            'During an attempt to save the archive, '
+            'an exception has occurred: $exception',
+      };
+      unawaited(
+        displayInfoBarInContext(
+          context,
+          title: const Text('Download failed'),
+          content: Text(contentString),
+          severity: InfoBarSeverity.error,
+          duration: const Duration(seconds: 30),
+        ),
+      );
+    }
   }
 
   Future<Q?> _showInvalidCommandDialog<Q extends Object?>(final String arg) =>

@@ -9,7 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../backend/akasha/domain/entity/nahida_element.dart';
 import '../../backend/structure/entity/mod_category.dart';
-import '../../di/nahida_store.dart';
+import '../../di/akasha_download_queue.dart';
 import '../util/open_url.dart';
 import 'intrinsic_command_bar.dart';
 
@@ -17,10 +17,8 @@ class StoreElement extends ConsumerWidget {
   const StoreElement({
     required this.element,
     required this.category,
-    required this.passwordController,
     super.key,
   });
-  final TextEditingController passwordController;
   final NahidaliveElement element;
   final ModCategory category;
 
@@ -79,12 +77,6 @@ class StoreElement extends ConsumerWidget {
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(
-        DiagnosticsProperty<TextEditingController>(
-          'passwordController',
-          passwordController,
-        ),
-      )
       ..add(DiagnosticsProperty<NahidaliveElement>('element', element))
       ..add(DiagnosticsProperty<ModCategory>('category', category));
   }
@@ -243,8 +235,8 @@ class StoreElement extends ConsumerWidget {
               Navigator.of(dialogContext).pop();
               unawaited(
                 ref
-                    .read(downloadModelProvider)
-                    .onModDownload(element: element, category: category),
+                    .read(nahidaDownloadQueueProvider.notifier)
+                    .addDownload(element: element, category: category),
               );
             },
             child: const Text('Download'),

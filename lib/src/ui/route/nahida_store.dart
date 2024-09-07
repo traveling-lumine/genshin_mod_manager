@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -10,12 +9,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import '../../backend/akasha/domain/entity/nahida_element.dart';
-import '../../backend/fs_interface/data/helper/path_op_string.dart';
 import '../../backend/structure/entity/mod_category.dart';
 import '../../di/fs_watcher.dart';
 import '../../di/nahida_store.dart';
 import '../route_names.dart';
-import '../util/display_infobar.dart';
 import '../util/tag_parser.dart';
 import '../widget/intrinsic_command_bar.dart';
 import '../widget/store_element.dart';
@@ -49,7 +46,6 @@ class _Debouncer {
 }
 
 class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
-  final _textEditingController = TextEditingController();
   TagParseElement? _tagFilter;
   final _debouncer = _Debouncer(const Duration(milliseconds: 700));
 
@@ -88,7 +84,6 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
 
   @override
   void dispose() {
-    _textEditingController.dispose();
     _pagingController.dispose();
     super.dispose();
   }
@@ -97,102 +92,6 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
   void initState() {
     super.initState();
     _pagingController.addPageRequestListener(_fetchPage);
-    ref.read(downloadModelProvider).registerDownloadCallbacks(
-      onApiException: (final e) {
-        if (!mounted) {
-          return;
-        }
-        unawaited(
-          displayInfoBarInContext(
-            context,
-            title: const Text('Download failed'),
-            content: Text('${e.uri}'),
-            severity: InfoBarSeverity.error,
-          ),
-        );
-      },
-      onDownloadComplete: (final element) {
-        if (!mounted) {
-          return;
-        }
-        unawaited(
-          displayInfoBarInContext(
-            context,
-            title: Text('Downloaded ${element.title}'),
-            severity: InfoBarSeverity.success,
-          ),
-        );
-      },
-      onPasswordRequired: (final wrongPw) async {
-        if (!mounted) {
-          return Future(() => null);
-        }
-        return showDialog(
-          context: context,
-          builder: (final dialogContext) => ContentDialog(
-            title: const Text('Enter password'),
-            content: IntrinsicHeight(
-              child: TextFormBox(
-                autovalidateMode: AutovalidateMode.always,
-                autofocus: true,
-                controller: _textEditingController,
-                placeholder: 'Password',
-                onFieldSubmitted: (final value) => Navigator.of(dialogContext)
-                    .pop(_textEditingController.text),
-                validator: (final value) {
-                  if (wrongPw == null || value == null) {
-                    return null;
-                  }
-                  if (value == wrongPw) {
-                    return 'Wrong password';
-                  }
-                  return null;
-                },
-              ),
-            ),
-            actions: [
-              Button(
-                onPressed: Navigator.of(dialogContext).pop,
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(dialogContext)
-                    .pop(_textEditingController.text),
-                child: const Text('Download'),
-              ),
-            ],
-          ),
-        );
-      },
-      onExtractFail: (final category, final modName, final data) async {
-        if (mounted) {
-          unawaited(
-            displayInfoBarInContext(
-              context,
-              title: const Text('Download failed'),
-              content: Text('Failed to extract archive: decode error.'
-                  ' Instead, the archive was saved as $modName.'),
-              severity: InfoBarSeverity.error,
-            ),
-          );
-        }
-        try {
-          await File(category.path.pJoin(modName)).writeAsBytes(data);
-        } on Exception catch (e) {
-          if (!mounted) {
-            return;
-          }
-          unawaited(
-            displayInfoBarInContext(
-              context,
-              title: const Text('Write failed'),
-              content: Text('Failed to write archive $modName: $e'),
-              severity: InfoBarSeverity.error,
-            ),
-          );
-        }
-      },
-    );
   }
 
   Widget _buildCommandBar() => RepaintBoundary(
@@ -237,7 +136,6 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
               }
               return RevertScrollbar(
                 child: StoreElement(
-                  passwordController: _textEditingController,
                   element: item,
                   category: category,
                 ),

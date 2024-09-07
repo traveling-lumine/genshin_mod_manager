@@ -25,7 +25,6 @@ ModWriter createModWriter({required final ModCategory category}) => ({
     }) async {
       final destDirName = await _getNonCollidingModName(category, modName);
       final destDirPath = category.path.pJoin(destDirName);
-      await Directory(destDirPath).create(recursive: true);
       try {
         final archive = ZipDecoder().decodeBytes(data);
         await extractArchiveToDiskAsync(archive, destDirPath, asyncWrite: true);
