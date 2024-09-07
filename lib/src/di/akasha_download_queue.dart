@@ -14,7 +14,7 @@ import 'nahida_store.dart';
 part 'akasha_download_queue.g.dart';
 
 @riverpod
-class NahidaDownloadQueue extends _$NahidaDownloadQueue {
+class AkashaDownloadQueue extends _$AkashaDownloadQueue {
   StreamController<AkashaDownloadState>? _controller;
 
   @override

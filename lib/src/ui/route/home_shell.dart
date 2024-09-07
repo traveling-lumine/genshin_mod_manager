@@ -83,8 +83,8 @@ Future<Never> _runUpdateScript() async {
 }
 
 class HomeShell extends StatefulHookConsumerWidget {
-  final Widget child;
   const HomeShell({required this.child, super.key});
+  final Widget child;
 
   @override
   ConsumerState<HomeShell> createState() => _HomeShellState();
@@ -113,7 +113,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         },
       )
       ..listen(
-        nahidaDownloadQueueProvider,
+        akashaDownloadQueueProvider,
         (final previous, final next) async {
           if (!next.hasValue) {
             return;
@@ -245,7 +245,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
                     onPressed: currentSelected.value == null
                         ? null
                         : () async {
-                            print('Selected: ${currentSelected.value}');
                             final akasha = ref.read(akashaApiProvider);
                             var uuid = Uri.parse(url).queryParameters['uuid'];
                             if (uuid == null) {
@@ -266,11 +265,10 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
                                 );
                               uuid = sb.toString();
                             }
-                            print('UUID: $uuid');
                             final elem =
                                 await akasha.fetchNahidaliveElement(uuid);
                             final model =
-                                ref.read(nahidaDownloadQueueProvider.notifier);
+                                ref.read(akashaDownloadQueueProvider.notifier);
                             await model.addDownload(
                               element: elem,
                               category: currentSelected.value!,

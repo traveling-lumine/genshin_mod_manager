@@ -235,7 +235,7 @@ class StoreElement extends ConsumerWidget {
               Navigator.of(dialogContext).pop();
               unawaited(
                 ref
-                    .read(nahidaDownloadQueueProvider.notifier)
+                    .read(akashaDownloadQueueProvider.notifier)
                     .addDownload(element: element, category: category),
               );
             },
