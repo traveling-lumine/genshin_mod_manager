@@ -79,16 +79,19 @@ class _MyAppState extends ConsumerState<_MyApp> {
             builder: (final context, final state) => const OssLicensesRoute(),
           ),
           GoRoute(
-            path: '${RouteNames.category.name}/:category',
+            path: '${RouteNames.category.name}/:${RouteParams.category.name}',
             builder: (final context, final state) {
-              final categoryName = state.pathParameters['category']!;
+              final categoryName =
+                  state.pathParameters[RouteParams.category.name]!;
               return CategoryRoute(categoryName: categoryName);
             },
           ),
           GoRoute(
-            path: '${RouteNames.nahidastore.name}/:category',
+            path:
+                '${RouteNames.nahidastore.name}/:${RouteParams.category.name}',
             builder: (final context, final state) {
-              final categoryName = state.pathParameters['category']!;
+              final categoryName =
+                  state.pathParameters[RouteParams.category.name]!;
               return NahidaStoreRoute(categoryName: categoryName);
             },
           ),

@@ -9,3 +9,7 @@ enum RouteNames {
 
   String get name => '/${(this as Enum).name}';
 }
+
+enum RouteParams {
+  category,
+}

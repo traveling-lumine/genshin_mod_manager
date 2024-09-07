@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../backend/akasha/data/repo/akasha.dart';
 import '../backend/akasha/domain/entity/nahida_element.dart';
+import '../backend/akasha/domain/entity/wrong_password.dart';
 import '../backend/akasha/domain/repo/akasha.dart';
 import '../backend/akasha/domain/usecase/download_url.dart';
 import '../backend/mod_writer/data/mod_writer.dart';
@@ -39,12 +40,12 @@ final class NahidaDownloadModel {
     final writer = createModWriter(category: category);
     while (true) {
       try {
-        await AkashaDownloadUrlUseCase(
+        await akashaDownloadUrlUseCase(
           api: api,
           element: element,
           writer: writer,
           pw: pw,
-        ).call();
+        );
         break;
       } on HttpException catch (e) {
         _onApiException?.call(e);
