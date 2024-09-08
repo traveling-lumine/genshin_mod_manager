@@ -5,7 +5,6 @@ import 'package:archive/archive_io.dart' show ZipDecoder;
 
 import '../../fs_interface/data/helper/fsops.dart';
 import '../../fs_interface/data/helper/path_op_string.dart';
-import '../../structure/entity/mod_category.dart';
 import '../domain/mod_writer.dart';
 import 'third_party.dart';
 
@@ -18,13 +17,13 @@ class ModZipExtractionException implements Exception {
   final Uint8List data;
 }
 
-/// Writes mods to [category] directory.
-ModWriter createModWriter({required final ModCategory category}) => ({
+/// Writes mods to [categoryPath] directory.
+ModWriter createModWriter({required final String categoryPath}) => ({
       required final modName,
       required final data,
     }) async {
-      final destDirName = await _getNonCollidingModName(category, modName);
-      final destDirPath = category.path.pJoin(destDirName);
+      final destDirName = await _getNonCollidingModName(categoryPath, modName);
+      final destDirPath = categoryPath.pJoin(destDirName);
       try {
         final archive = ZipDecoder().decodeBytes(data);
         await extractArchiveToDiskAsync(archive, destDirPath, asyncWrite: true);
@@ -34,16 +33,16 @@ ModWriter createModWriter({required final ModCategory category}) => ({
     };
 
 Future<String> _getNonCollidingModName(
-  final ModCategory category,
+  final String categoryPath,
   final String name,
 ) =>
-    _getNonCollidingName(category, name.pEnabledForm);
+    _getNonCollidingName(categoryPath, name.pEnabledForm);
 
 Future<String> _getNonCollidingName(
-  final ModCategory category,
+  final String categoryPath,
   final String destDirName,
 ) async {
-  final enabledFormDirNames = getUnderSync<Directory>(category.path)
+  final enabledFormDirNames = getUnderSync<Directory>(categoryPath)
       .map((final e) => e.pEnabledForm.pBasename)
       .toSet();
   var counter = 0;

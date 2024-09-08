@@ -37,7 +37,8 @@ class CategoryDropTarget extends HookConsumerWidget {
       onDragExited: (final details) {
         state.value = false;
       },
-      onDragDone: (final details) => _onDragDone(details, context, ref),
+      onDragDone: (final details) =>
+          unawaited(_onDragDone(details, context, ref)),
       child: Stack(
         children: [
           child,
@@ -100,13 +101,13 @@ class CategoryDropTarget extends HookConsumerWidget {
     properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
 
-  void _onDragDone(
+  Future<void> _onDragDone(
     final DropDoneDetails details,
     final BuildContext context,
     final WidgetRef ref,
-  ) {
+  ) async {
     final moveInsteadOfCopy = ref.read(moveOnDragProvider);
-    final result = dragToImportUseCase(
+    final result = await dragToImportUseCase(
       details.files.map((final e) => e.path),
       category.path,
       moveInsteadOfCopy,

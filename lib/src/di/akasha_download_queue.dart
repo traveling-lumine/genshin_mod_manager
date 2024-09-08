@@ -31,7 +31,7 @@ class AkashaDownloadQueue extends _$AkashaDownloadQueue {
     final String? pw,
   }) async {
     final api = ref.read(akashaApiProvider);
-    final writer = createModWriter(category: category);
+    final writer = createModWriter(categoryPath: category.path);
     var passwd = pw;
     while (true) {
       try {
