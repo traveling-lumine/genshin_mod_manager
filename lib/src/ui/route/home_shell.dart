@@ -94,6 +94,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     with WindowListener, ProtocolListener {
   static const _navigationPaneOpenWidth = 270.0;
   final _textEditingController = TextEditingController();
+  final _flyoutController = FlyoutController();
 
   @override
   Widget build(final BuildContext context) {
@@ -160,6 +161,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   void dispose() {
     WindowManager.instance.removeListener(this);
     protocolHandler.removeListener(this);
+    _flyoutController.dispose();
     _textEditingController.dispose();
     super.dispose();
   }
@@ -390,25 +392,28 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     final override = ref.watch(separateRunOverrideProvider);
     return override ?? select
         ? [
-            PaneItemAction(
+            RunAndExitPaneAction(
               key: const Key('<run_both>'),
               icon: icon,
               title: const Text('Run 3d migoto & launcher'),
               onTap: _runBoth,
+              flyoutController: _flyoutController,
             ),
           ]
         : [
-            PaneItemAction(
+            RunAndExitPaneAction(
               key: const Key('<run_migoto>'),
               icon: icon,
               title: const Text('Run 3d migoto'),
               onTap: _runMigoto,
+              flyoutController: _flyoutController,
             ),
-            PaneItemAction(
+            RunAndExitPaneAction(
               key: const Key('<run_launcher>'),
               icon: icon,
               title: const Text('Run launcher'),
               onTap: _runLauncher,
+              flyoutController: _flyoutController,
             ),
           ];
   }
@@ -686,4 +691,44 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           child: const Text('Auto update'),
         ),
       );
+}
+
+class RunAndExitPaneAction extends PaneItemAction {
+  RunAndExitPaneAction({
+    required super.icon,
+    required Widget super.title,
+    required Future<void> Function() super.onTap,
+    required final FlyoutController flyoutController,
+    super.key,
+  }) : super(
+          trailing: FlyoutTarget(
+            controller: flyoutController,
+            child: IconButton(
+              icon: const Icon(FluentIcons.more),
+              onPressed: () {
+                unawaited(
+                  flyoutController.showFlyout(
+                    builder: (final context) => FlyoutContent(
+                      child: IntrinsicWidth(
+                        child: CommandBar(
+                          overflowBehavior: CommandBarOverflowBehavior.clip,
+                          primaryItems: [
+                            CommandBarButton(
+                              icon: const Icon(FluentIcons.power_button),
+                              label: const Text('Run and exit'),
+                              onPressed: () async {
+                                await onTap();
+                                exit(0);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
 }
