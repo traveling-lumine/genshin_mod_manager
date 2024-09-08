@@ -28,13 +28,16 @@ class IniPaths extends _$IniPaths {
   List<String> build(final Mod mod) {
     final files = ref.watch(fileInFolderProvider(mod.path));
     final subscription = files.listen((final event) {
-      state =
-          event.where((final path) => path.pExtension.pEquals('.ini')).toList();
+      state = event
+          .where((final path) => path.pExtension.pEquals('.ini'))
+          .where((final path) => path.pIsEnabled)
+          .toList();
     });
     ref.onDispose(subscription.cancel);
 
     return getUnderSync<File>(mod.path)
         .where((final path) => path.pExtension.pEquals('.ini'))
+        .where((final path) => path.pIsEnabled)
         .toList();
   }
 }

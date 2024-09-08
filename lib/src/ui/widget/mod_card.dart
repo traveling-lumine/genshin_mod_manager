@@ -180,7 +180,7 @@ class _ModCardState extends ConsumerState<ModCard> {
           ),
           Center(
             child: GestureDetector(
-              onLongPress: () async => _onImageTap(imagePath),
+              onLongPress: () async => _onImageLongPress(imagePath),
               onSecondaryTapUp: (final details) async =>
                   _onImageRightClick(details, imagePath),
               child: FlyoutTarget(
@@ -277,7 +277,7 @@ class _ModCardState extends ConsumerState<ModCard> {
     }
   }
 
-  Future<void> _onImageTap(final String image) async {
+  Future<void> _onImageLongPress(final String image) async {
     await showDialog(
       context: context,
       barrierDismissible: true,
