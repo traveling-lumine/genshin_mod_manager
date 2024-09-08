@@ -267,11 +267,13 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
                             }
                             final elem =
                                 await akasha.fetchNahidaliveElement(uuid);
-                            final model =
-                                ref.read(akashaDownloadQueueProvider.notifier);
-                            await model.addDownload(
-                              element: elem,
-                              category: currentSelected.value!,
+                            unawaited(
+                              ref
+                                  .read(akashaDownloadQueueProvider.notifier)
+                                  .addDownload(
+                                    element: elem,
+                                    category: currentSelected.value!,
+                                  ),
                             );
                             if (dCtx.mounted) {
                               Navigator.of(dCtx).pop();
