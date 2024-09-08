@@ -15,6 +15,17 @@ List<String> getUnderSync<T extends FileSystemEntity>(
   return res;
 }
 
+const _previewExtensions = [
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.webp',
+  '.bmp',
+  '.avif',
+  '.wbmp',
+];
+
 /// In the [paths] list, find a file path that has a [name],
 /// ignoring extensions.
 String? findPreviewFileInString(
@@ -26,7 +37,12 @@ String? findPreviewFileInString(
     if (!filename.pEquals(name)) {
       continue;
     }
-    return element;
+    final ext = element.pExtension;
+    for (final previewExt in _previewExtensions) {
+      if (ext.pEquals(previewExt)) {
+        return element;
+      }
+    }
   }
   return null;
 }
