@@ -152,7 +152,7 @@ class SettingRoute extends ConsumerWidget {
           ),
           HookConsumer(
             builder: (final context, final ref, final child) {
-              final initialStrategy = ref.read(columnStrategyProvider).when(
+              final initialStrategy = ref.watch(columnStrategyProvider).when(
                     fixedCount: (final numChildren) => (0, numChildren),
                     maxExtent: (final extent) => (1, extent),
                     minExtent: (final extent) => (2, extent),

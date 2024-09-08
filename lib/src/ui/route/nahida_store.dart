@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -19,7 +19,7 @@ import '../widget/store_element.dart';
 import '../widget/thick_scrollbar.dart';
 import '../widget/third_party/flutter/sliver_grid_delegates/min_extent_delegate.dart';
 
-class NahidaStoreRoute extends ConsumerStatefulWidget {
+class NahidaStoreRoute extends StatefulHookConsumerWidget {
   const NahidaStoreRoute({required this.categoryName, super.key});
   final String categoryName;
 
@@ -64,21 +64,41 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
       },
     );
 
-    final category = ref.watch(categoriesProvider).firstWhereOrNull(
+    final initCategory = ref.watch(categoriesProvider).firstWhere(
           (final e) => e.name == widget.categoryName,
         );
 
-    if (category == null) {
-      return const SizedBox.shrink();
-    }
+    final category = useState(initCategory);
 
     return ScaffoldPage.withPadding(
       header: PageHeader(
-        title: Text('${category.name} ← Akasha'),
+        title: Row(
+          children: [
+            ComboBox(
+              value: category.value,
+              items: ref
+                  .watch(categoriesProvider)
+                  .map(
+                    (final e) => ComboBoxItem(
+                      value: e,
+                      child: Text(e.name),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (final value) {
+                if (value == null) {
+                  return;
+                }
+                category.value = value;
+              },
+            ),
+            const Text(' ← Akasha'),
+          ],
+        ),
         leading: _buildLeading(),
         commandBar: _buildCommandBar(),
       ),
-      content: _buildContent(category),
+      content: _buildContent(category.value),
     );
   }
 
