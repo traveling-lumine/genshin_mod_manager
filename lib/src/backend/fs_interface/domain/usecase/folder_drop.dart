@@ -24,7 +24,7 @@ Future<FolderMoveResult> dragToImportUseCase(
       switch (type) {
         case DragImportType.move:
           try {
-            _moveDir(sourceDir, newPath, result);
+            moveDir(sourceDir, newPath);
           } on FileSystemException catch (e) {
             result.addError(e);
           }
@@ -45,10 +45,9 @@ Future<FolderMoveResult> dragToImportUseCase(
   return result;
 }
 
-void _moveDir(
+void moveDir(
   final Directory sourceDir,
   final String newPath,
-  final FolderMoveResult result,
 ) {
   try {
     sourceDir.renameSync(newPath);

@@ -43,32 +43,37 @@ class _ModCardState extends ConsumerState<ModCard> {
   final _contextAttachKey = GlobalKey();
 
   @override
-  Widget build(final BuildContext context) => GestureDetector(
-        onTap: _onToggle,
-        child: Consumer(
-          builder: (
-            final context,
-            final ref,
-            final child,
-          ) =>
-              Card(
-            backgroundColor: ref.watch(
-              cardColorProvider(
-                isBright:
-                    FluentTheme.of(context).brightness == Brightness.light,
-                isEnabled: widget.mod.isEnabled,
+  Widget build(final BuildContext context) => LongPressDraggable<Mod>(
+        data: widget.mod,
+        dragAnchorStrategy: pointerDragAnchorStrategy,
+        feedback: Card(child: Text(widget.mod.displayName)),
+        child: GestureDetector(
+          onTap: _onToggle,
+          child: Consumer(
+            builder: (
+              final context,
+              final ref,
+              final child,
+            ) =>
+                Card(
+              backgroundColor: ref.watch(
+                cardColorProvider(
+                  isBright:
+                      FluentTheme.of(context).brightness == Brightness.light,
+                  isEnabled: widget.mod.isEnabled,
+                ),
               ),
+              padding: const EdgeInsets.all(6),
+              child: child!,
             ),
-            padding: const EdgeInsets.all(6),
-            child: child!,
-          ),
-          child: FocusTraversalGroup(
-            child: Column(
-              children: [
-                _buildFolderHeader(),
-                const SizedBox(height: 4),
-                Expanded(child: _buildFolderContent()),
-              ],
+            child: FocusTraversalGroup(
+              child: Column(
+                children: [
+                  _buildFolderHeader(),
+                  const SizedBox(height: 4),
+                  Expanded(child: _buildFolderContent()),
+                ],
+              ),
             ),
           ),
         ),

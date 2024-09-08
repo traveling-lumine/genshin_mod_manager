@@ -1,11 +1,18 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../backend/fs_interface/data/helper/path_op_string.dart';
+import '../../backend/fs_interface/domain/usecase/folder_drop.dart';
+import '../../backend/structure/entity/mod.dart';
 import '../../backend/structure/entity/mod_category.dart';
 import '../../di/app_state/folder_icon.dart';
 import '../../di/app_state/use_paimon.dart';
 import '../../di/fs_watcher.dart';
+import '../util/display_infobar.dart';
 import 'category_drop_target.dart';
 import 'custom_image.dart';
 
@@ -35,17 +42,81 @@ class FolderPaneItem extends PaneItem {
     final int? itemIndex,
     final bool? autofocus,
   }) =>
-      CategoryDropTarget(
-        category: category,
-        child: super.build(
-          context,
-          selected,
-          onPressed,
-          displayMode: displayMode,
-          showTextOnTop: showTextOnTop,
-          itemIndex: itemIndex,
-          autofocus: autofocus,
-        ),
+      DragTarget<Mod>(
+        onAcceptWithDetails: (final details) {
+          try {
+            moveDir(
+              Directory(details.data.path),
+              category.path.pJoin(details.data.displayName),
+            );
+            unawaited(
+              displayInfoBarInContext(
+                context,
+                title: const Text('Moved!'),
+                content: Text(
+                  'Moved ${details.data.displayName} to ${category.name}',
+                ),
+                severity: InfoBarSeverity.success,
+              ),
+            );
+          } on Exception catch (e) {
+            unawaited(
+              displayInfoBarInContext(
+                context,
+                title: const Text('Error'),
+                content: Text(e.toString()),
+                severity: InfoBarSeverity.error,
+              ),
+            );
+          }
+        },
+        builder: (
+          final context,
+          final candidateData,
+          final rejectedData,
+        ) {
+          final content = CategoryDropTarget(
+            category: category,
+            child: super.build(
+              context,
+              selected,
+              onPressed,
+              displayMode: displayMode,
+              showTextOnTop: showTextOnTop,
+              itemIndex: itemIndex,
+              autofocus: autofocus,
+            ),
+          );
+          if (candidateData.isNotEmpty) {
+            return Stack(
+              children: [
+                content,
+                Positioned.fill(
+                  child: Acrylic(
+                    blurAmount: 1,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.blue,
+                          width: 5,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Drop to move '
+                          '${candidateData.first?.displayName} to '
+                          '${category.name}',
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+          return content;
+        },
       );
 
   @override
