@@ -9,6 +9,29 @@ import 'package:archive/archive_io.dart';
 import 'package:cp949_codec/cp949_codec.dart';
 import 'package:path/path.dart' as path;
 
+String _longestCommonPrefix(final List<String> strings) {
+  if (strings.isEmpty) {
+    return '';
+  }
+  var s1 = strings.first;
+  var s2 = strings.first;
+  for (final s in strings) {
+    if (s.compareTo(s1) < 0) {
+      s1 = s;
+    } else if (s.compareTo(s2) > 0) {
+      s2 = s;
+    }
+  }
+  final length = s1.length;
+  var i = 0;
+  for (; i < length; i++) {
+    if (s1.codeUnitAt(i) != s2.codeUnitAt(i)) {
+      break;
+    }
+  }
+  return s1.substring(0, i);
+}
+
 Future<void> extractArchiveToDiskAsync(
   final Archive archive,
   final String outputPath, {
@@ -20,8 +43,18 @@ Future<void> extractArchiveToDiskAsync(
   if (!outDir.existsSync()) {
     outDir.createSync(recursive: true);
   }
+
+  final longestCommonPrefix =
+      _longestCommonPrefix(archive.files.map((e) => e.name).toList());
+  final int longestCommonLen;
+  if (longestCommonPrefix.endsWith('/') || longestCommonPrefix.endsWith('\\')) {
+    longestCommonLen = longestCommonPrefix.length;
+  } else {
+    longestCommonLen = 0;
+  }
+
   for (final file in archive.files) {
-    var name = file.name;
+    var name = file.name.substring(longestCommonLen);
     try {
       final decodeString = cp949.decodeString(name);
       if (name == cp949.encodeToString(decodeString)) {
