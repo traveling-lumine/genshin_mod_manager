@@ -10,6 +10,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../backend/fs_interface/domain/usecase/open_folder.dart';
 import '../../backend/structure/entity/mod.dart';
 import '../../backend/structure/entity/mod_category.dart';
+import '../../di/app_state/column_strategy.dart';
 import '../../di/fs_watcher.dart';
 import '../route_names.dart';
 import '../widget/category_drop_target.dart';
@@ -18,20 +19,19 @@ import '../widget/mod_card.dart';
 import '../widget/preset_control.dart';
 import '../widget/thick_scrollbar.dart';
 import '../widget/third_party/fluent_ui/auto_suggest_box.dart';
-import '../widget/third_party/flutter/min_extent_delegate.dart';
+import '../widget/third_party/flutter/sliver_grid_delegates/cross_axis_aware_delegate.dart';
+import '../widget/third_party/flutter/sliver_grid_delegates/fixed_count_delegate.dart'
+    as s;
+import '../widget/third_party/flutter/sliver_grid_delegates/max_extent_delegate.dart'
+    as s;
+import '../widget/third_party/flutter/sliver_grid_delegates/min_extent_delegate.dart'
+    as s;
 
 class CategoryRoute extends HookConsumerWidget {
   const CategoryRoute({required this.categoryName, super.key});
 
   static const _mainAxisExtent = 400.0;
   static const _mainAxisSpacing = 8.0;
-  static final _sliverGridDelegateWithMinCrossAxisExtent =
-      SliverGridDelegateWithMinCrossAxisExtent(
-    mainAxisExtent: _mainAxisExtent,
-    minCrossAxisExtent: 440,
-    crossAxisSpacing: 8,
-    mainAxisSpacing: _mainAxisSpacing,
-  );
 
   /// The category to display
   final String categoryName;
@@ -57,11 +57,36 @@ class CategoryRoute extends HookConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final sliverGridDelegate = ref.watch(columnStrategyProvider).when(
+          fixedCount: (final numChildren) =>
+              s.SliverGridDelegateWithFixedCrossAxisCount(
+            mainAxisExtent: _mainAxisExtent,
+            crossAxisCount: numChildren,
+            crossAxisSpacing: _mainAxisSpacing,
+            mainAxisSpacing: _mainAxisSpacing,
+          ),
+          maxExtent: (final extent) =>
+              s.SliverGridDelegateWithMaxCrossAxisExtent(
+            mainAxisExtent: _mainAxisExtent,
+            maxCrossAxisExtent: extent.toDouble(),
+            crossAxisSpacing: _mainAxisSpacing,
+            mainAxisSpacing: _mainAxisSpacing,
+          ),
+          minExtent: (final extent) =>
+              s.SliverGridDelegateWithMinCrossAxisExtent(
+            mainAxisExtent: _mainAxisExtent,
+            minCrossAxisExtent: extent.toDouble(),
+            crossAxisSpacing: _mainAxisSpacing,
+            mainAxisSpacing: _mainAxisSpacing,
+          ),
+        );
+
     return CategoryDropTarget(
       category: category,
       child: ScaffoldPage(
-        header: _buildHeader(category, scrollController, ref),
-        content: _buildContent(category, scrollController),
+        header:
+            _buildHeader(category, scrollController, ref, sliverGridDelegate),
+        content: _buildContent(category, scrollController, sliverGridDelegate),
       ),
     );
   }
@@ -70,6 +95,7 @@ class CategoryRoute extends HookConsumerWidget {
     final ModCategory category,
     final ScrollController scrollController,
     final WidgetRef ref,
+    final CrossAxisAwareDelegate sliverGridDelegate,
   ) {
     final context = useContext();
     return PageHeader(
@@ -83,7 +109,8 @@ class CategoryRoute extends HookConsumerWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildSearchBox(category, scrollController),
+            child:
+                _buildSearchBox(category, scrollController, sliverGridDelegate),
           ),
           IntrinsicCommandBarCard(
             child: CommandBar(
@@ -108,6 +135,7 @@ class CategoryRoute extends HookConsumerWidget {
   Widget _buildSearchBox(
     final ModCategory category,
     final ScrollController scrollController,
+    final CrossAxisAwareDelegate sliverGridDelegate,
   ) =>
       Consumer(
         builder: (final context, final ref, final child) {
@@ -119,7 +147,7 @@ class CategoryRoute extends HookConsumerWidget {
                   value: e.$2.displayName,
                   label: e.$2.displayName,
                   onSelected: () {
-                    _moveTo(scrollController, e.$1);
+                    _moveTo(scrollController, e.$1, sliverGridDelegate);
                   },
                 ),
               );
@@ -134,7 +162,7 @@ class CategoryRoute extends HookConsumerWidget {
                     final name = e.displayName.toLowerCase();
                     return name.startsWith(text.toLowerCase());
                   });
-                  _moveTo(scrollController, index);
+                  _moveTo(scrollController, index, sliverGridDelegate);
                 },
               );
             },
@@ -152,13 +180,15 @@ class CategoryRoute extends HookConsumerWidget {
   Widget _buildContent(
     final ModCategory category,
     final ScrollController scrollController,
+    final CrossAxisAwareDelegate sliverGridDelegate,
   ) =>
       ThickScrollbar(
         child: Consumer(
           builder: (final context, final ref, final child) =>
               ref.watch(modsInCategoryProvider(category)).when(
                     skipLoadingOnReload: true,
-                    data: (final data) => _buildData(data, scrollController),
+                    data: (final data) =>
+                        _buildData(data, scrollController, sliverGridDelegate),
                     error: _buildError,
                     loading: _buildLoading,
                   ),
@@ -168,6 +198,7 @@ class CategoryRoute extends HookConsumerWidget {
   Widget _buildData(
     final List<Mod> data,
     final ScrollController scrollController,
+    final CrossAxisAwareDelegate sliverGridDelegate,
   ) {
     final children = data.map((final e) => ModCard(mod: e)).toList();
     return AnimatedSwitcher(
@@ -175,7 +206,7 @@ class CategoryRoute extends HookConsumerWidget {
       child: GridView.builder(
         controller: scrollController,
         padding: const EdgeInsets.all(8),
-        gridDelegate: _sliverGridDelegateWithMinCrossAxisExtent,
+        gridDelegate: sliverGridDelegate,
         itemCount: children.length,
         itemBuilder: (final context, final index) =>
             RevertScrollbar(child: children[index]),
@@ -208,9 +239,12 @@ class CategoryRoute extends HookConsumerWidget {
         ),
       );
 
-  void _moveTo(final ScrollController scrollController, final int index) {
-    final latestCrossAxisCount =
-        _sliverGridDelegateWithMinCrossAxisExtent.latestCrossAxisCount;
+  void _moveTo(
+    final ScrollController scrollController,
+    final int index,
+    final CrossAxisAwareDelegate sliverGridDelegate,
+  ) {
+    final latestCrossAxisCount = sliverGridDelegate.latestCrossAxisCount;
     if (latestCrossAxisCount == null) {
       return;
     }

@@ -13,6 +13,7 @@ import '../../backend/fs_interface/domain/entity/setting_data.dart';
 import '../../backend/storage/domain/entity/game_config.dart';
 import '../../backend/storage/domain/usecase/card_color.dart';
 import '../../di/app_state/card_color.dart';
+import '../../di/app_state/column_strategy.dart';
 import '../../di/app_state/dark_mode.dart';
 import '../../di/app_state/display_enabled_mods_first.dart';
 import '../../di/app_state/folder_icon.dart';
@@ -148,6 +149,94 @@ class SettingRoute extends ConsumerWidget {
                 _ColorChanger(isBright: false, isEnabled: false),
               ],
             ),
+          ),
+          HookConsumer(
+            builder: (final context, final ref, final child) {
+              final initialStrategy = ref.read(columnStrategyProvider).when(
+                    fixedCount: (final numChildren) => (0, numChildren),
+                    maxExtent: (final extent) => (1, extent),
+                    minExtent: (final extent) => (2, extent),
+                  );
+              final columnStrategy = useState<int?>(initialStrategy.$1);
+              final columnParameter = useState<int?>(initialStrategy.$2);
+              return SettingElement(
+                initiallyExpanded: true,
+                text: 'Column Display Strategy',
+                trailing: ComboBox(
+                  value: columnStrategy.value,
+                  items: const [
+                    ComboBoxItem(value: 0, child: Text('Fixed Count')),
+                    ComboBoxItem(value: 1, child: Text('Max Extent')),
+                    ComboBoxItem(value: 2, child: Text('Min Extent')),
+                  ],
+                  onChanged: (final value) => columnStrategy.value = value,
+                ),
+                content: switch (columnStrategy.value) {
+                  0 => Row(
+                      children: [
+                        const Text('Fixed number of columns: '),
+                        SizedBox(
+                          width: 100,
+                          child: NumberBox<int>(
+                            value: columnParameter.value,
+                            onChanged: (final value) {
+                              if (value == null) {
+                                return;
+                              }
+                              ref
+                                  .read(columnStrategyProvider.notifier)
+                                  .setFixedCount(value);
+                              columnParameter.value = value;
+                            },
+                            mode: SpinButtonPlacementMode.none,
+                          ),
+                        ),
+                      ],
+                    ),
+                  1 => Row(
+                      children: [
+                        const Text('Column max width limit: '),
+                        SizedBox(
+                          width: 100,
+                          child: NumberBox(
+                            value: columnParameter.value,
+                            onChanged: (final value) {
+                              if (value == null) {
+                                return;
+                              }
+                              ref
+                                  .read(columnStrategyProvider.notifier)
+                                  .setMaxExtent(value);
+                            },
+                            mode: SpinButtonPlacementMode.none,
+                          ),
+                        ),
+                      ],
+                    ),
+                  2 => Row(
+                      children: [
+                        const Text('Column min width limit: '),
+                        SizedBox(
+                          width: 100,
+                          child: NumberBox(
+                            value: columnParameter.value,
+                            onChanged: (final value) {
+                              if (value == null) {
+                                return;
+                              }
+                              ref
+                                  .read(columnStrategyProvider.notifier)
+                                  .setMinExtent(value);
+                            },
+                            mode: SpinButtonPlacementMode.none,
+                          ),
+                        ),
+                      ],
+                    ),
+                  _ => null,
+                },
+              );
+            },
           ),
           const _SectionHeader(title: 'Misc'),
           const _StringItem(title: 'Ini file editor arguments'),

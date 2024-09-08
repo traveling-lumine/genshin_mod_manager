@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/rendering.dart';
+import 'cross_axis_aware_delegate.dart';
 
 /// Creates grid layouts with tiles that each have a maximum cross-axis extent.
 ///
@@ -32,7 +33,7 @@ import 'package:flutter/rendering.dart';
 ///    tiles.
 ///  * [RenderSliverGrid], which can use this delegate to control the layout of
 ///    its tiles.
-class SliverGridDelegateWithMinCrossAxisExtent extends SliverGridDelegate {
+class SliverGridDelegateWithMinCrossAxisExtent extends CrossAxisAwareDelegate {
   /// Creates a delegate that makes grid layouts with tiles that have a maximum
   /// cross-axis extent.
   ///
@@ -88,8 +89,10 @@ class SliverGridDelegateWithMinCrossAxisExtent extends SliverGridDelegate {
     return true;
   }
 
-  /// The latest number of cross axis count calculated by the delegate.
-  int? latestCrossAxisCount;
+  int? _latestCrossAxisCount;
+
+  @override
+  int? get latestCrossAxisCount => _latestCrossAxisCount;
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
@@ -100,6 +103,7 @@ class SliverGridDelegateWithMinCrossAxisExtent extends SliverGridDelegate {
     // Ensure a minimum count of 1, can be zero and result in an infinite extent
     // below when the window size is 0.
     crossAxisCount = math.max(1, crossAxisCount);
+    _latestCrossAxisCount = crossAxisCount;
     final double usableCrossAxisExtent = math.max(
       0.0,
       constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1),
@@ -107,7 +111,6 @@ class SliverGridDelegateWithMinCrossAxisExtent extends SliverGridDelegate {
     final double childCrossAxisExtent = usableCrossAxisExtent / crossAxisCount;
     final double childMainAxisExtent =
         mainAxisExtent ?? childCrossAxisExtent / childAspectRatio;
-    latestCrossAxisCount = crossAxisCount;
     return SliverGridRegularTileLayout(
       crossAxisCount: crossAxisCount,
       mainAxisStride: childMainAxisExtent + mainAxisSpacing,
