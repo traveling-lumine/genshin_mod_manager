@@ -23,8 +23,14 @@ jobs:
 
       - uses: subosito/flutter-action@v2
 
+      - name: Flutter pub get
+        run: flutter pub get
+
       - name: Run build_runner
         run: dart run build_runner build -d
+
+      - name: Generate flutter l10n
+        run: flutter gen-l10n
 
       - name: Build Windows
         run: flutter build windows
