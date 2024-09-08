@@ -32,6 +32,9 @@ jobs:
       - name: Generate flutter l10n
         run: flutter gen-l10n
 
+      - name: Flutter pub get (do not remove, it's required for the previous step)
+        run: flutter pub get
+
       - name: Build Windows
         run: flutter build windows
 
