@@ -9,6 +9,7 @@ import 'package:window_manager/window_manager.dart';
 import 'src/di/app_state/dark_mode.dart';
 import 'src/di/exe_arg.dart';
 import 'src/error_handler.dart';
+import 'src/ui/constants.dart';
 import 'src/ui/route/category.dart';
 import 'src/ui/route/first_page.dart';
 import 'src/ui/route/home_shell.dart';
@@ -17,7 +18,6 @@ import 'src/ui/route/loading.dart';
 import 'src/ui/route/nahida_store.dart';
 import 'src/ui/route/setting.dart';
 import 'src/ui/route/welcome.dart';
-import 'src/ui/route_names.dart';
 
 void main(final List<String> args) async {
   await _initialize();
@@ -32,7 +32,7 @@ const _kMinWindowSize = Size(800, 600);
 
 Future<void> _initialize() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await protocolHandler.register('gmm-interop-uri');
+  await protocolHandler.register(protocol);
   await windowManager.ensureInitialized();
   await windowManager.waitUntilReadyToShow(
     const WindowOptions(

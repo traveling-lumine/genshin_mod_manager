@@ -9,7 +9,7 @@ import 'package:pasteboard/pasteboard.dart';
 
 import '../../backend/fs_interface/data/helper/mod_switcher.dart';
 import '../../backend/fs_interface/data/helper/path_op_string.dart';
-import '../../backend/fs_interface/domain/entity/mod_toggle_exception.dart';
+import '../../backend/fs_interface/domain/entity/mod_toggle_exceptions.dart';
 import '../../backend/fs_interface/domain/usecase/open_folder.dart';
 import '../../backend/fs_interface/domain/usecase/paste_image.dart';
 import '../../backend/structure/entity/ini.dart';

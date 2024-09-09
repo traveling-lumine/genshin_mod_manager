@@ -27,7 +27,7 @@ import '../../di/app_version/current_version.dart';
 import '../../di/app_version/is_outdated.dart';
 import '../../di/app_version/remote_version.dart';
 import '../../di/fs_interface.dart';
-import '../route_names.dart';
+import '../constants.dart';
 import '../widget/game_selector.dart';
 import '../widget/setting_element.dart';
 import '../widget/third_party/flutter/no_deref_file_opener.dart';

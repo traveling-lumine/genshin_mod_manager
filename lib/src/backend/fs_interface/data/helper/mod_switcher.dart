@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../../domain/entity/mod_toggle_exception.dart';
+import '../../domain/entity/mod_toggle_exceptions.dart';
 import 'fsops.dart';
 import 'path_op_string.dart';
 

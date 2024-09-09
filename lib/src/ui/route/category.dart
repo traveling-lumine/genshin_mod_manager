@@ -12,7 +12,7 @@ import '../../backend/structure/entity/mod.dart';
 import '../../backend/structure/entity/mod_category.dart';
 import '../../di/app_state/column_strategy.dart';
 import '../../di/fs_watcher.dart';
-import '../route_names.dart';
+import '../constants.dart';
 import '../widget/category_drop_target.dart';
 import '../widget/intrinsic_command_bar.dart';
 import '../widget/mod_card.dart';

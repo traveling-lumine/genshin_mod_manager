@@ -5,6 +5,7 @@ import '../../data/helper/copy_directory.dart';
 import '../../data/helper/path_op_string.dart';
 import '../entity/folder_move_result.dart';
 import '../entity/setting_data.dart';
+import 'move_dir.dart';
 
 Future<FolderMoveResult> dragToImportUseCase(
   final Iterable<String> dropPaths,
@@ -24,7 +25,7 @@ Future<FolderMoveResult> dragToImportUseCase(
       switch (type) {
         case DragImportType.move:
           try {
-            moveDir(sourceDir, newPath);
+            moveDirUseCase(sourceDir, newPath);
           } on FileSystemException catch (e) {
             result.addError(e);
           }
@@ -43,22 +44,4 @@ Future<FolderMoveResult> dragToImportUseCase(
     }
   }
   return result;
-}
-
-void moveDir(
-  final Directory sourceDir,
-  final String newPath,
-) {
-  try {
-    sourceDir.renameSync(newPath);
-  } on FileSystemException catch (e) {
-    if (e.osError?.errorCode == 17) {
-      // Moving across different drives
-      sourceDir
-        ..copyToPath(newPath)
-        ..deleteSync(recursive: true);
-    } else {
-      rethrow;
-    }
-  }
 }

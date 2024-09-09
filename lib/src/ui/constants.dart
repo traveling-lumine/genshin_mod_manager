@@ -13,3 +13,5 @@ enum RouteNames {
 enum RouteParams {
   category,
 }
+
+const protocol = 'gmm-interop-uri';

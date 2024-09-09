@@ -12,7 +12,7 @@ import '../../backend/akasha/domain/entity/nahida_element.dart';
 import '../../backend/structure/entity/mod_category.dart';
 import '../../di/fs_watcher.dart';
 import '../../di/nahida_store.dart';
-import '../route_names.dart';
+import '../constants.dart';
 import '../util/tag_parser.dart';
 import '../widget/intrinsic_command_bar.dart';
 import '../widget/store_element.dart';

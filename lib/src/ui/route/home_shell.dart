@@ -33,7 +33,7 @@ import '../../di/exe_arg.dart';
 import '../../di/fs_interface.dart';
 import '../../di/fs_watcher.dart';
 import '../../di/nahida_store.dart';
-import '../route_names.dart';
+import '../constants.dart';
 import '../util/display_infobar.dart';
 import '../util/open_url.dart';
 import '../widget/appbar.dart';

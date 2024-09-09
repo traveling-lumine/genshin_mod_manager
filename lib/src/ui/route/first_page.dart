@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../di/app_state/games_list.dart';
-import '../route_names.dart';
+import '../constants.dart';
 import '../widget/appbar.dart';
 
 class FirstRoute extends ConsumerWidget {

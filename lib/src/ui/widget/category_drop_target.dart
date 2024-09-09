@@ -112,7 +112,7 @@ class CategoryDropTarget extends HookConsumerWidget {
       category.path,
       moveInsteadOfCopy,
     );
-    if (result.errors.isNotEmpty) {
+    if (result.errors.isNotEmpty && context.mounted) {
       unawaited(
         displayInfoBarInContext(
           context,
@@ -132,16 +132,18 @@ class CategoryDropTarget extends HookConsumerWidget {
         DragImportType.move => 'moved',
         DragImportType.copy => 'copied',
       };
-      unawaited(
-        displayInfoBarInContext(
-          context,
-          title: const Text('Folder already exists'),
-          content: Text('The following folders already exist'
-              ' and were not $dragImportType: \n'
-              '$join'),
-          severity: InfoBarSeverity.warning,
-        ),
-      );
+      if (context.mounted) {
+        unawaited(
+          displayInfoBarInContext(
+            context,
+            title: const Text('Folder already exists'),
+            content: Text('The following folders already exist'
+                ' and were not $dragImportType: \n'
+                '$join'),
+            severity: InfoBarSeverity.warning,
+          ),
+        );
+      }
     }
   }
 }

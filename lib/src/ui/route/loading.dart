@@ -6,7 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../di/app_state/games_list.dart';
 import '../../di/storage.dart';
-import '../route_names.dart';
+import '../constants.dart';
 import '../widget/appbar.dart';
 
 /// A route that shows a loading screen.

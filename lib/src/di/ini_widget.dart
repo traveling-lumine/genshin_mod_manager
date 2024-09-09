@@ -15,7 +15,9 @@ class IniLines extends _$IniLines {
     List<String> addData() => File(iniFile.path)
         .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true));
 
-    final watcher = ref.watch(fileEventWatcherProvider(iniFile.path, true));
+    final watcher = ref.watch(
+      fileEventWatcherProvider(iniFile.path, detectModifications: true),
+    );
     final subscription = watcher.listen((final event) {
       if (event is FileSystemModifyEvent) {
         state = addData();

@@ -18,11 +18,12 @@ part 'fs_watcher.g.dart';
 @riverpod
 Raw<Stream<FileSystemEvent>> folderEventWatcher(
   final FolderEventWatcherRef ref,
-  final String path,
-  final bool detectModifications,
-) {
+  final String path, {
+  required final bool detectModifications,
+}) {
   if (!detectModifications) {
-    final folderWatchStream = ref.watch(folderEventWatcherProvider(path, true));
+    final folderWatchStream =
+        ref.watch(folderEventWatcherProvider(path, detectModifications: true));
     return folderWatchStream
         .where((final event) => event is! FileSystemModifyEvent);
   }
@@ -37,7 +38,8 @@ Raw<Stream<List<String>>> directoryInFolder(
   final controller = StreamController<List<String>>.broadcast();
   ref.onDispose(controller.close);
 
-  final watcher = ref.watch(folderEventWatcherProvider(path, false));
+  final watcher =
+      ref.watch(folderEventWatcherProvider(path, detectModifications: false));
   final subscription = watcher
       .listen((final event) => controller.add(getUnderSync<Directory>(path)));
   ref.onDispose(subscription.cancel);
@@ -53,7 +55,8 @@ Raw<Stream<List<String>>> fileInFolder(
   final controller = StreamController<List<String>>.broadcast();
   ref.onDispose(controller.close);
 
-  final watcher = ref.watch(folderEventWatcherProvider(path, false));
+  final watcher =
+      ref.watch(folderEventWatcherProvider(path, detectModifications: false));
   final subscription =
       watcher.listen((final event) => controller.add(getUnderSync<File>(path)));
   ref.onDispose(subscription.cancel);
@@ -64,21 +67,30 @@ Raw<Stream<List<String>>> fileInFolder(
 @riverpod
 Raw<Stream<FileSystemEvent>> fileEventWatcher(
   final FileEventWatcherRef ref,
-  final String path,
-  final bool detectModifications,
-) {
-  final dirWatcher =
-      ref.watch(folderEventWatcherProvider(path.pDirname, detectModifications));
+  final String path, {
+  required final bool detectModifications,
+}) {
+  final dirWatcher = ref.watch(
+    folderEventWatcherProvider(
+      path.pDirname,
+      detectModifications: detectModifications,
+    ),
+  );
   return dirWatcher.where((final event) => event.path == path);
 }
 
 @riverpod
 Stream<FileSystemEvent> fileEventSnapshot(
   final FileEventSnapshotRef ref,
-  final String path,
-  final bool detectModifications,
-) =>
-    ref.watch(fileEventWatcherProvider(path, detectModifications));
+  final String path, {
+  required final bool detectModifications,
+}) =>
+    ref.watch(
+      fileEventWatcherProvider(
+        path,
+        detectModifications: detectModifications,
+      ),
+    );
 
 @riverpod
 Stream<List<Mod>> modsInCategory(
