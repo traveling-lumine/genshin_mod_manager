@@ -8,12 +8,8 @@ part 'secrets.g.dart';
 abstract class Env {
   @EnviedField()
   static final String val1 = _Env.val1;
-  @EnviedField(obfuscate: false)
-  static const String val2 = _Env.val2;
-  @EnviedField(obfuscate: false)
-  static const String val3 = _Env.val3;
-  @EnviedField(obfuscate: false)
-  static const String val4 = _Env.val4;
+  @EnviedField()
+  static final String val2 = _Env.val2;
   @EnviedField()
   static final String val5 = _Env.val5;
   @EnviedField()
@@ -32,10 +28,4 @@ abstract class Env {
   static final String val12 = _Env.val12;
   @EnviedField()
   static final String val13 = _Env.val13;
-  @EnviedField(obfuscate: false)
-  static const String val14 = _Env.val14;
-  @EnviedField(obfuscate: false)
-  static const String val15 = _Env.val15;
-  @EnviedField(obfuscate: false)
-  static const String val16 = _Env.val16;
 }

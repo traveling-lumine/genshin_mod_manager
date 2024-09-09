@@ -4,7 +4,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../secrets.dart';
 import 'akasha_page_result.dart';
 
 part 'akasha_page_fetch_result.freezed.dart';
@@ -15,7 +14,7 @@ class AkashaPageFetchResult with _$AkashaPageFetchResult {
   const factory AkashaPageFetchResult({
     required final bool success,
     required final String action,
-    @JsonKey(name: Env.val3) required final AkashaPageResult result,
+    @JsonKey(name: 'data') required final AkashaPageResult result,
   }) = _AkashaPageFetchResult;
 
   factory AkashaPageFetchResult.fromJson(final Map<String, dynamic> json) =>
