@@ -106,7 +106,7 @@ class PresetControlWidget extends HookWidget {
   PresetNotifier _getNotifier(final WidgetRef ref) {
     final PresetNotifier notifier;
     if (isLocal) {
-      notifier = ref.read(localPresetNotifierProvider(category).notifier);
+      notifier = ref.read(localPresetNotifierProvider(category!).notifier);
     } else {
       notifier = ref.read(globalPresetNotifierProvider.notifier);
     }
@@ -181,7 +181,7 @@ class _PresetComboBox extends ConsumerWidget {
   List<String> _getPresets(final WidgetRef ref) {
     final List<String> value;
     if (isLocal) {
-      value = ref.watch(localPresetNotifierProvider(category));
+      value = ref.watch(localPresetNotifierProvider(category!));
     } else {
       value = ref.watch(globalPresetNotifierProvider);
     }
@@ -192,7 +192,7 @@ class _PresetComboBox extends ConsumerWidget {
     final PresetNotifier notifier;
     if (isLocal) {
       notifier = ref.read(
-        localPresetNotifierProvider(category).notifier,
+        localPresetNotifierProvider(category!).notifier,
       );
     } else {
       notifier = ref.read(globalPresetNotifierProvider.notifier);
