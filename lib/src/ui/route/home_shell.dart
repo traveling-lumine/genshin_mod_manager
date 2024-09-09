@@ -18,7 +18,7 @@ import 'package:window_manager/window_manager.dart';
 import '../../backend/akasha/domain/entity/download_state.dart';
 import '../../backend/akasha/domain/entity/nahida_element.dart';
 import '../../backend/app_version/domain/github.dart';
-import '../../backend/fs_interface/data/helper/path_op_string.dart';
+import '../../backend/fs_interface/domain/helper/path_op_string.dart';
 import '../../backend/structure/entity/mod_category.dart';
 import '../../di/akasha_download_queue.dart';
 import '../../di/app_state/current_target_game.dart';

@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart' show ZipDecoder;
 
-import '../../fs_interface/data/helper/fsops.dart';
-import '../../fs_interface/data/helper/path_op_string.dart';
+import '../../fs_interface/domain/helper/fsops.dart';
+import '../../fs_interface/domain/helper/path_op_string.dart';
 import '../domain/mod_writer.dart';
 import 'third_party.dart';
 

@@ -1,5 +1,5 @@
 
-import '../../../fs_interface/data/helper/path_op_string.dart';
+import '../../../fs_interface/domain/helper/path_op_string.dart';
 import '../repo/persistent_storage.dart';
 import 'game_config.dart';
 

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../data/helper/copy_directory.dart';
+import '../helper/copy_directory.dart';
 
 void moveDirUseCase(
   final Directory sourceDir,

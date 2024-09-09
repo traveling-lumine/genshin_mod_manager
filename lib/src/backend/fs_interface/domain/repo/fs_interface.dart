@@ -18,23 +18,4 @@ abstract interface class FileSystemInterface {
   List<String?>? iniEditorArgument;
 
   Future<void> openTerminal(final String path);
-
-  String pJoin(
-    final String part1,
-    final String part2, [
-    final String? part3,
-    final String? part4,
-    final String? part5,
-    final String? part6,
-    final String? part7,
-    final String? part8,
-    final String? part9,
-    final String? part10,
-    final String? part11,
-    final String? part12,
-    final String? part13,
-    final String? part14,
-    final String? part15,
-    final String? part16,
-  ]);
 }
