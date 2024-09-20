@@ -20,8 +20,8 @@ import '../../di/fs_interface.dart';
 import '../../di/mod_card.dart';
 import '../util/display_infobar.dart';
 import '../util/show_prompt_dialog.dart';
-import 'time_aware_image.dart';
 import 'ini_widget.dart';
+import 'mod_preview_image.dart';
 
 class ModCard extends ConsumerStatefulWidget {
   const ModCard({required this.mod, super.key});
@@ -138,7 +138,9 @@ class _ModCardState extends ConsumerState<ModCard> {
             onPressed: _onCommand,
           ),
           _buildIconButton(
-              icon: FluentIcons.delete, onPressed: _onDeletePressed),
+            icon: FluentIcons.delete,
+            onPressed: _onDeletePressed,
+          ),
           _buildIconButton(
             icon: FluentIcons.folder_open,
             onPressed: _onFolderOpen,
@@ -165,7 +167,7 @@ class _ModCardState extends ConsumerState<ModCard> {
                     Colors.black.withOpacity(0.6),
                     BlendMode.darken,
                   ),
-                  child: TimeAwareFileImage(
+                  child: ModPreviewImage(
                     path: imagePath,
                     fit: BoxFit.cover,
                   ),
@@ -181,7 +183,7 @@ class _ModCardState extends ConsumerState<ModCard> {
               child: FlyoutTarget(
                 controller: _contextController,
                 key: _contextAttachKey,
-                child: TimeAwareFileImage(path: imagePath),
+                child: ModPreviewImage(path: imagePath),
               ),
             ),
           ),
@@ -282,7 +284,7 @@ class _ModCardState extends ConsumerState<ModCard> {
       builder: (final dCtx) => GestureDetector(
         onTap: Navigator.of(dCtx).pop,
         onSecondaryTap: Navigator.of(dCtx).pop,
-        child: TimeAwareFileImage(path: image),
+        child: ModPreviewImage(path: image),
       ),
     );
   }

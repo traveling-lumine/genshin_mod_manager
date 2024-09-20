@@ -12,7 +12,7 @@ import '../../di/app_state/use_paimon.dart';
 import '../../di/fs_watcher.dart';
 import '../util/display_infobar.dart';
 import 'category_drop_target.dart';
-import 'time_aware_image.dart';
+import 'mod_preview_image.dart';
 
 class FolderPaneItem extends PaneItem {
   FolderPaneItem({
@@ -148,7 +148,7 @@ class FolderPaneItem extends PaneItem {
         },
       );
     } else {
-      image = TimeAwareFileImage(path: imageFile);
+      image = ModPreviewImage(path: imageFile);
     }
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: maxIconWidth),

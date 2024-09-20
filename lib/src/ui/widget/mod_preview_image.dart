@@ -9,8 +9,8 @@ import 'package:image_size_getter/image_size_getter.dart';
 
 import '../../di/fs_watcher.dart';
 
-class TimeAwareFileImage extends HookConsumerWidget {
-  const TimeAwareFileImage({
+class ModPreviewImage extends HookConsumerWidget {
+  const ModPreviewImage({
     required this.path,
     super.key,
     this.frameBuilder,
