@@ -148,7 +148,7 @@ class FolderPaneItem extends PaneItem {
         },
       );
     } else {
-      image = ModPreviewImage(path: imageFile);
+      image = ModPreviewImage(path: imageFile, bypass: true);
     }
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: maxIconWidth),
