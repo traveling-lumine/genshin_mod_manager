@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
-import '../../backend/fs_interface/domain/usecase/open_folder.dart';
+import '../../backend/fs_interface/usecase/open_folder.dart';
 import '../../backend/structure/entity/mod.dart';
 import '../../backend/structure/entity/mod_category.dart';
 import '../../di/app_state/column_strategy.dart';

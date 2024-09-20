@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../../mod_writer/data/mod_writer.dart';
+import '../../mod_writer/data/mod_writer.dart';
 import '../entity/folder_move_result.dart';
 import '../entity/setting_data.dart';
 import '../helper/copy_directory.dart';

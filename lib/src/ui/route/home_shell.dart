@@ -15,8 +15,8 @@ import 'package:http/http.dart' as http;
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../backend/app_version/domain/github.dart';
-import '../../backend/fs_interface/domain/helper/path_op_string.dart';
+import '../../backend/app_version/github.dart';
+import '../../backend/fs_interface/helper/path_op_string.dart';
 import '../../backend/nahida/domain/entity/download_state.dart';
 import '../../backend/nahida/domain/entity/nahida_element.dart';
 import '../../backend/structure/entity/mod_category.dart';

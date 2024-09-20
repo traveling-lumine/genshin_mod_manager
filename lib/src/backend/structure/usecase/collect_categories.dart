@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 
-import '../../fs_interface/domain/helper/fsops.dart';
-import '../../fs_interface/domain/helper/path_op_string.dart';
+import '../../fs_interface/helper/fsops.dart';
+import '../../fs_interface/helper/path_op_string.dart';
 import '../entity/mod_category.dart';
 
 List<ModCategory> collectCategoriesUseCase({required final String modRoot}) =>

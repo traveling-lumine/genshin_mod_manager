@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../backend/app_version/domain/github.dart';
+import '../../backend/app_version/github.dart';
 import '../../di/app_state/current_target_game.dart';
 import '../util/open_url.dart';
 

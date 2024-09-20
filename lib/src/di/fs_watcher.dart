@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../backend/fs_interface/domain/helper/fsops.dart';
-import '../backend/fs_interface/domain/helper/path_op_string.dart';
+import '../backend/fs_interface/helper/fsops.dart';
+import '../backend/fs_interface/helper/path_op_string.dart';
 import 'app_state/current_target_game.dart';
 import 'fs_interface.dart';
 

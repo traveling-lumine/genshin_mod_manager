@@ -10,7 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
-import '../../backend/fs_interface/domain/entity/setting_data.dart';
+import '../../backend/fs_interface/entity/setting_data.dart';
 import '../../backend/storage/domain/entity/game_config.dart';
 import '../../backend/storage/domain/usecase/card_color.dart';
 import '../../di/app_state/card_color.dart';

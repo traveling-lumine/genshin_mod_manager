@@ -7,11 +7,11 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
 
-import '../../backend/fs_interface/domain/entity/mod_toggle_exceptions.dart';
-import '../../backend/fs_interface/domain/helper/mod_switcher.dart';
-import '../../backend/fs_interface/domain/helper/path_op_string.dart';
-import '../../backend/fs_interface/domain/usecase/open_folder.dart';
-import '../../backend/fs_interface/domain/usecase/paste_image.dart';
+import '../../backend/fs_interface/entity/mod_toggle_exceptions.dart';
+import '../../backend/fs_interface/helper/mod_switcher.dart';
+import '../../backend/fs_interface/helper/path_op_string.dart';
+import '../../backend/fs_interface/usecase/open_folder.dart';
+import '../../backend/fs_interface/usecase/paste_image.dart';
 import '../../backend/structure/entity/ini.dart';
 import '../../backend/structure/entity/mod.dart';
 import '../../di/app_state/card_color.dart';

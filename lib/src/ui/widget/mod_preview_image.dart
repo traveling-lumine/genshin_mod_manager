@@ -31,13 +31,11 @@ class ModPreviewImage extends HookConsumerWidget {
 
     useEffect(
       () {
-        final subscription = eventStream.listen(
-          (final event) async {
-            await FileImage(File(path)).evict();
-            curMTime.value = DateTime.now().microsecondsSinceEpoch;
-            imageSize.value = ImageSizeGetter.getSize(FileInput(File(path)));
-          },
-        );
+        final subscription = eventStream.listen((final event) async {
+          await FileImage(File(path)).evict();
+          curMTime.value = DateTime.now().microsecondsSinceEpoch;
+          imageSize.value = ImageSizeGetter.getSize(FileInput(File(path)));
+        });
 
         return subscription.cancel;
       },

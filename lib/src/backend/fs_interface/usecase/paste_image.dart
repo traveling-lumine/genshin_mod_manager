@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_image_converter/flutter_image_converter.dart';
 
-import '../../../structure/entity/mod.dart';
+import '../../structure/entity/mod.dart';
 import '../helper/path_op_string.dart';
 import '../repo/fs_interface.dart';
 

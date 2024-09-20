@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../backend/fs_interface/domain/helper/fsops.dart';
-import '../backend/fs_interface/domain/helper/mod_switcher.dart';
-import '../backend/fs_interface/domain/helper/path_op_string.dart';
+import '../backend/fs_interface/helper/fsops.dart';
+import '../backend/fs_interface/helper/mod_switcher.dart';
+import '../backend/fs_interface/helper/path_op_string.dart';
 import '../backend/storage/domain/entity/preset.dart';
 import '../backend/structure/entity/mod_category.dart';
 import 'app_state/game_config.dart';
