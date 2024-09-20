@@ -55,13 +55,12 @@ class TimeAwareFileImage extends HookConsumerWidget {
         final imageHeight = imageSize_.height;
         final imageAspectRatio = imageWidth / imageHeight;
 
-        final cacheWidth = imageAspectRatio < candidateAspectRatio &&
-                candidateWidth < imageWidth
+        const ceilConstant = 16;
+        final cacheWidth = imageAspectRatio < candidateAspectRatio
             ? null
-            : candidateWidth;
-        final cacheHeight = imageAspectRatio < candidateAspectRatio &&
-                candidateHeight < imageHeight
-            ? candidateHeight
+            : _ceilToNextMultiple(candidateWidth, ceilConstant);
+        final cacheHeight = imageAspectRatio < candidateAspectRatio
+            ? _ceilToNextMultiple(candidateHeight, ceilConstant)
             : null;
 
         return Image.file(
@@ -90,3 +89,6 @@ class TimeAwareFileImage extends HookConsumerWidget {
       );
   }
 }
+
+int _ceilToNextMultiple(final int value, final int multiple) =>
+    (value + multiple - 1) ~/ multiple * multiple;
