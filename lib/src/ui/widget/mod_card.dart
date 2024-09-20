@@ -38,7 +38,7 @@ class ModCard extends ConsumerStatefulWidget {
 }
 
 class _ModCardState extends ConsumerState<ModCard> {
-  static const _minIniSectionWidth = 150.0;
+  static const _minIniSectionWidth = 165.0;
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
 
