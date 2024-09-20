@@ -5,17 +5,7 @@ abstract interface class FileSystemInterface {
 
   Directory iconDir(final String game);
 
-  void copyFilenames(
-    final Directory from,
-    final Directory to,
-    final List<String> filenames,
-  );
-
-  Future<void> runProgram(final File program);
-
   Future<void> runIniEdit(final File program);
 
   List<String?>? iniEditorArgument;
-
-  Future<void> openTerminal(final String path);
 }

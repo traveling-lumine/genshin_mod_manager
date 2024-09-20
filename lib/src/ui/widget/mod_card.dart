@@ -221,7 +221,12 @@ class _ModCardState extends ConsumerState<ModCard> {
       );
 
   Future<void> _onCommand() async {
-    await ref.read(fsInterfaceProvider).openTerminal(widget.mod.path);
+    await Process.run(
+      'start',
+      ['powershell'],
+      workingDirectory: widget.mod.path,
+      runInShell: true,
+    );
   }
 
   Future<void> _onDeletePressed() async {

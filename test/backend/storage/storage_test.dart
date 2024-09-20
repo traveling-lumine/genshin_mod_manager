@@ -52,7 +52,9 @@ void main() {
       test('setMap and getMap', () {
         storage.setMap('key', <String, dynamic>{'key': 'value'});
         expect(
-            storage.getMap('key'), equals(<String, dynamic>{'key': 'value'}));
+          storage.getMap('key'),
+          equals(<String, dynamic>{'key': 'value'}),
+        );
       });
     },
   );
@@ -90,8 +92,9 @@ void main() {
     'remove key',
     () {
       test('removeKey', () {
-        storage.setString('key', 'value');
-        storage.removeKey('key');
+        storage
+          ..setString('key', 'value')
+          ..removeKey('key');
         expect(storage.getString('key'), isNull);
       });
     },

@@ -139,10 +139,9 @@ class CategoryRoute extends HookConsumerWidget {
   ) =>
       Consumer(
         builder: (final context, final ref, final child) {
-          final whenOrNull =
-              ref.watch(modsInCategoryProvider(category)).whenOrNull(
-            data: (final data) {
-              final items = data.indexed.map(
+          final data = ref.watch(modsInCategoryProvider(category));
+          final items = data.indexed
+              .map(
                 (final e) => AutoSuggestBoxItem2(
                   value: e.$2.displayName,
                   label: e.$2.displayName,
@@ -150,29 +149,24 @@ class CategoryRoute extends HookConsumerWidget {
                     _moveTo(scrollController, e.$1, sliverGridDelegate);
                   },
                 ),
-              );
-              return AutoSuggestBox2(
-                items: items.toList(),
-                trailingIcon: const Icon(FluentIcons.search),
-                onSubmissionFailed: (final text) {
-                  if (text.isEmpty) {
-                    return;
-                  }
-                  final index = data.indexWhere((final e) {
-                    final name = e.displayName.toLowerCase();
-                    return name.startsWith(text.toLowerCase());
-                  });
-                  _moveTo(scrollController, index, sliverGridDelegate);
-                },
-              );
-            },
-          );
-          if (whenOrNull == null) {
-            return const SizedBox.shrink();
-          }
+              )
+              .toList();
           return Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: whenOrNull,
+            child: AutoSuggestBox2(
+              items: items,
+              trailingIcon: const Icon(FluentIcons.search),
+              onSubmissionFailed: (final text) {
+                if (text.isEmpty) {
+                  return;
+                }
+                final index = data.indexWhere((final e) {
+                  final name = e.displayName.toLowerCase();
+                  return name.startsWith(text.toLowerCase());
+                });
+                _moveTo(scrollController, index, sliverGridDelegate);
+              },
+            ),
           );
         },
       );
@@ -184,14 +178,11 @@ class CategoryRoute extends HookConsumerWidget {
   ) =>
       ThickScrollbar(
         child: Consumer(
-          builder: (final context, final ref, final child) =>
-              ref.watch(modsInCategoryProvider(category)).when(
-                    skipLoadingOnReload: true,
-                    data: (final data) =>
-                        _buildData(data, scrollController, sliverGridDelegate),
-                    error: _buildError,
-                    loading: _buildLoading,
-                  ),
+          builder: (final context, final ref, final child) => _buildData(
+            ref.watch(modsInCategoryProvider(category)),
+            scrollController,
+            sliverGridDelegate,
+          ),
         ),
       );
 
@@ -213,31 +204,6 @@ class CategoryRoute extends HookConsumerWidget {
       ),
     );
   }
-
-  Widget _buildError(final Object error, final StackTrace stackTrace) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(FluentIcons.error),
-            Text('Error: $error\n$stackTrace'),
-          ],
-        ),
-      );
-
-  Widget _buildLoading() => const AnimatedSwitcher(
-        duration: Duration.zero,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ProgressRing(),
-              SizedBox(height: 16),
-              Text('Collecting mods...'),
-            ],
-          ),
-        ),
-      );
 
   void _moveTo(
     final ScrollController scrollController,

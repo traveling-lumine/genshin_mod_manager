@@ -30,7 +30,6 @@ import '../../di/app_state/window_size.dart';
 import '../../di/app_version/is_outdated.dart';
 import '../../di/app_version/remote_version.dart';
 import '../../di/exe_arg.dart';
-import '../../di/fs_interface.dart';
 import '../../di/fs_watcher.dart';
 import '../../di/nahida_store.dart';
 import '../constants.dart';
@@ -88,6 +87,48 @@ class HomeShell extends StatefulHookConsumerWidget {
 
   @override
   ConsumerState<HomeShell> createState() => _HomeShellState();
+}
+
+class RunAndExitPaneAction extends PaneItemAction {
+  RunAndExitPaneAction({
+    required super.icon,
+    required Widget super.title,
+    required Future<void> Function() super.onTap,
+    required final FlyoutController flyoutController,
+    super.key,
+  }) : super(
+          trailing: FlyoutTarget(
+            controller: flyoutController,
+            child: IconButton(
+              icon: const Icon(FluentIcons.more),
+              onPressed: () => _showRunAndExitFlyout(flyoutController, onTap),
+            ),
+          ),
+        );
+
+  static Future<void> _showRunAndExitFlyout(
+    final FlyoutController flyoutController,
+    final Future<void> Function() onTap,
+  ) async =>
+      flyoutController.showFlyout(
+        builder: (final context) => FlyoutContent(
+          child: IntrinsicWidth(
+            child: CommandBar(
+              overflowBehavior: CommandBarOverflowBehavior.clip,
+              primaryItems: [
+                CommandBarButton(
+                  icon: const Icon(FluentIcons.power_button),
+                  label: const Text('Run and exit'),
+                  onPressed: () async {
+                    await onTap();
+                    exit(0);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
 }
 
 class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
@@ -445,27 +486,31 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   Future<void> _runLauncher() async {
     final launcher = ref.read(gameConfigNotifierProvider).launcherFile;
-    final fsInterface = ref.read(fsInterfaceProvider);
     if (launcher == null) {
       return;
     }
-    await fsInterface.runProgram(File(launcher));
+    await _runProgram(launcher);
   }
 
   Future<void> _runMigoto() async {
     final path = ref.read(gameConfigNotifierProvider).modExecFile;
-    final fsInterface = ref.read(fsInterfaceProvider);
     if (path == null) {
       return;
     }
-    await fsInterface.runProgram(File(path));
-    if (!mounted) {
-      return;
+    await _runProgram(path);
+    if (mounted) {
+      await displayInfoBarInContext(
+        context,
+        title: const Text('Ran 3d migoto')
+      );
     }
-    await displayInfoBarInContext(
-      context,
-      title: const Text('Ran 3d migoto'),
-    );
+  }
+
+  Future<void> _runProgram(final String path) async {
+    final file = File(path);
+    final pwd = file.parent.path;
+    final pName = file.path.pBasename;
+    await Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
   }
 
   void _showAkashaApiErrorInfoBar(
@@ -691,44 +736,4 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           child: const Text('Auto update'),
         ),
       );
-}
-
-class RunAndExitPaneAction extends PaneItemAction {
-  RunAndExitPaneAction({
-    required super.icon,
-    required Widget super.title,
-    required Future<void> Function() super.onTap,
-    required final FlyoutController flyoutController,
-    super.key,
-  }) : super(
-          trailing: FlyoutTarget(
-            controller: flyoutController,
-            child: IconButton(
-              icon: const Icon(FluentIcons.more),
-              onPressed: () {
-                unawaited(
-                  flyoutController.showFlyout(
-                    builder: (final context) => FlyoutContent(
-                      child: IntrinsicWidth(
-                        child: CommandBar(
-                          overflowBehavior: CommandBarOverflowBehavior.clip,
-                          primaryItems: [
-                            CommandBarButton(
-                              icon: const Icon(FluentIcons.power_button),
-                              label: const Text('Run and exit'),
-                              onPressed: () async {
-                                await onTap();
-                                exit(0);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        );
 }

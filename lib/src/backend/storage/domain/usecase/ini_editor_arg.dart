@@ -66,10 +66,30 @@ void _copyIcons(
       continue;
     }
     final modRootSubDirs = modRootDir.listSync().whereType<Directory>();
-    fsInterface.copyFilenames(
+    _copyFilenames(
       iconDirRoot,
       iconDirGame,
       modRootSubDirs.map((final e) => e.path.pBasename).toList(),
     );
+  }
+}
+
+void _copyFilenames(
+  final Directory from,
+  final Directory to,
+  final List<String> filenames,
+) {
+  // iterate files in from directory,
+  // find the ones in filenames,
+  // copy to to directory
+  final lowerFilenames = filenames.map((final e) => e.toLowerCase()).toSet();
+  for (final file in from.listSync().whereType<File>()) {
+    if (lowerFilenames.contains(file.path.pBNameWoExt.toLowerCase())) {
+      // if file does not exist in to directory, copy
+      final toFile = File(to.path.pJoin(file.path.pBasename));
+      if (!toFile.existsSync()) {
+        file.copySync(toFile.path);
+      }
+    }
   }
 }

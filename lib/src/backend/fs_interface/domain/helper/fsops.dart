@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'path_op_string.dart';
 
-/// Returns a String path list under the given [path], synchronously.
 List<String> getUnderSync<T extends FileSystemEntity>(
   final String path,
 ) {
