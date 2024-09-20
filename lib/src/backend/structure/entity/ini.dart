@@ -13,16 +13,29 @@ class IniFile with _$IniFile {
 }
 
 @freezed
-class IniSection with _$IniSection {
-  const factory IniSection({
+sealed class IniStatement with _$IniStatement {
+  const factory IniStatement.section({
     required final IniFile iniFile,
-    required final String section,
-    required final String line,
-  }) = _IniSection;
+    required final int lineNum,
+    required final String name,
+  }) = IniStatementSection;
 
-  const IniSection._();
+  const factory IniStatement.forward({
+    required final int lineNum,
+    required final IniStatementSection section,
+    required final String value,
+  }) = IniStatementForward;
 
-  String get key => line.split('=')[0].trim();
+  const factory IniStatement.backward({
+    required final int lineNum,
+    required final IniStatementSection section,
+    required final String value,
+  }) = IniStatementBackward;
 
-  String get value => line.split('=')[1].trim();
+  const factory IniStatement.variable({
+    required final int lineNum,
+    required final IniStatementSection section,
+    required final String name,
+    required final int numCycles,
+  }) = IniStatementVariable;
 }
