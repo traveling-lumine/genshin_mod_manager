@@ -7,9 +7,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../backend/akasha/domain/entity/nahida_element.dart';
+import '../../backend/nahida/domain/entity/nahida_element.dart';
 import '../../backend/structure/entity/mod_category.dart';
-import '../../di/akasha_download_queue.dart';
+import '../../di/nahida_download_queue.dart';
 import '../util/open_url.dart';
 import 'intrinsic_command_bar.dart';
 
@@ -235,7 +235,7 @@ class StoreElement extends ConsumerWidget {
               Navigator.of(dialogContext).pop();
               unawaited(
                 ref
-                    .read(akashaDownloadQueueProvider.notifier)
+                    .read(nahidaDownloadQueueProvider.notifier)
                     .addDownload(element: element, category: category),
               );
             },

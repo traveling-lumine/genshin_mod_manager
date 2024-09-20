@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genshin_mod_manager/src/backend/akasha/data/repo/akasha.dart';
-import 'package:genshin_mod_manager/src/backend/akasha/domain/entity/nahida_element.dart';
+import 'package:genshin_mod_manager/src/backend/nahida/data/repo/nahida.dart';
+import 'package:genshin_mod_manager/src/backend/nahida/domain/entity/nahida_element.dart';
 
 void main() {
   late NahidaliveAPIImpl api;

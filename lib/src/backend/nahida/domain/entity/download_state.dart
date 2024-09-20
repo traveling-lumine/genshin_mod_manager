@@ -10,25 +10,25 @@ import 'nahida_element.dart';
 part 'download_state.freezed.dart';
 
 @freezed
-sealed class AkashaDownloadState with _$AkashaDownloadState {
-  const factory AkashaDownloadState.completed({
+sealed class NahidaDownloadState with _$NahidaDownloadState {
+  const factory NahidaDownloadState.completed({
     required final NahidaliveElement element,
-  }) = AkashaDownloadStateCompleted;
+  }) = NahidaDownloadStateCompleted;
 
-  const factory AkashaDownloadState.wrongPassword({
+  const factory NahidaDownloadState.wrongPassword({
     required final NahidaliveElement element,
     required final Completer<String?> completer,
     final String? wrongPw,
-  }) = AkashaDownloadStateWrongPassword;
+  }) = NahidaDownloadStateWrongPassword;
 
-  const factory AkashaDownloadState.httpException({
+  const factory NahidaDownloadState.httpException({
     required final NahidaliveElement element,
     required final HttpException exception,
-  }) = AkashaDownloadStateHttpException;
+  }) = NahidaDownloadStateHttpException;
 
-  const factory AkashaDownloadState.modZipExtractionException({
+  const factory NahidaDownloadState.modZipExtractionException({
     required final NahidaliveElement element,
     required final ModCategory category,
     required final Uint8List data,
-  }) = AkashaDownloadStateModZipExtractionException;
+  }) = NahidaDownloadStateModZipExtractionException;
 }

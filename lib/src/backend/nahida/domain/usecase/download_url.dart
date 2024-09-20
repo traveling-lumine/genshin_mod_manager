@@ -1,8 +1,8 @@
 import '../../../mod_writer/domain/mod_writer.dart';
 import '../entity/nahida_element.dart';
-import '../repo/akasha.dart';
+import '../repo/nahida.dart';
 
-Future<void> akashaDownloadUrlUseCase({
+Future<void> nahidaDownloadUrlUseCase({
   required final NahidaliveAPI api,
   required final NahidaliveElement element,
   required final ModWriter writer,

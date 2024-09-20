@@ -15,12 +15,12 @@ import 'package:http/http.dart' as http;
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../backend/akasha/domain/entity/download_state.dart';
-import '../../backend/akasha/domain/entity/nahida_element.dart';
+import '../../backend/nahida/domain/entity/download_state.dart';
+import '../../backend/nahida/domain/entity/nahida_element.dart';
 import '../../backend/app_version/domain/github.dart';
 import '../../backend/fs_interface/domain/helper/path_op_string.dart';
 import '../../backend/structure/entity/mod_category.dart';
-import '../../di/akasha_download_queue.dart';
+import '../../di/nahida_download_queue.dart';
 import '../../di/app_state/current_target_game.dart';
 import '../../di/app_state/game_config.dart';
 import '../../di/app_state/games_list.dart';
@@ -155,27 +155,27 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         },
       )
       ..listen(
-        akashaDownloadQueueProvider,
+        nahidaDownloadQueueProvider,
         (final previous, final next) async {
           if (!next.hasValue) {
             return;
           }
           switch (next.requireValue) {
-            case AkashaDownloadStateCompleted(:final element):
-              _showAkashaDownloadCompleteInfoBar(element);
-            case AkashaDownloadStateHttpException(:final exception):
-              _showAkashaApiErrorInfoBar(exception);
-            case AkashaDownloadStateWrongPassword(
+            case NahidaDownloadStateCompleted(:final element):
+              _showNahidaDownloadCompleteInfoBar(element);
+            case NahidaDownloadStateHttpException(:final exception):
+              _showNahidaApiErrorInfoBar(exception);
+            case NahidaDownloadStateWrongPassword(
                 :final completer,
                 :final wrongPw
               ):
-              await _showAkashaWrongPasswdDialog(completer, wrongPw);
-            case AkashaDownloadStateModZipExtractionException(
+              await _showNahidaWrongPasswdDialog(completer, wrongPw);
+            case NahidaDownloadStateModZipExtractionException(
                 :final category,
                 :final data,
                 :final element
               ):
-              await _showAkashaZipExtractionErrorInfoBar(
+              await _showNahidaZipExtractionErrorInfoBar(
                 element,
                 category,
                 data,
@@ -288,7 +288,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
                     onPressed: currentSelected.value == null
                         ? null
                         : () async {
-                            final akasha = ref.read(akashaApiProvider);
+                            final nahida = ref.read(nahidaApiProvider);
                             var uuid = Uri.parse(url).queryParameters['uuid'];
                             if (uuid == null) {
                               return;
@@ -309,10 +309,10 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
                               uuid = sb.toString();
                             }
                             final elem =
-                                await akasha.fetchNahidaliveElement(uuid);
+                                await nahida.fetchNahidaliveElement(uuid);
                             unawaited(
                               ref
-                                  .read(akashaDownloadQueueProvider.notifier)
+                                  .read(nahidaDownloadQueueProvider.notifier)
                                   .addDownload(
                                     element: elem,
                                     category: currentSelected.value!,
@@ -499,10 +499,8 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     }
     await _runProgram(path);
     if (mounted) {
-      await displayInfoBarInContext(
-        context,
-        title: const Text('Ran 3d migoto')
-      );
+      await displayInfoBarInContext(context,
+          title: const Text('Ran 3d migoto'));
     }
   }
 
@@ -513,7 +511,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     await Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
   }
 
-  void _showAkashaApiErrorInfoBar(
+  void _showNahidaApiErrorInfoBar(
     final HttpException exception,
   ) {
     unawaited(
@@ -526,7 +524,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     );
   }
 
-  void _showAkashaDownloadCompleteInfoBar(
+  void _showNahidaDownloadCompleteInfoBar(
     final NahidaliveElement element,
   ) {
     unawaited(
@@ -538,7 +536,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     );
   }
 
-  Future<void> _showAkashaWrongPasswdDialog(
+  Future<void> _showNahidaWrongPasswdDialog(
     final Completer<String?> completer,
     final String? wrongPw,
   ) async {
@@ -581,7 +579,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     completer.complete(userResponse);
   }
 
-  Future<void> _showAkashaZipExtractionErrorInfoBar(
+  Future<void> _showNahidaZipExtractionErrorInfoBar(
     final NahidaliveElement element,
     final ModCategory category,
     final Uint8List data,

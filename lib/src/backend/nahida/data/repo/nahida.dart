@@ -6,9 +6,9 @@ import 'package:http/http.dart' as http;
 import '../../domain/entity/download_element.dart';
 import '../../domain/entity/nahida_element.dart';
 import '../../domain/entity/wrong_password.dart';
-import '../../domain/repo/akasha.dart';
-import '../entity/akasha_page_fetch_result.dart';
-import '../entity/akasha_single_fetch_result.dart';
+import '../../domain/repo/nahida.dart';
+import '../entity/nahida_page_fetch_result.dart';
+import '../entity/nahida_single_fetch_result.dart';
 import '../secrets.dart';
 
 class NahidaliveAPIImpl implements NahidaliveAPI {
@@ -34,7 +34,7 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
         '${Env.val13}/$uuid',
       ),
     );
-    final fetchResult = AkashaSingleFetchResult.fromJson(
+    final fetchResult = NahidaSingleFetchResult.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
     return fetchResult.result;
@@ -61,7 +61,7 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
     if (response.statusCode != 200) {
       throw Exception('fetch list failed: ${response.body}');
     }
-    final fetchResult = AkashaPageFetchResult.fromJson(
+    final fetchResult = NahidaPageFetchResult.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
     return fetchResult.result.elements;

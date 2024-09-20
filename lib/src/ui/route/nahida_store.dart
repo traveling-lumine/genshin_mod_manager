@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
-import '../../backend/akasha/domain/entity/nahida_element.dart';
+import '../../backend/nahida/domain/entity/nahida_element.dart';
 import '../../backend/structure/entity/mod_category.dart';
 import '../../di/nahida_store.dart';
 import '../../di/structure/categories.dart';
@@ -203,7 +203,7 @@ class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
   Future<void> _fetchPage(final int pageKey) async {
     try {
       final newItems =
-          await ref.read(akashaApiProvider).fetchNahidaliveElements(pageKey);
+          await ref.read(nahidaApiProvider).fetchNahidaliveElements(pageKey);
       final isLastPage = newItems.isEmpty;
       List<NahidaliveElement?> filteredItems =
           newItems.where(_dataFilter).toList();
