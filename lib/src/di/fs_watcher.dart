@@ -22,7 +22,14 @@ Raw<Stream<FileSystemEvent>> directoryEventWatcher(
     return folderWatchStream
         .where((final event) => event is! FileSystemModifyEvent);
   }
-  return Directory(path).watch().asBroadcastStream();
+
+  final controller = StreamController<FileSystemEvent>.broadcast();
+  ref.onDispose(controller.close);
+
+  final subscription = Directory(path).watch().listen(controller.add);
+  ref.onDispose(subscription.cancel);
+
+  return controller.stream;
 }
 
 @riverpod
@@ -31,13 +38,19 @@ Raw<Stream<FileSystemEvent>> fileEventWatcher(
   final String path, {
   required final bool detectModifications,
 }) {
+  final controller = StreamController<FileSystemEvent>.broadcast();
+  ref.onDispose(controller.close);
+
   final dirWatcher = ref.watch(
     directoryEventWatcherProvider(
       path.pDirname,
       detectModifications: detectModifications,
     ),
   );
-  return dirWatcher.where((final event) => event.path == path);
+  final subscription = dirWatcher.listen(controller.add);
+  ref.onDispose(subscription.cancel);
+
+  return controller.stream;
 }
 
 @riverpod
@@ -73,19 +86,6 @@ Raw<Stream<List<String>>> fileInFolder(
 
   return controller.stream;
 }
-
-@riverpod
-Stream<FileSystemEvent> fileEventSnapshot(
-  final FileEventSnapshotRef ref,
-  final String path, {
-  required final bool detectModifications,
-}) =>
-    ref.watch(
-      fileEventWatcherProvider(
-        path,
-        detectModifications: detectModifications,
-      ),
-    );
 
 @riverpod
 class FolderIconPath extends _$FolderIconPath {

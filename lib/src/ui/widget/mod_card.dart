@@ -20,7 +20,7 @@ import '../../di/fs_interface.dart';
 import '../../di/mod_card.dart';
 import '../util/display_infobar.dart';
 import '../util/show_prompt_dialog.dart';
-import 'custom_image.dart';
+import 'time_aware_image.dart';
 import 'ini_widget.dart';
 
 class ModCard extends ConsumerStatefulWidget {
