@@ -41,6 +41,7 @@ dependencies:
   protocol_handler: ^0.2.0
   riverpod_annotation: ^2.3.5
   shared_preferences: ^2.3.2
+  smooth_scroll_multiplatform: ^1.0.8
   url_launcher: ^6.3.0
   watcher: ^1.1.0
   win32: ^5.5.4

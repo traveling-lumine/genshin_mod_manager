@@ -7,6 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
 import '../../backend/nahida/domain/entity/nahida_element.dart';
 import '../../backend/structure/entity/mod_category.dart';
@@ -133,26 +134,35 @@ class NahidaStoreRoute extends HookConsumerWidget {
       );
 
   Widget _buildContent(final ModCategory category) => ThickScrollbar(
-        child: PagedGridView<int, NahidaliveElement?>(
-          key: ValueKey(_pagingController),
-          pagingController: _pagingController,
-          gridDelegate: SliverGridDelegateWithMinCrossAxisExtent(
-            minCrossAxisExtent: 500,
-            mainAxisExtent: 500,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-          ),
-          builderDelegate: PagedChildBuilderDelegate(
-            itemBuilder: (final context, final item, final index) {
-              if (item == null) {
-                return const Center(
-                  child: Text('Not found in the first page. Searching more...'),
+        child: DynMouseScroll(
+          scrollSpeed: 1,
+          builder:
+              (final context, final scrollController, final scrollPhysics) =>
+                  PagedGridView<int, NahidaliveElement?>(
+            scrollController: scrollController,
+            physics: scrollPhysics,
+            key: ValueKey(_pagingController),
+            pagingController: _pagingController,
+            gridDelegate: SliverGridDelegateWithMinCrossAxisExtent(
+              minCrossAxisExtent: 500,
+              mainAxisExtent: 500,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
+            builderDelegate: PagedChildBuilderDelegate(
+              itemBuilder: (final context, final item, final index) {
+                if (item == null) {
+                  return const Center(
+                    child: Text(
+                      'Not found in the first page. Searching more...',
+                    ),
+                  );
+                }
+                return RevertScrollbar(
+                  child: StoreElement(element: item, category: category),
                 );
-              }
-              return RevertScrollbar(
-                child: StoreElement(element: item, category: category),
-              );
-            },
+              },
+            ),
           ),
         ),
       );

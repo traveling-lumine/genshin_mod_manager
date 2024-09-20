@@ -8,6 +8,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
 import '../../backend/fs_interface/domain/entity/setting_data.dart';
 import '../../backend/storage/domain/entity/game_config.dart';
@@ -37,7 +38,7 @@ class SettingRoute extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) =>
-      ScaffoldPage.scrollable(
+      ScaffoldPage.withPadding(
         header: const PageHeader(title: Text('Settings')),
         bottomBar: Column(
           children: [
@@ -45,202 +46,213 @@ class SettingRoute extends ConsumerWidget {
             _buildVersion(ref),
           ],
         ),
-        children: [
-          const _SectionHeader(title: 'Paths'),
-          _PathSelectItem(
-            title: 'Select mod root folder',
-            icon: FluentIcons.folder_open,
-            selector: (final value) => value.modRoot,
-            onPressed: () {
-              final dir = DirectoryPicker().getDirectory();
-              if (dir == null) {
-                return;
-              }
-              ref
-                  .read(gameConfigNotifierProvider.notifier)
-                  .changeModRoot(dir.path);
-            },
-          ),
-          _PathSelectItem(
-            title: 'Select 3D Migoto executable',
-            icon: FluentIcons.document_management,
-            selector: (final value) => value.modExecFile,
-            onPressed: () {
-              final file = OpenNoDereferenceFilePicker().getFile();
-              if (file == null) {
-                return;
-              }
-              ref
-                  .read(gameConfigNotifierProvider.notifier)
-                  .changeModExecFile(file.path);
-            },
-          ),
-          _PathSelectItem(
-            title: 'Select launcher',
-            icon: FluentIcons.document_management,
-            selector: (final value) => value.launcherFile,
-            onPressed: () {
-              final file = OpenNoDereferenceFilePicker().getFile();
-              if (file == null) {
-                return;
-              }
-              ref
-                  .read(gameConfigNotifierProvider.notifier)
-                  .changeLauncherFile(file.path);
-            },
-          ),
-          const _SectionHeader(title: 'Options'),
-          _SwitchItem(
-            text: 'Run 3d migoto and launcher using one button',
-            provider: runTogetherProvider,
-            content: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Checkbox(
-                    checked: ref.watch(separateRunOverrideProvider),
-                    onChanged: (final value) {
-                      final res = switch (value) {
-                        true => null,
-                        false => false,
-                        null => true,
-                      };
-                      ref
-                          .read(separateRunOverrideProvider.notifier)
-                          .setValue(res);
-                    },
+        content: _buildContent(ref),
+      );
+
+  Widget _buildContent(final WidgetRef ref) => DynMouseScroll(
+        scrollSpeed: 1,
+        builder: (final context, final scrollController, final scrollPhysics) =>
+            ListView(
+          controller: scrollController,
+          physics: scrollPhysics,
+          children: [
+            const _SectionHeader(title: 'Paths'),
+            _PathSelectItem(
+              title: 'Select mod root folder',
+              icon: FluentIcons.folder_open,
+              selector: (final value) => value.modRoot,
+              onPressed: () {
+                final dir = DirectoryPicker().getDirectory();
+                if (dir == null) {
+                  return;
+                }
+                ref
+                    .read(gameConfigNotifierProvider.notifier)
+                    .changeModRoot(dir.path);
+              },
+            ),
+            _PathSelectItem(
+              title: 'Select 3D Migoto executable',
+              icon: FluentIcons.document_management,
+              selector: (final value) => value.modExecFile,
+              onPressed: () {
+                final file = OpenNoDereferenceFilePicker().getFile();
+                if (file == null) {
+                  return;
+                }
+                ref
+                    .read(gameConfigNotifierProvider.notifier)
+                    .changeModExecFile(file.path);
+              },
+            ),
+            _PathSelectItem(
+              title: 'Select launcher',
+              icon: FluentIcons.document_management,
+              selector: (final value) => value.launcherFile,
+              onPressed: () {
+                final file = OpenNoDereferenceFilePicker().getFile();
+                if (file == null) {
+                  return;
+                }
+                ref
+                    .read(gameConfigNotifierProvider.notifier)
+                    .changeLauncherFile(file.path);
+              },
+            ),
+            const _SectionHeader(title: 'Options'),
+            _SwitchItem(
+              text: 'Run 3d migoto and launcher using one button',
+              provider: runTogetherProvider,
+              content: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Checkbox(
+                      checked: ref.watch(separateRunOverrideProvider),
+                      onChanged: (final value) {
+                        final res = switch (value) {
+                          true => null,
+                          false => false,
+                          null => true,
+                        };
+                        ref
+                            .read(separateRunOverrideProvider.notifier)
+                            .setValue(res);
+                      },
+                    ),
                   ),
-                ),
-                const Text('Per-game Override'),
-              ],
+                  const Text('Per-game Override'),
+                ],
+              ),
             ),
-          ),
-          _SwitchItem(
-            text: 'Move folder instead of copying for mod folder drag-and-drop',
-            provider: moveOnDragProvider,
-            boolMapper: (final value) => value == DragImportType.move,
-            typedMapper: (final value) =>
-                value ? DragImportType.move : DragImportType.copy,
-          ),
-          _SwitchItem(
-            text: 'Show folder icon images',
-            provider: folderIconProvider,
-          ),
-          _SwitchItem(
-            text: 'Show enabled mods first',
-            provider: displayEnabledModsFirstProvider,
-          ),
-          _SwitchItem(text: 'Dark mode', provider: darkModeProvider),
-          const _ComboItem(text: 'Target Game'),
-          const _SectionHeader(title: 'Themes'),
-          const SettingElement(
-            text: 'Card colors (hover on the icons to see details)',
-            initiallyExpanded: true,
-            content: Column(
-              children: [
-                _ColorChanger(isBright: true, isEnabled: true),
-                _ColorChanger(isBright: true, isEnabled: false),
-                _ColorChanger(isBright: false, isEnabled: true),
-                _ColorChanger(isBright: false, isEnabled: false),
-              ],
+            _SwitchItem(
+              text:
+                  'Move folder instead of copying for mod folder drag-and-drop',
+              provider: moveOnDragProvider,
+              boolMapper: (final value) => value == DragImportType.move,
+              typedMapper: (final value) =>
+                  value ? DragImportType.move : DragImportType.copy,
             ),
-          ),
-          HookConsumer(
-            builder: (final context, final ref, final child) {
-              final initialStrategy = ref.watch(columnStrategyProvider).when(
-                    fixedCount: (final numChildren) => (0, numChildren),
-                    maxExtent: (final extent) => (1, extent),
-                    minExtent: (final extent) => (2, extent),
-                  );
-              final columnStrategy = useState<int?>(initialStrategy.$1);
-              final columnParameter = useState<int?>(initialStrategy.$2);
-              return SettingElement(
-                initiallyExpanded: true,
-                text: 'Column Display Strategy',
-                trailing: ComboBox(
-                  value: columnStrategy.value,
-                  items: const [
-                    ComboBoxItem(value: 0, child: Text('Fixed Count')),
-                    ComboBoxItem(value: 1, child: Text('Max Extent')),
-                    ComboBoxItem(value: 2, child: Text('Min Extent')),
-                  ],
-                  onChanged: (final value) => columnStrategy.value = value,
-                ),
-                content: switch (columnStrategy.value) {
-                  0 => Row(
-                      children: [
-                        const Text('Fixed number of columns: '),
-                        SizedBox(
-                          width: 100,
-                          child: NumberBox<int>(
-                            value: columnParameter.value,
-                            onChanged: (final value) {
-                              if (value == null) {
-                                return;
-                              }
-                              ref
-                                  .read(columnStrategyProvider.notifier)
-                                  .setFixedCount(value);
-                              columnParameter.value = value;
-                            },
-                            mode: SpinButtonPlacementMode.none,
+            _SwitchItem(
+              text: 'Show folder icon images',
+              provider: folderIconProvider,
+            ),
+            _SwitchItem(
+              text: 'Show enabled mods first',
+              provider: displayEnabledModsFirstProvider,
+            ),
+            _SwitchItem(text: 'Dark mode', provider: darkModeProvider),
+            const _ComboItem(text: 'Target Game'),
+            const _SectionHeader(title: 'Themes'),
+            const SettingElement(
+              text: 'Card colors (hover on the icons to see details)',
+              initiallyExpanded: true,
+              content: Column(
+                children: [
+                  _ColorChanger(isBright: true, isEnabled: true),
+                  _ColorChanger(isBright: true, isEnabled: false),
+                  _ColorChanger(isBright: false, isEnabled: true),
+                  _ColorChanger(isBright: false, isEnabled: false),
+                ],
+              ),
+            ),
+            HookConsumer(
+              builder: (final context, final ref, final child) {
+                final initialStrategy = ref.watch(columnStrategyProvider).when(
+                      fixedCount: (final numChildren) => (0, numChildren),
+                      maxExtent: (final extent) => (1, extent),
+                      minExtent: (final extent) => (2, extent),
+                    );
+                final columnStrategy = useState<int?>(initialStrategy.$1);
+                final columnParameter = useState<int?>(initialStrategy.$2);
+                return SettingElement(
+                  initiallyExpanded: true,
+                  text: 'Column Display Strategy',
+                  trailing: ComboBox(
+                    value: columnStrategy.value,
+                    items: const [
+                      ComboBoxItem(value: 0, child: Text('Fixed Count')),
+                      ComboBoxItem(value: 1, child: Text('Max Extent')),
+                      ComboBoxItem(value: 2, child: Text('Min Extent')),
+                    ],
+                    onChanged: (final value) => columnStrategy.value = value,
+                  ),
+                  content: switch (columnStrategy.value) {
+                    0 => Row(
+                        children: [
+                          const Text('Fixed number of columns: '),
+                          SizedBox(
+                            width: 100,
+                            child: NumberBox<int>(
+                              value: columnParameter.value,
+                              onChanged: (final value) {
+                                if (value == null) {
+                                  return;
+                                }
+                                ref
+                                    .read(columnStrategyProvider.notifier)
+                                    .setFixedCount(value);
+                                columnParameter.value = value;
+                              },
+                              mode: SpinButtonPlacementMode.none,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  1 => Row(
-                      children: [
-                        const Text('Column max width limit: '),
-                        SizedBox(
-                          width: 100,
-                          child: NumberBox(
-                            value: columnParameter.value,
-                            onChanged: (final value) {
-                              if (value == null) {
-                                return;
-                              }
-                              ref
-                                  .read(columnStrategyProvider.notifier)
-                                  .setMaxExtent(value);
-                            },
-                            mode: SpinButtonPlacementMode.none,
+                        ],
+                      ),
+                    1 => Row(
+                        children: [
+                          const Text('Column max width limit: '),
+                          SizedBox(
+                            width: 100,
+                            child: NumberBox(
+                              value: columnParameter.value,
+                              onChanged: (final value) {
+                                if (value == null) {
+                                  return;
+                                }
+                                ref
+                                    .read(columnStrategyProvider.notifier)
+                                    .setMaxExtent(value);
+                              },
+                              mode: SpinButtonPlacementMode.none,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  2 => Row(
-                      children: [
-                        const Text('Column min width limit: '),
-                        SizedBox(
-                          width: 100,
-                          child: NumberBox(
-                            value: columnParameter.value,
-                            onChanged: (final value) {
-                              if (value == null) {
-                                return;
-                              }
-                              ref
-                                  .read(columnStrategyProvider.notifier)
-                                  .setMinExtent(value);
-                            },
-                            mode: SpinButtonPlacementMode.none,
+                        ],
+                      ),
+                    2 => Row(
+                        children: [
+                          const Text('Column min width limit: '),
+                          SizedBox(
+                            width: 100,
+                            child: NumberBox(
+                              value: columnParameter.value,
+                              onChanged: (final value) {
+                                if (value == null) {
+                                  return;
+                                }
+                                ref
+                                    .read(columnStrategyProvider.notifier)
+                                    .setMinExtent(value);
+                              },
+                              mode: SpinButtonPlacementMode.none,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  _ => null,
-                },
-              );
-            },
-          ),
-          const _SectionHeader(title: 'Misc'),
-          const _StringItem(title: 'Ini file editor arguments'),
-          _SwitchItem(
-            text: 'Use Paimon for folders without icons',
-            provider: paimonIconProvider,
-          ),
-          const SizedBox(height: 200),
-        ],
+                        ],
+                      ),
+                    _ => null,
+                  },
+                );
+              },
+            ),
+            const _SectionHeader(title: 'Misc'),
+            const _StringItem(title: 'Ini file editor arguments'),
+            _SwitchItem(
+              text: 'Use Paimon for folders without icons',
+              provider: paimonIconProvider,
+            ),
+            const SizedBox(height: 200),
+          ],
+        ),
       );
 
   Widget _buildLicense(final BuildContext context) => ListTile(
