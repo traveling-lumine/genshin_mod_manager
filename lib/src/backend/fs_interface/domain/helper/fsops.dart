@@ -2,9 +2,7 @@ import 'dart:io';
 
 import 'path_op_string.dart';
 
-List<String> getUnderSync<T extends FileSystemEntity>(
-  final String path,
-) {
+List<String> getUnderSync<T extends FileSystemEntity>(final String path) {
   final dir = Directory(path);
   if (!dir.existsSync()) {
     return [];

@@ -130,13 +130,8 @@ class SettingRoute extends ConsumerWidget {
             text: 'Show enabled mods first',
             provider: displayEnabledModsFirstProvider,
           ),
-          _SwitchItem(
-            text: 'Dark mode',
-            provider: darkModeProvider,
-          ),
-          const _ComboItem(
-            text: 'Target Game',
-          ),
+          _SwitchItem(text: 'Dark mode', provider: darkModeProvider),
+          const _ComboItem(text: 'Target Game'),
           const _SectionHeader(title: 'Themes'),
           const SettingElement(
             text: 'Card colors (hover on the icons to see details)',
@@ -307,10 +302,7 @@ class _ColorChanger extends ConsumerWidget {
       // add a green border to indicate that the color is visible
       brightModeIcon = DecoratedBox(
         decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.green,
-            width: 2,
-          ),
+          border: Border.all(color: Colors.green, width: 2),
           borderRadius: BorderRadius.circular(4),
         ),
         child: brightModeIcon,
@@ -394,9 +386,7 @@ class _ColorPickerDialog extends HookConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final currentColor = useState(
-      ref.watch(
-        cardColorProvider(isBright: isBright, isEnabled: isEnabled),
-      ),
+      ref.watch(cardColorProvider(isBright: isBright, isEnabled: isEnabled)),
     );
     return AlertDialog(
       title: const Text('Pick a color!'),
@@ -429,8 +419,10 @@ class _ColorPickerDialog extends HookConsumerWidget {
           onPressed: () {
             ref
                 .read(
-                  cardColorProvider(isBright: isBright, isEnabled: isEnabled)
-                      .notifier,
+                  cardColorProvider(
+                    isBright: isBright,
+                    isEnabled: isEnabled,
+                  ).notifier,
                 )
                 .setColor(currentColor.value);
             Navigator.of(context).pop();
@@ -457,10 +449,8 @@ class _ComboItem extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(final BuildContext context) => SettingElement(
-        text: text,
-        trailing: const GameSelector(),
-      );
+  Widget build(final BuildContext context) =>
+      SettingElement(text: text, trailing: const GameSelector());
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
@@ -486,10 +476,7 @@ class _PathSelectItem extends StatelessWidget {
   Widget build(final BuildContext context) => SettingElement(
         text: title,
         trailing: RepaintBoundary(
-          child: Button(
-            onPressed: onPressed,
-            child: Icon(icon),
-          ),
+          child: Button(onPressed: onPressed, child: Icon(icon)),
         ),
         subTitle: Consumer(
           builder: (final context, final ref, final child) {
@@ -523,10 +510,7 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(final BuildContext context) => Padding(
         padding: const EdgeInsets.only(top: 24, left: 8, right: 16, bottom: 8),
-        child: Text(
-          title,
-          style: FluentTheme.of(context).typography.subtitle,
-        ),
+        child: Text(title, style: FluentTheme.of(context).typography.subtitle),
       );
 
   @override

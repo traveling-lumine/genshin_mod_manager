@@ -201,20 +201,14 @@ Future<void> _toggleCategory(
   final futures = <Future<void>>[];
   for (final mod in shouldBeOff) {
     final modDir = categoryPath.pJoin(mod);
-    final future = disable(
-      shaderFixesPath: shaderFixes,
-      modPath: modDir,
-    );
+    final future = disable(shaderFixesPath: shaderFixes, modPath: modDir);
     futures.add(future);
   }
   final shouldBeOn =
       shouldBeEnabled.where((final e) => !currentEnabled.contains(e));
   for (final mod in shouldBeOn) {
     final modDir = categoryPath.pJoin(mod.pDisabledForm);
-    final future = enable(
-      shaderFixesPath: shaderFixes,
-      modPath: modDir,
-    );
+    final future = enable(shaderFixesPath: shaderFixes, modPath: modDir);
     futures.add(future);
   }
   await Future.wait(futures);

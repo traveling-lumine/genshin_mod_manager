@@ -3,9 +3,7 @@ import 'dart:io';
 
 import '../entity/ini.dart';
 
-List<IniStatement> parseIniFileUseCase(
-  final IniFile iniFile,
-) {
+List<IniStatement> parseIniFileUseCase(final IniFile iniFile) {
   final lines = File(iniFile.path)
       .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true));
 
@@ -23,11 +21,8 @@ List<IniStatement> parseIniFileUseCase(
 
     final match = sectionNamePattern.firstMatch(line)?.group(0);
     if (match != null) {
-      final newSection = IniStatementSection(
-        iniFile: iniFile,
-        name: match,
-        lineNum: lineNum,
-      );
+      final newSection =
+          IniStatementSection(iniFile: iniFile, name: match, lineNum: lineNum);
       statements.add(newSection);
       lastSection = newSection;
       metKeySection = true;

@@ -26,10 +26,6 @@ class FileSystemInterfaceImpl implements FileSystemInterface {
     } else {
       arg = [pName];
     }
-    await Process.run(
-      'start',
-      ['/b', '/d', pwd, '', ...arg],
-      runInShell: true,
-    );
+    await Process.run('start', ['/b', '/d', pwd, '', ...arg], runInShell: true);
   }
 }

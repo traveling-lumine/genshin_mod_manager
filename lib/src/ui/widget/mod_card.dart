@@ -50,12 +50,7 @@ class _ModCardState extends ConsumerState<ModCard> {
         child: GestureDetector(
           onTap: _onToggle,
           child: Consumer(
-            builder: (
-              final context,
-              final ref,
-              final child,
-            ) =>
-                Card(
+            builder: (final context, final ref, final child) => Card(
               backgroundColor: ref.watch(
                 cardColorProvider(
                   isBright:
@@ -105,10 +100,7 @@ class _ModCardState extends ConsumerState<ModCard> {
             const Icon(FluentIcons.unknown),
             const SizedBox(height: 4),
             RepaintBoundary(
-              child: Button(
-                onPressed: _onPaste,
-                child: const Text('Paste'),
-              ),
+              child: Button(onPressed: _onPaste, child: const Text('Paste')),
             ),
           ],
         ),
@@ -146,9 +138,7 @@ class _ModCardState extends ConsumerState<ModCard> {
             onPressed: _onCommand,
           ),
           _buildIconButton(
-            icon: FluentIcons.delete,
-            onPressed: _onDeletePressed,
-          ),
+              icon: FluentIcons.delete, onPressed: _onDeletePressed),
           _buildIconButton(
             icon: FluentIcons.folder_open,
             onPressed: _onFolderOpen,
@@ -246,9 +236,7 @@ class _ModCardState extends ConsumerState<ModCard> {
         displayInfoBarInContext(
           context,
           title: const Text('Mod deleted'),
-          content: Text(
-            'Mod deleted from ${widget.mod.path}',
-          ),
+          content: Text('Mod deleted from ${widget.mod.path}'),
           severity: InfoBarSeverity.warning,
         ),
       );
@@ -358,9 +346,7 @@ class _ModCardState extends ConsumerState<ModCard> {
     final BuildContext context,
     final String renameTarget,
   ) {
-    _showErrorDialog(
-      '$renameTarget directory already exists!',
-    );
+    _showErrorDialog('$renameTarget directory already exists!');
   }
 
   void _showErrorDialog(final String text) {
@@ -384,16 +370,13 @@ class _ModCardState extends ConsumerState<ModCard> {
   Future<bool> _showImageDeleteConfirmDialog() => showPromptDialog(
         context: context,
         title: 'Delete preview image?',
-        content: const Text(
-          'Are you sure you want to delete the preview image?',
-        ),
+        content:
+            const Text('Are you sure you want to delete the preview image?'),
         confirmButtonLabel: 'Delete',
         redButton: true,
       );
 
-  Future<bool?> _showImageFlyout(
-    final TapUpDetails details,
-  ) async {
+  Future<bool?> _showImageFlyout(final TapUpDetails details) async {
     final targetContext = _contextAttachKey.currentContext;
     if (targetContext == null) {
       return null;
@@ -423,9 +406,7 @@ class _ModCardState extends ConsumerState<ModCard> {
     );
   }
 
-  void _showRenameErrorDialog() => _showErrorDialog(
-        'Failed to rename folder.'
-        ' Check if the ShaderFixes folder is open in explorer,'
-        ' and close it if it is.',
-      );
+  void _showRenameErrorDialog() => _showErrorDialog('Failed to rename folder.'
+      ' Check if the ShaderFixes folder is open in explorer,'
+      ' and close it if it is.');
 }

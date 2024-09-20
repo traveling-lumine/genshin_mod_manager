@@ -43,11 +43,7 @@ class FolderPaneItem extends PaneItem {
       DragTarget<Mod>(
         onAcceptWithDetails: (final details) =>
             _onModDragAccept(context, details),
-        builder: (
-          final context,
-          final candidateData,
-          final rejectedData,
-        ) {
+        builder: (final context, final candidateData, final rejectedData) {
           final content = CategoryDropTarget(
             category: category,
             child: super.build(
@@ -69,18 +65,13 @@ class FolderPaneItem extends PaneItem {
                     blurAmount: 1,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.blue,
-                          width: 5,
-                        ),
+                        border: Border.all(color: Colors.blue, width: 5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
-                        child: Text(
-                          'Drop to move '
-                          '${candidateData.first?.displayName} to '
-                          '${category.name}',
-                        ),
+                        child: Text('Drop to move '
+                            '${candidateData.first?.displayName} to '
+                            '${category.name}'),
                       ),
                     ),
                   ),
@@ -119,9 +110,7 @@ class FolderPaneItem extends PaneItem {
       displayInfoBarInContext(
         context,
         title: const Text('Moved!'),
-        content: Text(
-          'Moved ${details.data.displayName} to ${category.name}',
-        ),
+        content: Text('Moved ${details.data.displayName} to ${category.name}'),
         severity: InfoBarSeverity.success,
       ),
     );
@@ -163,10 +152,7 @@ class FolderPaneItem extends PaneItem {
     }
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: maxIconWidth),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: image,
-      ),
+      child: AspectRatio(aspectRatio: 1, child: image),
     );
   }
 }

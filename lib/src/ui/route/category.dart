@@ -39,20 +39,17 @@ class CategoryRoute extends HookConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    ref.listen(
-      categoriesProvider,
-      (final previous, final next) {
-        final isIn = next.any((final e) => e.name == categoryName);
-        if (!isIn) {
-          context.go(RouteNames.home.name);
-        }
-      },
-    );
+    ref.listen(categoriesProvider, (final previous, final next) {
+      final isIn = next.any((final e) => e.name == categoryName);
+      if (!isIn) {
+        context.go(RouteNames.home.name);
+      }
+    });
 
     final scrollController = useScrollController();
-    final category = ref.watch(categoriesProvider).firstWhereOrNull(
-          (final e) => e.name == categoryName,
-        );
+    final category = ref
+        .watch(categoriesProvider)
+        .firstWhereOrNull((final e) => e.name == categoryName);
 
     if (category == null) {
       return const SizedBox.shrink();
@@ -85,8 +82,12 @@ class CategoryRoute extends HookConsumerWidget {
     return CategoryDropTarget(
       category: category,
       child: ScaffoldPage(
-        header:
-            _buildHeader(category, scrollController, ref, sliverGridDelegate),
+        header: _buildHeader(
+          category,
+          scrollController,
+          ref,
+          sliverGridDelegate,
+        ),
         content: _buildContent(category, scrollController, sliverGridDelegate),
       ),
     );
@@ -104,14 +105,14 @@ class CategoryRoute extends HookConsumerWidget {
       commandBar: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          PresetControlWidget(
-            isLocal: true,
-            category: category,
-          ),
+          PresetControlWidget(isLocal: true, category: category),
           const SizedBox(width: 8),
           Expanded(
-            child:
-                _buildSearchBox(category, scrollController, sliverGridDelegate),
+            child: _buildSearchBox(
+              category,
+              scrollController,
+              sliverGridDelegate,
+            ),
           ),
           IntrinsicCommandBarCard(
             child: CommandBar(

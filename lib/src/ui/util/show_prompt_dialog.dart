@@ -25,9 +25,7 @@ Future<bool> showPromptDialog({
           ),
           if (redButton)
             FluentTheme(
-              data: FluentTheme.of(dCtx).copyWith(
-                accentColor: Colors.red,
-              ),
+              data: FluentTheme.of(dCtx).copyWith(accentColor: Colors.red),
               child: filledButton,
             )
           else

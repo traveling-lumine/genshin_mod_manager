@@ -16,14 +16,11 @@ class LoadingRoute extends HookConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    ref.listen(
-      persistentStorageProvider,
-      (final previous, final next) {
-        if (next.hasValue) {
-          _goToLanding(context, ref);
-        }
-      },
-    );
+    ref.listen(persistentStorageProvider, (final previous, final next) {
+      if (next.hasValue) {
+        _goToLanding(context, ref);
+      }
+    });
     return ref.watch(persistentStorageProvider).when(
           data: (final data) => _buildData(data, ref),
           error: (final error, final stackTrace) => _buildError(error, ref),
@@ -46,11 +43,7 @@ class LoadingRoute extends HookConsumerWidget {
     );
   }
 
-  Widget _buildError(
-    final Object error,
-    final WidgetRef ref,
-  ) =>
-      _TitledNavView(
+  Widget _buildError(final Object error, final WidgetRef ref) => _TitledNavView(
         title: 'Error!',
         children: [
           Text('Error: $error'),
@@ -85,9 +78,7 @@ class LoadingRoute extends HookConsumerWidget {
 
   void _goToLanding(final BuildContext context, final WidgetRef ref) {
     final gamesEmpty = ref.read(gamesListProvider).isEmpty;
-    context.go(
-      gamesEmpty ? RouteNames.firstpage.name : RouteNames.home.name,
-    );
+    context.go(gamesEmpty ? RouteNames.firstpage.name : RouteNames.home.name);
   }
 }
 

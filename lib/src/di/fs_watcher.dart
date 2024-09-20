@@ -87,7 +87,6 @@ Stream<FileSystemEvent> fileEventSnapshot(
       ),
     );
 
-
 @riverpod
 class FolderIconPath extends _$FolderIconPath {
   @override

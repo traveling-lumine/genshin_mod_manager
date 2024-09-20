@@ -24,10 +24,8 @@ void setCardColorUseCase(
   required final bool isBright,
   required final bool isEnabled,
 }) {
-  final accessKey = _getCardColorAccessKeyUseCase(
-    isBright: isBright,
-    isEnabled: isEnabled,
-  );
+  final accessKey =
+      _getCardColorAccessKeyUseCase(isBright: isBright, isEnabled: isEnabled);
   repository?.setInt(accessKey, color.value);
 }
 

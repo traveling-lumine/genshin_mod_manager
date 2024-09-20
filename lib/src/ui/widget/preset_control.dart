@@ -191,9 +191,7 @@ class _PresetComboBox extends ConsumerWidget {
   PresetNotifier _getNotifier(final WidgetRef ref) {
     final PresetNotifier notifier;
     if (isLocal) {
-      notifier = ref.read(
-        localPresetNotifierProvider(category!).notifier,
-      );
+      notifier = ref.read(localPresetNotifierProvider(category!).notifier);
     } else {
       notifier = ref.read(globalPresetNotifierProvider.notifier);
     }

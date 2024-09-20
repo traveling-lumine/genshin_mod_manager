@@ -42,9 +42,7 @@ class CategoryDropTarget extends HookConsumerWidget {
       child: Stack(
         children: [
           child,
-          Positioned.fill(
-            child: _buildDropHint(ref, state),
-          ),
+          Positioned.fill(child: _buildDropHint(ref, state)),
         ],
       ),
     );
@@ -80,15 +78,10 @@ class CategoryDropTarget extends HookConsumerWidget {
           blurAmount: 1,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.blue,
-                width: 5,
-              ),
+              border: Border.all(color: Colors.blue, width: 5),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Center(
-              child: text,
-            ),
+            child: Center(child: text),
           ),
         ),
       ),
@@ -124,9 +117,7 @@ class CategoryDropTarget extends HookConsumerWidget {
     }
     if (result.exists.isNotEmpty) {
       final join = result.exists
-          .map(
-            (final e) => "'${e.source}' -> '${e.destination}'",
-          )
+          .map((final e) => "'${e.source}' -> '${e.destination}'")
           .join('\n');
       final dragImportType = switch (moveInsteadOfCopy) {
         DragImportType.move => 'moved',

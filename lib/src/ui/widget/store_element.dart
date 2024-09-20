@@ -39,9 +39,7 @@ class StoreElement extends ConsumerWidget {
       buttons.add(
         CommandBarButton(
           onPressed: () => openUrl(arcaUrl),
-          icon: const ImageIcon(
-            AssetImage('images/arca_logo.png'),
-          ),
+          icon: const ImageIcon(AssetImage('images/arca_logo.png')),
         ),
       );
     }
@@ -61,13 +59,8 @@ class StoreElement extends ConsumerWidget {
     return Card(
       child: Column(
         children: [
-          Expanded(
-            child: _buildDescriptionColumn(context, buttons),
-          ),
-          Expanded(
-            flex: 2,
-            child: _buildPreview(context),
-          ),
+          Expanded(child: _buildDescriptionColumn(context, buttons)),
+          Expanded(flex: 2, child: _buildPreview(context)),
         ],
       ),
     );
@@ -129,10 +122,7 @@ class StoreElement extends ConsumerWidget {
             ),
           ),
         ),
-        const Expanded(
-          flex: 0,
-          child: SizedBox(),
-        ),
+        const Expanded(flex: 0, child: SizedBox()),
         if (element.tags.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 10),
@@ -153,15 +143,11 @@ class StoreElement extends ConsumerWidget {
                     color = Colors.red;
                   }
                   return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 1,
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                     margin: const EdgeInsets.symmetric(horizontal: 2),
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: color,
-                      ),
+                      border: Border.all(color: color),
                       borderRadius: BorderRadius.circular(100),
                     ),
                     child: Text(
@@ -195,10 +181,7 @@ class StoreElement extends ConsumerWidget {
                     Colors.black.withOpacity(0.6),
                     BlendMode.darken,
                   ),
-                  child: Image(
-                    image: imageProvider,
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image(image: imageProvider, fit: BoxFit.cover),
                 ),
               ),
             ),
@@ -206,10 +189,7 @@ class StoreElement extends ConsumerWidget {
           Center(
             child: GestureDetector(
               onTap: () async => _showImageDialog(context, imageProvider),
-              child: Image(
-                image: imageProvider,
-                fit: BoxFit.contain,
-              ),
+              child: Image(image: imageProvider, fit: BoxFit.contain),
             ),
           ),
         ],
@@ -254,10 +234,7 @@ class StoreElement extends ConsumerWidget {
         builder: (final dialogContext) => GestureDetector(
           onTap: Navigator.of(dialogContext).pop,
           onSecondaryTap: Navigator.of(dialogContext).pop,
-          child: Image(
-            image: image,
-            fit: BoxFit.contain,
-          ),
+          child: Image(image: image, fit: BoxFit.contain),
         ),
       );
 }

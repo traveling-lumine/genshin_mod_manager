@@ -57,11 +57,18 @@ class GameSelector extends HookConsumerWidget {
                       if (Navigator.of(context).canPop()) {
                         Navigator.of(context).pop();
                       }
-                      _onGameDelete(context, TextEditingController(), ref, e);
+                      _onGameDelete(
+                        context,
+                        TextEditingController(),
+                        ref,
+                        e,
+                      );
                     },
                     child: ConstrainedBox(
-                      constraints:
-                          const BoxConstraints(minWidth: 50, maxWidth: 200),
+                      constraints: const BoxConstraints(
+                        minWidth: 50,
+                        maxWidth: 200,
+                      ),
                       child: Text(e),
                     ),
                   ),
@@ -155,9 +162,7 @@ class GameSelector extends HookConsumerWidget {
               child: const Text('Cancel'),
             ),
             FluentTheme(
-              data: FluentThemeData(
-                accentColor: Colors.red,
-              ),
+              data: FluentThemeData(accentColor: Colors.red),
               child: FilledButton(
                 onPressed: () {
                   Navigator.of(dCtx).pop();

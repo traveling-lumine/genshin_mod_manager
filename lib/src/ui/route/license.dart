@@ -53,9 +53,7 @@ class OssLicensesRoute extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) => NavigationView(
-        appBar: const NavigationAppBar(
-          title: Text('Open Source Licenses'),
-        ),
+        appBar: const NavigationAppBar(title: Text('Open Source Licenses')),
         content: ScaffoldPage(
           content: FutureBuilder<List<Package>>(
             future: _licenses,
@@ -102,18 +100,15 @@ class _MiscOssLicenseSingle extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) => NavigationView(
-        appBar: NavigationAppBar(
-          title: Text('${package.name} ${package.version}'),
-        ),
+        appBar:
+            NavigationAppBar(title: Text('${package.name} ${package.version}')),
         content: ScaffoldPage(
           content: ListView(
             children: <Widget>[
               if (package.description.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
-                  child: Text(
-                    package.description,
-                  ),
+                  child: Text(package.description),
                 ),
               if (package.homepage != null)
                 Padding(

@@ -79,10 +79,8 @@ Future<void> extractArchiveToDiskAsync(
     if (asyncWrite) {
       if (file.isSymbolicLink) {
         final link = Link(filePath);
-        await link.create(
-          path.normalize(file.nameOfLinkedFile),
-          recursive: true,
-        );
+        await link.create(path.normalize(file.nameOfLinkedFile),
+            recursive: true);
       } else {
         final output = File(filePath);
         final f = await output.create(recursive: true);

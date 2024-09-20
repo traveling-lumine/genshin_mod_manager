@@ -2,10 +2,7 @@ import 'dart:io';
 
 import '../helper/copy_directory.dart';
 
-void moveDirUseCase(
-  final Directory sourceDir,
-  final String newPath,
-) {
+void moveDirUseCase(final Directory sourceDir, final String newPath) {
   try {
     sourceDir.renameSync(newPath);
   } on FileSystemException catch (e) {

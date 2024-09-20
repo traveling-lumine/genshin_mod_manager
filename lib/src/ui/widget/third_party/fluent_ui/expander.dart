@@ -105,27 +105,17 @@ class Expander2 extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty<Duration>(
-        'animationDuration',
-        animationDuration,
-      ))
+      ..add(
+          DiagnosticsProperty<Duration>('animationDuration', animationDuration))
       ..add(DiagnosticsProperty<Curve>('animationCurve', animationCurve))
-      ..add(DiagnosticsProperty<ExpanderDirection>(
-        'direction',
-        direction,
-        defaultValue: ExpanderDirection.down,
-      ))
-      ..add(DiagnosticsProperty<bool>(
-        'initiallyExpanded',
-        initiallyExpanded,
-        defaultValue: false,
-      ))
+      ..add(DiagnosticsProperty<ExpanderDirection>('direction', direction,
+          defaultValue: ExpanderDirection.down))
+      ..add(DiagnosticsProperty<bool>('initiallyExpanded', initiallyExpanded,
+          defaultValue: false))
       ..add(ColorProperty('contentBackgroundColor', contentBackgroundColor))
       ..add(DiagnosticsProperty<EdgeInsetsGeometry>(
-        'contentPadding',
-        contentPadding,
-        defaultValue: const EdgeInsets.all(16.0),
-      ));
+          'contentPadding', contentPadding,
+          defaultValue: const EdgeInsets.all(16.0)));
   }
 
   @override
@@ -163,17 +153,13 @@ class ExpanderState extends State<Expander2>
 
   void _handlePressed() {
     if (_isExpanded) {
-      _controller.animateTo(
-        0.0,
-        duration: widget.animationDuration ?? _theme.mediumAnimationDuration,
-        curve: widget.animationCurve ?? _theme.animationCurve,
-      );
+      _controller.animateTo(0.0,
+          duration: widget.animationDuration ?? _theme.mediumAnimationDuration,
+          curve: widget.animationCurve ?? _theme.animationCurve);
       _isExpanded = false;
     } else {
-      _controller.animateTo(
-        1.0,
-        duration: widget.animationDuration ?? _theme.mediumAnimationDuration,
-      );
+      _controller.animateTo(1.0,
+          duration: widget.animationDuration ?? _theme.mediumAnimationDuration);
       _isExpanded = true;
     }
     PageStorage.of(context).writeState(context, _isExpanded);
@@ -200,177 +186,113 @@ class ExpanderState extends State<Expander2>
     if (content == null) {
       final children = [
         Container(
-          constraints: const BoxConstraints(
-            minHeight: 42.0,
-          ),
-          decoration: ShapeDecoration(
-            color: theme.resources.cardBackgroundFillColorDefault,
-            shape: widget.headerShape?.call(_isExpanded) ??
-                RoundedRectangleBorder(
-                  side: BorderSide(
-                    color: theme.resources.cardStrokeColorDefault,
-                  ),
-                  borderRadius: BorderRadius.vertical(
-                    top: const Radius.circular(6.0),
-                    bottom: Radius.circular(_isExpanded ? 0.0 : 6.0),
-                  ),
-                ),
-          ),
-          alignment: AlignmentDirectional.centerStart,
-          child: Row(mainAxisSize: MainAxisSize.max, children: [
-            if (widget.leading != null)
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 10.0),
-                child: widget.leading!,
-              ),
-            Expanded(child: widget.header),
-            if (widget.trailing != null)
-              Padding(
-                padding: const EdgeInsetsDirectional.only(start: 20.0),
-                child: widget.trailing!,
-              ),
-            SizedBox(
-              width: widget.trailing != null ? 16.0 : 28.0,
-            ),
-          ]),
-        ),
+            constraints: const BoxConstraints(minHeight: 42.0),
+            decoration: ShapeDecoration(
+                color: theme.resources.cardBackgroundFillColorDefault,
+                shape: widget.headerShape?.call(_isExpanded) ??
+                    RoundedRectangleBorder(
+                        side: BorderSide(
+                            color: theme.resources.cardStrokeColorDefault),
+                        borderRadius: BorderRadius.vertical(
+                            top: const Radius.circular(6.0),
+                            bottom: Radius.circular(_isExpanded ? 0.0 : 6.0)))),
+            alignment: AlignmentDirectional.centerStart,
+            child: Row(mainAxisSize: MainAxisSize.max, children: [
+              if (widget.leading != null)
+                Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 10.0),
+                    child: widget.leading!),
+              Expanded(child: widget.header),
+              if (widget.trailing != null)
+                Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 20.0),
+                    child: widget.trailing!),
+              SizedBox(width: widget.trailing != null ? 16.0 : 28.0),
+            ])),
       ];
       return Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: _isDown ? children : children.reversed.toList(),
-      );
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: _isDown ? children : children.reversed.toList());
     }
 
     final children = [
       // HEADER
       HoverButton(
-        onPressed: _handlePressed,
-        hitTestBehavior: HitTestBehavior.deferToChild,
-        builder: (context, states) {
-          return Container(
-            constraints: const BoxConstraints(
-              minHeight: 42.0,
-            ),
-            decoration: ShapeDecoration(
-              color: widget.headerBackgroundColor?.resolve(states) ??
-                  theme.resources.cardBackgroundFillColorDefault,
-              shape: widget.headerShape?.call(_isExpanded) ??
-                  RoundedRectangleBorder(
-                    side: BorderSide(
-                      color: theme.resources.cardStrokeColorDefault,
-                    ),
-                    borderRadius: BorderRadius.vertical(
-                      top: const Radius.circular(6.0),
-                      bottom: Radius.circular(_isExpanded ? 0.0 : 6.0),
-                    ),
-                  ),
-            ),
-            alignment: AlignmentDirectional.centerStart,
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              if (widget.leading != null)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 10.0),
-                  child: widget.leading!,
-                ),
-              Expanded(child: widget.header),
-              if (widget.trailing != null)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(start: 20.0),
-                  child: widget.trailing!,
-                ),
-              Padding(
-                padding: EdgeInsetsDirectional.only(
-                  start: widget.trailing != null ? 8.0 : 20.0,
-                  end: 8.0,
-                  top: 8.0,
-                  bottom: 8.0,
-                ),
-                child: FocusBorder(
-                  focused: states.isFocused,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0,
-                      vertical: 10.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: ButtonThemeData.uncheckedInputColor(
-                        _theme,
-                        states,
-                        transparentWhenNone: true,
-                      ),
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                    child: widget.icon ??
-                        RotationTransition(
-                          turns: Tween<double>(
-                            begin: 0,
-                            end: 0.5,
-                          ).animate(CurvedAnimation(
-                            parent: _controller,
-                            curve: Interval(
-                              0.5,
-                              1.0,
-                              curve: widget.animationCurve ??
-                                  _theme.animationCurve,
-                            ),
-                          )),
-                          child: AnimatedSlide(
-                            duration: theme.fastAnimationDuration,
-                            curve: Curves.easeInCirc,
-                            offset: states.isPressed
-                                ? const Offset(0, 0.1)
-                                : Offset.zero,
-                            child: Icon(
-                              _isDown
-                                  ? FluentIcons.chevron_down
-                                  : FluentIcons.chevron_up,
-                              size: 8.0,
-                            ),
-                          ),
-                        ),
-                  ),
-                ),
-              ),
-            ]),
-          );
-        },
-      ),
+          onPressed: _handlePressed,
+          hitTestBehavior: HitTestBehavior.deferToChild,
+          builder: (context, states) {
+            return Container(
+                constraints: const BoxConstraints(minHeight: 42.0),
+                decoration: ShapeDecoration(
+                    color: widget.headerBackgroundColor?.resolve(states) ??
+                        theme.resources.cardBackgroundFillColorDefault,
+                    shape: widget.headerShape?.call(_isExpanded) ??
+                        RoundedRectangleBorder(
+                            side: BorderSide(
+                                color: theme.resources.cardStrokeColorDefault),
+                            borderRadius: BorderRadius.vertical(
+                                top: const Radius.circular(6.0),
+                                bottom:
+                                    Radius.circular(_isExpanded ? 0.0 : 6.0)))),
+                alignment: AlignmentDirectional.centerStart,
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  if (widget.leading != null)
+                    Padding(
+                        padding: const EdgeInsetsDirectional.only(end: 10.0),
+                        child: widget.leading!),
+                  Expanded(child: widget.header),
+                  if (widget.trailing != null)
+                    Padding(
+                        padding: const EdgeInsetsDirectional.only(start: 20.0),
+                        child: widget.trailing!),
+                  Padding(
+                      padding: EdgeInsetsDirectional.only(
+                          start: widget.trailing != null ? 8.0 : 20.0,
+                          end: 8.0,
+                          top: 8.0,
+                          bottom: 8.0),
+                      child: FocusBorder(
+                          focused: states.isFocused,
+                          child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10.0, vertical: 10.0),
+                              decoration: BoxDecoration(
+                                  color: ButtonThemeData.uncheckedInputColor(_theme, states,
+                                      transparentWhenNone: true),
+                                  borderRadius: BorderRadius.circular(6.0)),
+                              child: widget.icon ??
+                                  RotationTransition(
+                                      turns: Tween<double>(begin: 0, end: 0.5)
+                                          .animate(CurvedAnimation(
+                                              parent: _controller,
+                                              curve: Interval(0.5, 1.0,
+                                                  curve: widget.animationCurve ?? _theme.animationCurve))),
+                                      child: AnimatedSlide(duration: theme.fastAnimationDuration, curve: Curves.easeInCirc, offset: states.isPressed ? const Offset(0, 0.1) : Offset.zero, child: Icon(_isDown ? FluentIcons.chevron_down : FluentIcons.chevron_up, size: 8.0)))))),
+                ]));
+          }),
       SizeTransition(
-        sizeFactor: CurvedAnimation(
-          curve: Interval(
-            0.0,
-            0.5,
-            curve: widget.animationCurve ?? _theme.animationCurve,
-          ),
-          parent: _controller,
-        ),
-        child: Container(
-          width: double.infinity,
-          padding: widget.contentPadding,
-          decoration: ShapeDecoration(
-            shape: widget.contentShape?.call(_isExpanded) ??
-                RoundedRectangleBorder(
-                  side: BorderSide(
-                    color: theme.resources.cardStrokeColorDefault,
-                  ),
-                  borderRadius:
-                      const BorderRadius.vertical(bottom: Radius.circular(6.0)),
-                ),
-            color: widget.contentBackgroundColor ??
-                theme.resources.cardBackgroundFillColorSecondary,
-          ),
-          child: ExcludeFocus(
-            excluding: !_isExpanded,
-            child: content,
-          ),
-        ),
-      ),
+          sizeFactor: CurvedAnimation(
+              curve: Interval(0.0, 0.5,
+                  curve: widget.animationCurve ?? _theme.animationCurve),
+              parent: _controller),
+          child: Container(
+              width: double.infinity,
+              padding: widget.contentPadding,
+              decoration: ShapeDecoration(
+                  shape: widget.contentShape?.call(_isExpanded) ??
+                      RoundedRectangleBorder(
+                          side: BorderSide(
+                              color: theme.resources.cardStrokeColorDefault),
+                          borderRadius: const BorderRadius.vertical(
+                              bottom: Radius.circular(6.0))),
+                  color: widget.contentBackgroundColor ??
+                      theme.resources.cardBackgroundFillColorSecondary),
+              child: ExcludeFocus(excluding: !_isExpanded, child: content))),
     ];
     return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: _isDown ? children : children.reversed.toList(),
-    );
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: _isDown ? children : children.reversed.toList());
   }
 }

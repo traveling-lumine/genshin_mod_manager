@@ -6,19 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 typedef AutoSuggestBoxSorter<T> = List<AutoSuggestBoxItem2<T>> Function(
-  String text,
-  List<AutoSuggestBoxItem2<T>> items,
-);
+    String text, List<AutoSuggestBoxItem2<T>> items);
 
 typedef OnChangeAutoSuggestBox<T> = void Function(
-  String text,
-  TextChangedReason reason,
-);
+    String text, TextChangedReason reason);
 
 typedef AutoSuggestBoxItemBuilder<T> = Widget Function(
-  BuildContext context,
-  AutoSuggestBoxItem2<T> item,
-);
+    BuildContext context, AutoSuggestBoxItem2<T> item);
 
 /// An item used in [AutoSuggestBox2]
 class AutoSuggestBoxItem2<T> {
@@ -349,36 +343,25 @@ class AutoSuggestBox2<T> extends StatefulWidget {
     properties
       ..add(IterableProperty<AutoSuggestBoxItem2<T>>('items', items))
       ..add(ObjectFlagProperty<ValueChanged<AutoSuggestBoxItem2<T>>?>(
-        'onSelected',
-        onSelected,
-        ifNull: 'disabled',
-      ))
-      ..add(FlagProperty(
-        'clearButtonEnabled',
-        value: clearButtonEnabled,
-        defaultValue: true,
-        ifFalse: 'clear button disabled',
-      ))
-      ..add(FlagProperty(
-        'enableKeyboardControls',
-        value: enableKeyboardControls,
-        defaultValue: true,
-        ifFalse: 'keyboard controls disabled',
-      ))
-      ..add(DoubleProperty(
-        'maxPopupHeight',
-        maxPopupHeight,
-        defaultValue: kAutoSuggestBoxPopupMaxHeight,
-      ));
+          'onSelected', onSelected,
+          ifNull: 'disabled'))
+      ..add(FlagProperty('clearButtonEnabled',
+          value: clearButtonEnabled,
+          defaultValue: true,
+          ifFalse: 'clear button disabled'))
+      ..add(FlagProperty('enableKeyboardControls',
+          value: enableKeyboardControls,
+          defaultValue: true,
+          ifFalse: 'keyboard controls disabled'))
+      ..add(DoubleProperty('maxPopupHeight', maxPopupHeight,
+          defaultValue: kAutoSuggestBoxPopupMaxHeight));
   }
 
   /// The default item sorter.
   ///
   /// This sorter will filter the items based on their label.
   List<AutoSuggestBoxItem2<T>> defaultItemSorter(
-    String text,
-    List<AutoSuggestBoxItem2<T>> items,
-  ) {
+      String text, List<AutoSuggestBoxItem2<T>> items) {
     text = text.trim();
     if (text.isEmpty) return items;
 
@@ -392,9 +375,8 @@ class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
   late FocusNode _focusNode = widget.focusNode ?? FocusNode();
   OverlayEntry? _entry;
   final LayerLink _layerLink = LayerLink();
-  final GlobalKey _textBoxKey = GlobalKey(
-    debugLabel: "AutoSuggestBox's TextBox Key",
-  );
+  final GlobalKey _textBoxKey =
+      GlobalKey(debugLabel: "AutoSuggestBox's TextBox Key");
 
   late TextEditingController _controller;
   final FocusScopeNode _overlayNode = FocusScopeNode();
@@ -507,11 +489,8 @@ class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
   bool get isOverlayVisible => _entry != null;
 
   void _insertOverlay() {
-    final overlayState = Overlay.of(
-      context,
-      rootOverlay: true,
-      debugRequiredFor: widget,
-    );
+    final overlayState =
+        Overlay.of(context, rootOverlay: true, debugRequiredFor: widget);
 
     _entry = OverlayEntry(builder: (context) {
       assert(debugCheckHasMediaQuery(context));
@@ -522,63 +501,53 @@ class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
       final box = boxContext.findRenderObject() as RenderBox;
 
       // ancestor is not necessary here because we are not dealing with routes, but overlays
-      final globalOffset = box.localToGlobal(
-        Offset.zero,
-        ancestor: overlayState.context.findRenderObject(),
-      );
+      final globalOffset = box.localToGlobal(Offset.zero,
+          ancestor: overlayState.context.findRenderObject());
 
       final screenHeight = MediaQuery.sizeOf(context).height -
           MediaQuery.viewPaddingOf(context).bottom;
       final overlayY = globalOffset.dy + box.size.height;
-      final maxHeight = (screenHeight - overlayY).clamp(
-        0.0,
-        widget.maxPopupHeight,
-      );
+      final maxHeight =
+          (screenHeight - overlayY).clamp(0.0, widget.maxPopupHeight);
 
       Widget child = PositionedDirectional(
-        width: box.size.width,
-        child: CompositedTransformFollower(
-          link: _layerLink,
-          showWhenUnlinked: false,
-          offset: Offset(0, box.size.height + 0.8),
-          child: SizedBox(
-            width: box.size.width,
-            child: FluentTheme(
-              data: FluentTheme.of(context),
-              child: _AutoSuggestBoxOverlay2<T>(
-                maxHeight: maxHeight,
-                node: _overlayNode,
-                controller: _controller,
-                items: widget.items,
-                itemBuilder: widget.itemBuilder,
-                focusStream: _focusStreamController.stream,
-                itemsStream: _dynamicItemsController.stream,
-                sorter: sorter,
-                onSelected: (AutoSuggestBoxItem2<T> item) {
-                  item.onSelected?.call();
-                  widget.onSelected?.call(item);
-                  _controller
-                    ..text = item.label
-                    ..selection = TextSelection.collapsed(
-                      offset: item.label.length,
-                    );
-                  widget.onChanged?.call(
-                    item.label,
-                    TextChangedReason.suggestionChosen,
-                  );
+          width: box.size.width,
+          child: CompositedTransformFollower(
+              link: _layerLink,
+              showWhenUnlinked: false,
+              offset: Offset(0, box.size.height + 0.8),
+              child: SizedBox(
+                  width: box.size.width,
+                  child: FluentTheme(
+                      data: FluentTheme.of(context),
+                      child: _AutoSuggestBoxOverlay2<T>(
+                          maxHeight: maxHeight,
+                          node: _overlayNode,
+                          controller: _controller,
+                          items: widget.items,
+                          itemBuilder: widget.itemBuilder,
+                          focusStream: _focusStreamController.stream,
+                          itemsStream: _dynamicItemsController.stream,
+                          sorter: sorter,
+                          onSelected: (AutoSuggestBoxItem2<T> item) {
+                            item.onSelected?.call();
+                            widget.onSelected?.call(item);
+                            _controller
+                              ..text = item.label
+                              ..selection = TextSelection.collapsed(
+                                  offset: item.label.length);
+                            widget.onChanged?.call(
+                                item.label, TextChangedReason.suggestionChosen);
 
-                  // After selected, the overlay is dismissed and the text box is
-                  // unfocused
-                  dismissOverlay();
-                  _focusNode.unfocus(
-                      disposition: UnfocusDisposition.previouslyFocusedChild);
-                },
-                noResultsFoundBuilder: widget.noResultsFoundBuilder,
-              ),
-            ),
-          ),
-        ),
-      );
+                            // After selected, the overlay is dismissed and the text box is
+                            // unfocused
+                            dismissOverlay();
+                            _focusNode.unfocus(
+                                disposition:
+                                    UnfocusDisposition.previouslyFocusedChild);
+                          },
+                          noResultsFoundBuilder:
+                              widget.noResultsFoundBuilder)))));
 
       if (DisableAcrylic.of(context) != null) {
         child = DisableAcrylic(child: child);
@@ -620,9 +589,8 @@ class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
   }
 
   void _onSubmitted() {
-    final currentlySelectedIndex = _localItems.indexWhere(
-      (item) => item._selected,
-    );
+    final currentlySelectedIndex =
+        _localItems.indexWhere((item) => item._selected);
     if (currentlySelectedIndex.isNegative) {
       widget.onSubmissionFailed?.call(_controller.text);
       return;
@@ -650,152 +618,144 @@ class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
     final suffix = Row(mainAxisSize: MainAxisSize.min, children: [
       if (widget.clearButtonEnabled && _controller.text.isNotEmpty)
         Padding(
-          padding: const EdgeInsetsDirectional.only(start: 2.0),
-          child: IconButton(
-            icon: const Icon(FluentIcons.chrome_close, size: 9.0),
-            onPressed: () {
-              _controller.clear();
-              widget.onChanged?.call(
-                _controller.text,
-                TextChangedReason.cleared,
-              );
-            },
-          ),
-        ),
+            padding: const EdgeInsetsDirectional.only(start: 2.0),
+            child: IconButton(
+                icon: const Icon(FluentIcons.chrome_close, size: 9.0),
+                onPressed: () {
+                  _controller.clear();
+                  widget.onChanged
+                      ?.call(_controller.text, TextChangedReason.cleared);
+                })),
       if (widget.trailingIcon != null) widget.trailingIcon!,
     ]);
 
     return CompositedTransformTarget(
-      link: _layerLink,
-      child: Focus(
-        skipTraversal: true,
-        onKeyEvent: (node, event) {
-          if (!(event is KeyDownEvent || event is KeyRepeatEvent) ||
-              !widget.enableKeyboardControls) {
-            return KeyEventResult.ignored;
-          }
-
-          if (event.logicalKey == LogicalKeyboardKey.escape) {
-            dismissOverlay();
-            return KeyEventResult.handled;
-          }
-
-          if (_localItems.isEmpty) return KeyEventResult.ignored;
-
-          final currentlySelectedIndex = _localItems.indexWhere(
-            (item) => item._selected,
-          );
-
-          void select(int index) {
-            _unselectAll();
-            final item = (_localItems[index]).._selected = true;
-            item.onFocusChange?.call(true);
-            _focusStreamController.add(index);
-          }
-
-          final lastIndex = _localItems.length - 1;
-
-          if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-            // if nothing is selected, select the first
-            if (currentlySelectedIndex == -1 ||
-                currentlySelectedIndex == lastIndex) {
-              select(0);
-            } else if (currentlySelectedIndex >= 0) {
-              select(currentlySelectedIndex + 1);
-            }
-            return KeyEventResult.handled;
-          } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-            // if nothing is selected, select the last
-            if (currentlySelectedIndex == -1 || currentlySelectedIndex == 0) {
-              select(_localItems.length - 1);
-            } else {
-              select(currentlySelectedIndex - 1);
-            }
-            return KeyEventResult.handled;
-          } else {
-            return KeyEventResult.ignored;
-          }
-        },
-        child: LayoutBuilder(builder: (context, constraints) {
-          _width ??= constraints.maxWidth;
-          if (_width! != constraints.maxWidth) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_entry != null && _entry!.mounted) {
-                _entry!.remove();
-                _entry = null;
-                showOverlay();
+        link: _layerLink,
+        child: Focus(
+            skipTraversal: true,
+            onKeyEvent: (node, event) {
+              if (!(event is KeyDownEvent || event is KeyRepeatEvent) ||
+                  !widget.enableKeyboardControls) {
+                return KeyEventResult.ignored;
               }
-            });
-            _width = constraints.maxWidth;
-          }
 
-          if (isForm) {
-            return TextFormBox(
-              key: _textBoxKey,
-              controller: _controller,
-              focusNode: _focusNode,
-              autofocus: widget.autofocus,
-              placeholder: widget.placeholder,
-              placeholderStyle: widget.placeholderStyle,
-              clipBehavior: Clip.antiAliasWithSaveLayer,
-              prefix: widget.leadingIcon,
-              suffix: suffix,
-              onChanged: _onChanged,
-              onSaved: print,
-              onFieldSubmitted: (text) => _onSubmitted(),
-              style: widget.style,
-              decoration: widget.decoration,
-              highlightColor: widget.highlightColor,
-              unfocusedColor: widget.unfocusedColor,
-              cursorColor: widget.cursorColor,
-              cursorHeight: widget.cursorHeight,
-              cursorRadius: widget.cursorRadius,
-              cursorWidth: widget.cursorWidth,
-              showCursor: widget.showCursor,
-              scrollPadding: widget.scrollPadding,
-              selectionHeightStyle: widget.selectionHeightStyle,
-              selectionWidthStyle: widget.selectionWidthStyle,
-              validator: widget.validator,
-              autovalidateMode: widget.autovalidateMode,
-              textInputAction: widget.textInputAction,
-              keyboardAppearance: widget.keyboardAppearance,
-              enabled: widget.enabled,
-              inputFormatters: widget.inputFormatters,
-            );
-          }
-          return TextBox(
-            key: _textBoxKey,
-            controller: _controller,
-            focusNode: _focusNode,
-            autofocus: widget.autofocus,
-            placeholder: widget.placeholder,
-            placeholderStyle: widget.placeholderStyle,
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            prefix: widget.leadingIcon,
-            suffix: suffix,
-            onChanged: _onChanged,
-            onSubmitted: (text) => _onSubmitted(),
-            style: widget.style,
-            decoration: widget.decoration,
-            foregroundDecoration: widget.foregroundDecoration,
-            highlightColor: widget.highlightColor,
-            unfocusedColor: widget.unfocusedColor,
-            cursorColor: widget.cursorColor,
-            cursorHeight: widget.cursorHeight,
-            cursorRadius: widget.cursorRadius,
-            cursorWidth: widget.cursorWidth,
-            showCursor: widget.showCursor,
-            scrollPadding: widget.scrollPadding,
-            selectionHeightStyle: widget.selectionHeightStyle,
-            selectionWidthStyle: widget.selectionWidthStyle,
-            textInputAction: widget.textInputAction,
-            keyboardAppearance: widget.keyboardAppearance,
-            enabled: widget.enabled,
-            inputFormatters: widget.inputFormatters,
-          );
-        }),
-      ),
-    );
+              if (event.logicalKey == LogicalKeyboardKey.escape) {
+                dismissOverlay();
+                return KeyEventResult.handled;
+              }
+
+              if (_localItems.isEmpty) return KeyEventResult.ignored;
+
+              final currentlySelectedIndex =
+                  _localItems.indexWhere((item) => item._selected);
+
+              void select(int index) {
+                _unselectAll();
+                final item = (_localItems[index]).._selected = true;
+                item.onFocusChange?.call(true);
+                _focusStreamController.add(index);
+              }
+
+              final lastIndex = _localItems.length - 1;
+
+              if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                // if nothing is selected, select the first
+                if (currentlySelectedIndex == -1 ||
+                    currentlySelectedIndex == lastIndex) {
+                  select(0);
+                } else if (currentlySelectedIndex >= 0) {
+                  select(currentlySelectedIndex + 1);
+                }
+                return KeyEventResult.handled;
+              } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                // if nothing is selected, select the last
+                if (currentlySelectedIndex == -1 ||
+                    currentlySelectedIndex == 0) {
+                  select(_localItems.length - 1);
+                } else {
+                  select(currentlySelectedIndex - 1);
+                }
+                return KeyEventResult.handled;
+              } else {
+                return KeyEventResult.ignored;
+              }
+            },
+            child: LayoutBuilder(builder: (context, constraints) {
+              _width ??= constraints.maxWidth;
+              if (_width! != constraints.maxWidth) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_entry != null && _entry!.mounted) {
+                    _entry!.remove();
+                    _entry = null;
+                    showOverlay();
+                  }
+                });
+                _width = constraints.maxWidth;
+              }
+
+              if (isForm) {
+                return TextFormBox(
+                    key: _textBoxKey,
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    autofocus: widget.autofocus,
+                    placeholder: widget.placeholder,
+                    placeholderStyle: widget.placeholderStyle,
+                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                    prefix: widget.leadingIcon,
+                    suffix: suffix,
+                    onChanged: _onChanged,
+                    onSaved: print,
+                    onFieldSubmitted: (text) => _onSubmitted(),
+                    style: widget.style,
+                    decoration: widget.decoration,
+                    highlightColor: widget.highlightColor,
+                    unfocusedColor: widget.unfocusedColor,
+                    cursorColor: widget.cursorColor,
+                    cursorHeight: widget.cursorHeight,
+                    cursorRadius: widget.cursorRadius,
+                    cursorWidth: widget.cursorWidth,
+                    showCursor: widget.showCursor,
+                    scrollPadding: widget.scrollPadding,
+                    selectionHeightStyle: widget.selectionHeightStyle,
+                    selectionWidthStyle: widget.selectionWidthStyle,
+                    validator: widget.validator,
+                    autovalidateMode: widget.autovalidateMode,
+                    textInputAction: widget.textInputAction,
+                    keyboardAppearance: widget.keyboardAppearance,
+                    enabled: widget.enabled,
+                    inputFormatters: widget.inputFormatters);
+              }
+              return TextBox(
+                  key: _textBoxKey,
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  autofocus: widget.autofocus,
+                  placeholder: widget.placeholder,
+                  placeholderStyle: widget.placeholderStyle,
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  prefix: widget.leadingIcon,
+                  suffix: suffix,
+                  onChanged: _onChanged,
+                  onSubmitted: (text) => _onSubmitted(),
+                  style: widget.style,
+                  decoration: widget.decoration,
+                  foregroundDecoration: widget.foregroundDecoration,
+                  highlightColor: widget.highlightColor,
+                  unfocusedColor: widget.unfocusedColor,
+                  cursorColor: widget.cursorColor,
+                  cursorHeight: widget.cursorHeight,
+                  cursorRadius: widget.cursorRadius,
+                  cursorWidth: widget.cursorWidth,
+                  showCursor: widget.showCursor,
+                  scrollPadding: widget.scrollPadding,
+                  selectionHeightStyle: widget.selectionHeightStyle,
+                  selectionWidthStyle: widget.selectionWidthStyle,
+                  textInputAction: widget.textInputAction,
+                  keyboardAppearance: widget.keyboardAppearance,
+                  enabled: widget.enabled,
+                  inputFormatters: widget.inputFormatters);
+            })));
   }
 }
 
@@ -849,11 +809,8 @@ class _AutoSuggestBoxOverlay2State2<T>
 
       final currentSelectedOffset = tileHeight * index;
 
-      scrollController.animateTo(
-        currentSelectedOffset,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.easeInOut,
-      );
+      scrollController.animateTo(currentSelectedOffset,
+          duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
       setState(() {});
     });
     itemsSubscription = widget.itemsStream.listen((items) {
@@ -878,73 +835,67 @@ class _AutoSuggestBoxOverlay2State2<T>
     final localizations = FluentLocalizations.of(context);
 
     return TextFieldTapRegion(
-      child: FocusScope(
-        node: widget.node,
-        child: Container(
-          constraints: BoxConstraints(maxHeight: widget.maxHeight),
-          decoration: ShapeDecoration(
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(4.0),
-              ),
-            ),
-            color: theme.resources.cardBackgroundFillColorDefault,
-            shadows: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                offset: const Offset(-1, 1),
-                blurRadius: 2.0,
-                spreadRadius: 3.0,
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                offset: const Offset(1, 1),
-                blurRadius: 2.0,
-                spreadRadius: 3.0,
-              ),
-            ],
-          ),
-          child: Acrylic(
-            child: ValueListenableBuilder<TextEditingValue>(
-              valueListenable: widget.controller,
-              builder: (context, value, _) {
-                final sortedItems = widget.sorter(value.text, items);
-                late Widget result;
-                if (sortedItems.isEmpty) {
-                  result = widget.noResultsFoundBuilder?.call(context) ??
-                      Padding(
-                        padding: const EdgeInsetsDirectional.only(bottom: 4.0),
-                        child: _AutoSuggestBoxOverlayTile2(
-                          text: Text(localizations.noResultsFoundLabel),
-                        ),
-                      );
-                } else {
-                  result = ListView.builder(
-                    itemExtent: tileHeight,
-                    controller: scrollController,
-                    key: ValueKey<int>(sortedItems.length),
-                    shrinkWrap: true,
-                    padding: const EdgeInsetsDirectional.only(bottom: 4.0),
-                    itemCount: sortedItems.length,
-                    itemBuilder: (context, index) {
-                      final item = sortedItems[index];
-                      return widget.itemBuilder?.call(context, item) ??
-                          _AutoSuggestBoxOverlayTile2(
-                            text: item.child ?? Text(item.label),
-                            semanticLabel: item.semanticLabel ?? item.label,
-                            selected: item._selected || widget.node.hasFocus,
-                            onSelected: () => widget.onSelected(item),
-                          );
-                    },
-                  );
-                }
-                return result;
-              },
-            ),
-          ),
-        ),
-      ),
-    );
+        child: FocusScope(
+            node: widget.node,
+            child: Container(
+                constraints: BoxConstraints(maxHeight: widget.maxHeight),
+                decoration: ShapeDecoration(
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(4.0))),
+                    color: theme.resources.cardBackgroundFillColorDefault,
+                    shadows: [
+                      BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          offset: const Offset(-1, 1),
+                          blurRadius: 2.0,
+                          spreadRadius: 3.0),
+                      BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          offset: const Offset(1, 1),
+                          blurRadius: 2.0,
+                          spreadRadius: 3.0),
+                    ]),
+                child: Acrylic(
+                    child: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: widget.controller,
+                        builder: (context, value, _) {
+                          final sortedItems = widget.sorter(value.text, items);
+                          late Widget result;
+                          if (sortedItems.isEmpty) {
+                            result = widget.noResultsFoundBuilder
+                                    ?.call(context) ??
+                                Padding(
+                                    padding: const EdgeInsetsDirectional.only(
+                                        bottom: 4.0),
+                                    child: _AutoSuggestBoxOverlayTile2(
+                                        text: Text(localizations
+                                            .noResultsFoundLabel)));
+                          } else {
+                            result = ListView.builder(
+                                itemExtent: tileHeight,
+                                controller: scrollController,
+                                key: ValueKey<int>(sortedItems.length),
+                                shrinkWrap: true,
+                                padding: const EdgeInsetsDirectional.only(
+                                    bottom: 4.0),
+                                itemCount: sortedItems.length,
+                                itemBuilder: (context, index) {
+                                  final item = sortedItems[index];
+                                  return widget.itemBuilder
+                                          ?.call(context, item) ??
+                                      _AutoSuggestBoxOverlayTile2(
+                                          text: item.child ?? Text(item.label),
+                                          semanticLabel:
+                                              item.semanticLabel ?? item.label,
+                                          selected: item._selected ||
+                                              widget.node.hasFocus,
+                                          onSelected: () =>
+                                              widget.onSelected(item));
+                                });
+                          }
+                          return result;
+                        })))));
   }
 }
 
@@ -975,9 +926,7 @@ class _AutoSuggestBoxOverlayTile2State2
   void initState() {
     super.initState();
     controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 125),
-    );
+        vsync: this, duration: const Duration(milliseconds: 125));
     controller.forward();
   }
 
@@ -993,22 +942,13 @@ class _AutoSuggestBoxOverlayTile2State2
     final theme = FluentTheme.of(context);
 
     return ListTile.selectable(
-      semanticLabel: widget.semanticLabel,
-      title: EntrancePageTransition(
-        animation: Tween<double>(
-          begin: 0.75,
-          end: 1.0,
-        ).animate(CurvedAnimation(
-          parent: controller,
-          curve: Curves.easeOut,
-        )),
-        child: DefaultTextStyle.merge(
-          style: theme.typography.body,
-          child: widget.text,
-        ),
-      ),
-      selected: widget.selected,
-      onPressed: widget.onSelected,
-    );
+        semanticLabel: widget.semanticLabel,
+        title: EntrancePageTransition(
+            animation: Tween<double>(begin: 0.75, end: 1.0).animate(
+                CurvedAnimation(parent: controller, curve: Curves.easeOut)),
+            child: DefaultTextStyle.merge(
+                style: theme.typography.body, child: widget.text)),
+        selected: widget.selected,
+        onPressed: widget.onSelected);
   }
 }

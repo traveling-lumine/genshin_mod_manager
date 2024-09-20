@@ -28,12 +28,8 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
 
   @override
   Future<NahidaliveElement> fetchNahidaliveElement(final String uuid) async {
-    final response = await _client.get(
-      Uri.https(
-        Env.val10,
-        '${Env.val13}/$uuid',
-      ),
-    );
+    final response =
+        await _client.get(Uri.https(Env.val10, '${Env.val13}/$uuid'));
     final fetchResult = NahidaSingleFetchResult.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
@@ -48,14 +44,10 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
       throw ArgumentError.value(pageNum, 'pageNum', 'must be greater than 0');
     }
     final response = await _client.get(
-      Uri.https(
-        Env.val10,
-        Env.val12,
-        {
-          Env.val1: pageNum.toString(),
-          Env.val2: Env.val5,
-        },
-      ),
+      Uri.https(Env.val10, Env.val12, {
+        Env.val1: pageNum.toString(),
+        Env.val2: Env.val5,
+      }),
       headers: {Env.val9: Env.val8},
     );
     if (response.statusCode != 200) {
@@ -88,11 +80,8 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
     final queryMap = queryParams.isEmpty ? null : queryParams;
 
     final uri = Uri.https(Env.val10, '${Env.val11}/$uuid', queryMap);
-    final response = await _client.post(
-      uri,
-      headers: {Env.val9: Env.val8},
-      body: {Env.val7: pw ?? ''},
-    );
+    final response = await _client
+        .post(uri, headers: {Env.val9: Env.val8}, body: {Env.val7: pw ?? ''});
     return NahidaliveDownloadElement.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );

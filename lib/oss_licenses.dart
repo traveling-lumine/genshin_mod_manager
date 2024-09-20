@@ -1730,13 +1730,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('typed_data')]
   );
 
-/// custom_lint 0.6.5
+/// custom_lint 0.6.7
 const _custom_lint = Package(
     name: 'custom_lint',
     description: 'Lint rules are a powerful way to improve the maintainability of a project. Custom Lint allows package authors and developers to easily write custom lint rules.',
     repository: 'https://github.com/invertase/dart_custom_lint',
     authors: [],
-    version: '0.6.5',
+    version: '0.6.7',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -1943,13 +1943,13 @@ const _custom_lint = Package(
     dependencies: [PackageRef('analyzer'), PackageRef('analyzer_plugin'), PackageRef('args'), PackageRef('async'), PackageRef('ci'), PackageRef('cli_util'), PackageRef('collection'), PackageRef('custom_lint_core'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('rxdart'), PackageRef('uuid'), PackageRef('yaml')]
   );
 
-/// custom_lint_builder 0.6.5
+/// custom_lint_builder 0.6.7
 const _custom_lint_builder = Package(
     name: 'custom_lint_builder',
     description: 'A package to help writing custom linters',
     repository: 'https://github.com/invertase/dart_custom_lint',
     authors: [],
-    version: '0.6.5',
+    version: '0.6.7',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -2403,13 +2403,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('yaml'), PackageRef('path'), PackageRef('json_annotation')]
   );
 
-/// dart_style 2.3.6
+/// dart_style 2.3.7
 const _dart_style = Package(
     name: 'dart_style',
     description: 'Opinionated, automatic Dart source code formatter. Provides an API and a CLI tool.',
     repository: 'https://github.com/dart-lang/dart_style',
     authors: [],
-    version: '2.3.6',
+    version: '2.3.7',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -2439,7 +2439,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('collection'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span')]
+    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('collection'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span')]
   );
 
 /// dependency_validator 4.1.0
@@ -2467,13 +2467,13 @@ limitations under the License.''',
     dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('build_config'), PackageRef('checked_yaml'), PackageRef('glob'), PackageRef('io'), PackageRef('json_annotation'), PackageRef('logging'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('yaml')]
   );
 
-/// desktop_drop 0.4.4
+/// desktop_drop 0.5.0
 const _desktop_drop = Package(
     name: 'desktop_drop',
     description: 'A plugin which allows user dragging files to your flutter desktop applications.',
     homepage: 'https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/desktop_drop',
     authors: [],
-    version: '0.4.4',
+    version: '0.5.0',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -2677,7 +2677,7 @@ const _desktop_drop = Package(
    limitations under the License.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('cross_file')]
+    dependencies: [PackageRef('flutter'), PackageRef('cross_file'), PackageRef('web')]
   );
 
 /// envied 0.5.4+1
@@ -3151,13 +3151,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     dependencies: [PackageRef('flutter'), PackageRef('intl'), PackageRef('scroll_pos'), PackageRef('recase'), PackageRef('math_expressions')]
   );
 
-/// flutter 3.24.0
+/// flutter 3.24.2
 const _flutter = Package(
     name: 'flutter',
     description: 'A framework for writing Flutter applications',
     homepage: 'https://flutter.dev',
     authors: [],
-    version: '3.24.0',
+    version: '3.24.2',
     license: '''Copyright 2014 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -4182,13 +4182,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('meta'), PackageRef('path'), PackageRef('string_scanner')]
   );
 
-/// js 0.6.7
+/// js 0.7.1
 const _js = Package(
     name: 'js',
     description: 'Annotations to create static Dart interfaces for JavaScript APIs.',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/js',
     authors: [],
-    version: '0.6.7',
+    version: '0.7.1',
     license: '''Copyright 2012, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -4218,7 +4218,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('meta')]
+    dependencies: []
   );
 
 /// json_annotation 4.9.0
@@ -4891,13 +4891,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// mime 1.0.5
+/// mime 1.0.6
 const _mime = Package(
     name: 'mime',
     description: 'Utilities for handling media (MIME) types, including determining a type from a file extension and file contents.',
-    repository: 'https://github.com/dart-lang/mime',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/mime',
     authors: [],
-    version: '1.0.5',
+    version: '1.0.6',
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -5082,13 +5082,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('plugin_platform_interface')]
   );
 
-/// pasteboard 0.2.0
+/// pasteboard 0.3.0
 const _pasteboard = Package(
     name: 'pasteboard',
     description: 'A flutter plugin which could read image,files from clipboard and write files to clipboard.',
     homepage: 'https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/pasteboard',
     authors: [],
-    version: '0.2.0',
+    version: '0.3.0',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -5292,7 +5292,7 @@ const _pasteboard = Package(
    limitations under the License.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('js')]
+    dependencies: [PackageRef('flutter'), PackageRef('web'), PackageRef('uuid'), PackageRef('path')]
   );
 
 /// path 1.9.0
@@ -7185,13 +7185,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter'), PackageRef('sqflite_common'), PackageRef('path')]
   );
 
-/// sqflite_common 2.5.4+2
+/// sqflite_common 2.5.4+3
 const _sqflite_common = Package(
     name: 'sqflite_common',
     description: 'Dart wrapper on SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     homepage: 'https://github.com/tekartik/sqflite/tree/master/sqflite_common',
     authors: [],
-    version: '2.5.4+2',
+    version: '2.5.4+3',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -7411,13 +7411,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('source_span')]
   );
 
-/// synchronized 3.2.0
+/// synchronized 3.3.0+2
 const _synchronized = Package(
     name: 'synchronized',
     description: 'Lock mechanism to prevent concurrent access to asynchronous code.',
     homepage: 'https://github.com/tekartik/synchronized.dart/tree/master/synchronized',
     authors: [],
-    version: '3.2.0',
+    version: '3.3.0+2',
     license: '''MIT License
 
 Copyright (c) 2016, Alexandre Roux Tekartik.
@@ -8102,14 +8102,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter'), PackageRef('url_launcher_platform_interface')]
   );
 
-/// uuid 4.4.2
+/// uuid 4.5.0
 const _uuid = Package(
     name: 'uuid',
     description: '''RFC4122 (v1, v4, v5, v6, v7, v8) UUID Generator and Parser for Dart
 ''',
     repository: 'https://github.com/Daegalus/dart-uuid',
     authors: [],
-    version: '4.4.2',
+    version: '4.5.0',
     license: '''Copyright (c) 2021 Yulian Kuncheff
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -8180,13 +8180,13 @@ freely, subject to the following restrictions:
     dependencies: []
   );
 
-/// vm_service 14.2.4
+/// vm_service 14.2.5
 const _vm_service = Package(
     name: 'vm_service',
     description: 'A library to communicate with a service implementing the Dart VM service protocol.',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/vm_service',
     authors: [],
-    version: '14.2.4',
+    version: '14.2.5',
     license: '''Copyright 2015, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -8416,13 +8416,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('ffi')]
   );
 
-/// win32_registry 1.1.4
+/// win32_registry 1.1.5
 const _win32_registry = Package(
     name: 'win32_registry',
     description: 'A package that provides a friendly Dart API for accessing the Windows Registry.',
     repository: 'https://github.com/halildurmus/win32_registry',
     authors: [],
-    version: '1.1.4',
+    version: '1.1.5',
     license: '''BSD 3-Clause License
 
 Copyright (c) 2023, Halil Durmus

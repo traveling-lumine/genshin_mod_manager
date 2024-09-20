@@ -32,15 +32,23 @@ class IniWidget extends ConsumerWidget {
                 IniStatementForward(
                   :final section,
                   :final lineNum,
-                  :final value,
+                  :final value
                 ) =>
-                  _buildForwardIniFieldEditor(section.iniFile, lineNum, value),
+                  _buildForwardIniFieldEditor(
+                    section.iniFile,
+                    lineNum,
+                    value,
+                  ),
                 IniStatementBackward(
                   :final section,
                   :final lineNum,
-                  :final value,
+                  :final value
                 ) =>
-                  _buildBackwardIniFieldEditor(section.iniFile, lineNum, value),
+                  _buildBackwardIniFieldEditor(
+                    section.iniFile,
+                    lineNum,
+                    value,
+                  ),
               },
             ),
       ],
@@ -98,9 +106,7 @@ class IniWidget extends ConsumerWidget {
             message: basenameString,
             child: Text(
               basenameString,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600),
               overflow: TextOverflow.ellipsis,
             ),
           ),

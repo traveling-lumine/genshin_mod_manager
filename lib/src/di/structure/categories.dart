@@ -9,9 +9,8 @@ part 'categories.g.dart';
 
 @riverpod
 List<ModCategory> categories(final CategoriesRef ref) {
-  final modRoot = ref.watch(
-    gameConfigNotifierProvider.select((final state) => state.modRoot),
-  );
+  final modRoot = ref
+      .watch(gameConfigNotifierProvider.select((final state) => state.modRoot));
   if (modRoot == null) {
     return [];
   }

@@ -15,12 +15,11 @@ import 'package:http/http.dart' as http;
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../backend/nahida/domain/entity/download_state.dart';
-import '../../backend/nahida/domain/entity/nahida_element.dart';
 import '../../backend/app_version/domain/github.dart';
 import '../../backend/fs_interface/domain/helper/path_op_string.dart';
+import '../../backend/nahida/domain/entity/download_state.dart';
+import '../../backend/nahida/domain/entity/nahida_element.dart';
 import '../../backend/structure/entity/mod_category.dart';
-import '../../di/nahida_download_queue.dart';
 import '../../di/app_state/current_target_game.dart';
 import '../../di/app_state/game_config.dart';
 import '../../di/app_state/games_list.dart';
@@ -30,6 +29,7 @@ import '../../di/app_state/window_size.dart';
 import '../../di/app_version/is_outdated.dart';
 import '../../di/app_version/remote_version.dart';
 import '../../di/exe_arg.dart';
+import '../../di/nahida_download_queue.dart';
 import '../../di/nahida_store.dart';
 import '../../di/structure/categories.dart';
 import '../constants.dart';
@@ -146,43 +146,33 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           unawaited(_showUpdateInfoBar(remote!));
         }
       })
-      ..listen(
-        gamesListProvider,
-        (final previous, final next) {
-          if (next.isEmpty) {
-            context.go(RouteNames.firstpage.name);
-          }
-        },
-      )
-      ..listen(
-        nahidaDownloadQueueProvider,
-        (final previous, final next) async {
-          if (!next.hasValue) {
-            return;
-          }
-          switch (next.requireValue) {
-            case NahidaDownloadStateCompleted(:final element):
-              _showNahidaDownloadCompleteInfoBar(element);
-            case NahidaDownloadStateHttpException(:final exception):
-              _showNahidaApiErrorInfoBar(exception);
-            case NahidaDownloadStateWrongPassword(
-                :final completer,
-                :final wrongPw
-              ):
-              await _showNahidaWrongPasswdDialog(completer, wrongPw);
-            case NahidaDownloadStateModZipExtractionException(
-                :final category,
-                :final data,
-                :final element
-              ):
-              await _showNahidaZipExtractionErrorInfoBar(
-                element,
-                category,
-                data,
-              );
-          }
-        },
-      );
+      ..listen(gamesListProvider, (final previous, final next) {
+        if (next.isEmpty) {
+          context.go(RouteNames.firstpage.name);
+        }
+      })
+      ..listen(nahidaDownloadQueueProvider, (final previous, final next) async {
+        if (!next.hasValue) {
+          return;
+        }
+        switch (next.requireValue) {
+          case NahidaDownloadStateCompleted(:final element):
+            _showNahidaDownloadCompleteInfoBar(element);
+          case NahidaDownloadStateHttpException(:final exception):
+            _showNahidaApiErrorInfoBar(exception);
+          case NahidaDownloadStateWrongPassword(
+              :final completer,
+              :final wrongPw
+            ):
+            await _showNahidaWrongPasswdDialog(completer, wrongPw);
+          case NahidaDownloadStateModZipExtractionException(
+              :final category,
+              :final data,
+              :final element
+            ):
+            await _showNahidaZipExtractionErrorInfoBar(element, category, data);
+        }
+      });
 
     final game = ref.watch(targetGameProvider);
     final updateMarker = (ref.watch(isOutdatedProvider).valueOrNull ?? false)
@@ -215,21 +205,19 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
     final args = ref.read(argProviderProvider);
     if (args.isNotEmpty) {
-      SchedulerBinding.instance.addPostFrameCallback(
-        (final timeStamp) {
-          final arg = args.first;
-          if (arg == AcceptedArg.run3dm.cmd) {
-            unawaited(_runMigoto());
-          } else if (arg == AcceptedArg.rungame.cmd) {
-            unawaited(_runLauncher());
-          } else if (arg == AcceptedArg.runboth.cmd) {
-            unawaited(_runBoth());
-          } else {
-            unawaited(_showInvalidCommandDialog(arg));
-          }
-          ref.read(argProviderProvider.notifier).clear();
-        },
-      );
+      SchedulerBinding.instance.addPostFrameCallback((final timeStamp) {
+        final arg = args.first;
+        if (arg == AcceptedArg.run3dm.cmd) {
+          unawaited(_runMigoto());
+        } else if (arg == AcceptedArg.rungame.cmd) {
+          unawaited(_runLauncher());
+        } else if (arg == AcceptedArg.runboth.cmd) {
+          unawaited(_runBoth());
+        } else {
+          unawaited(_showInvalidCommandDialog(arg));
+        }
+        ref.read(argProviderProvider.notifier).clear();
+      });
     }
 
     final read = ref.read(windowSizeProvider);
@@ -251,9 +239,8 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
               final ModCategory? initialCategory;
               if (currentUri.containsKey('category')) {
                 final categoryName = currentUri['category']!;
-                initialCategory = categories.firstWhereOrNull(
-                  (final e) => e.name == categoryName,
-                );
+                initialCategory = categories
+                    .firstWhereOrNull((final e) => e.name == categoryName);
               } else {
                 initialCategory = null;
               }
@@ -265,10 +252,8 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
                     value: currentSelected.value,
                     items: categories
                         .map(
-                          (final e) => ComboBoxItem(
-                            value: e,
-                            child: Text(e.name),
-                          ),
+                          (final e) =>
+                              ComboBoxItem(value: e, child: Text(e.name)),
                         )
                         .toList(),
                     onChanged: (final value) {
@@ -312,7 +297,9 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
                                 await nahida.fetchNahidaliveElement(uuid);
                             unawaited(
                               ref
-                                  .read(nahidaDownloadQueueProvider.notifier)
+                                  .read(
+                                    nahidaDownloadQueueProvider.notifier,
+                                  )
                                   .addDownload(
                                     element: elem,
                                     category: currentSelected.value!,
@@ -499,8 +486,10 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     }
     await _runProgram(path);
     if (mounted) {
-      await displayInfoBarInContext(context,
-          title: const Text('Ran 3d migoto'));
+      await displayInfoBarInContext(
+        context,
+        title: const Text('Ran 3d migoto'),
+      );
     }
   }
 
@@ -511,9 +500,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     await Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
   }
 
-  void _showNahidaApiErrorInfoBar(
-    final HttpException exception,
-  ) {
+  void _showNahidaApiErrorInfoBar(final HttpException exception) {
     unawaited(
       displayInfoBarInContext(
         context,
@@ -524,9 +511,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     );
   }
 
-  void _showNahidaDownloadCompleteInfoBar(
-    final NahidaliveElement element,
-  ) {
+  void _showNahidaDownloadCompleteInfoBar(final NahidaliveElement element) {
     unawaited(
       displayInfoBarInContext(
         context,

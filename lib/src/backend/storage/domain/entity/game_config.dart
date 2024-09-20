@@ -3,7 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'preset.dart';
 
-
 part 'game_config.freezed.dart';
 
 /// A configuration per game.

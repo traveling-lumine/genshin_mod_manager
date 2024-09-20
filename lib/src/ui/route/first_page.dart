@@ -11,20 +11,15 @@ class FirstRoute extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    ref.listen(
-      gamesListProvider,
-      (final previous, final next) {
-        if (next.isNotEmpty) {
-          context.go(RouteNames.home.name);
-        }
-      },
-    );
+    ref.listen(gamesListProvider, (final previous, final next) {
+      if (next.isNotEmpty) {
+        context.go(RouteNames.home.name);
+      }
+    });
     return NavigationView(
       appBar: getAppbar('Set the first game name'),
       content: ScaffoldPage.withPadding(
-        header: const PageHeader(
-          title: Text('Set the first game name'),
-        ),
+        header: const PageHeader(title: Text('Set the first game name')),
         content: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
