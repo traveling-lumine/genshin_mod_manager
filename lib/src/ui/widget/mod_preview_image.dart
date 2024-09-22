@@ -15,23 +15,13 @@ class ModPreviewImage extends HookConsumerWidget {
     super.key,
     this.frameBuilder,
     this.fit = BoxFit.contain,
-    this.bypass = false,
   });
   final String path;
   final BoxFit fit;
   final ImageFrameBuilder? frameBuilder;
-  final bool bypass;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    if (bypass) {
-      return Image.file(
-        File(path),
-        fit: fit,
-        frameBuilder: frameBuilder,
-      );
-    }
-
     final curMTime = useState<int>(DateTime.now().microsecondsSinceEpoch);
     final imageSize =
         useState<Size>(ImageSizeGetter.getSize(FileInput(File(path))));
@@ -95,7 +85,6 @@ class ModPreviewImage extends HookConsumerWidget {
           frameBuilder,
         ),
       );
-    properties.add(DiagnosticsProperty<bool>('bypass', bypass));
   }
 }
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
@@ -13,7 +14,6 @@ import '../../di/fs_watcher.dart';
 import '../util/display_infobar.dart';
 import 'category_drop_target.dart';
 import 'fade_in.dart';
-import 'mod_preview_image.dart';
 
 class FolderPaneItem extends PaneItem {
   FolderPaneItem({
@@ -128,31 +128,31 @@ class FolderPaneItem extends PaneItem {
   }
 
   static Widget _buildIcon(final String name) => Consumer(
-        builder: (final context, final ref, final child) {
-          final filePath = ref.watch(folderIconPathProvider(name));
-          return ref.watch(folderIconProvider)
-              ? _buildImage(filePath)
-              : const Icon(FluentIcons.folder_open);
-        },
+        builder: (final context, final ref, final child) =>
+            ref.watch(folderIconProvider)
+                ? _buildImage(name)
+                : const Icon(FluentIcons.folder_open),
       );
 
-  static Widget _buildImage(final String? imageFile) {
-    final Widget image;
-    if (imageFile == null) {
-      image = Consumer(
-        builder: (final context, final ref, final child) {
-          final usePaimon = ref.watch(paimonIconProvider);
-          return usePaimon
-              ? Image.asset('images/app_icon.ico')
-              : Image.asset('images/idk_icon.png');
-        },
+  static Widget _buildImage(final String name) => ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: maxIconWidth),
+        child: Consumer(
+          builder: (final context, final ref, final child) {
+            final imageFile = ref.watch(folderIconPathProvider(name));
+            return AspectRatio(
+              aspectRatio: 1,
+              child: imageFile == null
+                  ? Consumer(
+                      builder: (final context, final ref, final child) =>
+                          Image.asset(
+                        ref.watch(paimonIconProvider)
+                            ? 'images/app_icon.ico'
+                            : 'images/idk_icon.png',
+                      ),
+                    )
+                  : Image.file(File(imageFile), fit: BoxFit.contain),
+            );
+          },
+        ),
       );
-    } else {
-      image = ModPreviewImage(path: imageFile, bypass: true);
-    }
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: maxIconWidth),
-      child: AspectRatio(aspectRatio: 1, child: image),
-    );
-  }
 }
