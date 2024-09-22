@@ -48,7 +48,7 @@ class CategoryDropTarget extends HookConsumerWidget {
     );
   }
 
-  AnimatedOpacity _buildDropHint(
+  Widget _buildDropHint(
     final WidgetRef ref,
     final ValueNotifier<bool> state,
   ) {
@@ -69,22 +69,22 @@ class CategoryDropTarget extends HookConsumerWidget {
         ],
       ),
     );
+    final acrylic = state.value
+        ? Acrylic(
+            blurAmount: 1,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.blue, width: 5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(child: text),
+            ),
+          )
+        : null;
     return AnimatedOpacity(
       opacity: state.value ? 1 : 0,
       duration: const Duration(milliseconds: 200),
-      child: Offstage(
-        offstage: !state.value,
-        child: Acrylic(
-          blurAmount: 1,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.blue, width: 5),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(child: text),
-          ),
-        ),
-      ),
+      child: acrylic,
     );
   }
 
