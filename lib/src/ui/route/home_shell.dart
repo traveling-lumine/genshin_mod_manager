@@ -41,6 +41,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     with WindowListener, ProtocolListener {
   static const _navigationPaneOpenWidth = 270.0;
   final _flyoutController = FlyoutController();
+  final _flyoutController2 = FlyoutController();
 
   @override
   Widget build(final BuildContext context) {
@@ -78,6 +79,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     WindowManager.instance.removeListener(this);
     protocolHandler.removeListener(this);
     _flyoutController.dispose();
+    _flyoutController2.dispose();
     super.dispose();
   }
 
@@ -225,7 +227,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
               icon: icon,
               title: const Text('Run launcher'),
               onTap: _runLauncher,
-              flyoutController: _flyoutController,
+              flyoutController: _flyoutController2,
             ),
           ];
   }
@@ -256,11 +258,11 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       );
     }
   }
-}
 
-Future<void> _runProgram(final String path) async {
-  final file = File(path);
-  final pwd = file.parent.path;
-  final pName = file.path.pBasename;
-  await Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
+  Future<void> _runProgram(final String path) async {
+    final file = File(path);
+    final pwd = file.parent.path;
+    final pName = file.path.pBasename;
+    await Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
+  }
 }

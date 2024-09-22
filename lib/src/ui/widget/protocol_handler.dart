@@ -113,12 +113,13 @@ class ProtocolHandlerWidget extends ConsumerWidget {
     final WidgetRef ref,
     final String url,
   ) async {
-    final rawUuid = Uri.parse(url).queryParameters['uuid'];
+    final parsed = Uri.parse(url);
+    final rawUuid = parsed.queryParameters['uuid'];
     if (rawUuid == null) {
       return _showInvalidUriInfoBar(context);
     }
 
-    final password = Uri.parse(url).queryParameters['pw'];
+    final password = parsed.queryParameters['pw'];
     final categoryName = GoRouterState.of(context).pathParameters['category'];
     final category = ref
         .read(categoriesProvider)
