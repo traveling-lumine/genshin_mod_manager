@@ -46,7 +46,14 @@ class _ModCardState extends ConsumerState<ModCard> {
   Widget build(final BuildContext context) => LongPressDraggable<Mod>(
         data: widget.mod,
         dragAnchorStrategy: pointerDragAnchorStrategy,
-        feedback: Card(child: Text(widget.mod.displayName)),
+        feedback: Card(
+          backgroundColor:
+              FluentTheme.of(context).brightness == Brightness.light
+                  ? Colors.grey[30]
+                  : Colors.grey[150],
+          borderColor: Colors.blue,
+          child: Text(widget.mod.displayName),
+        ),
         child: GestureDetector(
           onTap: _onToggle,
           child: Consumer(

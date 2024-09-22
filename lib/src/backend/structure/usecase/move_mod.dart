@@ -9,5 +9,5 @@ void moveModUseCase({
   required final Mod mod,
   required final ModCategory category,
 }) {
-  moveDirUseCase(Directory(mod.path), category.path.pJoin(mod.displayName));
+  moveDirUseCase(Directory(mod.path), category.path.pJoin(mod.path.pBasename));
 }
