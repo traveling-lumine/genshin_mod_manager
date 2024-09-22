@@ -12,6 +12,7 @@ import '../../di/app_state/use_paimon.dart';
 import '../../di/fs_watcher.dart';
 import '../util/display_infobar.dart';
 import 'category_drop_target.dart';
+import 'fade_in.dart';
 import 'mod_preview_image.dart';
 
 class FolderPaneItem extends PaneItem {
@@ -44,63 +45,41 @@ class FolderPaneItem extends PaneItem {
         onAcceptWithDetails: (final details) =>
             _onModDragAccept(context, details),
         builder: (final context, final candidateData, final rejectedData) {
-          final content = CategoryDropTarget(
-            category: category,
-            child: super.build(
-              context,
-              selected,
-              onPressed,
-              displayMode: displayMode,
-              showTextOnTop: showTextOnTop,
-              itemIndex: itemIndex,
-              autofocus: autofocus,
-            ),
-          );
-          if (candidateData.isNotEmpty) {
-            final typography = FluentTheme.of(context).typography;
-            final body = typography.body;
-            final bodyStrong = typography.bodyStrong;
-            return Stack(
-              children: [
-                content,
-                Positioned.fill(
-                  child: Acrylic(
-                    blurAmount: 1,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blue, width: 5),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            text: 'Drop to move\n',
-                            style: body,
-                            children: [
-                              TextSpan(
-                                text: '${candidateData.first?.displayName}\n',
-                                style: bodyStrong,
-                              ),
-                              TextSpan(
-                                text: 'to ',
-                                style: body,
-                              ),
-                              TextSpan(
-                                text: category.name,
-                                style: bodyStrong,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+          final typography = FluentTheme.of(context).typography;
+          final body = typography.body;
+          final bodyStrong = typography.bodyStrong;
+          return FadeInWidget(
+            visible: candidateData.isNotEmpty,
+            fadeTarget: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                text: 'Drop to move\n',
+                style: body,
+                children: [
+                  ...candidateData.map(
+                    (final e) => TextSpan(
+                      text: '${e!.displayName}\n',
+                      style: bodyStrong,
                     ),
                   ),
-                ),
-              ],
-            );
-          }
-          return content;
+                  TextSpan(text: 'to ', style: body),
+                  TextSpan(text: category.name, style: bodyStrong),
+                ],
+              ),
+            ),
+            child: CategoryDropTarget(
+              category: category,
+              child: super.build(
+                context,
+                selected,
+                onPressed,
+                displayMode: displayMode,
+                showTextOnTop: showTextOnTop,
+                itemIndex: itemIndex,
+                autofocus: autofocus,
+              ),
+            ),
+          );
         },
       );
 

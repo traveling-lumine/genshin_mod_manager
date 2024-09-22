@@ -11,6 +11,7 @@ import '../../backend/fs_interface/usecase/folder_drop.dart';
 import '../../backend/structure/entity/mod_category.dart';
 import '../../di/app_state/move_on_drag.dart';
 import '../util/display_infobar.dart';
+import 'fade_in.dart';
 
 /// A widget that acts as a drop target for files and directories.
 class CategoryDropTarget extends HookConsumerWidget {
@@ -39,11 +40,10 @@ class CategoryDropTarget extends HookConsumerWidget {
       },
       onDragDone: (final details) =>
           unawaited(_onDragDone(details, context, ref)),
-      child: Stack(
-        children: [
-          child,
-          Positioned.fill(child: _buildDropHint(ref, state)),
-        ],
+      child: FadeInWidget(
+        visible: state.value,
+        fadeTarget: _buildDropHint(ref, state),
+        child: child,
       ),
     );
   }
@@ -57,34 +57,15 @@ class CategoryDropTarget extends HookConsumerWidget {
       DragImportType.move => 'move',
       DragImportType.copy => 'copy',
     };
-    final text = RichText(
+    final typography = FluentTheme.of(context).typography;
+    return RichText(
       text: TextSpan(
         text: 'Drop to $moveMethod to',
-        style: FluentTheme.of(context).typography.body,
+        style: typography.body,
         children: [
-          TextSpan(
-            text: ' ${category.name}',
-            style: FluentTheme.of(context).typography.bodyStrong,
-          ),
+          TextSpan(text: ' ${category.name}', style: typography.bodyStrong),
         ],
       ),
-    );
-    final acrylic = state.value
-        ? Acrylic(
-            blurAmount: 1,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.blue, width: 5),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Center(child: text),
-            ),
-          )
-        : null;
-    return AnimatedOpacity(
-      opacity: state.value ? 1 : 0,
-      duration: const Duration(milliseconds: 200),
-      child: acrylic,
     );
   }
 
