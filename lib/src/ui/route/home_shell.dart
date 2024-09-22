@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -38,6 +37,35 @@ import '../util/open_url.dart';
 import '../widget/appbar.dart';
 import '../widget/category_pane_item.dart';
 import '../widget/third_party/fluent_ui/auto_suggest_box.dart';
+
+String _convertUuid(final String uuid) {
+  // if uuid has no dashes, add it manually
+  if (uuid.length == 32) {
+    final sb = StringBuffer()
+      ..writeAll(
+        [
+          uuid.substring(0, 8),
+          uuid.substring(8, 12),
+          uuid.substring(12, 16),
+          uuid.substring(16, 20),
+          uuid.substring(20, 32),
+        ],
+        '-',
+      );
+    return sb.toString();
+  }
+  return uuid;
+}
+
+Future<NahidaliveElement> _getElement(
+  final WidgetRef ref,
+  final String rawUuid,
+) async {
+  final nahida = ref.read(nahidaApiProvider);
+  final uuid = _convertUuid(rawUuid);
+  final elem = await nahida.fetchNahidaliveElement(uuid);
+  return elem;
+}
 
 Future<Never> _runUpdateScript() async {
   final url = Uri.parse('$kRepoReleases/download/GenshinModManager.zip');
@@ -151,7 +179,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           context.go(RouteNames.firstpage.name);
         }
       })
-      ..listen(nahidaDownloadQueueProvider, (final previous, final next) async {
+      ..listen(nahidaDownloadQueueProvider, (final previous, final next) {
         if (!next.hasValue) {
           return;
         }
@@ -164,15 +192,37 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
               :final completer,
               :final wrongPw
             ):
-            await _showNahidaWrongPasswdDialog(completer, wrongPw);
+            unawaited(_showNahidaWrongPasswdDialog(completer, wrongPw));
           case NahidaDownloadStateModZipExtractionException(
               :final category,
               :final data,
               :final element
             ):
-            await _showNahidaZipExtractionErrorInfoBar(element, category, data);
+            unawaited(
+              _showNahidaZipExtractionErrorInfoBar(element, category, data),
+            );
         }
-      });
+      })
+      ..listen(
+        argProviderProvider,
+        (final previous, final next) {
+          final data = next.valueOrNull;
+          if (data == null) {
+            return;
+          }
+          if (data == AcceptedArg.run3dm.cmd) {
+            unawaited(_runMigoto());
+          } else if (data == AcceptedArg.rungame.cmd) {
+            unawaited(_runLauncher());
+          } else if (data == AcceptedArg.runboth.cmd) {
+            unawaited(_runBoth());
+          } else if (data.startsWith('/')) {
+            unawaited(_showInvalidCommandDialog(data));
+          } else {
+            unawaited(_onUriInput(data));
+          }
+        },
+      );
 
     final game = ref.watch(targetGameProvider);
     final updateMarker = (ref.watch(isOutdatedProvider).valueOrNull ?? false)
@@ -203,23 +253,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     protocolHandler.addListener(this);
     WindowManager.instance.addListener(this);
 
-    final args = ref.read(argProviderProvider);
-    if (args.isNotEmpty) {
-      SchedulerBinding.instance.addPostFrameCallback((final timeStamp) {
-        final arg = args.first;
-        if (arg == AcceptedArg.run3dm.cmd) {
-          unawaited(_runMigoto());
-        } else if (arg == AcceptedArg.rungame.cmd) {
-          unawaited(_runLauncher());
-        } else if (arg == AcceptedArg.runboth.cmd) {
-          unawaited(_runBoth());
-        } else {
-          unawaited(_showInvalidCommandDialog(arg));
-        }
-        ref.read(argProviderProvider.notifier).clear();
-      });
-    }
-
     final read = ref.read(windowSizeProvider);
     if (read != null) {
       unawaited(WindowManager.instance.setSize(read));
@@ -228,96 +261,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   @override
   void onProtocolUrlReceived(final String url) {
-    if (mounted) {
-      unawaited(
-        showDialog(
-          context: context,
-          builder: (final dCtx) => HookConsumer(
-            builder: (final hCtx, final ref, final child) {
-              final categories = ref.watch(categoriesProvider);
-              final currentUri = GoRouterState.of(context).pathParameters;
-              final ModCategory? initialCategory;
-              if (currentUri.containsKey('category')) {
-                final categoryName = currentUri['category']!;
-                initialCategory = categories
-                    .firstWhereOrNull((final e) => e.name == categoryName);
-              } else {
-                initialCategory = null;
-              }
-              final currentSelected = useState<ModCategory?>(initialCategory);
-              return ContentDialog(
-                title: const Text('Protocol URL received'),
-                content: IntrinsicHeight(
-                  child: ComboboxFormField<ModCategory>(
-                    value: currentSelected.value,
-                    items: categories
-                        .map(
-                          (final e) =>
-                              ComboBoxItem(value: e, child: Text(e.name)),
-                        )
-                        .toList(),
-                    onChanged: (final value) {
-                      currentSelected.value = value;
-                    },
-                    validator: (final value) =>
-                        value == null ? 'Please select a category' : null,
-                    autovalidateMode: AutovalidateMode.always,
-                  ),
-                ),
-                actions: [
-                  Button(
-                    onPressed: Navigator.of(dCtx).pop,
-                    child: const Text('Cancel'),
-                  ),
-                  FilledButton(
-                    onPressed: currentSelected.value == null
-                        ? null
-                        : () async {
-                            final nahida = ref.read(nahidaApiProvider);
-                            var uuid = Uri.parse(url).queryParameters['uuid'];
-                            if (uuid == null) {
-                              return;
-                            }
-                            // if uuid has no dashes, add it manually
-                            if (uuid.length == 32) {
-                              final sb = StringBuffer()
-                                ..writeAll(
-                                  [
-                                    uuid.substring(0, 8),
-                                    uuid.substring(8, 12),
-                                    uuid.substring(12, 16),
-                                    uuid.substring(16, 20),
-                                    uuid.substring(20, 32),
-                                  ],
-                                  '-',
-                                );
-                              uuid = sb.toString();
-                            }
-                            final elem =
-                                await nahida.fetchNahidaliveElement(uuid);
-                            unawaited(
-                              ref
-                                  .read(
-                                    nahidaDownloadQueueProvider.notifier,
-                                  )
-                                  .addDownload(
-                                    element: elem,
-                                    category: currentSelected.value!,
-                                  ),
-                            );
-                            if (dCtx.mounted) {
-                              Navigator.of(dCtx).pop();
-                            }
-                          },
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      );
-    }
+    ref.read(argProviderProvider.notifier).add(url);
   }
 
   @override
@@ -466,6 +410,41 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     return reason;
   }
 
+  Future<void> _onUriInput(final String url) async {
+    final rawUuid = Uri.parse(url).queryParameters['uuid'];
+    if (rawUuid == null) {
+      return _showInvalidUriInfoBar();
+    }
+
+    final password = Uri.parse(url).queryParameters['pw'];
+    final categoryName = GoRouterState.of(context).pathParameters['category'];
+    final category = ref
+        .read(categoriesProvider)
+        .firstWhereOrNull((final e) => e.name == categoryName);
+
+    if (category != null) {
+      final NahidaliveElement elem;
+      try {
+        elem = await _getElement(ref, rawUuid);
+      } on Exception catch (e) {
+        if (mounted) {
+          _showDownloadFailedInfoBar(e);
+        }
+        return;
+      }
+      unawaited(
+        ref
+            .read(
+              nahidaDownloadQueueProvider.notifier,
+            )
+            .addDownload(element: elem, category: category, pw: password),
+      );
+      return;
+    }
+
+    _showProtocolConfirmDialog(url, rawUuid, category, password);
+  }
+
   Future<void> _runBoth() async {
     await _runMigoto();
     await _runLauncher();
@@ -499,6 +478,42 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     final pName = file.path.pBasename;
     await Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
   }
+
+  void _showDownloadFailedInfoBar(final Exception e) => unawaited(
+        displayInfoBarInContext(
+          context,
+          title: const Text('Download failed'),
+          content: Text('$e'),
+          severity: InfoBarSeverity.error,
+        ),
+      );
+
+  Future<void> _showInvalidCommandDialog(final String arg) =>
+      showDialog(
+        context: context,
+        builder: (final dCtx) {
+          final validArgs =
+              AcceptedArg.values.map((final e) => e.cmd).join(', ');
+          return ContentDialog(
+            title: const Text('Invalid argument'),
+            content: Text('Unknown argument: $arg.\n'
+                'Valid args are: $validArgs'),
+            actions: [
+              FilledButton(
+                onPressed: Navigator.of(dCtx).pop,
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+
+  Future<void> _showInvalidUriInfoBar() => displayInfoBarInContext(
+        context,
+        title: const Text('Invalid URL'),
+        content: const Text('The URL does not contain a UUID.'),
+        severity: InfoBarSeverity.error,
+      );
 
   void _showNahidaApiErrorInfoBar(final HttpException exception) {
     unawaited(
@@ -599,24 +614,22 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     }
   }
 
-  Future<Q?> _showInvalidCommandDialog<Q extends Object?>(final String arg) =>
-      showDialog<Q>(
-        context: context,
-        builder: (final dCtx) {
-          final validArgs =
-              AcceptedArg.values.map((final e) => e.cmd).join(', ');
-          return ContentDialog(
-            title: const Text('Invalid argument'),
-            content: Text('Unknown argument: $arg.\n'
-                'Valid args are: $validArgs'),
-            actions: [
-              FilledButton(
-                onPressed: Navigator.of(dCtx).pop,
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
+  void _showProtocolConfirmDialog(
+    final String url,
+    final String rawUuid,
+    final ModCategory? category,
+    final String? password,
+  ) =>
+      unawaited(
+        showDialog(
+          context: context,
+          builder: (final dCtx) => _ProtocolDialog(
+            url: url,
+            rawUuid: rawUuid,
+            initialCategory: category,
+            password: password,
+          ),
+        ),
       );
 
   Future<bool?> _showUpdateConfirmDialog() => showDialog<bool?>(
@@ -719,4 +732,109 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           child: const Text('Auto update'),
         ),
       );
+}
+
+class _ProtocolDialog extends HookConsumerWidget {
+  const _ProtocolDialog({
+    required this.url,
+    required this.rawUuid,
+    required this.initialCategory,
+    this.password,
+  });
+  final String url;
+  final String rawUuid;
+  final String? password;
+  final ModCategory? initialCategory;
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final memoizedFuture =
+        // Using future itself
+        // ignore: discarded_futures
+        useMemoized(() => Future(() async => _getElement(ref, rawUuid)));
+    final elemGetState = useFuture(memoizedFuture);
+
+    final categories = ref.watch(categoriesProvider);
+    final currentSelected = useState<ModCategory?>(initialCategory);
+    final value = currentSelected.value;
+    return ContentDialog(
+      title: const Text('Protocol URL received'),
+      content: _buildContent(currentSelected, categories),
+      actions: [
+        Button(
+          onPressed: Navigator.of(context).pop,
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: elemGetState.hasData && value != null
+              ? () async =>
+                  _onConfirm(ref, value, context, elemGetState.requireData)
+              : null,
+          child: Text(
+            elemGetState.hasError
+                ? 'Error: ${elemGetState.error.runtimeType}'
+                : value == null
+                    ? 'Select a category First'
+                    : elemGetState.hasData
+                        ? 'Download'
+                        : 'Loading...',
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('url', url))
+      ..add(StringProperty('rawUuid', rawUuid))
+      ..add(
+        DiagnosticsProperty<ModCategory?>(
+          'initialCategory',
+          initialCategory,
+        ),
+      )
+      ..add(StringProperty('password', password));
+  }
+
+  Widget _buildContent(
+    final ValueNotifier<ModCategory?> currentSelected,
+    final List<ModCategory> categories,
+  ) =>
+      IntrinsicHeight(
+        child: ComboboxFormField<ModCategory>(
+          value: currentSelected.value,
+          items: categories
+              .map(
+                (final e) => ComboBoxItem(value: e, child: Text(e.name)),
+              )
+              .toList(),
+          onChanged: (final value) {
+            currentSelected.value = value;
+          },
+          validator: (final value) =>
+              value == null ? 'Please select a category' : null,
+          autovalidateMode: AutovalidateMode.always,
+        ),
+      );
+
+  Future<void> _onConfirm(
+    final WidgetRef ref,
+    final ModCategory currentSelected,
+    final BuildContext context,
+    final NahidaliveElement elem,
+  ) async {
+    unawaited(
+      ref
+          .read(
+            nahidaDownloadQueueProvider.notifier,
+          )
+          .addDownload(element: elem, category: currentSelected, pw: password),
+    );
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+  }
 }
