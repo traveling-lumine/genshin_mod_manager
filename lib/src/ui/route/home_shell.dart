@@ -99,11 +99,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   }
 
   @override
-  void onWindowFocus() {
-    ref.invalidate(categoriesProvider);
-  }
-
-  @override
   void onWindowResized() {
     super.onWindowResized();
     unawaited(
@@ -187,7 +182,18 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       size: const NavigationPaneSize(
         openWidth: _HomeShellState._navigationPaneOpenWidth,
       ),
-      autoSuggestBox: _buildAutoSuggestBox(items),
+      autoSuggestBox: Row(
+        children: [
+          Expanded(child: _buildAutoSuggestBox(items)),
+          Tooltip(
+            message: 'Refresh categories',
+            child: IconButton(
+              icon: const Icon(FluentIcons.refresh),
+              onPressed: () => ref.invalidate(categoriesProvider),
+            ),
+          ),
+        ],
+      ),
       autoSuggestBoxReplacement: const Icon(FluentIcons.search),
     );
   }
