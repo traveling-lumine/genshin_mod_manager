@@ -11,25 +11,53 @@ import 'fs_interface.dart';
 part 'fs_watcher.g.dart';
 
 @riverpod
-Raw<Stream<FileSystemEvent>> directoryEventWatcher(
-  final DirectoryEventWatcherRef ref,
-  final String path, {
-  required final bool detectModifications,
-}) {
-  if (!detectModifications) {
-    final folderWatchStream = ref
-        .watch(directoryEventWatcherProvider(path, detectModifications: true));
-    return folderWatchStream
-        .where((final event) => event is! FileSystemModifyEvent);
+class DirectoryEventWatcher extends _$DirectoryEventWatcher {
+  StreamSubscription<FileSystemEvent>? _subscription;
+  StreamController<FileSystemEvent>? _controller;
+
+  @override
+  Raw<Stream<FileSystemEvent>> build(
+    final String path, {
+    required final bool detectModifications,
+  }) {
+    if (!detectModifications) {
+      final folderWatchStream = ref.watch(
+        directoryEventWatcherProvider(path, detectModifications: true),
+      );
+      return folderWatchStream
+          .where((final event) => event is! FileSystemModifyEvent);
+    }
+
+    final controller = StreamController<FileSystemEvent>.broadcast();
+    ref.onDispose(controller.close);
+    _controller = controller;
+
+    final subscription = Directory(path).watch().listen(controller.add);
+    ref.onDispose(subscription.cancel);
+    _subscription = subscription;
+
+    return controller.stream;
   }
 
-  final controller = StreamController<FileSystemEvent>.broadcast();
-  ref.onDispose(controller.close);
+  void pause() {
+    if (!detectModifications) {
+      return;
+    }
+    _subscription?.cancel();
+  }
 
-  final subscription = Directory(path).watch().listen(controller.add);
-  ref.onDispose(subscription.cancel);
-
-  return controller.stream;
+  void resume() {
+    if (!detectModifications) {
+      return;
+    }
+    final controller = _controller;
+    if (controller == null) {
+      return;
+    }
+    final subscription = Directory(path).watch().listen(controller.add);
+    ref.onDispose(subscription.cancel);
+    _subscription = subscription;
+  }
 }
 
 @riverpod

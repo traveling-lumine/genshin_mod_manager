@@ -6,6 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../backend/fs_interface/entity/mod_toggle_exceptions.dart';
 import '../../backend/fs_interface/helper/mod_switcher.dart';
@@ -17,6 +18,7 @@ import '../../backend/structure/entity/mod.dart';
 import '../../di/app_state/card_color.dart';
 import '../../di/app_state/game_config.dart';
 import '../../di/fs_interface.dart';
+import '../../di/fs_watcher.dart';
 import '../../di/mod_card.dart';
 import '../util/display_infobar.dart';
 import '../util/show_prompt_dialog.dart';
@@ -37,7 +39,7 @@ class ModCard extends ConsumerStatefulWidget {
   }
 }
 
-class _ModCardState extends ConsumerState<ModCard> {
+class _ModCardState extends ConsumerState<ModCard> with WindowListener {
   static const _minIniSectionWidth = 165.0;
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
@@ -90,7 +92,41 @@ class _ModCardState extends ConsumerState<ModCard> {
   @override
   void dispose() {
     _contextController.dispose();
+    WindowManager.instance.removeListener(this);
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WindowManager.instance.addListener(this);
+  }
+
+  @override
+  void onWindowBlur() {
+    super.onWindowBlur();
+    ref
+        .read(
+          directoryEventWatcherProvider(
+            widget.mod.path,
+            detectModifications: true,
+          ).notifier,
+        )
+        .pause();
+  }
+
+  @override
+  void onWindowFocus() {
+    super.onWindowFocus();
+    ref
+        .read(
+          directoryEventWatcherProvider(
+            widget.mod.path,
+            detectModifications: true,
+          ).notifier,
+        )
+        .resume();
+    ref.invalidate(iniPathsProvider(widget.mod));
   }
 
   Widget _buildDesc() => Consumer(
@@ -263,6 +299,18 @@ class _ModCardState extends ConsumerState<ModCard> {
     }
   }
 
+  Future<void> _onImageLongPress(final String image) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (final dCtx) => GestureDetector(
+        onTap: Navigator.of(dCtx).pop,
+        onSecondaryTap: Navigator.of(dCtx).pop,
+        child: ModPreviewImage(path: image),
+      ),
+    );
+  }
+
   Future<void> _onImageRightClick(
     final TapUpDetails details,
     final String imagePath,
@@ -282,18 +330,6 @@ class _ModCardState extends ConsumerState<ModCard> {
         ),
       );
     }
-  }
-
-  Future<void> _onImageLongPress(final String image) async {
-    await showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (final dCtx) => GestureDetector(
-        onTap: Navigator.of(dCtx).pop,
-        onSecondaryTap: Navigator.of(dCtx).pop,
-        child: ModPreviewImage(path: image),
-      ),
-    );
   }
 
   Future<void> _onPaste() async {

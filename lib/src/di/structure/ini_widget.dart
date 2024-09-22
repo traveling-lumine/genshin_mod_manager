@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../backend/structure/entity/ini.dart';
@@ -15,11 +13,7 @@ class IniLines extends _$IniLines {
     final watcher = ref.watch(
       fileEventWatcherProvider(iniFile.path, detectModifications: true),
     );
-    final subscription = watcher.listen((final event) {
-      if (event is FileSystemModifyEvent) {
-        ref.invalidateSelf();
-      }
-    });
+    final subscription = watcher.listen((final event) => ref.invalidateSelf());
     ref.onDispose(subscription.cancel);
 
     return parseIniFileUseCase(iniFile);

@@ -4,24 +4,54 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../backend/fs_interface/helper/path_op_string.dart';
 import '../../backend/structure/entity/ini.dart';
 import '../../di/fs_interface.dart';
 import '../../di/structure/ini_widget.dart';
 
-class IniWidget extends ConsumerWidget {
+class IniWidget extends ConsumerStatefulWidget {
   const IniWidget({required this.iniFile, super.key});
   final IniFile iniFile;
 
   @override
-  Widget build(final BuildContext context, final WidgetRef ref) {
-    final iniSections = ref.watch(iniLinesProvider(iniFile));
+  ConsumerState<IniWidget> createState() => _IniWidgetState();
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<IniFile>('iniFile', iniFile));
+  }
+}
+
+class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
+  @override
+  void dispose() {
+    WindowManager.instance.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WindowManager.instance.addListener(this);
+  }
+
+  @override
+  void onWindowFocus() {
+    super.onWindowFocus();
+    ref.invalidate(iniLinesProvider(widget.iniFile));
+  }
+
+  @override
+  Widget build(final BuildContext context) {
+    final iniSections = ref.watch(iniLinesProvider(widget.iniFile));
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildIniHeader(iniFile.path, ref),
+        _buildIniHeader(widget.iniFile.path, ref),
         ...iniSections
             .where((final e) => e is! IniStatementVariable || e.numCycles > 1)
             .map(
@@ -58,7 +88,7 @@ class IniWidget extends ConsumerWidget {
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<IniFile>('iniFile', iniFile));
+    properties.add(DiagnosticsProperty<IniFile>('iniFile', widget.iniFile));
   }
 
   Widget _buildForwardIniFieldEditor(
