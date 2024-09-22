@@ -1,5 +1,6 @@
 enum RouteNames {
   category,
+  categoryHero,
   home,
   license,
   loading,
@@ -12,6 +13,7 @@ enum RouteNames {
 
 enum RouteParams {
   category,
+  categoryHeroTag,
 }
 
 const protocol = 'gmm-interop-uri';

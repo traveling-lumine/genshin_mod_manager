@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -18,6 +20,7 @@ import 'src/ui/route/loading.dart';
 import 'src/ui/route/nahida_store.dart';
 import 'src/ui/route/setting.dart';
 import 'src/ui/route/welcome.dart';
+import 'src/ui/widget/mod_preview_image.dart';
 
 void main(final List<String> args) async {
   await _initialize();
@@ -83,7 +86,51 @@ class _MyAppState extends ConsumerState<_MyApp> {
             builder: (final context, final state) {
               final categoryName =
                   state.pathParameters[RouteParams.category.name]!;
-              return CategoryRoute(categoryName: categoryName);
+              return CategoryRoute(
+                categoryName: categoryName,
+                key: ValueKey(categoryName),
+              );
+            },
+          ),
+          GoRoute(
+            name: RouteNames.categoryHero.name,
+            path:
+                '${RouteNames.categoryHero.name}/:${RouteParams.categoryHeroTag.name}',
+            pageBuilder: (final context, final state) {
+              final heroTag =
+                  state.pathParameters[RouteParams.categoryHeroTag.name]!;
+              return CustomTransitionPage(
+                barrierDismissible: true,
+                opaque: false,
+                fullscreenDialog: true,
+                transitionDuration: const Duration(milliseconds: 200),
+                transitionsBuilder: (
+                  final context,
+                  final animation,
+                  final secondaryAnimation,
+                  final child,
+                ) =>
+                    AnimatedBuilder(
+                  animation: animation,
+                  builder: (final context, final child) {
+                    const mult = 6;
+                    return BackdropFilter(
+                      filter: ImageFilter.blur(
+                        sigmaX: animation.value * mult,
+                        sigmaY: animation.value * mult,
+                      ),
+                      child: child,
+                    );
+                  },
+                  child: child,
+                ),
+                child: GestureDetector(
+                  onTap: context.pop,
+                  onSecondaryTap: context.pop,
+                  child:
+                      Hero(tag: heroTag, child: ModPreviewImage(path: heroTag)),
+                ),
+              );
             },
           ),
           GoRoute(

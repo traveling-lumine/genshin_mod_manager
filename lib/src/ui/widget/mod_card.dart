@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:window_manager/window_manager.dart';
@@ -20,6 +21,7 @@ import '../../di/app_state/game_config.dart';
 import '../../di/fs_interface.dart';
 import '../../di/fs_watcher.dart';
 import '../../di/mod_card.dart';
+import '../constants.dart';
 import '../util/display_infobar.dart';
 import '../util/show_prompt_dialog.dart';
 import 'ini_widget.dart';
@@ -226,7 +228,10 @@ class _ModCardState extends ConsumerState<ModCard> with WindowListener {
               child: FlyoutTarget(
                 controller: _contextController,
                 key: _contextAttachKey,
-                child: ModPreviewImage(path: imagePath),
+                child: Hero(
+                  tag: imagePath,
+                  child: ModPreviewImage(path: imagePath),
+                ),
               ),
             ),
           ),
@@ -300,13 +305,10 @@ class _ModCardState extends ConsumerState<ModCard> with WindowListener {
   }
 
   Future<void> _onImageLongPress(final String image) async {
-    await showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (final dCtx) => GestureDetector(
-        onTap: Navigator.of(dCtx).pop,
-        onSecondaryTap: Navigator.of(dCtx).pop,
-        child: ModPreviewImage(path: image),
+    unawaited(
+      context.pushNamed(
+        RouteNames.categoryHero.name,
+        pathParameters: {RouteParams.categoryHeroTag.name: image},
       ),
     );
   }
