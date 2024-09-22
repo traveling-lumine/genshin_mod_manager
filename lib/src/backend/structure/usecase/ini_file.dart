@@ -10,39 +10,48 @@ List<IniStatement> parseIniFileUseCase(final IniFile iniFile) {
   final statements = <IniStatement>[];
   late IniStatementSection lastSection;
   var metKeySection = false;
-  final sectionNamePattern = RegExp(r'\[Key.*?\]');
+  final rawSectionNamePattern = RegExp(r'\[key.*?\]');
+  final sectionNamePattern = RegExp(r'\[.*?\]');
   for (final lineIndexed in lines.indexed) {
     final lineNum = lineIndexed.$1;
-    final line = lineIndexed.$2.split(';').first;
+    final rawLine = lineIndexed.$2.split(';').first;
+    final line = rawLine.trim().toLowerCase();
 
     if (line.startsWith('[')) {
       metKeySection = false;
     }
 
-    final match = sectionNamePattern.firstMatch(line)?.group(0);
+    final match = rawSectionNamePattern.firstMatch(line)?.group(0);
     if (match != null) {
-      final newSection =
-          IniStatementSection(iniFile: iniFile, name: match, lineNum: lineNum);
+      final sectionName = sectionNamePattern.firstMatch(rawLine)?.group(0);
+      final newSection = IniStatementSection(
+        iniFile: iniFile,
+        name: sectionName!,
+        lineNum: lineNum,
+      );
       statements.add(newSection);
       lastSection = newSection;
       metKeySection = true;
     }
 
-    final lineLower = line.toLowerCase();
-    if (lineLower.startsWith('key')) {
+    if (!metKeySection) {
+      continue;
+    }
+
+    if (line.startsWith('key')) {
       statements.add(
         IniStatement.forward(
           lineNum: lineNum,
           section: lastSection,
-          value: _getRHS(line),
+          value: _getRHS(rawLine),
         ),
       );
-    } else if (lineLower.startsWith('back')) {
+    } else if (line.startsWith('back')) {
       statements.add(
         IniStatement.backward(
           lineNum: lineNum,
           section: lastSection,
-          value: _getRHS(line),
+          value: _getRHS(rawLine),
         ),
       );
     } else if (line.startsWith(r'$') && metKeySection) {
@@ -50,8 +59,8 @@ List<IniStatement> parseIniFileUseCase(final IniFile iniFile) {
         IniStatement.variable(
           lineNum: lineNum,
           section: lastSection,
-          name: _getLHS(line),
-          numCycles: ','.allMatches(line).length + 1,
+          name: _getLHS(rawLine),
+          numCycles: ','.allMatches(rawLine).length + 1,
         ),
       );
     }
