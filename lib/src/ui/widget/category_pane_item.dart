@@ -57,6 +57,9 @@ class FolderPaneItem extends PaneItem {
             ),
           );
           if (candidateData.isNotEmpty) {
+            final typography = FluentTheme.of(context).typography;
+            final body = typography.body;
+            final bodyStrong = typography.bodyStrong;
             return Stack(
               children: [
                 content,
@@ -69,9 +72,27 @@ class FolderPaneItem extends PaneItem {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
-                        child: Text('Drop to move '
-                            '${candidateData.first?.displayName} to '
-                            '${category.name}'),
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            text: 'Drop to move\n',
+                            style: body,
+                            children: [
+                              TextSpan(
+                                text: '${candidateData.first?.displayName}\n',
+                                style: bodyStrong,
+                              ),
+                              TextSpan(
+                                text: 'to ',
+                                style: body,
+                              ),
+                              TextSpan(
+                                text: category.name,
+                                style: bodyStrong,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
