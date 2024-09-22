@@ -14,6 +14,7 @@ import '../../backend/structure/entity/mod_category.dart';
 import '../../di/nahida_store.dart';
 import '../../di/structure/categories.dart';
 import '../constants.dart';
+import '../util/debouncer.dart';
 import '../util/tag_parser.dart';
 import '../widget/intrinsic_command_bar.dart';
 import '../widget/store_element.dart';
@@ -23,7 +24,7 @@ import '../widget/third_party/flutter/sliver_grid_delegates/min_extent_delegate.
 class NahidaStoreRoute extends HookConsumerWidget {
   NahidaStoreRoute({required this.categoryName, super.key});
   final String categoryName;
-  final _debouncer = _Debouncer(const Duration(milliseconds: 700));
+  final _debouncer = Debouncer(const Duration(milliseconds: 700));
   final PagingController<int, NahidaliveElement?> _pagingController =
       PagingController(firstPageKey: 1);
 
@@ -260,16 +261,5 @@ class NahidaStoreRoute extends HookConsumerWidget {
       return e.toString();
     }
     return null;
-  }
-}
-
-class _Debouncer {
-  _Debouncer(this.duration);
-  final Duration duration;
-  Timer? _timer;
-
-  void call(final VoidCallback action) {
-    _timer?.cancel();
-    _timer = Timer(duration, action);
   }
 }

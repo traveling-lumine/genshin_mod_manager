@@ -8,9 +8,15 @@ import 'package:image_size_getter/file_input.dart';
 import 'package:image_size_getter/image_size_getter.dart';
 
 import '../../di/fs_watcher.dart';
+import '../util/debouncer.dart';
+import '../util/third_party/time_aware_resize_image.dart'
+    as third_party_image_provider;
+
+int _ceilToNextMultiple(final int value, final int multiple) =>
+    (value + multiple - 1) ~/ multiple * multiple;
 
 class ModPreviewImage extends HookConsumerWidget {
-  const ModPreviewImage({
+  ModPreviewImage({
     required this.path,
     super.key,
     this.frameBuilder,
@@ -19,24 +25,24 @@ class ModPreviewImage extends HookConsumerWidget {
   final String path;
   final BoxFit fit;
   final ImageFrameBuilder? frameBuilder;
+  final _debouncer = Debouncer(const Duration(milliseconds: 300));
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final curMTime = useState<int>(DateTime.now().microsecondsSinceEpoch);
-    final imageSize =
-        useState<Size>(ImageSizeGetter.getSize(FileInput(File(path))));
+    final eventStream = ref.watch(
+      fileEventWatcherProvider(path, detectModifications: true),
+    );
 
-    final eventStream =
-        ref.watch(fileEventWatcherProvider(path, detectModifications: true));
-
+    final imageSize = useState<Size>(_getImageSize());
+    final curMTime = useState<int>(_getMTime());
     useEffect(
       () {
-        final subscription = eventStream.listen((final event) async {
-          await FileImage(File(path)).evict();
-          curMTime.value = DateTime.now().microsecondsSinceEpoch;
-          imageSize.value = ImageSizeGetter.getSize(FileInput(File(path)));
+        final subscription = eventStream.listen((final event) {
+          _debouncer(() {
+            imageSize.value = _getImageSize();
+            curMTime.value = _getMTime();
+          });
         });
-
         return subscription.cancel;
       },
       [eventStream],
@@ -61,13 +67,18 @@ class ModPreviewImage extends HookConsumerWidget {
             ? _ceilToNextMultiple(candidateHeight, ceilConstant)
             : null;
 
-        return Image.file(
-          File(path),
-          key: ValueKey(curMTime.value),
+        final resizeIfNeeded =
+            third_party_image_provider.ResizeImage.resizeIfNeeded(
+          cacheWidth,
+          cacheHeight,
+          FileImage(File(path)),
+          curMTime.value,
+        );
+
+        return Image(
+          image: resizeIfNeeded,
           fit: fit,
           frameBuilder: frameBuilder,
-          cacheWidth: cacheWidth,
-          cacheHeight: cacheHeight,
         );
       },
     );
@@ -86,7 +97,8 @@ class ModPreviewImage extends HookConsumerWidget {
         ),
       );
   }
-}
 
-int _ceilToNextMultiple(final int value, final int multiple) =>
-    (value + multiple - 1) ~/ multiple * multiple;
+  Size _getImageSize() => ImageSizeGetter.getSize(FileInput(File(path)));
+
+  int _getMTime() => File(path).lastModifiedSync().microsecondsSinceEpoch;
+}
