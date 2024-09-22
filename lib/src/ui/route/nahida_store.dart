@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -21,6 +23,7 @@ import '../widget/third_party/flutter/sliver_grid_delegates/min_extent_delegate.
 class NahidaStoreRoute extends HookConsumerWidget {
   NahidaStoreRoute({required this.categoryName, super.key});
   final String categoryName;
+  final _debouncer = _Debouncer(const Duration(milliseconds: 700));
   final PagingController<int, NahidaliveElement?> _pagingController =
       PagingController(firstPageKey: 1);
 
@@ -45,11 +48,6 @@ class NahidaStoreRoute extends HookConsumerWidget {
       },
       [_pagingController],
     );
-
-    final notifierDebounced =
-        useDebounced(notifier.value, const Duration(milliseconds: 700));
-
-    useEffect(() => _pagingController.refresh, [notifierDebounced]);
 
     final initCategory = ref
         .watch(categoriesProvider)
@@ -246,7 +244,10 @@ class NahidaStoreRoute extends HookConsumerWidget {
     } on Exception {
       filter = null;
     }
-    notifier.value = filter;
+    _debouncer(() {
+      notifier.value = filter;
+      _pagingController.refresh();
+    });
   }
 
   String? _onValidationCheck(final String? value) {
@@ -259,5 +260,16 @@ class NahidaStoreRoute extends HookConsumerWidget {
       return e.toString();
     }
     return null;
+  }
+}
+
+class _Debouncer {
+  _Debouncer(this.duration);
+  final Duration duration;
+  Timer? _timer;
+
+  void call(final VoidCallback action) {
+    _timer?.cancel();
+    _timer = Timer(duration, action);
   }
 }
