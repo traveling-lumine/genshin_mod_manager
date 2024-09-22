@@ -37,27 +37,9 @@ class NahidaStoreRoute extends HookConsumerWidget {
 
     useEffect(
       () {
-        _pagingController.addPageRequestListener((final pageKey) async {
-          try {
-            final newItems = await ref
-                .read(nahidaApiProvider)
-                .fetchNahidaliveElements(pageKey);
-            List<NahidaliveElement?> filteredItems = newItems
-                .where((final element) => _dataFilter(notifier.value, element))
-                .toList();
-            if (newItems.isNotEmpty && filteredItems.isEmpty && pageKey == 1) {
-              filteredItems = [null];
-            }
-            if (newItems.isEmpty) {
-              _pagingController.appendLastPage(filteredItems);
-            } else {
-              final nextPageKey = pageKey + 1;
-              _pagingController.appendPage(filteredItems, nextPageKey);
-            }
-          } on Exception catch (error) {
-            _pagingController.error = error;
-          }
-        });
+        _pagingController.addPageRequestListener(
+          (final pageKey) async => _requestPage(ref, pageKey, notifier),
+        );
 
         return _pagingController.dispose;
       },
@@ -102,6 +84,38 @@ class NahidaStoreRoute extends HookConsumerWidget {
       ),
       content: _buildContent(category.value),
     );
+  }
+
+  Future<void> _requestPage(
+    final WidgetRef ref,
+    final int pageKey,
+    final ValueNotifier<TagParseElement?> notifier,
+  ) async {
+    final List<NahidaliveElement> newItems;
+    try {
+      newItems =
+          await ref.read(nahidaApiProvider).fetchNahidaliveElements(pageKey);
+    } on Exception catch (error) {
+      _pagingController.error = error;
+      return;
+    }
+
+    final filteredItems = newItems
+        .where((final element) => _dataFilter(notifier.value, element))
+        .toList();
+
+    if (newItems.isEmpty) {
+      _pagingController.appendLastPage(filteredItems);
+      return;
+    }
+
+    final nextPageKey = pageKey + 1;
+    if (pageKey == 1 && filteredItems.isEmpty) {
+      _pagingController.appendPage([null], nextPageKey);
+      return;
+    }
+
+    _pagingController.appendPage(filteredItems, nextPageKey);
   }
 
   @override
