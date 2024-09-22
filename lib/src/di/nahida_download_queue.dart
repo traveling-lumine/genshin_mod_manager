@@ -43,35 +43,57 @@ class NahidaDownloadQueue extends _$NahidaDownloadQueue {
         );
         break;
       } on HttpException catch (e) {
-        _controller?.add(
-          NahidaDownloadState.httpException(element: element, exception: e),
-        );
+        _addHttpException(element, e);
         return;
       } on WrongPasswordException {
-        final completer = Completer<String?>();
-        _controller?.add(
-          NahidaDownloadState.wrongPassword(
-            element: element,
-            wrongPw: passwd,
-            completer: completer,
-          ),
-        );
-        final password = await completer.future;
+        final password = await _getPassword(element, passwd);
         if (password == null) {
           return;
         }
         passwd = password;
       } on ModZipExtractionException catch (e) {
-        _controller?.add(
-          NahidaDownloadState.modZipExtractionException(
-            element: element,
-            category: category,
-            data: e.data,
-          ),
-        );
+        _addModExtractionException(element, category, e);
         return;
       }
     }
     _controller?.add(NahidaDownloadState.completed(element: element));
+  }
+
+  void _addHttpException(
+    final NahidaliveElement element,
+    final HttpException e,
+  ) {
+    _controller?.add(
+      NahidaDownloadState.httpException(element: element, exception: e),
+    );
+  }
+
+  void _addModExtractionException(
+    final NahidaliveElement element,
+    final ModCategory category,
+    final ModZipExtractionException e,
+  ) {
+    _controller?.add(
+      NahidaDownloadState.modZipExtractionException(
+        element: element,
+        category: category,
+        data: e.data,
+      ),
+    );
+  }
+
+  Future<String?> _getPassword(
+    final NahidaliveElement element,
+    final String? passwd,
+  ) async {
+    final completer = Completer<String?>();
+    _controller?.add(
+      NahidaDownloadState.wrongPassword(
+        element: element,
+        wrongPw: passwd,
+        completer: completer,
+      ),
+    );
+    return completer.future;
   }
 }
