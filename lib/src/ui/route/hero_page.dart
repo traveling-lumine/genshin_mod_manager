@@ -13,7 +13,6 @@ Page<dynamic> heroPage(
       barrierDismissible: true,
       opaque: false,
       fullscreenDialog: true,
-      transitionDuration: const Duration(milliseconds: 200),
       transitionsBuilder: (
         final context,
         final animation,
