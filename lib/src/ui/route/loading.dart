@@ -78,7 +78,8 @@ class LoadingRoute extends HookConsumerWidget {
 
   void _goToLanding(final BuildContext context, final WidgetRef ref) {
     final gamesEmpty = ref.read(gamesListProvider).isEmpty;
-    context.go(gamesEmpty ? RouteNames.firstpage.name : RouteNames.home.name);
+    context
+        .goNamed(gamesEmpty ? RouteNames.firstpage.name : RouteNames.home.name);
   }
 }
 

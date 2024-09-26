@@ -33,7 +33,7 @@ class NahidaStoreRoute extends HookConsumerWidget {
     ref.listen(categoriesProvider, (final previous, final next) {
       final isIn = next.any((final e) => e.name == categoryName);
       if (!isIn) {
-        context.go(RouteNames.home.name);
+        context.goNamed(RouteNames.home.name);
       }
     });
 

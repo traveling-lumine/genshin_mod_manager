@@ -5,10 +5,8 @@ enum RouteNames {
   license,
   loading,
   firstpage,
-  nahidastore,
+  nahidaStore,
   setting;
-
-  String get name => '/${(this as Enum).name}';
 }
 
 enum RouteParams {

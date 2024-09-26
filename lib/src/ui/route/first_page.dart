@@ -13,7 +13,7 @@ class FirstRoute extends ConsumerWidget {
   Widget build(final BuildContext context, final WidgetRef ref) {
     ref.listen(gamesListProvider, (final previous, final next) {
       if (next.isNotEmpty) {
-        context.go(RouteNames.home.name);
+        context.goNamed(RouteNames.home.name);
       }
     });
     return NavigationView(

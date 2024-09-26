@@ -56,7 +56,7 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
     ref.listen(categoriesProvider, (final previous, final next) {
       final isIn = next.any((final e) => e.name == widget.categoryName);
       if (!isIn) {
-        context.go(RouteNames.home.name);
+        context.goNamed(RouteNames.home.name);
       }
     });
 
@@ -247,7 +247,10 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
 
   void _onDownloadPressed(final BuildContext context) {
     unawaited(
-      context.push('${RouteNames.nahidastore.name}/${widget.categoryName}'),
+      context.pushNamed(
+        RouteNames.nahidaStore.name,
+        pathParameters: {RouteParams.category.name: widget.categoryName},
+      ),
     );
   }
 

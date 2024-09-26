@@ -258,7 +258,7 @@ class SettingRoute extends ConsumerWidget {
   Widget _buildLicense(final BuildContext context) => ListTile(
         title: const Text('Licenses'),
         trailing: Button(
-          onPressed: () => unawaited(context.push(RouteNames.license.name)),
+          onPressed: () => context.goNamed(RouteNames.license.name),
           child: const Text('View'),
         ),
       );

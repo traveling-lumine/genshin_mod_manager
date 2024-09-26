@@ -47,7 +47,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   Widget build(final BuildContext context) {
     ref.listen(gamesListProvider, (final previous, final next) {
       if (next.isEmpty) {
-        context.go(RouteNames.firstpage.name);
+        context.goNamed(RouteNames.firstpage.name);
       }
     });
 
@@ -126,7 +126,10 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           if (category == null) {
             return;
           }
-          context.go('${RouteNames.category.name}/${category.name}');
+          context.goNamed(
+            RouteNames.category.name,
+            pathParameters: {RouteParams.category.name: category.name},
+          );
         },
         onSubmissionFailed: (final text) {
           if (text.isEmpty) {
@@ -140,7 +143,10 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
             return;
           }
           final category = item.category;
-          context.go('${RouteNames.category.name}/${category.name}');
+          context.goNamed(
+            RouteNames.category.name,
+            pathParameters: {RouteParams.category.name: category.name},
+          );
         },
       );
 
@@ -151,7 +157,10 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
           (final e) => FolderPaneItem(
             category: e,
             key: Key('${RouteNames.category.name}/${e.name}'),
-            onTap: () => context.go('${RouteNames.category.name}/${e.name}'),
+            onTap: () => context.goNamed(
+              RouteNames.category.name,
+              pathParameters: {RouteParams.category.name: e.name},
+            ),
           ),
         )
         .toList();
@@ -163,7 +172,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         icon: const Icon(FluentIcons.settings),
         title: const Text('Settings'),
         body: const SizedBox.shrink(),
-        onTap: () => context.go(RouteNames.setting.name),
+        onTap: () => context.goNamed(RouteNames.setting.name),
       ),
     ];
 
