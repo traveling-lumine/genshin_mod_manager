@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import '../constants.dart';
 import '../repo/persistent_storage.dart';
 
 Color initializeCardColorUseCase(
@@ -45,10 +46,10 @@ String _getCardColorAccessKeyUseCase({
   required final bool isEnabled,
 }) {
   final accessKey = switch ((isBright, isEnabled)) {
-    (true, true) => 'cardColorBrightEnabled',
-    (true, false) => 'cardColorBrightDisabled',
-    (false, true) => 'cardColorDarkEnabled',
-    (false, false) => 'cardColorDarkDisabled',
+    (true, true) => StorageAccessKey.cardColorBrightEnabled.name,
+    (true, false) => StorageAccessKey.cardColorBrightDisabled.name,
+    (false, true) => StorageAccessKey.cardColorDarkEnabled.name,
+    (false, false) => StorageAccessKey.cardColorDarkDisabled.name,
   };
   return accessKey;
 }

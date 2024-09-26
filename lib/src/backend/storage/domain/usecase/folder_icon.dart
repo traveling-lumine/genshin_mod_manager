@@ -1,6 +1,7 @@
+import '../constants.dart';
 import '../repo/persistent_storage.dart';
 
-const showFolderIconKey = 'showFolderIcon';
+final showFolderIconKey = StorageAccessKey.showFolderIcon.name;
 const showFolderIconDefault = true;
 
 bool initializeFolderIconUseCase(final PersistentStorage? watch) =>

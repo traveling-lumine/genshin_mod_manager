@@ -2,10 +2,11 @@ import 'dart:io';
 
 import '../../../fs_interface/helper/path_op_string.dart';
 import '../../../fs_interface/repo/fs_interface.dart';
+import '../constants.dart';
 import '../repo/persistent_storage.dart';
 import 'game_config.dart';
 
-const _iniEditorArgKey = 'iniEditorArg';
+final _iniEditorArgKey = StorageAccessKey.iniEditorArg.name;
 
 void initializeIniEditorArgumentUseCase(
   final PersistentStorage storage,

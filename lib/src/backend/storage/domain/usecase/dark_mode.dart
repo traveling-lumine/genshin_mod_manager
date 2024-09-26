@@ -1,6 +1,7 @@
+import '../constants.dart';
 import '../repo/persistent_storage.dart';
 
-const darkModeKey = 'darkMode';
+final darkModeKey = StorageAccessKey.darkMode.name;
 const darkModeDefault = true;
 
 bool initializeDarkModeUseCase(final PersistentStorage? watch) =>

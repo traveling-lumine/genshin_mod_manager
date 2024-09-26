@@ -1,6 +1,8 @@
+import '../constants.dart';
 import '../repo/persistent_storage.dart';
 
-String getKey(final String currentGame) => '$currentGame.overrideRun';
+String getKey(final String currentGame) =>
+    '$currentGame${StorageAccessKey.separateRunSuffix.name}';
 
 bool? initializeSeparateRunOverrideUseCase(
   final PersistentStorage? repository,

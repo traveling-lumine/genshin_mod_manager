@@ -1,6 +1,7 @@
+import '../constants.dart';
 import '../repo/persistent_storage.dart';
 
-const moveOnDragKey = 'moveOnDrag';
+final moveOnDragKey = StorageAccessKey.moveOnDrag.name;
 const moveOnDragDefault = true;
 
 bool initializeMoveOnDragUseCase(final PersistentStorage? watch) =>
