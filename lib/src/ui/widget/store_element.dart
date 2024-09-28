@@ -7,9 +7,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../backend/akasha/domain/entity/nahida_element.dart';
+import '../../backend/nahida/domain/entity/nahida_element.dart';
 import '../../backend/structure/entity/mod_category.dart';
-import '../../di/akasha_download_queue.dart';
+import '../../di/nahida_download_queue.dart';
 import '../util/open_url.dart';
 import 'intrinsic_command_bar.dart';
 
@@ -39,9 +39,7 @@ class StoreElement extends ConsumerWidget {
       buttons.add(
         CommandBarButton(
           onPressed: () => openUrl(arcaUrl),
-          icon: const ImageIcon(
-            AssetImage('images/arca_logo.png'),
-          ),
+          icon: const ImageIcon(AssetImage('images/arca_logo.png')),
         ),
       );
     }
@@ -61,13 +59,8 @@ class StoreElement extends ConsumerWidget {
     return Card(
       child: Column(
         children: [
-          Expanded(
-            child: _buildDescriptionColumn(context, buttons),
-          ),
-          Expanded(
-            flex: 2,
-            child: _buildPreview(context),
-          ),
+          Expanded(child: _buildDescriptionColumn(context, buttons)),
+          Expanded(flex: 2, child: _buildPreview(context)),
         ],
       ),
     );
@@ -92,8 +85,15 @@ class StoreElement extends ConsumerWidget {
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (element.password)
+              const Padding(
+                padding: EdgeInsets.only(right: 8),
+                child: Tooltip(
+                  message: 'Password protected',
+                  child: Icon(FluentIcons.lock),
+                ),
+              ),
             Expanded(
               child: Text(
                 element.title,
@@ -129,10 +129,7 @@ class StoreElement extends ConsumerWidget {
             ),
           ),
         ),
-        const Expanded(
-          flex: 0,
-          child: SizedBox(),
-        ),
+        const Expanded(flex: 0, child: SizedBox()),
         if (element.tags.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 10),
@@ -153,15 +150,11 @@ class StoreElement extends ConsumerWidget {
                     color = Colors.red;
                   }
                   return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 1,
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                     margin: const EdgeInsets.symmetric(horizontal: 2),
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: color,
-                      ),
+                      border: Border.all(color: color),
                       borderRadius: BorderRadius.circular(100),
                     ),
                     child: Text(
@@ -195,10 +188,7 @@ class StoreElement extends ConsumerWidget {
                     Colors.black.withOpacity(0.6),
                     BlendMode.darken,
                   ),
-                  child: Image(
-                    image: imageProvider,
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image(image: imageProvider, fit: BoxFit.cover),
                 ),
               ),
             ),
@@ -206,10 +196,7 @@ class StoreElement extends ConsumerWidget {
           Center(
             child: GestureDetector(
               onTap: () async => _showImageDialog(context, imageProvider),
-              child: Image(
-                image: imageProvider,
-                fit: BoxFit.contain,
-              ),
+              child: Image(image: imageProvider, fit: BoxFit.contain),
             ),
           ),
         ],
@@ -235,7 +222,7 @@ class StoreElement extends ConsumerWidget {
               Navigator.of(dialogContext).pop();
               unawaited(
                 ref
-                    .read(akashaDownloadQueueProvider.notifier)
+                    .read(nahidaDownloadQueueProvider.notifier)
                     .addDownload(element: element, category: category),
               );
             },
@@ -254,10 +241,7 @@ class StoreElement extends ConsumerWidget {
         builder: (final dialogContext) => GestureDetector(
           onTap: Navigator.of(dialogContext).pop,
           onSecondaryTap: Navigator.of(dialogContext).pop,
-          child: Image(
-            image: image,
-            fit: BoxFit.contain,
-          ),
+          child: Image(image: image, fit: BoxFit.contain),
         ),
       );
 }

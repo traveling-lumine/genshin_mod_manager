@@ -23,9 +23,7 @@ class ThickScrollbar extends StatelessWidget {
       scrollbarColor: toBeColor,
     );
     return FluentTheme(
-      data: current.copyWith(
-        scrollbarTheme: scrollbarThemeData,
-      ),
+      data: current.copyWith(scrollbarTheme: scrollbarThemeData),
       child: child,
     );
   }
@@ -50,9 +48,8 @@ class RevertScrollbar extends StatelessWidget {
         : FluentThemeData.dark();
     return FluentTheme(
       // reverting thick scrollbar
-      data: FluentTheme.of(context).copyWith(
-        scrollbarTheme: ScrollbarThemeData.standard(toUse),
-      ),
+      data: FluentTheme.of(context)
+          .copyWith(scrollbarTheme: ScrollbarThemeData.standard(toUse)),
       child: child,
     );
   }

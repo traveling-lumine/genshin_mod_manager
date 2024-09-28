@@ -1,6 +1,7 @@
+import '../constants.dart';
 import '../repo/persistent_storage.dart';
 
-const showEnabledModsFirstKey = 'showEnabledModsFirst';
+final showEnabledModsFirstKey = StorageAccessKey.showEnabledModsFirst.name;
 const showEnabledModsFirstDefault = false;
 
 bool initializeEnabledFirstUseCase(final PersistentStorage? watch) {

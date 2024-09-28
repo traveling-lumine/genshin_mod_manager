@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../backend/fs_interface/data/helper/fsops.dart';
-import '../backend/fs_interface/data/helper/path_op_string.dart';
+import '../backend/fs_interface/helper/fsops.dart';
+import '../backend/fs_interface/helper/path_op_string.dart';
 import '../backend/structure/entity/mod.dart';
 import 'fs_watcher.dart';
 
@@ -27,17 +27,16 @@ class IniPaths extends _$IniPaths {
   @override
   List<String> build(final Mod mod) {
     final files = ref.watch(fileInFolderProvider(mod.path));
+
+    List<String> getIniPaths(final List<String> event) => event
+        .where((final e) => e.pExtension.pEquals('.ini') && e.pIsEnabled)
+        .toList();
+
     final subscription = files.listen((final event) {
-      state = event
-          .where((final path) => path.pExtension.pEquals('.ini'))
-          .where((final path) => path.pIsEnabled)
-          .toList();
+      state = getIniPaths(event);
     });
     ref.onDispose(subscription.cancel);
 
-    return getUnderSync<File>(mod.path)
-        .where((final path) => path.pExtension.pEquals('.ini'))
-        .where((final path) => path.pIsEnabled)
-        .toList();
+    return getIniPaths(getUnderSync<File>(mod.path));
   }
 }

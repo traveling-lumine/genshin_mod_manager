@@ -1,8 +1,7 @@
-
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../backend/app_version/domain/github.dart';
+import '../../backend/app_version/github.dart';
 
 part 'remote_version.g.dart';
 

@@ -1,4 +1,3 @@
-
 import '../entity/game_config.dart';
 import '../entity/preset.dart';
 import '../repo/persistent_storage.dart';
@@ -97,10 +96,7 @@ PresetData? getPresetDataUseCase(
         ),
     };
   }
-  return PresetData(
-    global: global2,
-    local: local2,
-  );
+  return PresetData(global: global2, local: local2);
 }
 
 void setPresetDataUseCase(

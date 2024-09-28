@@ -1,18 +1,20 @@
-
-import '../../../fs_interface/data/helper/path_op_string.dart';
+import '../../../fs_interface/helper/path_op_string.dart';
+import '../constants.dart';
 import '../repo/persistent_storage.dart';
 import 'game_config.dart';
 
+final configVersionKey = StorageAccessKey.configVersion.name;
+
 void afterInitializationUseCase(final PersistentStorage storage) {
-  var version = storage.getInt('configVersion');
+  var version = storage.getInt(configVersionKey);
   if (version == null) {
     if (storage.getEntries().isEmpty) {
-      storage.setInt('configVersion', 2);
+      storage.setInt(configVersionKey, 2);
     } else {
       _convertToVersion1(storage);
     }
   }
-  version = storage.getInt('configVersion');
+  version = storage.getInt(configVersionKey);
   if (version == 1) {
     _convertToVersion2(storage);
   }
@@ -35,7 +37,7 @@ void _convertToVersion1(final PersistentStorage storage2) {
 
   storage2
     ..removeKey('targetDir')
-    ..setInt('configVersion', 1);
+    ..setInt(configVersionKey, 1);
 }
 
 void _convertToVersion2(final PersistentStorage storage2) {
@@ -58,5 +60,5 @@ void _convertToVersion2(final PersistentStorage storage2) {
     ..setString('Starrail.modExecFile', starrailModExecFile)
     ..setString('Starrail.launcherDir', starrailLauncherDir)
     ..setMap('Starrail.presetData', starrailPresetData)
-    ..setInt('configVersion', 2);
+    ..setInt(configVersionKey, 2);
 }

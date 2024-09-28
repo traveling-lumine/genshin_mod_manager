@@ -14,10 +14,6 @@ class IntrinsicCommandBarCard extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) => IntrinsicWidth(
-        child: CommandBarCard(
-          child: RepaintBoundary(
-            child: child,
-          ),
-        ),
+        child: CommandBarCard(child: RepaintBoundary(child: child)),
       );
 }

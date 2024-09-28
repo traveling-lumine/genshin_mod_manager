@@ -94,21 +94,19 @@ class SliverGridDelegateWithFixedCrossAxisCount extends CrossAxisAwareDelegate {
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
     assert(_debugAssertIsValid());
-    final double usableCrossAxisExtent = math.max(
-      0.0,
-      constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1),
-    );
+    final double usableCrossAxisExtent = math.max(0.0,
+        constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1));
     final double childCrossAxisExtent = usableCrossAxisExtent / crossAxisCount;
     final double childMainAxisExtent =
         mainAxisExtent ?? childCrossAxisExtent / childAspectRatio;
     return SliverGridRegularTileLayout(
-      crossAxisCount: crossAxisCount,
-      mainAxisStride: childMainAxisExtent + mainAxisSpacing,
-      crossAxisStride: childCrossAxisExtent + crossAxisSpacing,
-      childMainAxisExtent: childMainAxisExtent,
-      childCrossAxisExtent: childCrossAxisExtent,
-      reverseCrossAxis: axisDirectionIsReversed(constraints.crossAxisDirection),
-    );
+        crossAxisCount: crossAxisCount,
+        mainAxisStride: childMainAxisExtent + mainAxisSpacing,
+        crossAxisStride: childCrossAxisExtent + crossAxisSpacing,
+        childMainAxisExtent: childMainAxisExtent,
+        childCrossAxisExtent: childCrossAxisExtent,
+        reverseCrossAxis:
+            axisDirectionIsReversed(constraints.crossAxisDirection));
   }
 
   @override

@@ -40,10 +40,7 @@ NavigationAppBar getAppbar(
               const GameSelector(),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Divider(
-                  direction: Axis.vertical,
-                  size: 30,
-                ),
+                child: Divider(direction: Axis.vertical, size: 30),
               ),
               PresetControlWidget(isLocal: false),
             ],

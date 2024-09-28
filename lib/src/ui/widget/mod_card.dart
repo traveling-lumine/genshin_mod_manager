@@ -4,24 +4,28 @@ import 'dart:ui';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
+import 'package:window_manager/window_manager.dart';
 
-import '../../backend/fs_interface/data/helper/mod_switcher.dart';
-import '../../backend/fs_interface/data/helper/path_op_string.dart';
-import '../../backend/fs_interface/domain/entity/mod_toggle_exception.dart';
-import '../../backend/fs_interface/domain/usecase/open_folder.dart';
-import '../../backend/fs_interface/domain/usecase/paste_image.dart';
+import '../../backend/fs_interface/entity/mod_toggle_exceptions.dart';
+import '../../backend/fs_interface/helper/mod_switcher.dart';
+import '../../backend/fs_interface/helper/path_op_string.dart';
+import '../../backend/fs_interface/usecase/open_folder.dart';
+import '../../backend/fs_interface/usecase/paste_image.dart';
 import '../../backend/structure/entity/ini.dart';
 import '../../backend/structure/entity/mod.dart';
 import '../../di/app_state/card_color.dart';
 import '../../di/app_state/game_config.dart';
 import '../../di/fs_interface.dart';
+import '../../di/fs_watcher.dart';
 import '../../di/mod_card.dart';
+import '../constants.dart';
 import '../util/display_infobar.dart';
 import '../util/show_prompt_dialog.dart';
-import 'custom_image.dart';
 import 'ini_widget.dart';
+import 'mod_preview_image.dart';
 
 class ModCard extends ConsumerStatefulWidget {
   const ModCard({required this.mod, super.key});
@@ -37,8 +41,8 @@ class ModCard extends ConsumerStatefulWidget {
   }
 }
 
-class _ModCardState extends ConsumerState<ModCard> {
-  static const _minIniSectionWidth = 150.0;
+class _ModCardState extends ConsumerState<ModCard> with WindowListener {
+  static const _minIniSectionWidth = 165.0;
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
 
@@ -46,16 +50,18 @@ class _ModCardState extends ConsumerState<ModCard> {
   Widget build(final BuildContext context) => LongPressDraggable<Mod>(
         data: widget.mod,
         dragAnchorStrategy: pointerDragAnchorStrategy,
-        feedback: Card(child: Text(widget.mod.displayName)),
+        feedback: Card(
+          backgroundColor:
+              FluentTheme.of(context).brightness == Brightness.light
+                  ? Colors.grey[30]
+                  : Colors.grey[150],
+          borderColor: Colors.blue,
+          child: Text(widget.mod.displayName),
+        ),
         child: GestureDetector(
           onTap: _onToggle,
           child: Consumer(
-            builder: (
-              final context,
-              final ref,
-              final child,
-            ) =>
-                Card(
+            builder: (final context, final ref, final child) => Card(
               backgroundColor: ref.watch(
                 cardColorProvider(
                   isBright:
@@ -88,7 +94,41 @@ class _ModCardState extends ConsumerState<ModCard> {
   @override
   void dispose() {
     _contextController.dispose();
+    WindowManager.instance.removeListener(this);
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WindowManager.instance.addListener(this);
+  }
+
+  @override
+  void onWindowBlur() {
+    super.onWindowBlur();
+    ref
+        .read(
+          directoryEventWatcherProvider(
+            widget.mod.path,
+            detectModifications: true,
+          ).notifier,
+        )
+        .pause();
+  }
+
+  @override
+  void onWindowFocus() {
+    super.onWindowFocus();
+    ref
+      ..invalidate(
+        directoryEventWatcherProvider(
+          widget.mod.path,
+          detectModifications: true,
+        ),
+      )
+      ..invalidate(iniPathsProvider(widget.mod))
+      ..invalidate(modIconPathProvider(widget.mod));
   }
 
   Widget _buildDesc() => Consumer(
@@ -105,10 +145,7 @@ class _ModCardState extends ConsumerState<ModCard> {
             const Icon(FluentIcons.unknown),
             const SizedBox(height: 4),
             RepaintBoundary(
-              child: Button(
-                onPressed: _onPaste,
-                child: const Text('Paste'),
-              ),
+              child: Button(onPressed: _onPaste, child: const Text('Paste')),
             ),
           ],
         ),
@@ -175,7 +212,7 @@ class _ModCardState extends ConsumerState<ModCard> {
                     Colors.black.withOpacity(0.6),
                     BlendMode.darken,
                   ),
-                  child: TimeAwareFileImage(
+                  child: ModPreviewImage(
                     path: imagePath,
                     fit: BoxFit.cover,
                   ),
@@ -191,7 +228,10 @@ class _ModCardState extends ConsumerState<ModCard> {
               child: FlyoutTarget(
                 controller: _contextController,
                 key: _contextAttachKey,
-                child: TimeAwareFileImage(path: imagePath),
+                child: Hero(
+                  tag: imagePath,
+                  child: ModPreviewImage(path: imagePath),
+                ),
               ),
             ),
           ),
@@ -221,7 +261,12 @@ class _ModCardState extends ConsumerState<ModCard> {
       );
 
   Future<void> _onCommand() async {
-    await ref.read(fsInterfaceProvider).openTerminal(widget.mod.path);
+    await Process.run(
+      'start',
+      ['powershell'],
+      workingDirectory: widget.mod.path,
+      runInShell: true,
+    );
   }
 
   Future<void> _onDeletePressed() async {
@@ -241,9 +286,7 @@ class _ModCardState extends ConsumerState<ModCard> {
         displayInfoBarInContext(
           context,
           title: const Text('Mod deleted'),
-          content: Text(
-            'Mod deleted from ${widget.mod.path}',
-          ),
+          content: Text('Mod deleted from ${widget.mod.path}'),
           severity: InfoBarSeverity.warning,
         ),
       );
@@ -259,6 +302,15 @@ class _ModCardState extends ConsumerState<ModCard> {
     if (fCtx.mounted) {
       Navigator.of(fCtx).pop(userResponse);
     }
+  }
+
+  Future<void> _onImageLongPress(final String image) async {
+    unawaited(
+      context.pushNamed(
+        RouteNames.categoryHero.name,
+        pathParameters: {RouteParams.categoryHeroTag.name: image},
+      ),
+    );
   }
 
   Future<void> _onImageRightClick(
@@ -280,18 +332,6 @@ class _ModCardState extends ConsumerState<ModCard> {
         ),
       );
     }
-  }
-
-  Future<void> _onImageLongPress(final String image) async {
-    await showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (final dCtx) => GestureDetector(
-        onTap: Navigator.of(dCtx).pop,
-        onSecondaryTap: Navigator.of(dCtx).pop,
-        child: TimeAwareFileImage(path: image),
-      ),
-    );
   }
 
   Future<void> _onPaste() async {
@@ -353,9 +393,7 @@ class _ModCardState extends ConsumerState<ModCard> {
     final BuildContext context,
     final String renameTarget,
   ) {
-    _showErrorDialog(
-      '$renameTarget directory already exists!',
-    );
+    _showErrorDialog('$renameTarget directory already exists!');
   }
 
   void _showErrorDialog(final String text) {
@@ -379,16 +417,13 @@ class _ModCardState extends ConsumerState<ModCard> {
   Future<bool> _showImageDeleteConfirmDialog() => showPromptDialog(
         context: context,
         title: 'Delete preview image?',
-        content: const Text(
-          'Are you sure you want to delete the preview image?',
-        ),
+        content:
+            const Text('Are you sure you want to delete the preview image?'),
         confirmButtonLabel: 'Delete',
         redButton: true,
       );
 
-  Future<bool?> _showImageFlyout(
-    final TapUpDetails details,
-  ) async {
+  Future<bool?> _showImageFlyout(final TapUpDetails details) async {
     final targetContext = _contextAttachKey.currentContext;
     if (targetContext == null) {
       return null;
@@ -418,9 +453,7 @@ class _ModCardState extends ConsumerState<ModCard> {
     );
   }
 
-  void _showRenameErrorDialog() => _showErrorDialog(
-        'Failed to rename folder.'
-        ' Check if the ShaderFixes folder is open in explorer,'
-        ' and close it if it is.',
-      );
+  void _showRenameErrorDialog() => _showErrorDialog('Failed to rename folder.'
+      ' Check if the ShaderFixes folder is open in explorer,'
+      ' and close it if it is.');
 }

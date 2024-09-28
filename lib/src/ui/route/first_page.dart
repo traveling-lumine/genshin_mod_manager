@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../di/app_state/games_list.dart';
-import '../route_names.dart';
+import '../constants.dart';
 import '../widget/appbar.dart';
 
 class FirstRoute extends ConsumerWidget {
@@ -11,20 +11,15 @@ class FirstRoute extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    ref.listen(
-      gamesListProvider,
-      (final previous, final next) {
-        if (next.isNotEmpty) {
-          context.go(RouteNames.home.name);
-        }
-      },
-    );
+    ref.listen(gamesListProvider, (final previous, final next) {
+      if (next.isNotEmpty) {
+        context.goNamed(RouteNames.home.name);
+      }
+    });
     return NavigationView(
       appBar: getAppbar('Set the first game name'),
       content: ScaffoldPage.withPadding(
-        header: const PageHeader(
-          title: Text('Set the first game name'),
-        ),
+        header: const PageHeader(title: Text('Set the first game name')),
         content: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,

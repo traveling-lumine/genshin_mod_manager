@@ -1,32 +1,84 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../backend/fs_interface/data/helper/fsops.dart';
-import '../backend/fs_interface/data/helper/path_op_string.dart';
-import '../backend/structure/entity/mod.dart';
-import '../backend/structure/entity/mod_category.dart';
+import '../backend/fs_interface/helper/fsops.dart';
+import '../backend/fs_interface/helper/path_op_string.dart';
 import 'app_state/current_target_game.dart';
-import 'app_state/display_enabled_mods_first.dart';
-import 'app_state/game_config.dart';
 import 'fs_interface.dart';
 
 part 'fs_watcher.g.dart';
 
 @riverpod
-Raw<Stream<FileSystemEvent>> folderEventWatcher(
-  final FolderEventWatcherRef ref,
-  final String path,
-  final bool detectModifications,
-) {
-  if (!detectModifications) {
-    final folderWatchStream = ref.watch(folderEventWatcherProvider(path, true));
-    return folderWatchStream
-        .where((final event) => event is! FileSystemModifyEvent);
+class DirectoryEventWatcher extends _$DirectoryEventWatcher {
+  StreamSubscription<FileSystemEvent>? _subscription;
+  StreamController<FileSystemEvent>? _controller;
+
+  @override
+  Raw<Stream<FileSystemEvent>> build(
+    final String path, {
+    required final bool detectModifications,
+  }) {
+    if (!detectModifications) {
+      final folderWatchStream = ref.watch(
+        directoryEventWatcherProvider(path, detectModifications: true),
+      );
+      return folderWatchStream
+          .where((final event) => event is! FileSystemModifyEvent);
+    }
+
+    final controller = StreamController<FileSystemEvent>.broadcast();
+    ref.onDispose(controller.close);
+    _controller = controller;
+
+    final subscription = Directory(path).watch().listen(controller.add);
+    ref.onDispose(subscription.cancel);
+    _subscription = subscription;
+
+    return controller.stream;
   }
-  return Directory(path).watch().asBroadcastStream();
+
+  void pause() {
+    if (!detectModifications) {
+      return;
+    }
+    unawaited(_subscription?.cancel());
+  }
+
+  void resume() {
+    if (!detectModifications) {
+      return;
+    }
+    final controller = _controller;
+    if (controller == null) {
+      return;
+    }
+    final subscription = Directory(path).watch().listen(controller.add);
+    ref.onDispose(subscription.cancel);
+    _subscription = subscription;
+  }
+}
+
+@riverpod
+Raw<Stream<FileSystemEvent>> fileEventWatcher(
+  final FileEventWatcherRef ref,
+  final String path, {
+  required final bool detectModifications,
+}) {
+  final controller = StreamController<FileSystemEvent>.broadcast();
+  ref.onDispose(controller.close);
+
+  final dirWatcher = ref.watch(
+    directoryEventWatcherProvider(
+      path.pDirname,
+      detectModifications: detectModifications,
+    ),
+  );
+  final subscription = dirWatcher.listen(controller.add);
+  ref.onDispose(subscription.cancel);
+
+  return controller.stream;
 }
 
 @riverpod
@@ -37,7 +89,8 @@ Raw<Stream<List<String>>> directoryInFolder(
   final controller = StreamController<List<String>>.broadcast();
   ref.onDispose(controller.close);
 
-  final watcher = ref.watch(folderEventWatcherProvider(path, false));
+  final watcher = ref
+      .watch(directoryEventWatcherProvider(path, detectModifications: false));
   final subscription = watcher
       .listen((final event) => controller.add(getUnderSync<Directory>(path)));
   ref.onDispose(subscription.cancel);
@@ -53,108 +106,13 @@ Raw<Stream<List<String>>> fileInFolder(
   final controller = StreamController<List<String>>.broadcast();
   ref.onDispose(controller.close);
 
-  final watcher = ref.watch(folderEventWatcherProvider(path, false));
+  final watcher = ref
+      .watch(directoryEventWatcherProvider(path, detectModifications: false));
   final subscription =
       watcher.listen((final event) => controller.add(getUnderSync<File>(path)));
   ref.onDispose(subscription.cancel);
 
   return controller.stream;
-}
-
-@riverpod
-Raw<Stream<FileSystemEvent>> fileEventWatcher(
-  final FileEventWatcherRef ref,
-  final String path,
-  final bool detectModifications,
-) {
-  final dirWatcher =
-      ref.watch(folderEventWatcherProvider(path.pDirname, detectModifications));
-  return dirWatcher.where((final event) => event.path == path);
-}
-
-@riverpod
-Stream<FileSystemEvent> fileEventSnapshot(
-  final FileEventSnapshotRef ref,
-  final String path,
-  final bool detectModifications,
-) =>
-    ref.watch(fileEventWatcherProvider(path, detectModifications));
-
-@riverpod
-Stream<List<Mod>> modsInCategory(
-  final ModsInCategoryRef ref,
-  final ModCategory category,
-) {
-  final enabledModsFirst = ref.watch(displayEnabledModsFirstProvider);
-
-  final controller = StreamController<List<Mod>>();
-  ref.onDispose(controller.close);
-
-  void addData() {
-    controller.add(
-      getUnderSync<Directory>(category.path)
-          .map(
-            (final e) => Mod(
-              path: e,
-              displayName: e.pEnabledForm.pBasename,
-              isEnabled: e.pIsEnabled,
-              category: category,
-            ),
-          )
-          .toList()
-        ..sort((final a, final b) {
-          if (enabledModsFirst) {
-            final aEnabled = a.isEnabled;
-            final bEnabled = b.isEnabled;
-            if (aEnabled && !bEnabled) {
-              return -1;
-            } else if (!aEnabled && bEnabled) {
-              return 1;
-            }
-          }
-          final aLower = a.path.pEnabledForm.pBasename.toLowerCase();
-          final bLower = b.path.pEnabledForm.pBasename.toLowerCase();
-          return compareNatural(aLower, bLower);
-        }),
-    );
-  }
-
-  addData();
-
-  final watch = ref.watch(directoryInFolderProvider(category.path));
-  final subscription = watch.listen((final event) => addData());
-  ref.onDispose(subscription.cancel);
-
-  return controller.stream;
-}
-
-@riverpod
-class Categories extends _$Categories {
-  @override
-  List<ModCategory> build() {
-    final modRoot = ref.watch(
-      gameConfigNotifierProvider.select((final state) => state.modRoot),
-    );
-    if (modRoot == null) {
-      return [];
-    }
-
-    List<ModCategory> addData() => getUnderSync<Directory>(modRoot)
-        .map(
-          (final e) => ModCategory(
-            path: e,
-            name: e.pBasename,
-          ),
-        )
-        .toList()
-      ..sort((final a, final b) => compareNatural(a.name, b.name));
-
-    final watcher = ref.watch(directoryInFolderProvider(modRoot));
-    final subscription = watcher.listen((final event) => state = addData());
-    ref.onDispose(subscription.cancel);
-
-    return addData();
-  }
 }
 
 @riverpod

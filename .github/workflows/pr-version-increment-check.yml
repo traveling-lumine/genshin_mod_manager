@@ -20,9 +20,10 @@ jobs:
           fetch-depth: 0
 
       - name: Get the latest tag
+        id: get_latest_tag
         run: |
           LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
 
       - uses: subosito/flutter-action@v2
 
@@ -30,13 +31,14 @@ jobs:
         run: flutter pub global activate cider
 
       - name: Get the head version
+        id: get_head_version
         run: |
           HEAD_OUTPUT=$(cider version)
-          echo "HEAD_OUTPUT=v$HEAD_OUTPUT" >> $GITHUB_ENV
+          echo "HEAD_OUTPUT=v$HEAD_OUTPUT" >> $GITHUB_OUTPUT
 
       - name: Check version increment
         run: |
-          if [ ${{ env.HEAD_OUTPUT }} == ${{ env.LATEST_TAG }} ]; then
+          if [ ${{ steps.get_head_version.outputs.HEAD_OUTPUT }} == ${{ steps.get_latest_tag.outputs.LATEST_TAG }} ]; then
             echo "Version number has not changed in the PR."
             exit 1
           fi

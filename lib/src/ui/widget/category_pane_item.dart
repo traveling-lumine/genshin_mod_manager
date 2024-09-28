@@ -5,16 +5,15 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../backend/fs_interface/data/helper/path_op_string.dart';
-import '../../backend/fs_interface/domain/usecase/folder_drop.dart';
 import '../../backend/structure/entity/mod.dart';
 import '../../backend/structure/entity/mod_category.dart';
+import '../../backend/structure/usecase/move_mod.dart';
 import '../../di/app_state/folder_icon.dart';
 import '../../di/app_state/use_paimon.dart';
 import '../../di/fs_watcher.dart';
 import '../util/display_infobar.dart';
 import 'category_drop_target.dart';
-import 'custom_image.dart';
+import 'fade_in.dart';
 
 class FolderPaneItem extends PaneItem {
   FolderPaneItem({
@@ -26,7 +25,7 @@ class FolderPaneItem extends PaneItem {
             category.name,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          icon: _getIcon(category.name),
+          icon: _buildIcon(category.name),
           body: const SizedBox.shrink(),
         );
   static const maxIconWidth = 80.0;
@@ -43,79 +42,44 @@ class FolderPaneItem extends PaneItem {
     final bool? autofocus,
   }) =>
       DragTarget<Mod>(
-        onAcceptWithDetails: (final details) {
-          try {
-            moveDir(
-              Directory(details.data.path),
-              category.path.pJoin(details.data.displayName),
-            );
-            unawaited(
-              displayInfoBarInContext(
-                context,
-                title: const Text('Moved!'),
-                content: Text(
-                  'Moved ${details.data.displayName} to ${category.name}',
-                ),
-                severity: InfoBarSeverity.success,
-              ),
-            );
-          } on Exception catch (e) {
-            unawaited(
-              displayInfoBarInContext(
-                context,
-                title: const Text('Error'),
-                content: Text(e.toString()),
-                severity: InfoBarSeverity.error,
-              ),
-            );
-          }
-        },
-        builder: (
-          final context,
-          final candidateData,
-          final rejectedData,
-        ) {
-          final content = CategoryDropTarget(
-            category: category,
-            child: super.build(
-              context,
-              selected,
-              onPressed,
-              displayMode: displayMode,
-              showTextOnTop: showTextOnTop,
-              itemIndex: itemIndex,
-              autofocus: autofocus,
-            ),
-          );
-          if (candidateData.isNotEmpty) {
-            return Stack(
-              children: [
-                content,
-                Positioned.fill(
-                  child: Acrylic(
-                    blurAmount: 1,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.blue,
-                          width: 5,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Drop to move '
-                          '${candidateData.first?.displayName} to '
-                          '${category.name}',
-                        ),
-                      ),
+        onAcceptWithDetails: (final details) =>
+            _onModDragAccept(context, details),
+        builder: (final context, final candidateData, final rejectedData) {
+          final typography = FluentTheme.of(context).typography;
+          final body = typography.body;
+          final bodyStrong = typography.bodyStrong;
+          return FadeInWidget(
+            visible: candidateData.isNotEmpty,
+            fadeTarget: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                text: 'Drop to move\n',
+                style: body,
+                children: [
+                  ...candidateData.map(
+                    (final e) => TextSpan(
+                      text: '${e!.displayName}\n',
+                      style: bodyStrong,
                     ),
                   ),
-                ),
-              ],
-            );
-          }
-          return content;
+                  TextSpan(text: 'to ', style: body),
+                  TextSpan(text: category.name, style: bodyStrong),
+                ],
+              ),
+            ),
+            child: CategoryDropTarget(
+              category: category,
+              child: super.build(
+                context,
+                selected,
+                onPressed,
+                displayMode: displayMode,
+                showTextOnTop: showTextOnTop,
+                itemIndex: itemIndex,
+                autofocus: autofocus,
+              ),
+            ),
+          );
         },
       );
 
@@ -125,35 +89,70 @@ class FolderPaneItem extends PaneItem {
     properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
 
-  static Widget _buildImage(final String? imageFile) {
-    final Widget image;
-    if (imageFile == null) {
-      image = Consumer(
-        builder: (final context, final ref, final child) {
-          final usePaimon = ref.watch(paimonIconProvider);
-          return usePaimon
-              ? Image.asset('images/app_icon.ico')
-              : Image.asset('images/idk_icon.png');
-        },
-      );
-    } else {
-      image = TimeAwareFileImage(path: imageFile);
+  void _onModDragAccept(
+    final BuildContext context,
+    final DragTargetDetails<Mod> details,
+  ) {
+    try {
+      moveModUseCase(category: category, mod: details.data);
+    } on Exception catch (e) {
+      _showMoveErrorInfoBar(context, e);
+      return;
     }
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: maxIconWidth),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: image,
+    _showMoveDoneInfoBar(context, details);
+  }
+
+  void _showMoveDoneInfoBar(
+    final BuildContext context,
+    final DragTargetDetails<Mod> details,
+  ) {
+    unawaited(
+      displayInfoBarInContext(
+        context,
+        title: const Text('Moved!'),
+        content: Text('Moved ${details.data.displayName} to ${category.name}'),
+        severity: InfoBarSeverity.success,
       ),
     );
   }
 
-  static Widget _getIcon(final String name) => Consumer(
-        builder: (final context, final ref, final child) {
-          final filePath = ref.watch(folderIconPathProvider(name));
-          return ref.watch(folderIconProvider)
-              ? _buildImage(filePath)
-              : const Icon(FluentIcons.folder_open);
-        },
+  void _showMoveErrorInfoBar(final BuildContext context, final Exception e) {
+    unawaited(
+      displayInfoBarInContext(
+        context,
+        title: const Text('Error'),
+        content: Text(e.toString()),
+        severity: InfoBarSeverity.error,
+      ),
+    );
+  }
+
+  static Widget _buildIcon(final String name) => Consumer(
+        builder: (final context, final ref, final child) =>
+            ref.watch(folderIconProvider)
+                ? _buildImage(name)
+                : const Icon(FluentIcons.folder_open),
+      );
+
+  static Widget _buildImage(final String name) => ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: maxIconWidth),
+        child: Consumer(
+          builder: (final context, final ref, final child) {
+            final imageFile = ref.watch(folderIconPathProvider(name));
+            return AspectRatio(
+              aspectRatio: 1,
+              child: imageFile == null
+                  ? Consumer(
+                      builder: (final context, final ref, final child) =>
+                          Image.asset(
+                        ref.watch(paimonIconProvider)
+                            ? 'images/app_icon.ico'
+                            : 'images/idk_icon.png',
+                      ),
+                    )
+                  : Image.file(File(imageFile), fit: BoxFit.contain),
+            );
+          },
+        ),
       );
 }

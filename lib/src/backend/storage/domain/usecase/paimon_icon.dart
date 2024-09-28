@@ -1,6 +1,7 @@
+import '../constants.dart';
 import '../repo/persistent_storage.dart';
 
-const showPaimonIconKey = 'showPaimonAsEmptyIconFolderIcon';
+final showPaimonIconKey = StorageAccessKey.showPaimonAsEmptyIconFolderIcon.name;
 const showPaimonIconDefault = true;
 
 bool initializePaimonIconUseCase(final PersistentStorage? watch) =>

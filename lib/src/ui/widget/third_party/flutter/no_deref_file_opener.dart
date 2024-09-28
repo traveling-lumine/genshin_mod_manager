@@ -189,12 +189,7 @@ class OpenNoDereferenceFilePicker extends FileDialog {
         final pszPath = initialDirectory!.toNativeUtf16(allocator: arena);
         final riid = convertToIID(IID_IShellItem, allocator: arena);
         final ppv = calloc<Pointer>();
-        var hr = SHCreateItemFromParsingName(
-          pszPath,
-          nullptr,
-          riid,
-          ppv,
-        );
+        var hr = SHCreateItemFromParsingName(pszPath, nullptr, riid, ppv);
         if (FAILED(hr)) throw WindowsException(hr);
 
         final shellItem = IShellItem(ppv.cast());

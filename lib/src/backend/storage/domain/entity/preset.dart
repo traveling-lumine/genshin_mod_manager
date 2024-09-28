@@ -31,8 +31,6 @@ class PresetList with _$PresetList {
     required final List<String> mods,
   }) = _PresetList;
 
-  factory PresetList.fromJson(
-    final Map<String, dynamic> json,
-  ) =>
+  factory PresetList.fromJson(final Map<String, dynamic> json) =>
       _$PresetListFromJson(json);
 }

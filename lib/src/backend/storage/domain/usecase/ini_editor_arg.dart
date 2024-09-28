@@ -1,11 +1,12 @@
 import 'dart:io';
 
-import '../../../fs_interface/data/helper/path_op_string.dart';
-import '../../../fs_interface/domain/repo/fs_interface.dart';
+import '../../../fs_interface/helper/path_op_string.dart';
+import '../../../fs_interface/repo/fs_interface.dart';
+import '../constants.dart';
 import '../repo/persistent_storage.dart';
 import 'game_config.dart';
 
-const _iniEditorArgKey = 'iniEditorArg';
+final _iniEditorArgKey = StorageAccessKey.iniEditorArg.name;
 
 void initializeIniEditorArgumentUseCase(
   final PersistentStorage storage,
@@ -66,10 +67,30 @@ void _copyIcons(
       continue;
     }
     final modRootSubDirs = modRootDir.listSync().whereType<Directory>();
-    fsInterface.copyFilenames(
+    _copyFilenames(
       iconDirRoot,
       iconDirGame,
       modRootSubDirs.map((final e) => e.path.pBasename).toList(),
     );
+  }
+}
+
+void _copyFilenames(
+  final Directory from,
+  final Directory to,
+  final List<String> filenames,
+) {
+  // iterate files in from directory,
+  // find the ones in filenames,
+  // copy to to directory
+  final lowerFilenames = filenames.map((final e) => e.toLowerCase()).toSet();
+  for (final file in from.listSync().whereType<File>()) {
+    if (lowerFilenames.contains(file.path.pBNameWoExt.toLowerCase())) {
+      // if file does not exist in to directory, copy
+      final toFile = File(to.path.pJoin(file.path.pBasename));
+      if (!toFile.existsSync()) {
+        file.copySync(toFile.path);
+      }
+    }
   }
 }

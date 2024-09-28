@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../backend/fs_interface/data/helper/fsops.dart';
-import '../backend/fs_interface/data/helper/mod_switcher.dart';
-import '../backend/fs_interface/data/helper/path_op_string.dart';
+import '../backend/fs_interface/helper/fsops.dart';
+import '../backend/fs_interface/helper/mod_switcher.dart';
+import '../backend/fs_interface/helper/path_op_string.dart';
 import '../backend/storage/domain/entity/preset.dart';
 import '../backend/structure/entity/mod_category.dart';
 import 'app_state/game_config.dart';
@@ -18,6 +18,11 @@ abstract interface class PresetNotifier {
   void setPreset(final String name);
 
   void removePreset(final String name);
+
+  void renamePreset({
+    required final String oldName,
+    required final String newName,
+  });
 }
 
 @riverpod
@@ -88,6 +93,36 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
       return;
     }
     final modString = {...categoryPresets.bundledPresets}..remove(name);
+    final newCategoryPresets = PresetListMap(bundledPresets: modString);
+    final newLocalPresets = {...localPresets}..[category.name] =
+        newCategoryPresets;
+    final res = presetData.copyWith(local: newLocalPresets);
+    ref.read(gameConfigNotifierProvider.notifier).changePresetData(res);
+  }
+
+  @override
+  void renamePreset({
+    required final String oldName,
+    required final String newName,
+  }) {
+    final presetData = ref.read(gameConfigNotifierProvider).presetData;
+    if (presetData == null) {
+      return;
+    }
+    final localPresets = presetData.local;
+    final categoryPresets = localPresets[category.name];
+    if (categoryPresets == null) {
+      return;
+    }
+    final modString = {...categoryPresets.bundledPresets};
+    final oldMods = modString.remove(oldName);
+    if (oldMods == null) {
+      return;
+    }
+    if (modString.containsKey(newName)) {
+      return;
+    }
+    modString[newName] = oldMods;
     final newCategoryPresets = PresetListMap(bundledPresets: modString);
     final newLocalPresets = {...localPresets}..[category.name] =
         newCategoryPresets;
@@ -169,6 +204,32 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
     ref.read(gameConfigNotifierProvider.notifier).changePresetData(res);
   }
 
+  @override
+  void renamePreset({
+    required final String oldName,
+    required final String newName,
+  }) {
+    final presetData = ref.read(gameConfigNotifierProvider).presetData;
+    if (presetData == null) {
+      return;
+    }
+    final globalPresets = presetData.global;
+    final oldData = globalPresets[oldName];
+    if (oldData == null) {
+      return;
+    }
+    if (globalPresets.containsKey(newName)) {
+      return;
+    }
+    final res = presetData.copyWith(
+      global: {
+        for (final e in globalPresets.entries)
+          if (e.key == oldName) newName: e.value else e.key: e.value,
+      },
+    );
+    ref.read(gameConfigNotifierProvider.notifier).changePresetData(res);
+  }
+
   void _toggleGlobal(final Map<String, List<String>> directives) {
     for (final category in directives.entries) {
       final shouldBeEnabled = category.value;
@@ -201,20 +262,14 @@ Future<void> _toggleCategory(
   final futures = <Future<void>>[];
   for (final mod in shouldBeOff) {
     final modDir = categoryPath.pJoin(mod);
-    final future = disable(
-      shaderFixesPath: shaderFixes,
-      modPath: modDir,
-    );
+    final future = disable(shaderFixesPath: shaderFixes, modPath: modDir);
     futures.add(future);
   }
   final shouldBeOn =
       shouldBeEnabled.where((final e) => !currentEnabled.contains(e));
   for (final mod in shouldBeOn) {
     final modDir = categoryPath.pJoin(mod.pDisabledForm);
-    final future = enable(
-      shaderFixesPath: shaderFixes,
-      modPath: modDir,
-    );
+    final future = enable(shaderFixesPath: shaderFixes, modPath: modDir);
     futures.add(future);
   }
   await Future.wait(futures);

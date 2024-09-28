@@ -23,17 +23,14 @@ jobs:
 
       - uses: subosito/flutter-action@v2
 
+      - name: Generate flutter l10n
+        run: flutter gen-l10n
+
       - name: Flutter pub get
         run: flutter pub get
 
       - name: Run build_runner
         run: dart run build_runner build -d
-
-      - name: Generate flutter l10n
-        run: flutter gen-l10n
-
-      - name: Flutter pub get (do not remove, it's required for the previous step)
-        run: flutter pub get
 
       - name: Build Windows
         run: flutter build windows
@@ -45,18 +42,19 @@ jobs:
           certutil -hashfile GenshinModManager.zip SHA256
 
       - name: Get tag version
+        id: get_tag
         run: |
           flutter pub global activate cider
-          echo "TAG=v$(cider version)" >> $env:GITHUB_ENV
+          echo "TAG=v$(cider version)" >> $env:GITHUB_OUTPUT
 
       - uses: ydataai/create-tag@v1
         with:
-          tag: ${{ env.TAG }}
-          message: ${{ env.TAG }}
+          tag: ${{ steps.get_tag.outputs.TAG }}
+          message: ${{ steps.get_tag.outputs.TAG }}
 
       - uses: softprops/action-gh-release@v2
         with:
           files: GenshinModManager.zip
-          tag_name: ${{ env.TAG }}
+          tag_name: ${{ steps.get_tag.outputs.TAG }}
           generate_release_notes: ${{ !contains(github.event.pull_request.labels.*.name, 'build') }}
           prerelease: ${{ contains(github.event.pull_request.labels.*.name, 'build')}}

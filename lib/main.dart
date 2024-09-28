@@ -9,15 +9,16 @@ import 'package:window_manager/window_manager.dart';
 import 'src/di/app_state/dark_mode.dart';
 import 'src/di/exe_arg.dart';
 import 'src/error_handler.dart';
+import 'src/ui/constants.dart';
 import 'src/ui/route/category.dart';
 import 'src/ui/route/first_page.dart';
+import 'src/ui/route/hero_page.dart';
 import 'src/ui/route/home_shell.dart';
 import 'src/ui/route/license.dart';
 import 'src/ui/route/loading.dart';
 import 'src/ui/route/nahida_store.dart';
 import 'src/ui/route/setting.dart';
 import 'src/ui/route/welcome.dart';
-import 'src/ui/route_names.dart';
 
 void main(final List<String> args) async {
   await _initialize();
@@ -32,7 +33,7 @@ const _kMinWindowSize = Size(800, 600);
 
 Future<void> _initialize() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await protocolHandler.register('gmm-interop-uri');
+  await protocolHandler.register(protocol);
   await windowManager.ensureInitialized();
   await windowManager.waitUntilReadyToShow(
     const WindowOptions(
@@ -52,48 +53,71 @@ class _MyApp extends ConsumerStatefulWidget {
 class _MyAppState extends ConsumerState<_MyApp> {
   final _router = GoRouter(
     debugLogDiagnostics: true,
-    initialLocation: RouteNames.loading.name,
+    initialLocation: '/loading',
     routes: [
       GoRoute(
-        path: RouteNames.loading.name,
+        name: RouteNames.loading.name,
+        path: '/loading',
         builder: (final context, final state) => const LoadingRoute(),
       ),
       GoRoute(
-        path: RouteNames.firstpage.name,
+        name: RouteNames.firstpage.name,
+        path: '/firstpage',
         builder: (final context, final state) => const FirstRoute(),
+      ),
+      GoRoute(
+        name: RouteNames.categoryHero.name,
+        path: '/categoryHero/:${RouteParams.categoryHeroTag.name}',
+        pageBuilder: (final context, final state) {
+          final heroTag =
+              state.pathParameters[RouteParams.categoryHeroTag.name]!;
+          return heroPage(context, heroTag);
+        },
       ),
       ShellRoute(
         builder: (final context, final state, final child) =>
             HomeShell(child: child),
         routes: [
           GoRoute(
-            path: RouteNames.home.name,
+            name: RouteNames.home.name,
+            path: '/',
             builder: (final context, final state) => const WelcomeRoute(),
-          ),
-          GoRoute(
-            path: RouteNames.setting.name,
-            builder: (final context, final state) => const SettingRoute(),
-          ),
-          GoRoute(
-            path: RouteNames.license.name,
-            builder: (final context, final state) => const OssLicensesRoute(),
-          ),
-          GoRoute(
-            path: '${RouteNames.category.name}/:${RouteParams.category.name}',
-            builder: (final context, final state) {
-              final categoryName =
-                  state.pathParameters[RouteParams.category.name]!;
-              return CategoryRoute(categoryName: categoryName);
-            },
-          ),
-          GoRoute(
-            path:
-                '${RouteNames.nahidastore.name}/:${RouteParams.category.name}',
-            builder: (final context, final state) {
-              final categoryName =
-                  state.pathParameters[RouteParams.category.name]!;
-              return NahidaStoreRoute(categoryName: categoryName);
-            },
+            routes: [
+              GoRoute(
+                name: RouteNames.setting.name,
+                path: 'setting',
+                builder: (final context, final state) => const SettingRoute(),
+                routes: [
+                  GoRoute(
+                    name: RouteNames.license.name,
+                    path: 'license',
+                    builder: (final context, final state) =>
+                        const OssLicensesRoute(),
+                  ),
+                ],
+              ),
+              GoRoute(
+                name: RouteNames.category.name,
+                path: 'category/:${RouteParams.category.name}',
+                builder: (final context, final state) {
+                  final categoryName =
+                      state.pathParameters[RouteParams.category.name]!;
+                  return CategoryRoute(
+                    categoryName: categoryName,
+                    key: ValueKey(categoryName),
+                  );
+                },
+              ),
+              GoRoute(
+                name: RouteNames.nahidaStore.name,
+                path: 'nahidaStore/:${RouteParams.category.name}',
+                builder: (final context, final state) {
+                  final categoryName =
+                      state.pathParameters[RouteParams.category.name]!;
+                  return NahidaStoreRoute(categoryName: categoryName);
+                },
+              ),
+            ],
           ),
         ],
       ),

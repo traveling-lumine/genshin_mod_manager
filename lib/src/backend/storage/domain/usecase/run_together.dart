@@ -1,6 +1,7 @@
+import '../constants.dart';
 import '../repo/persistent_storage.dart';
 
-const runTogetherKey = 'runTogether';
+final runTogetherKey = StorageAccessKey.runTogether.name;
 const runTogetherDefault = false;
 
 bool initializeRunTogetherUseCase(final PersistentStorage? watch) =>
