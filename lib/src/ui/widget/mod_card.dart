@@ -120,13 +120,15 @@ class _ModCardState extends ConsumerState<ModCard> with WindowListener {
   @override
   void onWindowFocus() {
     super.onWindowFocus();
-    ref.invalidate(
-      directoryEventWatcherProvider(
-        widget.mod.path,
-        detectModifications: true,
-      ),
-    );
-    ref.invalidate(iniPathsProvider(widget.mod));
+    ref
+      ..invalidate(
+        directoryEventWatcherProvider(
+          widget.mod.path,
+          detectModifications: true,
+        ),
+      )
+      ..invalidate(iniPathsProvider(widget.mod))
+      ..invalidate(modIconPathProvider(widget.mod));
   }
 
   Widget _buildDesc() => Consumer(

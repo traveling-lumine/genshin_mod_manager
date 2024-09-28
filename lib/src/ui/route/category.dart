@@ -7,11 +7,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../backend/fs_interface/usecase/open_folder.dart';
 import '../../backend/structure/entity/mod.dart';
 import '../../backend/structure/entity/mod_category.dart';
 import '../../di/app_state/column_strategy.dart';
+import '../../di/fs_watcher.dart';
 import '../../di/structure/categories.dart';
 import '../../di/structure/mods.dart';
 import '../constants.dart';
@@ -48,8 +50,56 @@ class CategoryRoute extends StatefulHookConsumerWidget {
   }
 }
 
-class _CategoryRouteState extends ConsumerState<CategoryRoute> {
+class _CategoryRouteState extends ConsumerState<CategoryRoute>
+    with WindowListener {
   ScrollController? scrollController;
+  ModCategory? _category;
+
+  @override
+  void initState() {
+    super.initState();
+    WindowManager.instance.addListener(this);
+  }
+
+  @override
+  void dispose() {
+    WindowManager.instance.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  void onWindowBlur() {
+    super.onWindowBlur();
+    final category = _category;
+    if (category == null) {
+      return;
+    }
+    ref
+        .read(
+          directoryEventWatcherProvider(
+            category.path,
+            detectModifications: true,
+          ).notifier,
+        )
+        .pause();
+  }
+
+  @override
+  void onWindowFocus() {
+    super.onWindowFocus();
+    final category = _category;
+    if (category == null) {
+      return;
+    }
+    ref
+      ..invalidate(
+        directoryEventWatcherProvider(
+          category.path,
+          detectModifications: true,
+        ),
+      )
+      ..invalidate(modsInCategoryProvider(category));
+  }
 
   @override
   Widget build(final BuildContext context) {
@@ -67,6 +117,8 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
     if (category == null) {
       return const SizedBox.shrink();
     }
+
+    _category = category;
 
     final sliverGridDelegate = ref.watch(columnStrategyProvider).when(
           fixedCount: (final numChildren) =>

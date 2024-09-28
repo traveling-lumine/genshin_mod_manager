@@ -43,7 +43,7 @@ class DirectoryEventWatcher extends _$DirectoryEventWatcher {
     if (!detectModifications) {
       return;
     }
-    _subscription?.cancel();
+    unawaited(_subscription?.cancel());
   }
 
   void resume() {
