@@ -35,6 +35,9 @@ class NahidaDownloadQueue extends _$NahidaDownloadQueue {
     var passwd = pw;
     while (true) {
       try {
+        if (element.password && passwd == null) {
+          throw const WrongPasswordException();
+        }
         await nahidaDownloadUrlUseCase(
           api: api,
           element: element,

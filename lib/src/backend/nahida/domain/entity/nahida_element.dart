@@ -18,6 +18,7 @@ class NahidaliveElement with _$NahidaliveElement {
     final String? description,
     @JsonKey(name: 'arca_url') final String? arcaUrl,
     @JsonKey(name: 'virustotal_url') final String? virustotalUrl,
+    required final bool password,
   }) = _NahidaliveElement;
 
   factory NahidaliveElement.fromJson(final Map<String, dynamic> json) =>

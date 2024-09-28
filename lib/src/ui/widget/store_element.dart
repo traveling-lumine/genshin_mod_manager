@@ -85,8 +85,15 @@ class StoreElement extends ConsumerWidget {
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (element.password)
+              const Padding(
+                padding: EdgeInsets.only(right: 8),
+                child: Tooltip(
+                  message: 'Password protected',
+                  child: Icon(FluentIcons.lock),
+                ),
+              ),
             Expanded(
               child: Text(
                 element.title,
