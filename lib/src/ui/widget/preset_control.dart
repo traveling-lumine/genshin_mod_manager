@@ -134,12 +134,13 @@ class _PresetComboBox extends ConsumerWidget {
             .map((final e) => ComboBoxItem(value: e, child: Text(e)))
             .toList(),
         placeholder: Text('$prefix Preset...'),
-        onChanged: (final value) => _onBoxChanged(context, value!, ref),
+        onChanged: (final value) =>
+            _showPresetActionDialog(context, value!, ref),
       ),
     );
   }
 
-  void _onBoxChanged(
+  void _showPresetActionDialog(
     final BuildContext context,
     final String value,
     final WidgetRef ref,
@@ -150,7 +151,19 @@ class _PresetComboBox extends ConsumerWidget {
           context: context,
           builder: (final dCtx) => ContentDialog(
             title: Text('Apply $prefix Preset?'),
-            content: Text('Preset name: $value'),
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Preset name: $value'),
+                Button(
+                  onPressed: () {
+                    Navigator.of(dCtx).pop();
+                    _showPresetRenameDialog(context, value, ref);
+                  },
+                  child: const Text('Rename'),
+                ),
+              ],
+            ),
             actions: [
               FluentTheme(
                 data: FluentTheme.of(context).copyWith(accentColor: Colors.red),
@@ -205,5 +218,63 @@ class _PresetComboBox extends ConsumerWidget {
       ..add(DiagnosticsProperty<bool>('isLocal', isLocal))
       ..add(DiagnosticsProperty<ModCategory?>('category', category))
       ..add(StringProperty('prefix', prefix));
+  }
+
+  void _showPresetRenameDialog(
+    final BuildContext context,
+    final String value,
+    final WidgetRef ref,
+  ) {
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (final dCtx) => HookBuilder(
+          builder: (final hCtx) {
+            final textController = useTextEditingController();
+            return Form(
+              child: ContentDialog(
+                title: Text('Rename $prefix Preset'),
+                content: IntrinsicHeight(
+                  child: TextFormBox(
+                    placeholder: 'New Preset Name',
+                    onChanged: (final value) => textController.text = value,
+                    validator: (final value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Preset name cannot be empty';
+                      }
+                      final allPresetNames = _getPresets(ref);
+                      if (allPresetNames.contains(value)) {
+                        return 'Preset name already exists';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                actions: [
+                  Button(
+                    onPressed: Navigator.of(dCtx).pop,
+                    child: const Text('Cancel'),
+                  ),
+                  Builder(
+                    builder: (final bCtx) => FilledButton(
+                      onPressed: () {
+                        if (!Form.of(bCtx).validate()) {
+                          return;
+                        }
+                        final text = textController.text;
+                        _getNotifier(ref)
+                            .renamePreset(oldName: value, newName: text);
+                        Navigator.of(dCtx).pop();
+                      },
+                      child: const Text('Rename'),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 }

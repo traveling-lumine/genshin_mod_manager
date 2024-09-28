@@ -18,6 +18,11 @@ abstract interface class PresetNotifier {
   void setPreset(final String name);
 
   void removePreset(final String name);
+
+  void renamePreset({
+    required final String oldName,
+    required final String newName,
+  });
 }
 
 @riverpod
@@ -88,6 +93,36 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
       return;
     }
     final modString = {...categoryPresets.bundledPresets}..remove(name);
+    final newCategoryPresets = PresetListMap(bundledPresets: modString);
+    final newLocalPresets = {...localPresets}..[category.name] =
+        newCategoryPresets;
+    final res = presetData.copyWith(local: newLocalPresets);
+    ref.read(gameConfigNotifierProvider.notifier).changePresetData(res);
+  }
+
+  @override
+  void renamePreset({
+    required final String oldName,
+    required final String newName,
+  }) {
+    final presetData = ref.read(gameConfigNotifierProvider).presetData;
+    if (presetData == null) {
+      return;
+    }
+    final localPresets = presetData.local;
+    final categoryPresets = localPresets[category.name];
+    if (categoryPresets == null) {
+      return;
+    }
+    final modString = {...categoryPresets.bundledPresets};
+    final oldMods = modString.remove(oldName);
+    if (oldMods == null) {
+      return;
+    }
+    if (modString.containsKey(newName)) {
+      return;
+    }
+    modString[newName] = oldMods;
     final newCategoryPresets = PresetListMap(bundledPresets: modString);
     final newLocalPresets = {...localPresets}..[category.name] =
         newCategoryPresets;
@@ -166,6 +201,32 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
     }
     final res =
         presetData.copyWith(global: {...presetData.global}..remove(name));
+    ref.read(gameConfigNotifierProvider.notifier).changePresetData(res);
+  }
+
+  @override
+  void renamePreset({
+    required final String oldName,
+    required final String newName,
+  }) {
+    final presetData = ref.read(gameConfigNotifierProvider).presetData;
+    if (presetData == null) {
+      return;
+    }
+    final globalPresets = presetData.global;
+    final oldData = globalPresets[oldName];
+    if (oldData == null) {
+      return;
+    }
+    if (globalPresets.containsKey(newName)) {
+      return;
+    }
+    final res = presetData.copyWith(
+      global: {
+        for (final e in globalPresets.entries)
+          if (e.key == oldName) newName: e.value else e.key: e.value,
+      },
+    );
     ref.read(gameConfigNotifierProvider.notifier).changePresetData(res);
   }
 
