@@ -63,25 +63,31 @@ class ProtocolHandlerWidget extends ConsumerWidget {
   Widget build(final BuildContext context, final WidgetRef ref) {
     ref.listen(
       argProviderProvider,
-      (final previous, final next) {
-        final data = next.valueOrNull;
-        if (data == null) {
-          return;
-        }
-        if (data == AcceptedArg.run3dm.cmd) {
-          unawaited(runMigotoCallback());
-        } else if (data == AcceptedArg.rungame.cmd) {
-          unawaited(runLauncherCallback());
-        } else if (data == AcceptedArg.runboth.cmd) {
-          unawaited(runBothCallback());
-        } else if (data.startsWith('/')) {
-          unawaited(_showInvalidCommandDialog(context, data));
-        } else {
-          unawaited(_onUriInput(context, ref, data));
-        }
-      },
+      (final previous, final next) => _argListener(context, ref, next),
     );
     return child;
+  }
+
+  void _argListener(
+    final BuildContext context,
+    final WidgetRef ref,
+    final AsyncValue<String> next,
+  ) {
+    final data = next.valueOrNull;
+    if (data == null) {
+      return;
+    }
+    if (data == AcceptedArg.run3dm.cmd) {
+      unawaited(runMigotoCallback());
+    } else if (data == AcceptedArg.rungame.cmd) {
+      unawaited(runLauncherCallback());
+    } else if (data == AcceptedArg.runboth.cmd) {
+      unawaited(runBothCallback());
+    } else if (data.startsWith('/')) {
+      unawaited(_showInvalidCommandDialog(context, data));
+    } else {
+      unawaited(_onUriInput(context, ref, data));
+    }
   }
 
   @override
