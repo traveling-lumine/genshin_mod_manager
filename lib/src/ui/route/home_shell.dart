@@ -156,7 +156,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         .map(
           (final e) => FolderPaneItem(
             category: e,
-            key: Key('${RouteNames.category.name}/${e.name}'),
+            key: Key('/${RouteNames.category.name}/${e.name}'),
             onTap: () => context.goNamed(
               RouteNames.category.name,
               pathParameters: {RouteParams.category.name: e.name},
@@ -168,7 +168,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       PaneItemSeparator(),
       ..._buildPaneItemActions(),
       PaneItem(
-        key: Key(RouteNames.setting.name),
+        key: Key('/${RouteNames.setting.name}'),
         icon: const Icon(FluentIcons.settings),
         title: const Text('Settings'),
         body: const SizedBox.shrink(),
