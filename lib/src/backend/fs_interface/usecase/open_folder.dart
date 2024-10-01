@@ -1,5 +1,4 @@
 import 'dart:io';
 
-Future<void> openFolderUseCase(final String path) async {
-  await Process.start('explorer', [path], runInShell: true);
-}
+Future<Process> openFolderUseCase(final String path) =>
+    Process.start('explorer', [path], runInShell: true);
