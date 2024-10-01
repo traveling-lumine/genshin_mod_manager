@@ -241,9 +241,23 @@ class _ProtocolDialog extends HookConsumerWidget {
     final categories = ref.watch(categoriesProvider);
     final currentSelected = useState<ModCategory?>(initialCategory);
     final value = currentSelected.value;
+
     return ContentDialog(
       title: const Text('Protocol URL received'),
-      content: _buildContent(currentSelected, categories),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (elemGetState.hasError)
+            const Text('Error fetching element')
+          else if (elemGetState.hasData)
+            Text('Download ${elemGetState.requireData.title}')
+          else
+            const Text('Fetching element...'),
+          const SizedBox(height: 10),
+          _buildCategorySelector(currentSelected, categories),
+        ],
+      ),
       actions: [
         Button(
           onPressed: Navigator.of(context).pop,
@@ -283,26 +297,47 @@ class _ProtocolDialog extends HookConsumerWidget {
       ..add(StringProperty('password', password));
   }
 
-  Widget _buildContent(
+  Widget _buildCategorySelector(
     final ValueNotifier<ModCategory?> currentSelected,
     final List<ModCategory> categories,
-  ) =>
-      IntrinsicHeight(
-        child: ComboboxFormField<ModCategory>(
-          value: currentSelected.value,
-          items: categories
-              .map(
-                (final e) => ComboBoxItem(value: e, child: Text(e.name)),
-              )
-              .toList(),
-          onChanged: (final value) {
-            currentSelected.value = value;
-          },
-          validator: (final value) =>
-              value == null ? 'Please select a category' : null,
-          autovalidateMode: AutovalidateMode.always,
-        ),
-      );
+  ) {
+    const emptyPlaceholder = '';
+    return IntrinsicHeight(
+      child: EditableComboBox<String>(
+        value: currentSelected.value?.name ?? emptyPlaceholder,
+        items: categories
+            .map(
+              (final e) => ComboBoxItem(
+                value: e.name,
+                child: Text(e.name),
+              ),
+            )
+            .toList(),
+        onChanged: (final value) {
+          final category = _getCategory(categories, value);
+          currentSelected.value = category;
+        },
+        onFieldSubmitted: (final text) {
+          final category = _getCategory(categories, text);
+          currentSelected.value = category;
+          return category?.name ?? emptyPlaceholder;
+        },
+      ),
+    );
+  }
+
+  ModCategory? _getCategory(
+    final List<ModCategory> categories,
+    final String? categoryName,
+  ) {
+    if (categoryName == null || categoryName.isEmpty) {
+      return null;
+    }
+    final lowerCase = categoryName.toLowerCase();
+    return categories.firstWhereOrNull(
+      (final e) => e.name.toLowerCase().startsWith(lowerCase),
+    );
+  }
 
   Future<void> _onConfirm(
     final WidgetRef ref,
