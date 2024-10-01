@@ -6,6 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../backend/nahida/domain/entity/nahida_element.dart';
 import '../../backend/structure/entity/mod_category.dart';
@@ -50,7 +51,7 @@ class StoreElement extends ConsumerWidget {
             context: context,
             barrierDismissible: true,
             builder: (final dialogContext) =>
-                _downloadDialog(dialogContext, context, ref),
+                _showDownloadDialog(dialogContext, context, ref),
           ),
         ),
         icon: const Icon(FluentIcons.download),
@@ -60,6 +61,7 @@ class StoreElement extends ConsumerWidget {
       child: Column(
         children: [
           Expanded(child: _buildDescriptionColumn(context, buttons)),
+          const SizedBox(height: 10),
           Expanded(flex: 2, child: _buildPreview(context)),
         ],
       ),
@@ -83,96 +85,125 @@ class StoreElement extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            if (element.password)
-              const Padding(
-                padding: EdgeInsets.only(right: 8),
-                child: Tooltip(
-                  message: 'Password protected',
-                  child: Icon(FluentIcons.lock),
+        _buildHeader(context, primaryItems),
+        Expanded(
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child:
+                          _buildModDescription(description, context, bodyStyle),
+                    ),
+                    if (element.tags.isNotEmpty) _buildTags(context),
+                  ],
                 ),
               ),
-            Expanded(
-              child: Text(
-                element.title,
-                style: FluentTheme.of(context).typography.subtitle,
-              ),
-            ),
-            IntrinsicCommandBarCard(
-              child: CommandBar(
-                overflowBehavior: CommandBarOverflowBehavior.clip,
-                primaryItems: primaryItems,
-              ),
-            ),
-          ],
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: SizedBox(
-              width: double.infinity,
-              child: description != null
-                  ? SelectableText(description)
-                  : SelectableText.rich(
-                      TextSpan(
-                        text: AppLocalizations.of(context)!.noDescription,
-                        style: bodyStyle?.copyWith(
-                          fontStyle:
-                              AppLocalizations.of(context)!.localeName == 'ko'
-                                  ? null
-                                  : FontStyle.italic,
-                          color: bodyStyle.color?.withOpacity(0.5),
-                        ),
-                      ),
-                    ),
-            ),
+              _buildExpiresAt(context),
+            ],
           ),
         ),
-        const Expanded(flex: 0, child: SizedBox()),
-        if (element.tags.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Wrap(
-              runSpacing: 4,
-              children: [
-                ...element.tags.map((final e) {
-                  final isBright = FluentTheme.of(context).brightness.isLight;
-                  var color = isBright ? Colors.grey : Colors.grey[40];
-                  final nsfwTags = [
-                    'nsfw',
-                    '18+',
-                    'r18',
-                    '19',
-                    'hentai',
-                  ];
-                  if (nsfwTags.contains(e.toLowerCase())) {
-                    color = Colors.red;
-                  }
-                  return Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: color),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: Text(
-                      e,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: color,
-                      ),
-                    ),
-                  );
-                }),
-              ],
-            ),
-          ),
-        const SizedBox(height: 10),
       ],
     );
   }
+
+  Widget _buildExpiresAt(final BuildContext context) {
+    final expiresAtDateTime = element.expiresAt != null
+        ? DateTime.fromMillisecondsSinceEpoch(element.expiresAt! * 1000)
+        : null;
+    final dateFormater = DateFormat('yyyy-MM-dd\nHH:mm:ss');
+    return Center(
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // This is a hack to make the column not shrink when the text is
+          // the infinite symbol
+          const Visibility.maintain(visible: false, child: Text('2099-12-31')),
+
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(FluentIcons.calendar),
+              const SizedBox(width: 4),
+              Text(
+                expiresAtDateTime != null
+                    ? dateFormater.format(expiresAtDateTime)
+                    : '∞',
+                textAlign: TextAlign.center,
+                style: expiresAtDateTime == null
+                    ? FluentTheme.of(context).typography.bodyLarge
+                    : null,
+              ),
+              Visibility.maintain(
+                visible: expiresAtDateTime != null &&
+                    expiresAtDateTime.difference(DateTime.now()).inDays < 7,
+                child: Text(
+                  'Expires soon!',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(
+    final BuildContext context,
+    final List<CommandBarItem> primaryItems,
+  ) =>
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (element.password)
+            const Padding(
+              padding: EdgeInsets.only(right: 8),
+              child: Tooltip(
+                message: 'Password protected',
+                child: Icon(FluentIcons.lock),
+              ),
+            ),
+          Expanded(
+            child: Text(
+              element.title,
+              style: FluentTheme.of(context).typography.subtitle,
+            ),
+          ),
+          IntrinsicCommandBarCard(
+            child: CommandBar(
+              overflowBehavior: CommandBarOverflowBehavior.clip,
+              primaryItems: primaryItems,
+            ),
+          ),
+        ],
+      );
+
+  Widget _buildModDescription(
+    final String? description,
+    final BuildContext context,
+    final TextStyle? bodyStyle,
+  ) =>
+      SingleChildScrollView(
+        child: description != null
+            ? SelectableText(description)
+            : SelectableText.rich(
+                TextSpan(
+                  text: AppLocalizations.of(context)!.noDescription,
+                  style: bodyStyle?.copyWith(
+                    fontStyle: AppLocalizations.of(context)!.localeName == 'ko'
+                        ? null
+                        : FontStyle.italic,
+                    color: bodyStyle.color?.withOpacity(0.5),
+                  ),
+                ),
+              ),
+      );
 
   Widget _buildPreview(final BuildContext context) {
     final imageProvider = CachedNetworkImageProvider(element.previewUrl);
@@ -204,7 +235,48 @@ class StoreElement extends ConsumerWidget {
     );
   }
 
-  Widget _downloadDialog(
+  Widget _buildTags(final BuildContext context) => Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: Wrap(
+          runSpacing: 4,
+          children: [
+            ...element.tags.map((final e) {
+              final isBright = FluentTheme.of(context).brightness.isLight;
+              var color = isBright ? Colors.grey : Colors.grey[40];
+              final nsfwTags = [
+                'nsfw',
+                '18+',
+                'r18',
+                '19',
+                'hentai',
+              ];
+              if (nsfwTags.contains(e.toLowerCase())) {
+                color = Colors.red;
+              }
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 1,
+                ),
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                decoration: BoxDecoration(
+                  border: Border.all(color: color),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Text(
+                  e,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      );
+
+  Widget _showDownloadDialog(
     final BuildContext dialogContext,
     final BuildContext context,
     final WidgetRef ref,

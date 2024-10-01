@@ -104,27 +104,17 @@ void setPresetDataUseCase(
   final PersistentStorage read,
   final String targetGame,
 ) {
-  final global = Map.fromEntries(
-    data.global.entries.map(
-      (final e) => MapEntry(
-        e.key,
-        Map.fromEntries(
-          e.value.bundledPresets.entries
-              .map((final f) => MapEntry(f.key, f.value.mods)),
-        ),
-      ),
-    ),
-  );
-  final local = Map.fromEntries(
-    data.local.entries.map(
-      (final e) => MapEntry(
-        e.key,
-        Map.fromEntries(
-          e.value.bundledPresets.entries
-              .map((final f) => MapEntry(f.key, f.value.mods)),
-        ),
-      ),
-    ),
-  );
+  final global = {
+    for (final e in data.global.entries)
+      e.key: {
+        for (final f in e.value.bundledPresets.entries) f.key: f.value.mods,
+      },
+  };
+  final local = {
+    for (final e in data.local.entries)
+      e.key: {
+        for (final f in e.value.bundledPresets.entries) f.key: f.value.mods,
+      },
+  };
   read.setMap('$targetGame.presetData', {'global': global, 'local': local});
 }
