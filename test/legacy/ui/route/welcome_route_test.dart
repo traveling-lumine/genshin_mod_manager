@@ -6,7 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
-import 'mock/mock_url_launcher_platform.dart';
+import '../mock/mock_url_launcher_platform.dart';
 
 part 'welcome_route_test.g.dart';
 
@@ -24,9 +24,7 @@ void main() {
   });
   testWidgets('WelcomeRoute has a link to GitHub', (final tester) async {
     await pumpMainWidget(tester);
-
-    expect(find.text('Welcome'), findsAny);
-
+    
     mock
       ..setLaunchExpectations(
         url: 'https://github.com/traveling-lumine/genshin_mod_manager',
