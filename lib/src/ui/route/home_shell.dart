@@ -3,12 +3,12 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../app_state/current_target_game.dart';
 import '../../app_state/exe_arg.dart';
 import '../../app_state/game_config.dart';

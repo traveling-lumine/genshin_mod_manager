@@ -14,7 +14,7 @@ void registerErrorHandlers() {
 void _onErrorHandler(final FlutterErrorDetails details) {
   final now = DateTime.now().toUtc().toIso8601String();
   final message = _errorToString(details);
-  final stackTrace = _writeStacktrace(details);
+  final stackTrace = writeStacktrace(details);
   try {
     File('error.log').writeAsStringSync(
       '[$now]\n'
@@ -37,16 +37,20 @@ Widget _errorWidgetBuilder(final FlutterErrorDetails details) => Center(
       ),
     );
 
-String _writeStacktrace(final FlutterErrorDetails details) {
+String writeStacktrace(final FlutterErrorDetails details) {
   try {
-    final stackTrace = details.stack.toString();
-    return _elideLines(stackTrace);
+    final stack = details.stack;
+    if (stack == null) {
+      return 'Stack trace not available';
+    }
+    final stackTrace = stack.toString();
+    return elideLines(stackTrace);
   } catch (e) {
-    return 'Stack trace not available';
+    return 'Error writing stack trace';
   }
 }
 
-String _elideLines(final String stackTrace) {
+String elideLines(final String stackTrace) {
   // only choose lines that include genshin_mod_manager.
   // Lines that don't include it are shrunk to ...
   final lines = <String>[];
