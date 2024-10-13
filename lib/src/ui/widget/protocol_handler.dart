@@ -68,28 +68,6 @@ class ProtocolHandlerWidget extends ConsumerWidget {
     return child;
   }
 
-  void _argListener(
-    final BuildContext context,
-    final WidgetRef ref,
-    final AsyncValue<String> next,
-  ) {
-    final data = next.valueOrNull;
-    if (data == null) {
-      return;
-    }
-    if (data == AcceptedArg.run3dm.cmd) {
-      unawaited(runMigotoCallback());
-    } else if (data == AcceptedArg.rungame.cmd) {
-      unawaited(runLauncherCallback());
-    } else if (data == AcceptedArg.runboth.cmd) {
-      unawaited(runBothCallback());
-    } else if (data.startsWith('/')) {
-      unawaited(_showInvalidCommandDialog(context, data));
-    } else {
-      unawaited(_onUriInput(context, ref, data));
-    }
-  }
-
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -114,6 +92,28 @@ class ProtocolHandlerWidget extends ConsumerWidget {
       );
   }
 
+  void _argListener(
+    final BuildContext context,
+    final WidgetRef ref,
+    final AsyncValue<String> next,
+  ) {
+    final data = next.valueOrNull;
+    if (data == null) {
+      return;
+    }
+    if (data == AcceptedArg.run3dm.cmd) {
+      unawaited(runMigotoCallback());
+    } else if (data == AcceptedArg.rungame.cmd) {
+      unawaited(runLauncherCallback());
+    } else if (data == AcceptedArg.runboth.cmd) {
+      unawaited(runBothCallback());
+    } else if (data.startsWith('/')) {
+      unawaited(_showInvalidCommandDialog(context, data));
+    } else {
+      unawaited(_onUriInput(context, ref, data));
+    }
+  }
+
   Future<void> _onUriInput(
     final BuildContext context,
     final WidgetRef ref,
@@ -131,41 +131,8 @@ class ProtocolHandlerWidget extends ConsumerWidget {
         .read(categoriesProvider)
         .firstWhereOrNull((final e) => e.name == categoryName);
 
-    if (category != null) {
-      final NahidaliveElement elem;
-      try {
-        elem = await _getElement(ref, rawUuid);
-      } on Exception catch (e) {
-        if (context.mounted) {
-          _showDownloadFailedInfoBar(context, e);
-        }
-        return;
-      }
-      unawaited(
-        ref
-            .read(
-              nahidaDownloadQueueProvider.notifier,
-            )
-            .addDownload(element: elem, category: category, pw: password),
-      );
-      return;
-    }
-
     _showProtocolConfirmDialog(context, url, rawUuid, category, password);
   }
-
-  void _showDownloadFailedInfoBar(
-    final BuildContext context,
-    final Exception e,
-  ) =>
-      unawaited(
-        displayInfoBarInContext(
-          context,
-          title: const Text('Download failed'),
-          content: Text('$e'),
-          severity: InfoBarSeverity.error,
-        ),
-      );
 
   Future<void> _showInvalidCommandDialog(
     final BuildContext context,
