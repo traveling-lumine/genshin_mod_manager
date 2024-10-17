@@ -15,10 +15,10 @@ class NahidaliveElement with _$NahidaliveElement {
     required final String title,
     required final List<String> tags,
     @JsonKey(name: 'preview_url') required final String previewUrl,
+    required final bool password,
     final String? description,
     @JsonKey(name: 'arca_url') final String? arcaUrl,
     @JsonKey(name: 'virustotal_url') final String? virustotalUrl,
-    required final bool password,
     @JsonKey(name: 'expires_at') final int? expiresAt,
   }) = _NahidaliveElement;
 
