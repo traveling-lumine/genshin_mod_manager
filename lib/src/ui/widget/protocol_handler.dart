@@ -68,28 +68,6 @@ class ProtocolHandlerWidget extends ConsumerWidget {
     return child;
   }
 
-  void _argListener(
-    final BuildContext context,
-    final WidgetRef ref,
-    final AsyncValue<String> next,
-  ) {
-    final data = next.valueOrNull;
-    if (data == null) {
-      return;
-    }
-    if (data == AcceptedArg.run3dm.cmd) {
-      unawaited(runMigotoCallback());
-    } else if (data == AcceptedArg.rungame.cmd) {
-      unawaited(runLauncherCallback());
-    } else if (data == AcceptedArg.runboth.cmd) {
-      unawaited(runBothCallback());
-    } else if (data.startsWith('/')) {
-      unawaited(_showInvalidCommandDialog(context, data));
-    } else {
-      unawaited(_onUriInput(context, ref, data));
-    }
-  }
-
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -114,6 +92,28 @@ class ProtocolHandlerWidget extends ConsumerWidget {
       );
   }
 
+  void _argListener(
+    final BuildContext context,
+    final WidgetRef ref,
+    final AsyncValue<String> next,
+  ) {
+    final data = next.valueOrNull;
+    if (data == null) {
+      return;
+    }
+    if (data == AcceptedArg.run3dm.cmd) {
+      unawaited(runMigotoCallback());
+    } else if (data == AcceptedArg.rungame.cmd) {
+      unawaited(runLauncherCallback());
+    } else if (data == AcceptedArg.runboth.cmd) {
+      unawaited(runBothCallback());
+    } else if (data.startsWith('/')) {
+      unawaited(_showInvalidCommandDialog(context, data));
+    } else {
+      unawaited(_onUriInput(context, ref, data));
+    }
+  }
+
   Future<void> _onUriInput(
     final BuildContext context,
     final WidgetRef ref,
@@ -131,41 +131,8 @@ class ProtocolHandlerWidget extends ConsumerWidget {
         .read(categoriesProvider)
         .firstWhereOrNull((final e) => e.name == categoryName);
 
-    if (category != null) {
-      final NahidaliveElement elem;
-      try {
-        elem = await _getElement(ref, rawUuid);
-      } on Exception catch (e) {
-        if (context.mounted) {
-          _showDownloadFailedInfoBar(context, e);
-        }
-        return;
-      }
-      unawaited(
-        ref
-            .read(
-              nahidaDownloadQueueProvider.notifier,
-            )
-            .addDownload(element: elem, category: category, pw: password),
-      );
-      return;
-    }
-
     _showProtocolConfirmDialog(context, url, rawUuid, category, password);
   }
-
-  void _showDownloadFailedInfoBar(
-    final BuildContext context,
-    final Exception e,
-  ) =>
-      unawaited(
-        displayInfoBarInContext(
-          context,
-          title: const Text('Download failed'),
-          content: Text('$e'),
-          severity: InfoBarSeverity.error,
-        ),
-      );
 
   Future<void> _showInvalidCommandDialog(
     final BuildContext context,
@@ -241,9 +208,23 @@ class _ProtocolDialog extends HookConsumerWidget {
     final categories = ref.watch(categoriesProvider);
     final currentSelected = useState<ModCategory?>(initialCategory);
     final value = currentSelected.value;
+
     return ContentDialog(
       title: const Text('Protocol URL received'),
-      content: _buildContent(currentSelected, categories),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (elemGetState.hasError)
+            const Text('Error fetching element')
+          else if (elemGetState.hasData)
+            Text('Download ${elemGetState.requireData.title}')
+          else
+            const Text('Fetching element...'),
+          const SizedBox(height: 10),
+          _buildCategorySelector(currentSelected, categories),
+        ],
+      ),
       actions: [
         Button(
           onPressed: Navigator.of(context).pop,
@@ -283,26 +264,47 @@ class _ProtocolDialog extends HookConsumerWidget {
       ..add(StringProperty('password', password));
   }
 
-  Widget _buildContent(
+  Widget _buildCategorySelector(
     final ValueNotifier<ModCategory?> currentSelected,
     final List<ModCategory> categories,
-  ) =>
-      IntrinsicHeight(
-        child: ComboboxFormField<ModCategory>(
-          value: currentSelected.value,
-          items: categories
-              .map(
-                (final e) => ComboBoxItem(value: e, child: Text(e.name)),
-              )
-              .toList(),
-          onChanged: (final value) {
-            currentSelected.value = value;
-          },
-          validator: (final value) =>
-              value == null ? 'Please select a category' : null,
-          autovalidateMode: AutovalidateMode.always,
-        ),
-      );
+  ) {
+    const emptyPlaceholder = '';
+    return IntrinsicHeight(
+      child: EditableComboBox<String>(
+        value: currentSelected.value?.name ?? emptyPlaceholder,
+        items: categories
+            .map(
+              (final e) => ComboBoxItem(
+                value: e.name,
+                child: Text(e.name),
+              ),
+            )
+            .toList(),
+        onChanged: (final value) {
+          final category = _getCategory(categories, value);
+          currentSelected.value = category;
+        },
+        onFieldSubmitted: (final text) {
+          final category = _getCategory(categories, text);
+          currentSelected.value = category;
+          return category?.name ?? emptyPlaceholder;
+        },
+      ),
+    );
+  }
+
+  ModCategory? _getCategory(
+    final List<ModCategory> categories,
+    final String? categoryName,
+  ) {
+    if (categoryName == null || categoryName.isEmpty) {
+      return null;
+    }
+    final lowerCase = categoryName.toLowerCase();
+    return categories.firstWhereOrNull(
+      (final e) => e.name.toLowerCase().startsWith(lowerCase),
+    );
+  }
 
   Future<void> _onConfirm(
     final WidgetRef ref,

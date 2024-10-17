@@ -61,8 +61,10 @@ class _ModPreviewImageState extends ConsumerState<ModPreviewImage>
       () {
         final subscription = eventStream.listen((final event) {
           _debouncer(() {
-            imageSize.value = _getImageSize();
-            _setCurMTime();
+            if (File(widget.path).existsSync()) {
+              imageSize.value = _getImageSize();
+              _setCurMTime();
+            }
           });
         });
         return subscription.cancel;

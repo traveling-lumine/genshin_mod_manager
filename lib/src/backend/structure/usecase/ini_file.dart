@@ -4,8 +4,13 @@ import 'dart:io';
 import '../entity/ini.dart';
 
 List<IniStatement> parseIniFileUseCase(final IniFile iniFile) {
-  final lines = File(iniFile.path)
-      .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true));
+  final List<String> lines;
+  try {
+    lines = File(iniFile.path)
+        .readAsLinesSync(encoding: const Utf8Codec(allowMalformed: true));
+  } on PathNotFoundException {
+    return [];
+  }
 
   final statements = <IniStatement>[];
   late IniStatementSection lastSection;

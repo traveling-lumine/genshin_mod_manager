@@ -702,13 +702,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('build'), PackageRef('collection'), PackageRef('convert'), PackageRef('crypto'), PackageRef('graphs'), PackageRef('logging'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('pub_semver'), PackageRef('stream_transform'), PackageRef('yaml')]
   );
 
-/// build_runner 2.4.12
+/// build_runner 2.4.13
 const _build_runner = Package(
     name: 'build_runner',
     description: 'A build system for Dart code generation and modular compilation.',
     repository: 'https://github.com/dart-lang/build/tree/master/build_runner',
     authors: [],
-    version: '2.4.12',
+    version: '2.4.13',
     license: '''Copyright 2016, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -1737,13 +1737,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('typed_data')]
   );
 
-/// custom_lint 0.6.7
+/// custom_lint 0.6.8
 const _custom_lint = Package(
     name: 'custom_lint',
     description: 'Lint rules are a powerful way to improve the maintainability of a project. Custom Lint allows package authors and developers to easily write custom lint rules.',
     repository: 'https://github.com/invertase/dart_custom_lint',
     authors: [],
-    version: '0.6.7',
+    version: '0.6.8',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -1950,13 +1950,13 @@ const _custom_lint = Package(
     dependencies: [PackageRef('analyzer'), PackageRef('analyzer_plugin'), PackageRef('args'), PackageRef('async'), PackageRef('ci'), PackageRef('cli_util'), PackageRef('collection'), PackageRef('custom_lint_core'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('rxdart'), PackageRef('uuid'), PackageRef('yaml')]
   );
 
-/// custom_lint_builder 0.6.7
+/// custom_lint_builder 0.6.8
 const _custom_lint_builder = Package(
     name: 'custom_lint_builder',
     description: 'A package to help writing custom linters',
     repository: 'https://github.com/invertase/dart_custom_lint',
     authors: [],
-    version: '0.6.7',
+    version: '0.6.8',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -2449,13 +2449,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('collection'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span')]
   );
 
-/// dependency_validator 4.1.0
+/// dependency_validator 4.1.1
 const _dependency_validator = Package(
     name: 'dependency_validator',
     description: 'Checks for missing, under-promoted, over-promoted, and unused dependencies.',
     homepage: 'https://github.com/Workiva/dependency_validator',
     authors: [],
-    version: '4.1.0',
+    version: '4.1.1',
     license: '''Copyright 2017 Workiva Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -3134,14 +3134,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// fluent_ui 4.9.1
+/// fluent_ui 4.9.2
 const _fluent_ui = Package(
     name: 'fluent_ui',
     description: 'Implements Windows UI in Flutter. Based on the official documentation',
     homepage: 'https://bdlukaa.github.io/fluent_ui/#/',
     repository: 'https://github.com/bdlukaa/fluent_ui',
     authors: [],
-    version: '4.9.1',
+    version: '4.9.2',
     license: '''Copyright 2020 Bruno D'Luka
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -3158,13 +3158,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     dependencies: [PackageRef('flutter'), PackageRef('intl'), PackageRef('scroll_pos'), PackageRef('recase'), PackageRef('math_expressions')]
   );
 
-/// flutter 3.24.2
+/// flutter 3.24.3
 const _flutter = Package(
     name: 'flutter',
     description: 'A framework for writing Flutter applications',
     homepage: 'https://flutter.dev',
     authors: [],
-    version: '3.24.2',
+    version: '3.24.3',
     license: '''Copyright 2014 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3283,13 +3283,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('flutter')]
   );
 
-/// flutter_image_converter 0.3.3
+/// flutter_image_converter 0.4.1
 const _flutter_image_converter = Package(
     name: 'flutter_image_converter',
-    description: 'Ultimative converter between Dart & Flutter images: ui, widgets, package image, ImageProvider, raw bytes, Base64 string. Works in any direction.',
+    description: 'Ultimate converter between Dart & Flutter images: ui, widgets, package image, ImageProvider, raw bytes, Base64 string. Works in any direction.',
     repository: 'https://github.com/signmotion/flutter_image_converter',
     authors: [],
-    version: '0.3.3',
+    version: '0.4.1',
     license: '''# MIT License
 
 Copyright (c) 2024 [Andrii Syrokomskyi](https://syrokomskyi.com)
@@ -3316,13 +3316,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('flutter'), PackageRef('image')]
   );
 
-/// flutter_lints 4.0.0
+/// flutter_lints 5.0.0
 const _flutter_lints = Package(
     name: 'flutter_lints',
     description: 'Recommended lints for Flutter apps, packages, and plugins to encourage good coding practices.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/flutter_lints',
     authors: [],
-    version: '4.0.0',
+    version: '5.0.0',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3387,7 +3387,7 @@ SOFTWARE.''',
     dependencies: [PackageRef('path'), PackageRef('meta'), PackageRef('yaml'), PackageRef('dart_pubspec_licenses'), PackageRef('args')]
   );
 
-/// flutter_riverpod 2.5.1
+/// flutter_riverpod 2.5.3
 const _flutter_riverpod = Package(
     name: 'flutter_riverpod',
     description: '''A reactive caching and data-binding framework. Riverpod makes working with asynchronous code a breeze.
@@ -3395,7 +3395,7 @@ const _flutter_riverpod = Package(
     homepage: 'https://riverpod.dev',
     repository: 'https://github.com/rrousselGit/riverpod',
     authors: [],
-    version: '2.5.1',
+    version: '2.5.3',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -3601,13 +3601,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('file'), PackageRef('path'), PackageRef('string_scanner')]
   );
 
-/// go_router 14.2.7
+/// go_router 14.3.0
 const _go_router = Package(
     name: 'go_router',
     description: 'A declarative router for Flutter based on Navigation 2 supporting deep linking, data-driven routes and more',
     repository: 'https://github.com/flutter/packages/tree/main/packages/go_router',
     authors: [],
-    version: '14.2.7',
+    version: '14.3.0',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3718,7 +3718,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// hooks_riverpod 2.5.2
+/// hooks_riverpod 2.5.4
 const _hooks_riverpod = Package(
     name: 'hooks_riverpod',
     description: '''A reactive caching and data-binding framework. Riverpod makes working with asynchronous code a breeze.
@@ -3726,7 +3726,7 @@ const _hooks_riverpod = Package(
     homepage: 'https://riverpod.dev',
     repository: 'https://github.com/rrousselGit/riverpod',
     authors: [],
-    version: '2.5.2',
+    version: '2.5.4',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -4119,13 +4119,13 @@ THE SOFTWARE.''',
     dependencies: [PackageRef('archive'), PackageRef('meta'), PackageRef('xml')]
   );
 
-/// image_size_getter 2.1.3
+/// image_size_getter 2.2.0
 const _image_size_getter = Package(
     name: 'image_size_getter',
     description: 'Get image width and height, the library does not completely decode the image file, just read the metadata to get the image width and height.',
     homepage: 'https://github.com/CaiJingLong/dart_image_size_getter',
     authors: [],
-    version: '2.1.3',
+    version: '2.2.0',
     license: '''Apache License
                        Version 2.0, January 2004
                     http://www.apache.org/licenses/
@@ -4675,14 +4675,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// lints 4.0.0
+/// lints 5.0.0
 const _lints = Package(
     name: 'lints',
     description: """Official Dart lint rules. Defines the 'core' and 'recommended' set of lints suggested by the Dart team.
 """,
     repository: 'https://github.com/dart-lang/lints',
     authors: [],
-    version: '4.0.0',
+    version: '5.0.0',
     license: '''Copyright 2021, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -5296,14 +5296,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('path')]
   );
 
-/// package_info_plus 8.0.2
+/// package_info_plus 8.1.0
 const _package_info_plus = Package(
     name: 'package_info_plus',
     description: 'Flutter plugin for querying information about the application package, such as CFBundleVersion on iOS or versionCode on Android.',
     homepage: 'https://github.com/fluttercommunity/plus_plugins',
     repository: 'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/package_info_plus/package_info_plus',
     authors: [],
-    version: '8.0.2',
+    version: '8.1.0',
     license: '''Copyright 2017 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -6329,7 +6329,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     dependencies: []
   );
 
-/// riverpod 2.5.1
+/// riverpod 2.5.3
 const _riverpod = Package(
     name: 'riverpod',
     description: '''A reactive caching and data-binding framework. Riverpod makes working with asynchronous code a breeze.
@@ -6337,7 +6337,7 @@ const _riverpod = Package(
     homepage: 'https://riverpod.dev',
     repository: 'https://github.com/rrousselGit/riverpod',
     authors: [],
-    version: '2.5.1',
+    version: '2.5.3',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -6397,13 +6397,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('analyzer'), PackageRef('collection'), PackageRef('crypto'), PackageRef('custom_lint_core'), PackageRef('freezed_annotation'), PackageRef('meta'), PackageRef('path'), PackageRef('source_span')]
   );
 
-/// riverpod_annotation 2.3.5
+/// riverpod_annotation 2.5.3
 const _riverpod_annotation = Package(
     name: 'riverpod_annotation',
     description: 'A package exposing annotations for riverpod_generator',
     repository: 'https://github.com/rrousselGit/riverpod',
     authors: [],
-    version: '2.3.5',
+    version: '2.5.3',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -7960,13 +7960,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('collection')]
   );
 
-/// url_launcher 6.3.0
+/// url_launcher 6.3.1
 const _url_launcher = Package(
     name: 'url_launcher',
     description: 'Flutter plugin for launching a URL. Supports web, phone, SMS, and email schemes.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher',
     authors: [],
-    version: '6.3.0',
+    version: '6.3.1',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -8734,7 +8734,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('async'), PackageRef('crypto'), PackageRef('stream_channel'), PackageRef('web'), PackageRef('web_socket')]
   );
 
-/// win32 5.5.4
+/// win32 5.6.0
 const _win32 = Package(
     name: 'win32',
     description: '''Access common Win32 APIs directly from Dart using FFI — no C required!
@@ -8742,7 +8742,7 @@ const _win32 = Package(
     homepage: 'https://win32.pub',
     repository: 'https://github.com/halildurmus/win32',
     authors: [],
-    version: '5.5.4',
+    version: '5.6.0',
     license: '''BSD 3-Clause License
 
 Copyright (c) 2024, Halil Durmus
