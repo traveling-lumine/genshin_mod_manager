@@ -13,7 +13,6 @@ part 'nahida_page_fetch_result.g.dart';
 class NahidaPageFetchResult with _$NahidaPageFetchResult {
   const factory NahidaPageFetchResult({
     required final bool success,
-    required final String action,
     @JsonKey(name: 'data') required final NahidaPageResult result,
   }) = _NahidaPageFetchResult;
 
