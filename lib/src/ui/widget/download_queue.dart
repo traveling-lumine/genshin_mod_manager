@@ -6,6 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../backend/fs_interface/helper/path_op_string.dart';
+import '../../backend/mod_writer/data/mod_writer.dart';
 import '../../backend/nahida/domain/entity/download_state.dart';
 import '../../backend/nahida/domain/entity/nahida_element.dart';
 import '../../backend/structure/entity/mod_category.dart';
@@ -139,7 +140,7 @@ class _DownloadQueueState extends ConsumerState<DownloadQueue> {
   ) async {
     var writeSuccess = false;
     Exception? exception;
-    final fileName = '${element.title}.zip';
+    final fileName = sanitizeString('${element.title}.zip');
     try {
       await File(category.path.pJoin(fileName)).writeAsBytes(data);
       writeSuccess = true;

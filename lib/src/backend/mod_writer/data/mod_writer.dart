@@ -35,8 +35,15 @@ ModWriter createModWriter({required final String categoryPath}) => ({
 Future<String> _getNonCollidingModName(
   final String categoryPath,
   final String name,
-) =>
-    _getNonCollidingName(categoryPath, name.pEnabledForm);
+) {
+  final sanitizedName = sanitizeString(name);
+  return _getNonCollidingName(categoryPath, sanitizedName.pEnabledForm);
+}
+
+String sanitizeString(final String name) {
+  final sanitizedName = name.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
+  return sanitizedName.trim();
+}
 
 Future<String> _getNonCollidingName(
   final String categoryPath,
