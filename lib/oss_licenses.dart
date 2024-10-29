@@ -3158,13 +3158,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     dependencies: [PackageRef('flutter'), PackageRef('intl'), PackageRef('scroll_pos'), PackageRef('recase'), PackageRef('math_expressions')]
   );
 
-/// flutter 3.24.3
+/// flutter 3.24.4
 const _flutter = Package(
     name: 'flutter',
     description: 'A framework for writing Flutter applications',
     homepage: 'https://flutter.dev',
     authors: [],
-    version: '3.24.3',
+    version: '3.24.4',
     license: '''Copyright 2014 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
