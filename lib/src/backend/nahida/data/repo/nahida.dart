@@ -77,7 +77,7 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
         pw == null || pw.isEmpty ? <String, String>{} : {Env.val7: pw};
     final uri = Uri.https(Env.val10, '${Env.val11}/$uuid');
     final response =
-        await _client.post(uri, headers: {Env.val9: Env.val8}, body: passwd);
+        await _client.post(uri, body: passwd);
     return NahidaliveDownloadElement.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );

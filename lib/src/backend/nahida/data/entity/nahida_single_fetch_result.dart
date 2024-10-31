@@ -13,7 +13,7 @@ part 'nahida_single_fetch_result.g.dart';
 class NahidaSingleFetchResult with _$NahidaSingleFetchResult {
   const factory NahidaSingleFetchResult({
     required final bool success,
-    @JsonKey(name: 'data') required final NahidaliveElement result,
+    @JsonKey(name: 'mod') required final NahidaliveElement result,
   }) = _NahidaSingleFetchResult;
 
   factory NahidaSingleFetchResult.fromJson(final Map<String, dynamic> json) =>
