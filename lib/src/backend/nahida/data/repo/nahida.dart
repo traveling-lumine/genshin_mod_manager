@@ -12,8 +12,6 @@ import '../entity/nahida_single_fetch_result.dart';
 import '../secrets.dart';
 
 class NahidaliveAPIImpl implements NahidaliveAPI {
-  final _client = http.Client();
-
   @override
   Future<Uint8List> downloadUuid({
     required final String uuid,
@@ -28,8 +26,7 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
 
   @override
   Future<NahidaliveElement> fetchNahidaliveElement(final String uuid) async {
-    final response =
-        await _client.get(Uri.https(Env.val10, '${Env.val13}/$uuid'));
+    final response = await http.get(Uri.https(Env.val10, '${Env.val13}/$uuid'));
     final fetchResult = NahidaSingleFetchResult.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
@@ -43,18 +40,18 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
     if (pageNum <= 0) {
       throw ArgumentError.value(pageNum, 'pageNum', 'must be greater than 0');
     }
-    final response = await _client.get(
+    final response = await http.get(
       Uri.https(Env.val10, Env.val12, {
         Env.val1: pageNum.toString(),
         Env.val2: Env.val5,
       }),
-      headers: {Env.val9: Env.val8},
     );
+    final body = response.body;
     if (response.statusCode != 200) {
-      throw Exception('fetch list failed: ${response.body}');
+      throw Exception('fetch list failed: $body');
     }
     final fetchResult = NahidaPageFetchResult.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+      jsonDecode(body) as Map<String, dynamic>,
     );
     return fetchResult.result.elements;
   }
@@ -62,7 +59,7 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
   Future<Uint8List> _download(
     final NahidaliveDownloadElement downloadElement,
   ) async {
-    final response = await _client.get(Uri.parse(downloadElement.downloadUrl!));
+    final response = await http.get(Uri.parse(downloadElement.downloadUrl!));
     if (response.statusCode != 200) {
       throw Exception('download failed');
     }
@@ -76,8 +73,7 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
     final passwd =
         pw == null || pw.isEmpty ? <String, String>{} : {Env.val7: pw};
     final uri = Uri.https(Env.val10, '${Env.val11}/$uuid');
-    final response =
-        await _client.post(uri, headers: {Env.val9: Env.val8}, body: passwd);
+    final response = await http.post(uri, body: passwd);
     return NahidaliveDownloadElement.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
