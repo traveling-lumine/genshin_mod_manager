@@ -45,6 +45,7 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
         Env.val1: pageNum.toString(),
         Env.val2: Env.val5,
       }),
+      headers: {Env.val9: Env.val8},
     );
     final body = response.body;
     if (response.statusCode != 200) {
