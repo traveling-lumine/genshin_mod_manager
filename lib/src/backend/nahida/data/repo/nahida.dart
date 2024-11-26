@@ -26,9 +26,16 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
 
   @override
   Future<NahidaliveElement> fetchNahidaliveElement(final String uuid) async {
-    final response = await http.get(Uri.https(Env.val10, '${Env.val13}/$uuid'));
+    final client = http.Client();
+    final request = http.Request(
+      'GET',
+      Uri.https(Env.val10, '${Env.val13}/$uuid'),
+    );
+    final response = await client.send(request);
+    final body = await response.stream.bytesToString();
+    client.close();
     final fetchResult = NahidaSingleFetchResult.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+      jsonDecode(body) as Map<String, dynamic>,
     );
     return fetchResult.result;
   }
@@ -40,14 +47,18 @@ class NahidaliveAPIImpl implements NahidaliveAPI {
     if (pageNum <= 0) {
       throw ArgumentError.value(pageNum, 'pageNum', 'must be greater than 0');
     }
-    final response = await http.get(
+    final client = http.Client();
+    final request = http.Request(
+      'GET',
       Uri.https(Env.val10, Env.val12, {
         Env.val1: pageNum.toString(),
         Env.val2: Env.val5,
       }),
-      headers: {Env.val9: Env.val8},
     );
-    final body = response.body;
+    request.headers[Env.val9] = Env.val8;
+    final response = await client.send(request);
+    final body = await response.stream.bytesToString();
+    client.close();
     if (response.statusCode != 200) {
       throw Exception('fetch list failed: $body');
     }
