@@ -6,10 +6,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../backend/fs_interface/helper/path_op_string.dart';
-import '../../backend/structure/entity/ini.dart';
-import '../../di/fs_interface.dart';
-import '../../di/structure/ini_widget.dart';
+import '../../fs_interface/di/fs_interface.dart';
+import '../../fs_interface/helper/path_op_string.dart';
+import '../../structure/di/ini_widget.dart';
+import '../../structure/entity/ini.dart';
 
 class IniWidget extends ConsumerStatefulWidget {
   const IniWidget({required this.iniFile, super.key});

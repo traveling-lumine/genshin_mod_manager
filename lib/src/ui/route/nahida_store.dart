@@ -9,10 +9,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
-import '../../backend/nahida/domain/entity/nahida_element.dart';
-import '../../backend/structure/entity/mod_category.dart';
-import '../../di/nahida_store.dart';
-import '../../di/structure/categories.dart';
+import '../../nahida/di/nahida_store.dart';
+import '../../nahida/domain/entity/nahida_element.dart';
+import '../../structure/di/categories.dart';
+import '../../structure/entity/mod_category.dart';
 import '../constants.dart';
 import '../util/debouncer.dart';
 import '../util/tag_parser.dart';

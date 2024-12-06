@@ -5,12 +5,12 @@ import 'dart:typed_data';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../backend/fs_interface/helper/path_op_string.dart';
-import '../../backend/mod_writer/data/mod_writer.dart';
-import '../../backend/nahida/domain/entity/download_state.dart';
-import '../../backend/nahida/domain/entity/nahida_element.dart';
-import '../../backend/structure/entity/mod_category.dart';
-import '../../di/nahida_download_queue.dart';
+import '../../fs_interface/helper/path_op_string.dart';
+import '../../mod_writer/data/mod_writer.dart';
+import '../../nahida/di/nahida_download_queue.dart';
+import '../../nahida/domain/entity/download_state.dart';
+import '../../nahida/domain/entity/nahida_element.dart';
+import '../../structure/entity/mod_category.dart';
 import '../util/display_infobar.dart';
 
 class DownloadQueue extends ConsumerStatefulWidget {

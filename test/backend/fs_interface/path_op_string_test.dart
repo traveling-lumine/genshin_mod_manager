@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genshin_mod_manager/src/backend/fs_interface/helper/path_op_string.dart';
+import 'package:genshin_mod_manager/src/fs_interface/helper/path_op_string.dart';
 
 void main() {
   group('Enabled recognition', () {

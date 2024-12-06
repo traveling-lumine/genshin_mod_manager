@@ -8,9 +8,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../backend/nahida/domain/entity/nahida_element.dart';
-import '../../backend/structure/entity/mod_category.dart';
-import '../../di/nahida_download_queue.dart';
+import '../../nahida/di/nahida_download_queue.dart';
+import '../../nahida/domain/entity/nahida_element.dart';
+import '../../structure/entity/mod_category.dart';
 import '../util/open_url.dart';
 import 'intrinsic_command_bar.dart';
 

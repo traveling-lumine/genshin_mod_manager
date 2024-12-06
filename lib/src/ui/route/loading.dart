@@ -4,8 +4,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../di/app_state/games_list.dart';
-import '../../di/storage.dart';
+import '../../app_state/games_list.dart';
+import '../../storage/di/storage.dart';
 import '../constants.dart';
 import '../widget/appbar.dart';
 

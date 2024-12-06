@@ -6,9 +6,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'src/di/app_state/dark_mode.dart';
-import 'src/di/exe_arg.dart';
-import 'src/error_handler.dart';
+import 'src/app_state/dark_mode.dart';
+import 'src/app_state/exe_arg.dart';
+import 'src/error_handler/error_handler.dart';
 import 'src/ui/constants.dart';
 import 'src/ui/route/category.dart';
 import 'src/ui/route/first_page.dart';
