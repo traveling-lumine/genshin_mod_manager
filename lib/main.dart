@@ -4,8 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'src/app_state/exe_arg.dart';
 import 'src/error_handler/error_handler.dart';
+import 'src/storage/di/exe_arg.dart';
 import 'src/ui/app.dart';
 import 'src/ui/constants.dart';
 

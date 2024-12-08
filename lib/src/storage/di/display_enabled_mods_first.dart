@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../storage/di/storage.dart';
-import '../storage/domain/usecase/enabled_first.dart';
+import '../domain/usecase/enabled_first.dart';
+import 'storage.dart';
 import 'value_settable.dart';
 
 part 'display_enabled_mods_first.g.dart';

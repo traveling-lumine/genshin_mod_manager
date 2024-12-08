@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../app_state/display_enabled_mods_first.dart';
 import '../../fs_interface/di/fs_watcher.dart';
+import '../../storage/di/display_enabled_mods_first.dart';
 import '../entity/mod.dart';
 import '../entity/mod_category.dart';
 import '../usecase/collect_mods.dart';

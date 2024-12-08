@@ -1,23 +1,23 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../storage/di/storage.dart';
-import '../storage/domain/usecase/run_together.dart';
+import '../domain/usecase/folder_icon.dart';
+import 'storage.dart';
 import 'value_settable.dart';
 
-part 'run_together.g.dart';
+part 'folder_icon.g.dart';
 
 @riverpod
-class RunTogether extends _$RunTogether implements ValueSettable<bool> {
+class FolderIcon extends _$FolderIcon implements ValueSettable<bool> {
   @override
   bool build() {
     final watch = ref.watch(persistentStorageProvider).valueOrNull;
-    return initializeRunTogetherUseCase(watch);
+    return initializeFolderIconUseCase(watch);
   }
 
   @override
   void setValue(final bool value) {
     final read = ref.read(persistentStorageProvider).valueOrNull;
-    setRunTogetherUseCase(read, value);
+    setFolderIconUseCase(read, value);
     state = value;
   }
 }

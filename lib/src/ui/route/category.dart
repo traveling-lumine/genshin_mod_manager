@@ -9,9 +9,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../app_state/column_strategy.dart';
 import '../../fs_interface/di/fs_watcher.dart';
 import '../../fs_interface/usecase/open_folder.dart';
+import '../../storage/di/column_strategy.dart';
 import '../../structure/di/categories.dart';
 import '../../structure/di/mods.dart';
 import '../../structure/entity/mod.dart';

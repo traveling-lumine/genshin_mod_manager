@@ -9,8 +9,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../app_state/card_color.dart';
-import '../../app_state/game_config.dart';
 import '../../fs_interface/di/fs_interface.dart';
 import '../../fs_interface/di/fs_watcher.dart';
 import '../../fs_interface/entity/mod_toggle_exceptions.dart';
@@ -18,6 +16,8 @@ import '../../fs_interface/helper/mod_switcher.dart';
 import '../../fs_interface/helper/path_op_string.dart';
 import '../../fs_interface/usecase/open_folder.dart';
 import '../../fs_interface/usecase/paste_image.dart';
+import '../../storage/di/card_color.dart';
+import '../../storage/di/game_config.dart';
 import '../../structure/di/mod_card.dart';
 import '../../structure/entity/ini.dart';
 import '../../structure/entity/mod.dart';

@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../storage/di/storage.dart';
 import 'games_list.dart';
+import 'storage.dart';
 
 part 'current_target_game.g.dart';
 

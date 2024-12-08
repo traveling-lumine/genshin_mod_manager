@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../storage/di/storage.dart';
-import '../storage/domain/usecase/paimon_icon.dart';
+import '../domain/usecase/paimon_icon.dart';
+import 'storage.dart';
 import 'value_settable.dart';
 
 part 'use_paimon.g.dart';

@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../storage/di/storage.dart';
-import '../storage/domain/usecase/separate_run.dart';
+import '../domain/usecase/separate_run.dart';
 import 'current_target_game.dart';
+import 'storage.dart';
 
 part 'separate_run_override.g.dart';
 

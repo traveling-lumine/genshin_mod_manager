@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../fs_interface/entity/setting_data.dart';
-import '../storage/di/storage.dart';
-import '../storage/domain/usecase/move_on_drag.dart';
+import '../../fs_interface/entity/setting_data.dart';
+import '../domain/usecase/move_on_drag.dart';
+import 'storage.dart';
 import 'value_settable.dart';
 
 part 'move_on_drag.g.dart';

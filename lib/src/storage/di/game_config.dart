@@ -1,10 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../storage/di/storage.dart';
-import '../storage/domain/entity/game_config.dart';
-import '../storage/domain/entity/preset.dart';
-import '../storage/domain/usecase/game_config.dart';
+import '../domain/entity/game_config.dart';
+import '../domain/entity/preset.dart';
+import '../domain/usecase/game_config.dart';
 import 'current_target_game.dart';
+import 'storage.dart';
 
 part 'game_config.g.dart';
 

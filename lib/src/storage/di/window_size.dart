@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../storage/di/storage.dart';
-import '../storage/domain/usecase/window_size.dart';
+import '../domain/usecase/window_size.dart';
+import 'storage.dart';
 
 part 'window_size.g.dart';
 

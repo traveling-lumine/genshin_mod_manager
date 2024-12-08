@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../app_state/current_target_game.dart';
+import '../../storage/di/current_target_game.dart';
 import '../helper/fsops.dart';
 import '../helper/path_op_string.dart';
 import 'fs_interface.dart';

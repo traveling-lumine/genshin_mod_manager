@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../storage/di/storage.dart';
-import '../storage/domain/usecase/card_color.dart';
+import '../domain/usecase/card_color.dart';
+import 'storage.dart';
 
 part 'card_color.g.dart';
 

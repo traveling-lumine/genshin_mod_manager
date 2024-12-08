@@ -3,7 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../app_state/dark_mode.dart';
+import '../storage/di/dark_mode.dart';
 import 'constants.dart';
 import 'route/category.dart';
 import 'route/first_page.dart';

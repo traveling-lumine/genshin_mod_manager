@@ -1,8 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../storage/di/storage.dart';
-import '../storage/domain/repo/persistent_storage.dart' as s;
+import '../domain/repo/persistent_storage.dart' as s;
+import 'storage.dart';
 
 part 'column_strategy.freezed.dart';
 part 'column_strategy.g.dart';

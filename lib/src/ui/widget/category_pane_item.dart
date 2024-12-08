@@ -5,9 +5,9 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../app_state/folder_icon.dart';
-import '../../app_state/use_paimon.dart';
 import '../../fs_interface/di/fs_watcher.dart';
+import '../../storage/di/folder_icon.dart';
+import '../../storage/di/use_paimon.dart';
 import '../../structure/entity/mod.dart';
 import '../../structure/entity/mod_category.dart';
 import '../../structure/usecase/move_mod.dart';

@@ -3,12 +3,12 @@ import 'dart:io';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../app_state/game_config.dart';
 import '../../fs_interface/helper/fsops.dart';
 import '../../fs_interface/helper/mod_switcher.dart';
 import '../../fs_interface/helper/path_op_string.dart';
 import '../../structure/entity/mod_category.dart';
 import '../domain/entity/preset.dart';
+import 'game_config.dart';
 
 part 'preset.g.dart';
 

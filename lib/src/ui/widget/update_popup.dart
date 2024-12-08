@@ -7,11 +7,11 @@ import 'package:flutter/gestures.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-import '../../app_state/game_config.dart';
 import '../../app_version/di/is_outdated.dart';
 import '../../app_version/di/remote_version.dart';
 import '../../app_version/github.dart';
 import '../../fs_interface/helper/path_op_string.dart';
+import '../../storage/di/game_config.dart';
 import '../util/display_infobar.dart';
 import '../util/open_url.dart';
 

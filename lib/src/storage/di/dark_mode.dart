@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../storage/di/storage.dart';
-import '../storage/domain/usecase/dark_mode.dart';
+import '../domain/usecase/dark_mode.dart';
+import 'storage.dart';
 import 'value_settable.dart';
 
 part 'dark_mode.g.dart';
