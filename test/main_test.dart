@@ -4,5 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:genshin_mod_manager/main.dart';
 
 void main() {
-  test('A test for coverage tracking, nothing to see here', () => expect(1, 1));
+  test(
+    'A test for coverage tracking. Nothing to see here.',
+    () => expect(1, 1),
+  );
 }

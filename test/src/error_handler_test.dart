@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genshin_mod_manager/src/error_handler.dart';
+import 'package:genshin_mod_manager/src/error_handler/error_handler.dart';
 
 void main() {
   test('elideLines', () {

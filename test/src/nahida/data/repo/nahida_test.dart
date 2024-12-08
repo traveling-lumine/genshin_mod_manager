@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genshin_mod_manager/src/backend/nahida/data/repo/nahida.dart';
-import 'package:genshin_mod_manager/src/backend/nahida/domain/entity/nahida_element.dart';
-import 'package:genshin_mod_manager/src/backend/nahida/domain/entity/wrong_password.dart';
+import 'package:genshin_mod_manager/src/nahida/data/repo/nahida.dart';
+import 'package:genshin_mod_manager/src/nahida/domain/entity/nahida_element.dart';
+import 'package:genshin_mod_manager/src/nahida/domain/entity/wrong_password.dart';
 
 const _passwdUuid = '734ae73e-dee7-477f-83d5-33e4f3cd0755';
 const _nopasswdUuid = '54ff0249-831b-4ac4-b9b0-ba8d387bb13b';

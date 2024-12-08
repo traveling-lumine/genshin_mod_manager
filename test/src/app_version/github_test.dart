@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genshin_mod_manager/src/backend/app_version/github.dart';
+import 'package:genshin_mod_manager/src/app_version/github.dart';
 
 import 'package:http/http.dart' as http;
 
