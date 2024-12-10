@@ -267,7 +267,7 @@ class SettingRoute extends ConsumerWidget {
         title: Consumer(
           builder: (final context, final ref, final child) {
             final curVersion = ref.watch(versionStringProvider).when(
-                  data: (final version) => version,
+                  data: (final version) => version.formatted,
                   error: (final error, final stackTrace) => '(error)',
                   loading: () => 'Loading...',
                 );

@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 
 import '../../app_version/di/is_outdated.dart';
 import '../../app_version/di/remote_version.dart';
+import '../../app_version/domain/entity/version.dart';
 import '../../app_version/github.dart';
 import '../../fs_interface/helper/path_op_string.dart';
 import '../../storage/di/game_config.dart';
@@ -165,7 +166,7 @@ class UpdatePopup extends ConsumerWidget {
   Future<void> _showUpdateInfoBar(
     final BuildContext context,
     final WidgetRef ref,
-    final String newVersion,
+    final Version newVersion,
   ) =>
       displayInfoBarInContext(
         context,
@@ -176,7 +177,7 @@ class UpdatePopup extends ConsumerWidget {
             children: [
               const TextSpan(text: 'New version available: '),
               TextSpan(
-                text: newVersion,
+                text: newVersion.formatted,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const TextSpan(text: '. Click '),
