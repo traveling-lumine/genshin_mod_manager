@@ -5,13 +5,13 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 
-/// Registers error handlers for the application.
 void registerErrorHandlers() {
   FlutterError.onError = _onErrorHandler;
   ErrorWidget.builder = _errorWidgetBuilder;
 }
 
 void _onErrorHandler(final FlutterErrorDetails details) {
+  FlutterError.presentError(details);
   final now = DateTime.now().toUtc().toIso8601String();
   final message = _errorToString(details);
   final stackTrace = writeStacktrace(details);
@@ -51,8 +51,6 @@ String writeStacktrace(final FlutterErrorDetails details) {
 }
 
 String elideLines(final String stackTrace) {
-  // only choose lines that include genshin_mod_manager.
-  // Lines that don't include it are shrunk to ...
   final lines = <String>[];
   var elidedLines = 0;
   for (final line in stackTrace.split('\n')) {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../fs_interface/helper/fsops.dart';
@@ -246,7 +247,7 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
 Future<void> _toggleCategory(
   final String categoryPath,
   final List<String> shouldBeEnabled,
-  final AutoDisposeNotifierProviderRef<List<String>> ref,
+  final Ref<List<String>> ref,
 ) async {
   final modExecFile = ref.read(gameConfigNotifierProvider).modExecFile;
   if (modExecFile == null) {

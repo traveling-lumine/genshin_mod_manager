@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../storage/di/current_target_game.dart';
@@ -62,7 +63,7 @@ class DirectoryEventWatcher extends _$DirectoryEventWatcher {
 
 @riverpod
 Raw<Stream<FileSystemEvent>> fileEventWatcher(
-  final FileEventWatcherRef ref,
+  final Ref ref,
   final String path, {
   required final bool detectModifications,
 }) {
@@ -83,7 +84,7 @@ Raw<Stream<FileSystemEvent>> fileEventWatcher(
 
 @riverpod
 Raw<Stream<List<String>>> directoryInFolder(
-  final DirectoryInFolderRef ref,
+  final Ref ref,
   final String path,
 ) {
   final controller = StreamController<List<String>>.broadcast();
@@ -100,7 +101,7 @@ Raw<Stream<List<String>>> directoryInFolder(
 
 @riverpod
 Raw<Stream<List<String>>> fileInFolder(
-  final FileInFolderRef ref,
+  final Ref ref,
   final String path,
 ) {
   final controller = StreamController<List<String>>.broadcast();

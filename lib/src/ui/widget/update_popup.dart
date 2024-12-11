@@ -7,10 +7,10 @@ import 'package:flutter/gestures.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import '../../app_version/data/github.dart';
 import '../../app_version/di/is_outdated.dart';
 import '../../app_version/di/remote_version.dart';
 import '../../app_version/domain/entity/version.dart';
-import '../../app_version/github.dart';
 import '../../fs_interface/helper/path_op_string.dart';
 import '../../storage/di/game_config.dart';
 import '../util/display_infobar.dart';
@@ -68,7 +68,7 @@ class UpdatePopup extends ConsumerWidget {
       if (next is AsyncData && next.requireValue) {
         final remote = await ref.read(remoteVersionProvider.future);
         if (context.mounted) {
-          unawaited(_showUpdateInfoBar(context, ref, remote!));
+          unawaited(_showUpdateInfoBar(context, ref, remote));
         }
       }
     });

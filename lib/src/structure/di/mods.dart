@@ -1,3 +1,4 @@
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../fs_interface/di/fs_watcher.dart';
@@ -10,7 +11,7 @@ part 'mods.g.dart';
 
 @riverpod
 List<Mod> modsInCategory(
-  final ModsInCategoryRef ref,
+  final Ref ref,
   final ModCategory category,
 ) {
   final enabledModsFirst = ref.watch(displayEnabledModsFirstProvider);

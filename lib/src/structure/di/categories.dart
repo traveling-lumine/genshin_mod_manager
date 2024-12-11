@@ -1,3 +1,4 @@
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../fs_interface/di/fs_watcher.dart';
@@ -8,7 +9,7 @@ import '../usecase/collect_categories.dart';
 part 'categories.g.dart';
 
 @riverpod
-List<ModCategory> categories(final CategoriesRef ref) {
+List<ModCategory> categories(final Ref ref) {
   final modRoot = ref
       .watch(gameConfigNotifierProvider.select((final state) => state.modRoot));
   if (modRoot == null) {
