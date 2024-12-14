@@ -7,7 +7,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 
 void registerErrorHandlers() {
   FlutterError.onError = _onErrorHandler;
-  ErrorWidget.builder = _errorWidgetBuilder;
+  ErrorWidget.builder = errorWidgetBuilder;
 }
 
 void _onErrorHandler(final FlutterErrorDetails details) {
@@ -30,7 +30,7 @@ void _onErrorHandler(final FlutterErrorDetails details) {
   }
 }
 
-Widget _errorWidgetBuilder(final FlutterErrorDetails details) => Center(
+Widget errorWidgetBuilder(final FlutterErrorDetails details) => Center(
       child: SelectableText(
         _errorToString(details),
         style: TextStyle(color: Colors.red.darker),
@@ -77,7 +77,8 @@ String _errorToString(final FlutterErrorDetails details) {
     try {
       return details.toString();
     } catch (e) {
-      return 'An error occurred';
+      // what to do here?
     }
   }
+  return 'An error occurred';
 }

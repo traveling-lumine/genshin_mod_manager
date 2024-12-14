@@ -8,7 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
-import '../../../l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 import '../../nahida/di/nahida_store.dart';
 import '../../nahida/domain/entity/nahida_element.dart';
 import '../../structure/di/categories.dart';

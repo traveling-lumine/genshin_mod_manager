@@ -8,9 +8,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../../l10n/app_localizations.dart';
 import '../../app_version/di/is_outdated.dart';
 import '../../fs_interface/helper/path_op_string.dart';
+import '../../l10n/app_localizations.dart';
 import '../../storage/di/current_target_game.dart';
 import '../../storage/di/exe_arg.dart';
 import '../../storage/di/game_config.dart';
