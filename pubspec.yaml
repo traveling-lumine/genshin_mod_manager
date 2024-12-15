@@ -9,7 +9,7 @@ environment:
   flutter: ">=3.0.0"
 
 dependencies:
-  archive: ^3.6.1
+  archive: ^4.0.1
   cached_network_image: ^3.4.1
   collection: ^1.18.0
   cp949_codec: ^1.0.2
@@ -33,7 +33,7 @@ dependencies:
   infinite_scroll_pagination: ^4.1.0
   intl: ^0.19.0
   json_annotation: ^4.9.0
-  package_info_plus: ^8.1.1
+  package_info_plus: ^8.1.2
   pasteboard: ^0.3.0
   path: ^1.9.0
   protocol_handler: ^0.2.0

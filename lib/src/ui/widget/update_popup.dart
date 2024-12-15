@@ -20,10 +20,9 @@ Future<Never> _runUpdateScript() async {
   final url = Uri.parse('$kRepoReleases/download/GenshinModManager.zip');
   final response = await http.get(url);
   final archive = ZipDecoder().decodeBytes(response.bodyBytes);
-  await extractArchiveToDiskAsync(
+  await extractArchiveToDisk(
     archive,
     Directory.current.path,
-    asyncWrite: true,
   );
   const updateScript = 'setlocal\n'
       'echo update script running\n'
@@ -55,7 +54,7 @@ Future<Never> _runUpdateScript() async {
     ],
     runInShell: true,
   );
-  exit(0);
+  return exit(0);
 }
 
 class UpdatePopup extends ConsumerWidget {

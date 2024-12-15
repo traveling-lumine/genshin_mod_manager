@@ -26,7 +26,7 @@ ModWriter createModWriter({required final String categoryPath}) => ({
       final destDirPath = categoryPath.pJoin(destDirName);
       try {
         final archive = ZipDecoder().decodeBytes(data);
-        await extractArchiveToDiskAsync(archive, destDirPath, asyncWrite: true);
+        await extractArchiveToDiskAsync(archive, destDirPath);
       } on Exception {
         throw ModZipExtractionException(data: data);
       }
