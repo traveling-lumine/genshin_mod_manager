@@ -52,9 +52,8 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     });
 
     final game = ref.watch(targetGameProvider);
-    final updateMarker = (ref.watch(isOutdatedProvider).valueOrNull ?? false)
-        ? AppLocalizations.of(context)!.updateMarker
-        : '';
+    final updateMarker =
+        (ref.watch(isOutdatedProvider).valueOrNull ?? false) ? 'update' : '';
     return UpdatePopup(
       child: DownloadQueue(
         child: ProtocolHandlerWidget(

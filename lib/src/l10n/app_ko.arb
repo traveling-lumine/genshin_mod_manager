@@ -1,7 +1,6 @@
 {
-    "modManager": "{game} 모드매니저{updateMarker}",
+    "modManager": "{game} 모드 매니저{updateMarker, select, update { (업데이트!)} other {}}",
     "@modManager": {
-        "description": "Mod manager",
         "placeholders": {
             "game": {
                 "type": "String"
@@ -11,17 +10,8 @@
             }
         }
     },
-    "updateMarker": " (업데이트!)",
-    "@updateMarker": {
-        "description": "Update marker"
-    },
     "noDescription": "상세정보 없음",
-    "@noDescription": {
-        "description": "No description"
-    },
     "searchTags": "태그 검색",
-    "@searchTags": {
-        "description": "Search tags"
-    },
+    "displayedLocaleName": "한국어",
     "@@locale": "ko"
 }

@@ -95,29 +95,29 @@ abstract class AppLocalizations {
     Locale('ko')
   ];
 
-  /// Mod manager
+  /// No description provided for @modManager.
   ///
   /// In en, this message translates to:
-  /// **'{game} Mod Manager{updateMarker}'**
+  /// **'{game} Mod Manager{updateMarker, select, update { (update!)} other {}}'**
   String modManager(String game, String updateMarker);
 
-  /// Update marker
-  ///
-  /// In en, this message translates to:
-  /// **' (update!)'**
-  String get updateMarker;
-
-  /// No description
+  /// No description provided for @noDescription.
   ///
   /// In en, this message translates to:
   /// **'No description'**
   String get noDescription;
 
-  /// Search tags
+  /// No description provided for @searchTags.
   ///
   /// In en, this message translates to:
   /// **'Search tags'**
   String get searchTags;
+
+  /// No description provided for @displayedLocaleName.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get displayedLocaleName;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

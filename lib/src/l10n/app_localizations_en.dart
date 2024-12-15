@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -8,15 +10,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String modManager(String game, String updateMarker) {
-    return '$game Mod Manager$updateMarker';
+    String _temp0 = intl.Intl.selectLogic(
+      updateMarker,
+      {
+        'update': ' (update!)',
+        'other': '',
+      },
+    );
+    return '$game Mod Manager$_temp0';
   }
-
-  @override
-  String get updateMarker => ' (update!)';
 
   @override
   String get noDescription => 'No description';
 
   @override
   String get searchTags => 'Search tags';
+
+  @override
+  String get displayedLocaleName => 'English';
 }
