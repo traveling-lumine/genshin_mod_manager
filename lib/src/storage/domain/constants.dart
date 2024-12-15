@@ -23,6 +23,9 @@ enum StorageAccessKey {
   windowWidth,
   windowHeight,
 
+  columnStrategyType,
+  columnStrategyValue,
+
   configVersion;
 
   const StorageAccessKey([this.overrideValue]);
