@@ -1,0 +1,44 @@
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - ".github/**"
+      - ".readme/**"
+      - ".gitignore"
+      - "LICENSE"
+      - "*.md"
+  
+jobs:
+  coverage-report:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up secret file
+      run: |
+        echo @'
+        ${{ secrets.REMOTE_SECRET }}
+        '@ > .env
+
+    - uses: subosito/flutter-action@v2
+
+    - name: Generate flutter l10n
+      run: flutter gen-l10n
+
+    - name: Flutter pub get
+      run: flutter pub get
+
+    - name: Run build_runner
+      run: dart run build_runner build -d
+
+    - name: Flutter test
+      run: flutter test --branch-coverage
+    
+    - name: Upload coverage
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage/lcov.info
+        fail_ci_if_error: true
