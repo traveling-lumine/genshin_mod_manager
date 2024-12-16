@@ -1,0 +1,17 @@
+{
+    "modManager": "{game} 모드 매니저{updateMarker, select, update { (업데이트!)} other {}}",
+    "@modManager": {
+        "placeholders": {
+            "game": {
+                "type": "String"
+            },
+            "updateMarker": {
+                "type": "String"
+            }
+        }
+    },
+    "noDescription": "상세정보 없음",
+    "searchTags": "태그 검색",
+    "displayedLocaleName": "한국어",
+    "@@locale": "ko"
+}

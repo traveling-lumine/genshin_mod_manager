@@ -5,12 +5,12 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../backend/structure/entity/mod.dart';
-import '../../backend/structure/entity/mod_category.dart';
-import '../../backend/structure/usecase/move_mod.dart';
-import '../../di/app_state/folder_icon.dart';
-import '../../di/app_state/use_paimon.dart';
-import '../../di/fs_watcher.dart';
+import '../../fs_interface/di/fs_watcher.dart';
+import '../../storage/di/folder_icon.dart';
+import '../../storage/di/use_paimon.dart';
+import '../../structure/entity/mod.dart';
+import '../../structure/entity/mod_category.dart';
+import '../../structure/usecase/move_mod.dart';
 import '../util/display_infobar.dart';
 import 'category_drop_target.dart';
 import 'fade_in.dart';

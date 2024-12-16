@@ -9,7 +9,7 @@ import 'package:image_size_getter/file_input.dart';
 import 'package:image_size_getter/image_size_getter.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../di/fs_watcher.dart';
+import '../../fs_interface/di/fs_watcher.dart';
 import '../util/debouncer.dart';
 import '../util/third_party/time_aware_resize_image.dart' as s;
 

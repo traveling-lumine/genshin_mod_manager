@@ -1,0 +1,17 @@
+{
+    "modManager": "{game} Mod Manager{updateMarker, select, update { (update!)} other {}}",
+    "@modManager": {
+        "placeholders": {
+            "game": {
+                "type": "String"
+            },
+            "updateMarker": {
+                "type": "String"
+            }
+        }
+    },
+    "noDescription": "No description",
+    "searchTags": "Search tags",
+    "displayedLocaleName": "English",
+    "@@locale": "en"
+}

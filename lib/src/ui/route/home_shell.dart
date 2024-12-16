@@ -3,22 +3,22 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../backend/fs_interface/helper/path_op_string.dart';
-import '../../di/app_state/current_target_game.dart';
-import '../../di/app_state/game_config.dart';
-import '../../di/app_state/games_list.dart';
-import '../../di/app_state/run_together.dart';
-import '../../di/app_state/separate_run_override.dart';
-import '../../di/app_state/window_size.dart';
-import '../../di/app_version/is_outdated.dart';
-import '../../di/exe_arg.dart';
-import '../../di/structure/categories.dart';
+import '../../app_version/di/is_outdated.dart';
+import '../../fs_interface/helper/path_op_string.dart';
+import '../../l10n/app_localizations.dart';
+import '../../storage/di/current_target_game.dart';
+import '../../storage/di/exe_arg.dart';
+import '../../storage/di/game_config.dart';
+import '../../storage/di/games_list.dart';
+import '../../storage/di/run_together.dart';
+import '../../storage/di/separate_run_override.dart';
+import '../../storage/di/window_size.dart';
+import '../../structure/di/categories.dart';
 import '../constants.dart';
 import '../util/display_infobar.dart';
 import '../widget/appbar.dart';
@@ -52,9 +52,8 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     });
 
     final game = ref.watch(targetGameProvider);
-    final updateMarker = (ref.watch(isOutdatedProvider).valueOrNull ?? false)
-        ? AppLocalizations.of(context)!.updateMarker
-        : '';
+    final updateMarker =
+        (ref.watch(isOutdatedProvider).valueOrNull ?? false) ? 'update' : '';
     return UpdatePopup(
       child: DownloadQueue(
         child: ProtocolHandlerWidget(

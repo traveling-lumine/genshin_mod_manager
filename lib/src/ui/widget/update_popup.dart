@@ -7,11 +7,12 @@ import 'package:flutter/gestures.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-import '../../backend/app_version/github.dart';
-import '../../backend/fs_interface/helper/path_op_string.dart';
-import '../../di/app_state/game_config.dart';
-import '../../di/app_version/is_outdated.dart';
-import '../../di/app_version/remote_version.dart';
+import '../../app_version/data/github.dart';
+import '../../app_version/di/is_outdated.dart';
+import '../../app_version/di/remote_version.dart';
+import '../../app_version/domain/entity/version.dart';
+import '../../fs_interface/helper/path_op_string.dart';
+import '../../storage/di/game_config.dart';
 import '../util/display_infobar.dart';
 import '../util/open_url.dart';
 
@@ -19,10 +20,9 @@ Future<Never> _runUpdateScript() async {
   final url = Uri.parse('$kRepoReleases/download/GenshinModManager.zip');
   final response = await http.get(url);
   final archive = ZipDecoder().decodeBytes(response.bodyBytes);
-  await extractArchiveToDiskAsync(
+  await extractArchiveToDisk(
     archive,
     Directory.current.path,
-    asyncWrite: true,
   );
   const updateScript = 'setlocal\n'
       'echo update script running\n'
@@ -54,7 +54,7 @@ Future<Never> _runUpdateScript() async {
     ],
     runInShell: true,
   );
-  exit(0);
+  return exit(0);
 }
 
 class UpdatePopup extends ConsumerWidget {
@@ -67,7 +67,7 @@ class UpdatePopup extends ConsumerWidget {
       if (next is AsyncData && next.requireValue) {
         final remote = await ref.read(remoteVersionProvider.future);
         if (context.mounted) {
-          unawaited(_showUpdateInfoBar(context, ref, remote!));
+          unawaited(_showUpdateInfoBar(context, ref, remote));
         }
       }
     });
@@ -165,7 +165,7 @@ class UpdatePopup extends ConsumerWidget {
   Future<void> _showUpdateInfoBar(
     final BuildContext context,
     final WidgetRef ref,
-    final String newVersion,
+    final Version newVersion,
   ) =>
       displayInfoBarInContext(
         context,
@@ -176,7 +176,7 @@ class UpdatePopup extends ConsumerWidget {
             children: [
               const TextSpan(text: 'New version available: '),
               TextSpan(
-                text: newVersion,
+                text: newVersion.formatted,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const TextSpan(text: '. Click '),

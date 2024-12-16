@@ -38,4 +38,11 @@ jobs:
         run: dart run build_runner build -d
 
       - name: Flutter test
-        run: flutter test
+        run: flutter test --branch-coverage
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: true

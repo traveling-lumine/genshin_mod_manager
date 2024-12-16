@@ -1,6 +1,7 @@
 한국어 | [EN](.readme/README_EN.md)
 
 ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/traveling-lumine/genshin_mod_manager/latest/total)
+[![codecov](https://codecov.io/github/traveling-lumine/genshin_mod_manager/graph/badge.svg?token=LXTXWNY64Z)](https://codecov.io/github/traveling-lumine/genshin_mod_manager)
 
 # genshin_mod_manager
 
