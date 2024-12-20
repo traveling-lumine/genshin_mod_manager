@@ -11,7 +11,7 @@ void main() {
     final notifier = container.read(nahidaDownloadQueueProvider.notifier);
     final listener = container.listen(
       nahidaDownloadQueueProvider,
-      (previous, next) {
+      (final previous, final next) {
         expect(next, isA<AsyncData<NahidaDownloadState>>());
         final nextVal = (next as AsyncData<NahidaDownloadState>).value;
         expect(nextVal, isA<NahidaDownloadStateWrongPassword>());
@@ -28,7 +28,7 @@ void main() {
       previewUrl: '',
       password: true,
     );
-    const category = ModCategory(name: 'name', path: 'path');
+    final category = ModCategory(name: 'name', path: 'path');
     await notifier.addDownload(element: element, category: category);
     listener.close();
   });
