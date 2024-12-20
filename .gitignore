@@ -55,3 +55,6 @@ app.*.map.json
 # secrets
 /lib/data/secrets.g.dart
 /.env
+
+# test
+/junit.xml

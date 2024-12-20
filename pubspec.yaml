@@ -33,6 +33,7 @@ dependencies:
   infinite_scroll_pagination: ^4.1.0
   intl: ^0.19.0
   json_annotation: ^4.9.0
+  meta: ^1.15.0
   package_info_plus: ^8.1.2
   pasteboard: ^0.3.0
   path: ^1.9.0
