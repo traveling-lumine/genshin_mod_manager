@@ -24,6 +24,9 @@ jobs:
 
     - uses: subosito/flutter-action@v2
 
+    - name: Install tojunit
+      run: dart pub global activate junitreport
+
     - name: Generate flutter l10n
       run: flutter gen-l10n
 
@@ -34,11 +37,19 @@ jobs:
       run: dart run build_runner build -d
 
     - name: Flutter test
-      run: flutter test --branch-coverage
+      run: flutter test --branch-coverage --machine | tojunit --output junit.xml
     
     - name: Upload coverage
       uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ./coverage/lcov.info
+        fail_ci_if_error: true
+
+    - name: Upload test results to Codecov
+      if: ${{ !cancelled() }}
+      uses: codecov/test-results-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: junit.xml
         fail_ci_if_error: true
