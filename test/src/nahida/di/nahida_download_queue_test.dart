@@ -29,7 +29,8 @@ void main() {
       password: true,
     );
     final category = ModCategory(name: 'name', path: 'path');
-    await notifier.addDownload(element: element, category: category);
+    await notifier.addDownload(
+        element: element, category: category, turnstile: '');
     listener.close();
   });
 }

@@ -1,18 +1,21 @@
-import 'dart:typed_data';
-
+import '../../data/entity/nahida_page_result.dart';
+import '../entity/download_element.dart';
 import '../entity/nahida_element.dart';
 
-/// An API to interact with Nahidalive.
 abstract interface class NahidaliveAPI {
-  /// Fetches all Nahidalive elements.
-  Future<List<NahidaliveElement>> fetchNahidaliveElements(final int pageNum);
-
-  /// Fetches a single Nahidalive element.
-  Future<NahidaliveElement> fetchNahidaliveElement(final String uuid);
-
-  /// Fetches the download URL for a Nahidalive element.
-  Future<Uint8List> downloadUuid({
+  Future<NahidaliveElement> fetchNahidaliveElement({
     required final String uuid,
+  });
+
+  Future<NahidaPageResult> fetchNahidaliveElements({
+    required final int pageNum,
+    required final String authKey,
+    final int pageSize = 100,
+  });
+
+  Future<NahidaliveDownloadUrlElement> downloadUuid({
+    required final String uuid,
+    required final String turnstile,
     final String? pw,
   });
 }

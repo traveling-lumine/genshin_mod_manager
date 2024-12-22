@@ -13,6 +13,7 @@ import '../../nahida/domain/entity/nahida_element.dart';
 import '../../structure/entity/mod_category.dart';
 import '../util/open_url.dart';
 import 'intrinsic_command_bar.dart';
+import 'turnstile_dialog.dart';
 
 class StoreElement extends ConsumerWidget {
   const StoreElement({
@@ -292,10 +293,19 @@ class StoreElement extends ConsumerWidget {
           FilledButton(
             onPressed: () async {
               Navigator.of(dialogContext).pop();
+              final turnstile = await showDialog<String?>(
+                context: context,
+                builder: (final dCtx) => const TurnstileDialog(),
+              );
+              if (turnstile == null) {
+                return;
+              }
               unawaited(
-                ref
-                    .read(nahidaDownloadQueueProvider.notifier)
-                    .addDownload(element: element, category: category),
+                ref.read(nahidaDownloadQueueProvider.notifier).addDownload(
+                      element: element,
+                      category: category,
+                      turnstile: turnstile,
+                    ),
               );
             },
             child: const Text('Download'),
