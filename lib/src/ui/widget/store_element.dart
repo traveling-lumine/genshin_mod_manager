@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -300,11 +301,51 @@ class StoreElement extends ConsumerWidget {
               if (turnstile == null) {
                 return;
               }
+              final String? password;
+              if (!context.mounted) {
+                return;
+              }
+              if (element.password) {
+                password = await showDialog<String?>(
+                  context: context,
+                  builder: (final dialogContext) => HookBuilder(
+                    builder: (final ctx) {
+                      final tctrl = useTextEditingController();
+                      return ContentDialog(
+                        title: const Text('Enter password'),
+                        content: IntrinsicHeight(
+                          child: TextFormBox(
+                            autofocus: true,
+                            controller: tctrl,
+                            placeholder: 'Password',
+                            onFieldSubmitted: (final value) =>
+                                Navigator.of(dialogContext).pop(tctrl.text),
+                          ),
+                        ),
+                        actions: [
+                          Button(
+                            onPressed: Navigator.of(dialogContext).pop,
+                            child: const Text('Cancel'),
+                          ),
+                          FilledButton(
+                            onPressed: () =>
+                                Navigator.of(dialogContext).pop(tctrl.text),
+                            child: const Text('Download'),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                );
+              } else {
+                password = null;
+              }
               unawaited(
                 ref.read(nahidaDownloadQueueProvider.notifier).addDownload(
                       element: element,
                       category: category,
                       turnstile: turnstile,
+                      pw: password,
                     ),
               );
             },

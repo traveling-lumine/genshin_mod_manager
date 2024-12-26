@@ -46,7 +46,6 @@ app.*.map.json
 # custom
 /error_log.txt
 /coverage/
-/.vscode
 
 # generated files
 **/*.g.dart

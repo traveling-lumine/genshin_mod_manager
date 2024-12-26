@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../data/repo/nahida.dart';
+import '../domain/entity/wrong_password.dart';
 import '../domain/repo/nahida.dart';
 
 part 'nahida_store.g.dart';
@@ -20,7 +21,10 @@ NahidaliveAPI nahidaApi(final Ref ref) {
           response.data = dataMap;
           return handler.next(response);
         } else {
-          throw Exception(data['error']);
+          if (data['error']['code'] == 'invalid_password') {
+            throw const WrongPasswordException();
+          }
+          throw Exception();
         }
       },
     ),

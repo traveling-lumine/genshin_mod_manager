@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../mod_writer/data/mod_writer.dart';
@@ -59,13 +60,17 @@ Future<void> _addDownload({
       if (element.password && passwd == null) {
         throw const WrongPasswordException();
       }
-      await nahidaDownloadUrlUseCase(
-        api: api,
-        element: element,
-        writer: writer,
-        turnstile: turnstile,
-        pw: passwd,
-      );
+      try {
+        await nahidaDownloadUrlUseCase(
+          api: api,
+          element: element,
+          writer: writer,
+          turnstile: turnstile,
+          pw: passwd,
+        );
+      } on DioException catch (e) {
+        throw e.error! as Exception;
+      }
       break;
     } on HttpException catch (e) {
       _addHttpException(element, e, controller);

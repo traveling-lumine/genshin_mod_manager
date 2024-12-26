@@ -93,43 +93,12 @@ class _DownloadQueueState extends ConsumerState<DownloadQueue> {
     final Completer<String?> completer,
     final String? wrongPw,
   ) async {
-    final userResponse = await showDialog<String?>(
-      context: context,
-      builder: (final dialogContext) => ContentDialog(
-        title: const Text('Enter password'),
-        content: IntrinsicHeight(
-          child: TextFormBox(
-            autovalidateMode: AutovalidateMode.always,
-            autofocus: true,
-            controller: _textEditingController,
-            placeholder: 'Password',
-            onFieldSubmitted: (final value) =>
-                Navigator.of(dialogContext).pop(_textEditingController.text),
-            validator: (final value) {
-              if (wrongPw == null || value == null) {
-                return null;
-              }
-              if (value == wrongPw) {
-                return 'Wrong password';
-              }
-              return null;
-            },
-          ),
-        ),
-        actions: [
-          Button(
-            onPressed: Navigator.of(dialogContext).pop,
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.of(dialogContext).pop(_textEditingController.text),
-            child: const Text('Download'),
-          ),
-        ],
-      ),
+    completer.complete(null);
+    await displayInfoBarInContext(
+      context,
+      title: const Text('Wrong password'),
+      severity: InfoBarSeverity.error,
     );
-    completer.complete(userResponse);
   }
 
   Future<void> _showNahidaZipExtractionErrorInfoBar(
