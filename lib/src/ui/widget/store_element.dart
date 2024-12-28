@@ -201,7 +201,7 @@ class StoreElement extends ConsumerWidget {
                     fontStyle: AppLocalizations.of(context)!.localeName == 'ko'
                         ? null
                         : FontStyle.italic,
-                    color: bodyStyle.color?.withOpacity(0.5),
+                    color: bodyStyle.color?.withValues(alpha: 0.5),
                   ),
                 ),
               ),
@@ -218,7 +218,7 @@ class StoreElement extends ConsumerWidget {
                 imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.6),
+                    Colors.black.withValues(alpha: 0.6),
                     BlendMode.darken,
                   ),
                   child: Image(image: imageProvider, fit: BoxFit.cover),

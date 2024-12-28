@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -17,13 +16,13 @@ part 'nahida_download_queue.g.dart';
 
 @riverpod
 class NahidaDownloadQueue extends _$NahidaDownloadQueue {
-  StreamController<NahidaDownloadState>? controller;
+  StreamController<NahidaDownloadState>? _controller;
 
   @override
   Stream<NahidaDownloadState> build() {
     final ctrl = StreamController<NahidaDownloadState>();
     ref.onDispose(ctrl.close);
-    controller = ctrl;
+    _controller = ctrl;
     return ctrl.stream;
   }
 
@@ -39,7 +38,7 @@ class NahidaDownloadQueue extends _$NahidaDownloadQueue {
       category: category,
       turnstile: turnstile,
       api: api,
-      controller: controller,
+      controller: _controller,
       pw: pw,
     );
   }
@@ -53,50 +52,31 @@ Future<void> _addDownload({
   required final StreamController<NahidaDownloadState>? controller,
   final String? pw,
 }) async {
+  if (element.password && pw == null) {
+    _getPassword(element, pw, controller);
+    return;
+  }
   final writer = createModWriter(categoryPath: category.path);
-  var passwd = pw;
-  while (true) {
-    try {
-      if (element.password && passwd == null) {
-        throw const WrongPasswordException();
-      }
-      try {
-        await nahidaDownloadUrlUseCase(
-          api: api,
-          element: element,
-          writer: writer,
-          turnstile: turnstile,
-          pw: passwd,
-        );
-      } on DioException catch (e) {
-        throw e.error! as Exception;
-      }
-      break;
-    } on HttpException catch (e) {
-      _addHttpException(element, e, controller);
-      return;
-    } on WrongPasswordException {
-      final password = await _getPassword(element, passwd, controller);
-      if (password == null) {
+
+  try {
+    await nahidaDownloadUrlUseCase(
+      api: api,
+      element: element,
+      writer: writer,
+      turnstile: turnstile,
+      pw: pw,
+    );
+  } on DioException catch (e) {
+    switch (e.error) {
+      case WrongPasswordException _:
+        _getPassword(element, pw, controller);
         return;
-      }
-      passwd = password;
-    } on ModZipExtractionException catch (e) {
-      _addModExtractionException(element, category, e, controller);
-      return;
     }
+  } on ModZipExtractionException catch (e) {
+    _addModExtractionException(element, category, e, controller);
+    return;
   }
   controller?.add(NahidaDownloadState.completed(element: element));
-}
-
-void _addHttpException(
-  final NahidaliveElement element,
-  final HttpException e,
-  final StreamController<NahidaDownloadState>? controller,
-) {
-  controller?.add(
-    NahidaDownloadState.httpException(element: element, exception: e),
-  );
 }
 
 void _addModExtractionException(
@@ -114,18 +94,15 @@ void _addModExtractionException(
   );
 }
 
-Future<String?> _getPassword(
+void _getPassword(
   final NahidaliveElement element,
   final String? passwd,
   final StreamController<NahidaDownloadState>? controller,
-) async {
-  final completer = Completer<String?>();
+) {
   controller?.add(
     NahidaDownloadState.wrongPassword(
       element: element,
       wrongPw: passwd,
-      completer: completer,
     ),
   );
-  return completer.future;
 }

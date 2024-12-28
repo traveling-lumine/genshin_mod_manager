@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -17,15 +15,9 @@ sealed class NahidaDownloadState with _$NahidaDownloadState {
 
   const factory NahidaDownloadState.wrongPassword({
     required final NahidaliveElement element,
-    required final Completer<String?> completer,
     final String? wrongPw,
   }) = NahidaDownloadStateWrongPassword;
-
-  const factory NahidaDownloadState.httpException({
-    required final NahidaliveElement element,
-    required final HttpException exception,
-  }) = NahidaDownloadStateHttpException;
-
+  
   const factory NahidaDownloadState.modZipExtractionException({
     required final NahidaliveElement element,
     required final ModCategory category,
