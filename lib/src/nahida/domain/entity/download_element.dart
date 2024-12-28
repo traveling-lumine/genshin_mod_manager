@@ -8,13 +8,14 @@ part 'download_element.freezed.dart';
 part 'download_element.g.dart';
 
 @freezed
-class NahidaliveDownloadElement with _$NahidaliveDownloadElement {
-  const factory NahidaliveDownloadElement({
-    required final bool success,
-    @JsonKey(name: 'error-codes') final String? errorCodes,
-    @JsonKey(name: 'presigned_url') final String? downloadUrl,
-  }) = _NahidaliveDownloadElement;
+class NahidaliveDownloadUrlElement with _$NahidaliveDownloadUrlElement {
+  const factory NahidaliveDownloadUrlElement({
+    @JsonKey(name: 'presigned_url') required final String downloadUrl,
+    @JsonKey(name: 'file_name') required final String fileName,
+    @JsonKey(name: 'uuid') required final String uuid,
+  }) = _NahidaliveDownloadUrlElement;
 
-  factory NahidaliveDownloadElement.fromJson(final Map<String, dynamic> json) =>
-      _$NahidaliveDownloadElementFromJson(json);
+  factory NahidaliveDownloadUrlElement.fromJson(
+          final Map<String, dynamic> json) =>
+      _$NahidaliveDownloadUrlElementFromJson(json);
 }

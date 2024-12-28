@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -13,6 +14,7 @@ import '../../nahida/domain/entity/nahida_element.dart';
 import '../../structure/entity/mod_category.dart';
 import '../util/open_url.dart';
 import 'intrinsic_command_bar.dart';
+import 'turnstile_dialog.dart';
 
 class StoreElement extends ConsumerWidget {
   const StoreElement({
@@ -199,7 +201,7 @@ class StoreElement extends ConsumerWidget {
                     fontStyle: AppLocalizations.of(context)!.localeName == 'ko'
                         ? null
                         : FontStyle.italic,
-                    color: bodyStyle.color?.withOpacity(0.5),
+                    color: bodyStyle.color?.withValues(alpha: 0.5),
                   ),
                 ),
               ),
@@ -216,7 +218,7 @@ class StoreElement extends ConsumerWidget {
                 imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.6),
+                    Colors.black.withValues(alpha: 0.6),
                     BlendMode.darken,
                   ),
                   child: Image(image: imageProvider, fit: BoxFit.cover),
@@ -292,10 +294,59 @@ class StoreElement extends ConsumerWidget {
           FilledButton(
             onPressed: () async {
               Navigator.of(dialogContext).pop();
+              final turnstile = await showDialog<String?>(
+                context: context,
+                builder: (final dCtx) => const TurnstileDialog(),
+              );
+              if (turnstile == null) {
+                return;
+              }
+              final String? password;
+              if (!context.mounted) {
+                return;
+              }
+              if (element.password) {
+                password = await showDialog<String?>(
+                  context: context,
+                  builder: (final dialogContext) => HookBuilder(
+                    builder: (final ctx) {
+                      final tctrl = useTextEditingController();
+                      return ContentDialog(
+                        title: const Text('Enter password'),
+                        content: IntrinsicHeight(
+                          child: TextFormBox(
+                            autofocus: true,
+                            controller: tctrl,
+                            placeholder: 'Password',
+                            onFieldSubmitted: (final value) =>
+                                Navigator.of(dialogContext).pop(tctrl.text),
+                          ),
+                        ),
+                        actions: [
+                          Button(
+                            onPressed: Navigator.of(dialogContext).pop,
+                            child: const Text('Cancel'),
+                          ),
+                          FilledButton(
+                            onPressed: () =>
+                                Navigator.of(dialogContext).pop(tctrl.text),
+                            child: const Text('Download'),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                );
+              } else {
+                password = null;
+              }
               unawaited(
-                ref
-                    .read(nahidaDownloadQueueProvider.notifier)
-                    .addDownload(element: element, category: category),
+                ref.read(nahidaDownloadQueueProvider.notifier).addDownload(
+                      element: element,
+                      category: category,
+                      turnstile: turnstile,
+                      pw: password,
+                    ),
               );
             },
             child: const Text('Download'),

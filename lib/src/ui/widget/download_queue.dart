@@ -13,19 +13,12 @@ import '../../nahida/domain/entity/nahida_element.dart';
 import '../../structure/entity/mod_category.dart';
 import '../util/display_infobar.dart';
 
-class DownloadQueue extends ConsumerStatefulWidget {
+class DownloadQueue extends ConsumerWidget {
   const DownloadQueue({required this.child, super.key});
   final Widget child;
 
   @override
-  ConsumerState<DownloadQueue> createState() => _DownloadQueueState();
-}
-
-class _DownloadQueueState extends ConsumerState<DownloadQueue> {
-  final _textEditingController = TextEditingController();
-
-  @override
-  Widget build(final BuildContext context) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     ref.listen(nahidaDownloadQueueProvider, (final previous, final next) {
       if (!next.hasValue) {
         return;
@@ -33,10 +26,8 @@ class _DownloadQueueState extends ConsumerState<DownloadQueue> {
       switch (next.requireValue) {
         case NahidaDownloadStateCompleted(:final element):
           _showNahidaDownloadCompleteInfoBar(context, element);
-        case NahidaDownloadStateHttpException(:final exception):
-          _showNahidaApiErrorInfoBar(context, exception);
-        case NahidaDownloadStateWrongPassword(:final completer, :final wrongPw):
-          unawaited(_showNahidaWrongPasswdDialog(context, completer, wrongPw));
+        case NahidaDownloadStateWrongPassword(:final wrongPw):
+          _showNahidaWrongPasswdDialog(context, wrongPw);
         case NahidaDownloadStateModZipExtractionException(
             :final category,
             :final data,
@@ -52,27 +43,7 @@ class _DownloadQueueState extends ConsumerState<DownloadQueue> {
           );
       }
     });
-    return widget.child;
-  }
-
-  @override
-  void dispose() {
-    _textEditingController.dispose();
-    super.dispose();
-  }
-
-  void _showNahidaApiErrorInfoBar(
-    final BuildContext context,
-    final HttpException exception,
-  ) {
-    unawaited(
-      displayInfoBarInContext(
-        context,
-        title: const Text('Download failed'),
-        content: Text('${exception.uri}'),
-        severity: InfoBarSeverity.error,
-      ),
-    );
+    return child;
   }
 
   void _showNahidaDownloadCompleteInfoBar(
@@ -88,48 +59,17 @@ class _DownloadQueueState extends ConsumerState<DownloadQueue> {
     );
   }
 
-  Future<void> _showNahidaWrongPasswdDialog(
+  void _showNahidaWrongPasswdDialog(
     final BuildContext context,
-    final Completer<String?> completer,
     final String? wrongPw,
-  ) async {
-    final userResponse = await showDialog<String?>(
-      context: context,
-      builder: (final dialogContext) => ContentDialog(
-        title: const Text('Enter password'),
-        content: IntrinsicHeight(
-          child: TextFormBox(
-            autovalidateMode: AutovalidateMode.always,
-            autofocus: true,
-            controller: _textEditingController,
-            placeholder: 'Password',
-            onFieldSubmitted: (final value) =>
-                Navigator.of(dialogContext).pop(_textEditingController.text),
-            validator: (final value) {
-              if (wrongPw == null || value == null) {
-                return null;
-              }
-              if (value == wrongPw) {
-                return 'Wrong password';
-              }
-              return null;
-            },
-          ),
-        ),
-        actions: [
-          Button(
-            onPressed: Navigator.of(dialogContext).pop,
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.of(dialogContext).pop(_textEditingController.text),
-            child: const Text('Download'),
-          ),
-        ],
+  ) {
+    unawaited(
+      displayInfoBarInContext(
+        context,
+        title: const Text('Wrong password'),
+        severity: InfoBarSeverity.error,
       ),
     );
-    completer.complete(userResponse);
   }
 
   Future<void> _showNahidaZipExtractionErrorInfoBar(

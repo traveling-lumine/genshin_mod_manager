@@ -1,93 +1,41 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
 
 import '../../domain/entity/download_element.dart';
 import '../../domain/entity/nahida_element.dart';
-import '../../domain/entity/wrong_password.dart';
 import '../../domain/repo/nahida.dart';
-import '../entity/nahida_page_fetch_result.dart';
-import '../entity/nahida_single_fetch_result.dart';
-import '../secrets.dart';
+import '../entity/nahida_page_result.dart';
 
-class NahidaliveAPIImpl implements NahidaliveAPI {
-  @override
-  Future<Uint8List> downloadUuid({
-    required final String uuid,
-    final String? pw,
-  }) async {
-    final elem = await _downloadUrl(uuid, pw: pw);
-    if (!elem.success) {
-      throw const WrongPasswordException();
-    }
-    return _download(elem);
-  }
+part 'nahida.g.dart';
+
+@RestApi(baseUrl: 'https://nahida.live')
+abstract class NahidaliveAPIImpl implements NahidaliveAPI {
+  factory NahidaliveAPIImpl(
+    final Dio dio, {
+    final String? baseUrl,
+    final ParseErrorLogger? errorLogger,
+  }) = _NahidaliveAPIImpl;
 
   @override
-  Future<NahidaliveElement> fetchNahidaliveElement(final String uuid) async {
-    final client = http.Client();
-    final request = http.Request(
-      'GET',
-      Uri.https(Env.val10, '${Env.val13}/$uuid'),
-    );
-    final response = await client.send(request);
-    final body = await response.stream.bytesToString();
-    client.close();
-    final fetchResult = NahidaSingleFetchResult.fromJson(
-      jsonDecode(body) as Map<String, dynamic>,
-    );
-    return fetchResult.result;
-  }
+  @GET('/api/hello/{uuid}')
+  Future<NahidaliveElement> fetchNahidaliveElement({
+    @Path('uuid') required final String uuid,
+  });
 
   @override
-  Future<List<NahidaliveElement>> fetchNahidaliveElements(
-    final int pageNum,
-  ) async {
-    if (pageNum <= 0) {
-      throw ArgumentError.value(pageNum, 'pageNum', 'must be greater than 0');
-    }
-    final client = http.Client();
-    final request = http.Request(
-      'GET',
-      Uri.https(Env.val10, Env.val12, {
-        Env.val1: pageNum.toString(),
-        Env.val2: Env.val5,
-      }),
-    );
-    request.headers[Env.val9] = Env.val8;
-    final response = await client.send(request);
-    final body = await response.stream.bytesToString();
-    client.close();
-    if (response.statusCode != 200) {
-      throw Exception('fetch list failed: $body');
-    }
-    final fetchResult = NahidaPageFetchResult.fromJson(
-      jsonDecode(body) as Map<String, dynamic>,
-    );
-    return fetchResult.result.elements;
-  }
+  @GET('/api/hello/mods')
+  Future<NahidaPageResult> fetchNahidaliveElements({
+    @Query('p') required final int pageNum,
+    @Header('Authorization') required final String authKey,
+    @Query('ps') final int pageSize = 100,
+  });
 
-  Future<Uint8List> _download(
-    final NahidaliveDownloadElement downloadElement,
-  ) async {
-    final response = await http.get(Uri.parse(downloadElement.downloadUrl!));
-    if (response.statusCode != 200) {
-      throw Exception('download failed');
-    }
-    return response.bodyBytes;
-  }
-
-  Future<NahidaliveDownloadElement> _downloadUrl(
-    final String uuid, {
-    final String? pw,
-  }) async {
-    final passwd =
-        pw == null || pw.isEmpty ? <String, String>{} : {Env.val7: pw};
-    final uri = Uri.https(Env.val10, '${Env.val11}/$uuid');
-    final response = await http.post(uri, body: passwd);
-    return NahidaliveDownloadElement.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
-  }
+  @override
+  @POST('/api/gimme/{uuid}')
+  @FormUrlEncoded()
+  Future<NahidaliveDownloadUrlElement> downloadUuid({
+    @Path('uuid') required final String uuid,
+    @Field('cftoken') required final String turnstile,
+    @Field('password') final String? pw,
+  });
 }

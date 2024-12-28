@@ -1,0 +1,34 @@
+{
+    "configurations": [
+        {
+            "name": "genshin_mod_manager (Flutter Windows)",
+            "program": "lib/main.dart",
+            "deviceId": "windows",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "genshin_mod_manager (Flutter profile mode)",
+            "program": "lib/main.dart",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "genshin_mod_manager (Flutter release mode)",
+            "program": "lib/main.dart",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "genshin_mod_manager (Flutter Tests)",
+            "program": "test",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--branch-coverage"
+            ]
+        }
+    ]
+}

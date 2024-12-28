@@ -13,7 +13,7 @@ import '../../nahida/domain/entity/nahida_element.dart';
 import '../../storage/di/exe_arg.dart';
 import '../../structure/di/categories.dart';
 import '../../structure/entity/mod_category.dart';
-import '../util/display_infobar.dart';
+import 'turnstile_dialog.dart';
 
 String _convertUuid(final String uuid) {
   // if uuid has no dashes, add it manually
@@ -40,7 +40,7 @@ Future<NahidaliveElement> _getElement(
 ) async {
   final nahida = ref.read(nahidaApiProvider);
   final uuid = _convertUuid(rawUuid);
-  final elem = await nahida.fetchNahidaliveElement(uuid);
+  final elem = await nahida.fetchNahidaliveElement(uuid: uuid);
   return elem;
 }
 
@@ -122,7 +122,7 @@ class ProtocolHandlerWidget extends ConsumerWidget {
     final parsed = Uri.parse(url);
     final rawUuid = parsed.queryParameters['uuid'];
     if (rawUuid == null) {
-      return _showInvalidUriInfoBar(context);
+      return;
     }
 
     final password = parsed.queryParameters['pw'];
@@ -155,14 +155,6 @@ class ProtocolHandlerWidget extends ConsumerWidget {
             ],
           );
         },
-      );
-
-  Future<void> _showInvalidUriInfoBar(final BuildContext context) =>
-      displayInfoBarInContext(
-        context,
-        title: const Text('Invalid URL'),
-        content: const Text('The URL does not contain a UUID.'),
-        severity: InfoBarSeverity.error,
       );
 
   void _showProtocolConfirmDialog(
@@ -312,12 +304,24 @@ class _ProtocolDialog extends HookConsumerWidget {
     final BuildContext context,
     final NahidaliveElement elem,
   ) async {
+    final turnstile = await showDialog<String?>(
+      context: context,
+      builder: (final dCtx) => const TurnstileDialog(),
+    );
+    if (turnstile == null) {
+      return;
+    }
     unawaited(
       ref
           .read(
             nahidaDownloadQueueProvider.notifier,
           )
-          .addDownload(element: elem, category: currentSelected, pw: password),
+          .addDownload(
+            element: elem,
+            category: currentSelected,
+            pw: password,
+            turnstile: turnstile,
+          ),
     );
     if (context.mounted) {
       Navigator.of(context).pop();
