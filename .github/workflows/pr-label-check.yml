@@ -7,6 +7,10 @@ on:
       - labeled
       - unlabeled
 
+concurrency:
+  group: pr-label-check
+  cancel-in-progress: true
+
 jobs:
   pr-label-check:
     runs-on: ubuntu-latest
