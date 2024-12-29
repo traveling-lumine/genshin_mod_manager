@@ -9,6 +9,10 @@ on:
       - labeled
       - unlabeled
 
+concurrency:
+  group: pr-version-increment-check
+  cancel-in-progress: true
+
 jobs:
   check_version_increment:
     if: contains(github.event.pull_request.labels.*.name, 'release') || contains(github.event.pull_request.labels.*.name, 'build')
