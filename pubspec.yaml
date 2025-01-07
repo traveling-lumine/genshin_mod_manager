@@ -71,3 +71,8 @@ flutter:
   generate: true
   assets:
     - images/
+
+cider:
+  link_template:
+    tag: https://github.com/traveling-lumine/genshin_mod_manager/releases/tag/v%tag%
+    diff: https://github.com/traveling-lumine/genshin_mod_manager/compare/v%from%...v%to%
