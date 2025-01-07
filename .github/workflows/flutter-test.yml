@@ -21,7 +21,11 @@ on:
       - ".gitignore"
       - "LICENSE"
       - "*.md"
-  
+
+concurrency:
+  group: flutter-test-${{ github.sha }}
+  cancel-in-progress: true
+
 jobs:
   coverage-report:
     runs-on: windows-latest
