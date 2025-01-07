@@ -8,7 +8,7 @@ on:
       - unlabeled
 
 concurrency:
-  group: pr-label-check
+  group: pr-label-check-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:

@@ -61,7 +61,7 @@ Future<void> extractArchiveToDiskAsync(
       // do nothing
     }
 
-    final filePath = path.normalize(path.join(outputPath, entry.name));
+    final filePath = path.normalize(path.join(outputPath, name));
 
     if ((entry.isDirectory && !entry.isSymbolicLink) ||
         !_isWithinOutputPath(outputPath, filePath)) {

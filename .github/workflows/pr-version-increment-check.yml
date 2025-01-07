@@ -10,7 +10,7 @@ on:
       - unlabeled
 
 concurrency:
-  group: pr-version-increment-check
+  group: pr-version-increment-check-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
