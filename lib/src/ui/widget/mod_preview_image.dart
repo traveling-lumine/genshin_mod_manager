@@ -147,7 +147,8 @@ class _ModPreviewImageState extends ConsumerState<ModPreviewImage>
     _setCurMTime();
   }
 
-  Size _getImageSize() => ImageSizeGetter.getSize(FileInput(File(widget.path)));
+  Size _getImageSize() =>
+      ImageSizeGetter.getSizeResult(FileInput(File(widget.path))).size;
 
   int _getMTime() =>
       File(widget.path).lastModifiedSync().microsecondsSinceEpoch;

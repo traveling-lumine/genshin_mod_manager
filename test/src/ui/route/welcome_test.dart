@@ -24,7 +24,7 @@ void main() {
   });
   testWidgets('WelcomeRoute has a link to GitHub', (final tester) async {
     await pumpMainWidget(tester);
-    
+
     mock
       ..setLaunchExpectations(
         url: 'https://github.com/traveling-lumine/genshin_mod_manager',

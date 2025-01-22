@@ -209,7 +209,7 @@ class _ModCardState extends ConsumerState<ModCard> with WindowListener {
                 imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.6),
+                    Colors.black.withValues(alpha: 0.6),
                     BlendMode.darken,
                   ),
                   child: ModPreviewImage(
@@ -245,7 +245,7 @@ class _ModCardState extends ConsumerState<ModCard> with WindowListener {
             child: Divider(direction: Axis.vertical),
           ),
           Card(
-            backgroundColor: Colors.white.withOpacity(0.05),
+            backgroundColor: Colors.white.withValues(alpha: 0.05),
             padding: const EdgeInsets.all(4),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: _minIniSectionWidth),

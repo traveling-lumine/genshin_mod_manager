@@ -19,7 +19,7 @@ NavigationAppBar getAppbar(
         builder: (final context) => DefaultTextStyle(
           style: TextStyle(
             color: FluentTheme.of(context).brightness == Brightness.light
-                ? Colors.black.withOpacity(0.8956)
+                ? Colors.black.withValues(alpha: 0.8956)
                 : Colors.white,
             fontSize: 14,
           ),

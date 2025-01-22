@@ -15,8 +15,6 @@ void main() {
         expect(next, isA<AsyncData<NahidaDownloadState>>());
         final nextVal = (next as AsyncData<NahidaDownloadState>).value;
         expect(nextVal, isA<NahidaDownloadStateWrongPassword>());
-        final casted = nextVal as NahidaDownloadStateWrongPassword;
-        casted.completer.complete();
       },
     );
     expect(notifier, isNotNull);
@@ -30,7 +28,10 @@ void main() {
     );
     final category = ModCategory(name: 'name', path: 'path');
     await notifier.addDownload(
-        element: element, category: category, turnstile: '');
+      element: element,
+      category: category,
+      turnstile: '',
+    );
     listener.close();
   });
 }

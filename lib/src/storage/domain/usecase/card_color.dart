@@ -36,9 +36,9 @@ Color getDefaultValueUseCase({
 }) =>
     switch ((isBright, isEnabled)) {
       (true, true) => Colors.green.lightest,
-      (true, false) => Colors.red.lightest.withOpacity(0.5),
-      (false, true) => Colors.green.darkest.withOpacity(0.8),
-      (false, false) => Colors.red.darkest.withOpacity(0.6),
+      (true, false) => Colors.red.lightest.withValues(alpha: 0.5),
+      (false, true) => Colors.green.darkest.withValues(alpha: 0.8),
+      (false, false) => Colors.red.darkest.withValues(alpha: 0.6),
     };
 
 String _getCardColorAccessKeyUseCase({

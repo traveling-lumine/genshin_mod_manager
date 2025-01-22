@@ -16,6 +16,7 @@ class NahidaliveDownloadUrlElement with _$NahidaliveDownloadUrlElement {
   }) = _NahidaliveDownloadUrlElement;
 
   factory NahidaliveDownloadUrlElement.fromJson(
-          final Map<String, dynamic> json) =>
+    final Map<String, dynamic> json,
+  ) =>
       _$NahidaliveDownloadUrlElementFromJson(json);
 }

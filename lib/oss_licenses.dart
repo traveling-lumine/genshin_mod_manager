@@ -720,13 +720,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('build'), PackageRef('collection'), PackageRef('convert'), PackageRef('crypto'), PackageRef('graphs'), PackageRef('logging'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('pub_semver'), PackageRef('stream_transform'), PackageRef('yaml')]
   );
 
-/// build_runner 2.4.13
+/// build_runner 2.4.14
 const _build_runner = Package(
     name: 'build_runner',
     description: 'A build system for Dart code generation and modular compilation.',
     repository: 'https://github.com/dart-lang/build/tree/master/build_runner',
     authors: [],
-    version: '2.4.13',
+    version: '2.4.14',
     license: '''Copyright 2016, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -759,13 +759,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('async'), PackageRef('build'), PackageRef('build_config'), PackageRef('build_daemon'), PackageRef('build_resolvers'), PackageRef('build_runner_core'), PackageRef('code_builder'), PackageRef('collection'), PackageRef('crypto'), PackageRef('dart_style'), PackageRef('frontend_server_client'), PackageRef('glob'), PackageRef('graphs'), PackageRef('http_multi_server'), PackageRef('io'), PackageRef('js'), PackageRef('logging'), PackageRef('meta'), PackageRef('mime'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('shelf'), PackageRef('shelf_web_socket'), PackageRef('stack_trace'), PackageRef('stream_transform'), PackageRef('timing'), PackageRef('watcher'), PackageRef('web_socket_channel'), PackageRef('yaml')]
   );
 
-/// build_runner_core 7.3.2
+/// build_runner_core 8.0.0
 const _build_runner_core = Package(
     name: 'build_runner_core',
     description: 'Core tools to organize the structure of a build and run Builders.',
     repository: 'https://github.com/dart-lang/build/tree/master/build_runner_core',
     authors: [],
-    version: '7.3.2',
+    version: '8.0.0',
     license: '''Copyright 2018, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -2992,14 +2992,14 @@ SOFTWARE.''',
     dependencies: [PackageRef('dio'), PackageRef('http_parser'), PackageRef('meta'), PackageRef('web')]
   );
 
-/// envied 1.0.0
+/// envied 1.0.1
 const _envied = Package(
     name: 'envied',
     description: 'Explicitly reads environment variables into a dart file from a .env file for more security and faster start up times.',
     homepage: 'https://github.com/petercinibulk/envied',
     repository: 'https://github.com/petercinibulk/envied',
     authors: [],
-    version: '1.0.0',
+    version: '1.0.1',
     license: '''The MIT License (MIT)
 
 Copyright © 2022 Peter Cinibulk
@@ -3014,14 +3014,14 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
     dependencies: []
   );
 
-/// envied_generator 1.0.0
+/// envied_generator 1.0.1
 const _envied_generator = Package(
     name: 'envied_generator',
     description: 'Generator for the Envied package. See https://pub.dev/packages/envied.',
     homepage: 'https://github.com/petercinibulk/envied',
     repository: 'https://github.com/petercinibulk/envied',
     authors: [],
-    version: '1.0.0',
+    version: '1.0.1',
     license: '''The MIT License (MIT)
 
 Copyright © 2022 Peter Cinibulk
@@ -3439,14 +3439,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// fluent_ui 4.9.2
+/// fluent_ui 4.10.0
 const _fluent_ui = Package(
     name: 'fluent_ui',
     description: 'Implements Windows UI in Flutter. Based on the official documentation',
     homepage: 'https://bdlukaa.github.io/fluent_ui/#/',
     repository: 'https://github.com/bdlukaa/fluent_ui',
     authors: [],
-    version: '4.9.2',
+    version: '4.10.0',
     license: '''Copyright 2020 Bruno D'Luka
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -3463,13 +3463,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     dependencies: [PackageRef('flutter'), PackageRef('intl'), PackageRef('scroll_pos'), PackageRef('recase'), PackageRef('math_expressions')]
   );
 
-/// flutter 3.27.1
+/// flutter 3.27.2
 const _flutter = Package(
     name: 'flutter',
     description: 'A framework for writing Flutter applications',
     homepage: 'https://flutter.dev',
     authors: [],
-    version: '3.27.1',
+    version: '3.27.2',
     license: '''Copyright 2014 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3906,13 +3906,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('file'), PackageRef('path'), PackageRef('string_scanner')]
   );
 
-/// go_router 14.6.2
+/// go_router 14.6.3
 const _go_router = Package(
     name: 'go_router',
     description: 'A declarative router for Flutter based on Navigation 2 supporting deep linking, data-driven routes and more',
     repository: 'https://github.com/flutter/packages/tree/main/packages/go_router',
     authors: [],
-    version: '14.6.2',
+    version: '14.6.3',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -4424,13 +4424,13 @@ THE SOFTWARE.''',
     dependencies: [PackageRef('archive'), PackageRef('meta'), PackageRef('xml')]
   );
 
-/// image_size_getter 2.2.0
+/// image_size_getter 2.4.0
 const _image_size_getter = Package(
     name: 'image_size_getter',
     description: 'Get image width and height, the library does not completely decode the image file, just read the metadata to get the image width and height.',
     homepage: 'https://github.com/CaiJingLong/dart_image_size_getter',
     authors: [],
-    version: '2.2.0',
+    version: '2.4.0',
     license: '''Apache License
                        Version 2.0, January 2004
                     http://www.apache.org/licenses/
@@ -4634,7 +4634,7 @@ See the License for the specific language governing permissions and
 limitations under the License.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('hashcodes')]
+    dependencies: [PackageRef('collection'), PackageRef('hashcodes'), PackageRef('meta')]
   );
 
 /// infinite_scroll_pagination 4.1.0
@@ -5601,14 +5601,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('path')]
   );
 
-/// package_info_plus 8.1.2
+/// package_info_plus 8.1.3
 const _package_info_plus = Package(
     name: 'package_info_plus',
     description: 'Flutter plugin for querying information about the application package, such as CFBundleVersion on iOS or versionCode on Android.',
     homepage: 'https://github.com/fluttercommunity/plus_plugins',
     repository: 'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/package_info_plus/package_info_plus',
     authors: [],
-    version: '8.1.2',
+    version: '8.1.3',
     license: '''Copyright 2017 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -6706,14 +6706,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     dependencies: []
   );
 
-/// retrofit 4.4.1
+/// retrofit 4.4.2
 const _retrofit = Package(
     name: 'retrofit',
     description: 'retrofit.dart is an dio client generator using source_gen and inspired by Chopper and Retrofit.',
     homepage: 'https://mings.in/retrofit.dart/',
     repository: 'https://github.com/trevorwang/retrofit.dart/',
     authors: [],
-    version: '4.4.1',
+    version: '4.4.2',
     license: '''MIT License
 
 Copyright (c) 2019 Trevor Wang
@@ -6740,14 +6740,14 @@ SOFTWARE.''',
     dependencies: [PackageRef('dio'), PackageRef('meta')]
   );
 
-/// retrofit_generator 9.1.5
+/// retrofit_generator 9.1.7
 const _retrofit_generator = Package(
     name: 'retrofit_generator',
     description: 'retrofit generator is an dio client generator using source_gen and inspired by Chopper and Retrofit.',
     homepage: 'https://mings.in/retrofit.dart/',
     repository: 'https://github.com/trevorwang/retrofit.dart/',
     authors: [],
-    version: '9.1.5',
+    version: '9.1.7',
     license: '''MIT License
 
 Copyright (c) 2019 Trevor Wang
@@ -6771,7 +6771,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('build'), PackageRef('built_collection'), PackageRef('code_builder'), PackageRef('dart_style'), PackageRef('dio'), PackageRef('protobuf'), PackageRef('retrofit'), PackageRef('source_gen')]
+    dependencies: [PackageRef('analyzer'), PackageRef('build'), PackageRef('built_collection'), PackageRef('code_builder'), PackageRef('dart_style'), PackageRef('dio'), PackageRef('protobuf'), PackageRef('source_gen'), PackageRef('retrofit')]
   );
 
 /// riverpod 2.6.1
@@ -7354,13 +7354,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('flutter')]
   );
 
-/// shared_preferences 2.3.4
+/// shared_preferences 2.3.5
 const _shared_preferences = Package(
     name: 'shared_preferences',
     description: 'Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences',
     authors: [],
-    version: '2.3.4',
+    version: '2.3.5',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -9463,7 +9463,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter')]
   );
 
-/// win32 5.9.0
+/// win32 5.10.0
 const _win32 = Package(
     name: 'win32',
     description: '''Access common Win32 APIs directly from Dart using FFI — no C required!
@@ -9471,7 +9471,7 @@ const _win32 = Package(
     homepage: 'https://win32.pub',
     repository: 'https://github.com/halildurmus/win32',
     authors: [],
-    version: '5.9.0',
+    version: '5.10.0',
     license: '''BSD 3-Clause License
 
 Copyright (c) 2024, Halil Durmus

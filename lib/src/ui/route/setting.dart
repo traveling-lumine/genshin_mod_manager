@@ -4,7 +4,6 @@ import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show AlertDialog;
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -404,10 +403,8 @@ class _ColorPickerDialog extends HookConsumerWidget {
       title: const Text('Pick a color!'),
       content: SingleChildScrollView(
         child: ColorPicker(
-          pickerColor: currentColor.value,
-          onColorChanged: (final value) {
-            currentColor.value = value;
-          },
+          color: currentColor.value,
+          onChanged: (final value) => currentColor.value = value,
         ),
       ),
       actions: [

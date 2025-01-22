@@ -26,7 +26,6 @@ void main() {
             response.data = dataMap;
             return handler.next(response);
           } else {
-            print(data['error']);
             throw const WrongPasswordException();
           }
         },

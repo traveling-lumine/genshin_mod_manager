@@ -17,7 +17,7 @@ sealed class NahidaDownloadState with _$NahidaDownloadState {
     required final NahidaliveElement element,
     final String? wrongPw,
   }) = NahidaDownloadStateWrongPassword;
-  
+
   const factory NahidaDownloadState.modZipExtractionException({
     required final NahidaliveElement element,
     required final ModCategory category,
