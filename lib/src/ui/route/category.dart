@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:fluent_ui/fluent_ui.dart'
+    hide AutoSuggestBox, AutoSuggestBoxItem;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -205,7 +206,7 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute>
           final data = ref.watch(modsInCategoryProvider(category));
           final items = data.indexed
               .map(
-                (final e) => AutoSuggestBoxItem2(
+                (final e) => AutoSuggestBoxItem(
                   value: e.$2.displayName,
                   label: e.$2.displayName,
                   onSelected: () {
@@ -216,7 +217,7 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute>
               .toList();
           return Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: AutoSuggestBox2(
+            child: AutoSuggestBox(
               items: items,
               trailingIcon: const Icon(FluentIcons.search),
               onSubmissionFailed: (final text) {

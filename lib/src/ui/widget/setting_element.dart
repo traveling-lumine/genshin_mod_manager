@@ -1,6 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'third_party/fluent_ui/expander.dart';
 
 class SettingElement extends StatelessWidget {
   const SettingElement({
@@ -21,22 +20,35 @@ class SettingElement extends StatelessWidget {
   final Widget? trailing;
 
   @override
-  Widget build(final BuildContext context) => Padding(
-        padding: const EdgeInsets.all(2),
-        child: Expander2(
-          initiallyExpanded: initiallyExpanded,
-          header: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 11),
-            child: ListTile(
-              leading: leading,
-              title: Text(text),
-              subtitle: subTitle,
+  Widget build(final BuildContext context) {
+    final localContent = content;
+    return Padding(
+      padding: const EdgeInsets.all(2),
+      child: localContent == null
+          ? Card(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+              child: ListTile(
+                leading: leading,
+                title: Text(text),
+                subtitle: subTitle,
+                trailing: trailing,
+              ),
+            )
+          : Expander(
+              initiallyExpanded: initiallyExpanded,
+              header: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 11),
+                child: ListTile(
+                  leading: leading,
+                  title: Text(text),
+                  subtitle: subTitle,
+                ),
+              ),
+              trailing: trailing,
+              content: localContent,
             ),
-          ),
-          trailing: trailing,
-          content: content,
-        ),
-      );
+    );
+  }
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {

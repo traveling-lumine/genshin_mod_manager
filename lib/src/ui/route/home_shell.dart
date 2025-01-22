@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:fluent_ui/fluent_ui.dart'
+    hide AutoSuggestBox, AutoSuggestBoxItem;
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protocol_handler/protocol_handler.dart';
@@ -109,47 +111,54 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     );
   }
 
-  Widget _buildAutoSuggestBox(final List<FolderPaneItem> items) =>
-      AutoSuggestBox2(
-        items: items
+  Widget _buildAutoSuggestBox(
+    final List<FolderPaneItem> items,
+    final ScrollController controller,
+  ) =>
+      AutoSuggestBox(
+        items: items.indexed
             .map(
-              (final e) => AutoSuggestBoxItem2(
-                value: e.category,
-                label: e.category.name,
+              (final e) => AutoSuggestBoxItem(
+                value: e.$2.category,
+                label: e.$2.category.name,
+                onSelected: () {
+                  e.$2.onTap?.call();
+                  unawaited(
+                    controller.animateTo(
+                      e.$1 * 84.0,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
+                    ),
+                  );
+                },
               ),
             )
             .toList(),
         trailingIcon: const Icon(FluentIcons.search),
-        onSelected: (final item) {
-          final category = item.value;
-          if (category == null) {
-            return;
-          }
-          context.goNamed(
-            RouteNames.category.name,
-            pathParameters: {RouteParams.category.name: category.name},
-          );
-        },
         onSubmissionFailed: (final text) {
           if (text.isEmpty) {
             return;
           }
-          final item = items.firstWhereOrNull((final e) {
-            final name = e.category.name.toLowerCase();
+          final item = items.indexed.firstWhereOrNull((final e) {
+            final name = e.$2.category.name.toLowerCase();
             return name.startsWith(text.toLowerCase());
           });
           if (item == null) {
             return;
           }
-          final category = item.category;
-          context.goNamed(
-            RouteNames.category.name,
-            pathParameters: {RouteParams.category.name: category.name},
+          item.$2.onTap?.call();
+          unawaited(
+            controller.animateTo(
+              item.$1 * 84.0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            ),
           );
         },
       );
 
   NavigationPane _buildPane() {
+    final controller = useScrollController();
     final items = ref
         .watch(categoriesProvider)
         .map(
@@ -194,7 +203,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       ),
       autoSuggestBox: Row(
         children: [
-          Expanded(child: _buildAutoSuggestBox(items)),
+          Expanded(child: _buildAutoSuggestBox(items, controller)),
           Tooltip(
             message: 'Refresh categories',
             child: IconButton(
@@ -205,6 +214,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
         ],
       ),
       autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+      scrollController: controller,
     );
   }
 

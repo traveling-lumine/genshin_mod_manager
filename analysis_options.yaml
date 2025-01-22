@@ -11,8 +11,6 @@ analyzer:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "lib/oss_licenses.dart"
-    - "**/third_party/**"
-    - "**/third_party.dart"
 
 linter:
   rules:

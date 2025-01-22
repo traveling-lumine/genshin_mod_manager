@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' show AlertDialog;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -30,7 +29,6 @@ import '../../storage/domain/usecase/card_color.dart';
 import '../constants.dart';
 import '../widget/game_selector.dart';
 import '../widget/setting_element.dart';
-import '../widget/third_party/flutter/no_deref_file_opener.dart';
 
 class SettingRoute extends ConsumerWidget {
   const SettingRoute({super.key});
@@ -75,7 +73,8 @@ class SettingRoute extends ConsumerWidget {
               icon: FluentIcons.document_management,
               selector: (final value) => value.modExecFile,
               onPressed: () {
-                final file = OpenNoDereferenceFilePicker().getFile();
+                final file =
+                    (OpenFilePicker()..dereferenceLinks = false).getFile();
                 if (file == null) {
                   return;
                 }
@@ -89,7 +88,8 @@ class SettingRoute extends ConsumerWidget {
               icon: FluentIcons.document_management,
               selector: (final value) => value.launcherFile,
               onPressed: () {
-                final file = OpenNoDereferenceFilePicker().getFile();
+                final file =
+                    (OpenFilePicker()..dereferenceLinks = false).getFile();
                 if (file == null) {
                   return;
                 }
@@ -176,70 +176,76 @@ class SettingRoute extends ConsumerWidget {
                     ],
                     onChanged: (final value) => columnStrategy.value = value,
                   ),
-                  content: switch (columnStrategy.value) {
-                    0 => Row(
-                        children: [
-                          const Text('Fixed number of columns: '),
-                          SizedBox(
-                            width: 100,
-                            child: NumberBox<int>(
-                              value: columnParameter.value,
-                              onChanged: (final value) {
-                                if (value == null) {
-                                  return;
-                                }
-                                ref
-                                    .read(columnStrategyProvider.notifier)
-                                    .setFixedCount(value);
-                                columnParameter.value = value;
-                              },
-                              mode: SpinButtonPlacementMode.none,
+                  content: Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: switch (columnStrategy.value) {
+                      0 => Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Fixed number of columns: '),
+                            SizedBox(
+                              width: 100,
+                              child: NumberBox<int>(
+                                value: columnParameter.value,
+                                onChanged: (final value) {
+                                  if (value == null) {
+                                    return;
+                                  }
+                                  ref
+                                      .read(columnStrategyProvider.notifier)
+                                      .setFixedCount(value);
+                                  columnParameter.value = value;
+                                },
+                                mode: SpinButtonPlacementMode.none,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    1 => Row(
-                        children: [
-                          const Text('Column max width limit: '),
-                          SizedBox(
-                            width: 100,
-                            child: NumberBox(
-                              value: columnParameter.value,
-                              onChanged: (final value) {
-                                if (value == null) {
-                                  return;
-                                }
-                                ref
-                                    .read(columnStrategyProvider.notifier)
-                                    .setMaxExtent(value);
-                              },
-                              mode: SpinButtonPlacementMode.none,
+                          ],
+                        ),
+                      1 => Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Column max width limit: '),
+                            SizedBox(
+                              width: 100,
+                              child: NumberBox(
+                                value: columnParameter.value,
+                                onChanged: (final value) {
+                                  if (value == null) {
+                                    return;
+                                  }
+                                  ref
+                                      .read(columnStrategyProvider.notifier)
+                                      .setMaxExtent(value);
+                                },
+                                mode: SpinButtonPlacementMode.none,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    2 => Row(
-                        children: [
-                          const Text('Column min width limit: '),
-                          SizedBox(
-                            width: 100,
-                            child: NumberBox(
-                              value: columnParameter.value,
-                              onChanged: (final value) {
-                                if (value == null) {
-                                  return;
-                                }
-                                ref
-                                    .read(columnStrategyProvider.notifier)
-                                    .setMinExtent(value);
-                              },
-                              mode: SpinButtonPlacementMode.none,
+                          ],
+                        ),
+                      2 => Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Column min width limit: '),
+                            SizedBox(
+                              width: 100,
+                              child: NumberBox(
+                                value: columnParameter.value,
+                                onChanged: (final value) {
+                                  if (value == null) {
+                                    return;
+                                  }
+                                  ref
+                                      .read(columnStrategyProvider.notifier)
+                                      .setMinExtent(value);
+                                },
+                                mode: SpinButtonPlacementMode.none,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    _ => null,
-                  },
+                          ],
+                        ),
+                      _ => null,
+                    },
+                  ),
                 );
               },
             ),
@@ -399,7 +405,7 @@ class _ColorPickerDialog extends HookConsumerWidget {
     final currentColor = useState(
       ref.watch(cardColorProvider(isBright: isBright, isEnabled: isEnabled)),
     );
-    return AlertDialog(
+    return ContentDialog(
       title: const Text('Pick a color!'),
       content: SingleChildScrollView(
         child: ColorPicker(
@@ -414,7 +420,15 @@ class _ColorPickerDialog extends HookConsumerWidget {
               isBright: isBright,
               isEnabled: isEnabled,
             );
-            currentColor.value = defaultColor;
+            ref
+                .read(
+                  cardColorProvider(
+                    isBright: isBright,
+                    isEnabled: isEnabled,
+                  ).notifier,
+                )
+                .setColor(defaultColor);
+            Navigator.of(context).pop();
           },
           child: const Text('Restore default'),
         ),
