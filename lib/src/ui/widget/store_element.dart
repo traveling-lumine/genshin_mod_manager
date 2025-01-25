@@ -9,8 +9,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../../nahida/di/nahida_download_queue.dart';
-import '../../nahida/domain/entity/nahida_element.dart';
+import '../../nahida/l0/di/nahida_download_queue.dart';
+import '../../nahida/l0/entity/nahida_element.dart';
+import '../../nahida/l0/usecase/download_url.dart';
+import '../../nahida/l1/di/nahida_repo.dart';
 import '../../structure/entity/mod_category.dart';
 import '../util/open_url.dart';
 import 'intrinsic_command_bar.dart';
@@ -341,12 +343,14 @@ class StoreElement extends ConsumerWidget {
                 password = null;
               }
               unawaited(
-                ref.read(nahidaDownloadQueueProvider.notifier).addDownload(
-                      element: element,
-                      category: category,
-                      turnstile: turnstile,
-                      pw: password,
-                    ),
+                downloadUrlUseCase(
+                  repo: ref.read(nahidaRepositoryProvider),
+                  downloadQueue: ref.read(nahidaDownloadQueueProvider.notifier),
+                  element: element,
+                  category: category,
+                  turnstile: turnstile,
+                  pw: password,
+                ),
               );
             },
             child: const Text('Download'),

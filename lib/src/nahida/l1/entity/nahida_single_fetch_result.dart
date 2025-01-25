@@ -4,7 +4,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../domain/entity/nahida_element.dart';
+import '../../l0/entity/nahida_element.dart';
 
 part 'nahida_single_fetch_result.freezed.dart';
 part 'nahida_single_fetch_result.g.dart';

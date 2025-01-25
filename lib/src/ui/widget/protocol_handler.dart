@@ -7,9 +7,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../nahida/di/nahida_download_queue.dart';
-import '../../nahida/di/nahida_store.dart';
-import '../../nahida/domain/entity/nahida_element.dart';
+import '../../nahida/l0/di/nahida_download_queue.dart';
+import '../../nahida/l0/entity/nahida_element.dart';
+import '../../nahida/l0/usecase/download_url.dart';
+import '../../nahida/l0/usecase/get_element.dart';
+import '../../nahida/l1/di/nahida_repo.dart';
 import '../../storage/di/exe_arg.dart';
 import '../../structure/di/categories.dart';
 import '../../structure/entity/mod_category.dart';
@@ -37,12 +39,11 @@ String _convertUuid(final String uuid) {
 Future<NahidaliveElement> _getElement(
   final WidgetRef ref,
   final String rawUuid,
-) async {
-  final nahida = ref.read(nahidaApiProvider);
-  final uuid = _convertUuid(rawUuid);
-  final elem = await nahida.fetchNahidaliveElement(uuid: uuid);
-  return elem;
-}
+) async =>
+    getNahidaElementUseCase(
+      repository: ref.read(nahidaRepositoryProvider),
+      uuid: _convertUuid(rawUuid),
+    );
 
 typedef VoidFutureCallback = Future<void> Function();
 
@@ -311,17 +312,16 @@ class _ProtocolDialog extends HookConsumerWidget {
     if (turnstile == null) {
       return;
     }
+
     unawaited(
-      ref
-          .read(
-            nahidaDownloadQueueProvider.notifier,
-          )
-          .addDownload(
-            element: elem,
-            category: currentSelected,
-            pw: password,
-            turnstile: turnstile,
-          ),
+      downloadUrlUseCase(
+        repo: ref.read(nahidaRepositoryProvider),
+        downloadQueue: ref.read(nahidaDownloadQueueProvider.notifier),
+        element: elem,
+        category: currentSelected,
+        pw: password,
+        turnstile: turnstile,
+      ),
     );
     if (context.mounted) {
       Navigator.of(context).pop();

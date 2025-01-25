@@ -488,8 +488,12 @@ class AutoSuggestBox<T> extends StatefulWidget {
         inputFormatters,
       ),
     );
-    properties.add(ObjectFlagProperty<void Function(String p1)?>.has(
-        'onSubmissionFailed', onSubmissionFailed,),);
+    properties.add(
+      ObjectFlagProperty<void Function(String p1)?>.has(
+        'onSubmissionFailed',
+        onSubmissionFailed,
+      ),
+    );
   }
 
   /// The default item sorter.

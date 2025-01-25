@@ -7,9 +7,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../fs_interface/helper/path_op_string.dart';
 import '../../mod_writer/data/mod_writer.dart';
-import '../../nahida/di/nahida_download_queue.dart';
-import '../../nahida/domain/entity/download_state.dart';
-import '../../nahida/domain/entity/nahida_element.dart';
+import '../../nahida/l0/di/nahida_download_queue.dart';
+import '../../nahida/l0/entity/download_state.dart';
+import '../../nahida/l0/entity/nahida_element.dart';
 import '../../structure/entity/mod_category.dart';
 import '../util/display_infobar.dart';
 

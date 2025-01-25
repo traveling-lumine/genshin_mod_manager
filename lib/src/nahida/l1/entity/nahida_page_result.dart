@@ -4,10 +4,21 @@
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../domain/entity/nahida_element.dart';
+import '../../l0/entity/nahida_element.dart';
 
 part 'nahida_page_result.freezed.dart';
 part 'nahida_page_result.g.dart';
+
+@freezed
+class NahidaPageQueryResult with _$NahidaPageQueryResult {
+  const factory NahidaPageQueryResult({
+    required final bool success,
+    required final NahidaPageResult data,
+  }) = _NahidaPageQueryResult;
+
+  factory NahidaPageQueryResult.fromJson(final Map<String, dynamic> json) =>
+      _$NahidaPageQueryResultFromJson(json);
+}
 
 @freezed
 class NahidaPageResult with _$NahidaPageResult {

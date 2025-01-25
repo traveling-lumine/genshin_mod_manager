@@ -9,9 +9,9 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../../nahida/data/secrets.dart';
-import '../../nahida/di/nahida_store.dart';
-import '../../nahida/domain/entity/nahida_element.dart';
+import '../../nahida/l0/entity/nahida_element.dart';
+import '../../nahida/l0/usecase/get_element_page.dart';
+import '../../nahida/l1/di/nahida_repo.dart';
 import '../../structure/di/categories.dart';
 import '../../structure/entity/mod_category.dart';
 import '../constants.dart';
@@ -93,10 +93,10 @@ class NahidaStoreRoute extends HookConsumerWidget {
   ) async {
     final List<NahidaliveElement> newItems;
     try {
-      newItems = (await ref
-              .read(nahidaApiProvider)
-              .fetchNahidaliveElements(pageNum: pageKey, authKey: Env.val8))
-          .elements;
+      newItems = await getNahidaElementPageUseCase(
+        repository: ref.read(nahidaRepositoryProvider),
+        pageNum: pageKey,
+      );
     } on Exception catch (error) {
       _pagingController.error = error;
       return;

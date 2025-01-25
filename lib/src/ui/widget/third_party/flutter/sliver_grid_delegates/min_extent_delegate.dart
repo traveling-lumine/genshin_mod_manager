@@ -104,25 +104,30 @@ class SliverGridDelegateWithMinCrossAxisExtent extends CrossAxisAwareDelegate {
     // below when the window size is 0.
     crossAxisCount = math.max(1, crossAxisCount);
     _latestCrossAxisCount = crossAxisCount;
-    final double usableCrossAxisExtent = math.max(0,
-        constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1),);
+    final double usableCrossAxisExtent = math.max(
+      0,
+      constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1),
+    );
     final childCrossAxisExtent = usableCrossAxisExtent / crossAxisCount;
     final childMainAxisExtent =
         mainAxisExtent ?? childCrossAxisExtent / childAspectRatio;
     return SliverGridRegularTileLayout(
-        crossAxisCount: crossAxisCount,
-        mainAxisStride: childMainAxisExtent + mainAxisSpacing,
-        crossAxisStride: childCrossAxisExtent + crossAxisSpacing,
-        childMainAxisExtent: childMainAxisExtent,
-        childCrossAxisExtent: childCrossAxisExtent,
-        reverseCrossAxis:
-            axisDirectionIsReversed(constraints.crossAxisDirection),);
+      crossAxisCount: crossAxisCount,
+      mainAxisStride: childMainAxisExtent + mainAxisSpacing,
+      crossAxisStride: childCrossAxisExtent + crossAxisSpacing,
+      childMainAxisExtent: childMainAxisExtent,
+      childCrossAxisExtent: childCrossAxisExtent,
+      reverseCrossAxis: axisDirectionIsReversed(constraints.crossAxisDirection),
+    );
   }
 
   @override
-  bool shouldRelayout(final SliverGridDelegateWithMinCrossAxisExtent oldDelegate) => oldDelegate.minCrossAxisExtent != minCrossAxisExtent ||
-        oldDelegate.mainAxisSpacing != mainAxisSpacing ||
-        oldDelegate.crossAxisSpacing != crossAxisSpacing ||
-        oldDelegate.childAspectRatio != childAspectRatio ||
-        oldDelegate.mainAxisExtent != mainAxisExtent;
+  bool shouldRelayout(
+    final SliverGridDelegateWithMinCrossAxisExtent oldDelegate,
+  ) =>
+      oldDelegate.minCrossAxisExtent != minCrossAxisExtent ||
+      oldDelegate.mainAxisSpacing != mainAxisSpacing ||
+      oldDelegate.crossAxisSpacing != crossAxisSpacing ||
+      oldDelegate.childAspectRatio != childAspectRatio ||
+      oldDelegate.mainAxisExtent != mainAxisExtent;
 }
