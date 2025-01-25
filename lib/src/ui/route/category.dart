@@ -256,7 +256,6 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute>
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       child: DynMouseScroll(
-        scrollSpeed: 1,
         builder: (final context, final scrollController, final scrollPhysics) {
           this.scrollController = scrollController;
           return GridView.builder(

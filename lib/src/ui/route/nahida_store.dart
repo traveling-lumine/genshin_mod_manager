@@ -153,7 +153,6 @@ class NahidaStoreRoute extends HookConsumerWidget {
 
   Widget _buildContent(final ModCategory category) => ThickScrollbar(
         child: DynMouseScroll(
-          scrollSpeed: 1,
           builder: (
             final context,
             final scrollController,

@@ -15,6 +15,7 @@ import '../../nahida/l0/usecase/download_url.dart';
 import '../../nahida/l1/di/nahida_repo.dart';
 import '../../structure/entity/mod_category.dart';
 import '../util/open_url.dart';
+import 'auto_resize_image.dart';
 import 'intrinsic_command_bar.dart';
 import 'turnstile_dialog.dart';
 
@@ -223,7 +224,8 @@ class StoreElement extends ConsumerWidget {
                     Colors.black.withValues(alpha: 0.6),
                     BlendMode.darken,
                   ),
-                  child: Image(image: imageProvider, fit: BoxFit.cover),
+                  child:
+                      AutoResizeImage(image: imageProvider, fit: BoxFit.cover),
                 ),
               ),
             ),
@@ -231,7 +233,7 @@ class StoreElement extends ConsumerWidget {
           Center(
             child: GestureDetector(
               onTap: () async => _showImageDialog(context, imageProvider),
-              child: Image(image: imageProvider, fit: BoxFit.contain),
+              child: AutoResizeImage(image: imageProvider, fit: BoxFit.contain),
             ),
           ),
         ],
