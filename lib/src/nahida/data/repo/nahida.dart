@@ -17,6 +17,15 @@ abstract class NahidaliveAPIImpl implements NahidaliveAPI {
   }) = _NahidaliveAPIImpl;
 
   @override
+  @POST('/api/gimme/{uuid}')
+  @FormUrlEncoded()
+  Future<NahidaliveDownloadUrlElement> downloadUuid({
+    @Path('uuid') required final String uuid,
+    @Field('cftoken') required final String turnstile,
+    @Field('password') final String? pw,
+  });
+
+  @override
   @GET('/api/hello/{uuid}')
   Future<NahidaliveElement> fetchNahidaliveElement({
     @Path('uuid') required final String uuid,
@@ -28,14 +37,5 @@ abstract class NahidaliveAPIImpl implements NahidaliveAPI {
     @Query('p') required final int pageNum,
     @Header('Authorization') required final String authKey,
     @Query('ps') final int pageSize = 100,
-  });
-
-  @override
-  @POST('/api/gimme/{uuid}')
-  @FormUrlEncoded()
-  Future<NahidaliveDownloadUrlElement> downloadUuid({
-    @Path('uuid') required final String uuid,
-    @Field('cftoken') required final String turnstile,
-    @Field('password') final String? pw,
   });
 }
