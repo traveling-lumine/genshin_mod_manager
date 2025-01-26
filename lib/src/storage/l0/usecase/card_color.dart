@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
+
+import '../api/persistent_storage.dart';
 import '../constants.dart';
-import '../repo/persistent_storage.dart';
 
 Color initializeCardColorUseCase(
   final PersistentStorage? repository, {

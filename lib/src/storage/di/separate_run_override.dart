@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../domain/usecase/separate_run.dart';
+import '../l0/usecase/separate_run.dart';
 import 'current_target_game.dart';
 import 'storage.dart';
 

@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../domain/entity/column_strategy.dart';
-import '../domain/usecase/column_strategy.dart';
+import '../l0/entity/column_strategy.dart';
+import '../l0/usecase/column_strategy.dart';
 import 'storage.dart';
 
 part 'column_strategy.g.dart';

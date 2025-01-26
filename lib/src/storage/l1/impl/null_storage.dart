@@ -1,4 +1,4 @@
-import '../../domain/repo/persistent_storage.dart';
+import '../../l0/api/persistent_storage.dart';
 
 class NullSharedPreferenceStorage implements PersistentStorage {
   @override

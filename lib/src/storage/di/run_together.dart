@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../domain/usecase/run_together.dart';
+import '../l0/usecase/run_together.dart';
 import 'storage.dart';
 import 'value_settable.dart';
 

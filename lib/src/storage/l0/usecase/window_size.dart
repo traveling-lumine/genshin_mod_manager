@@ -1,7 +1,7 @@
 import 'dart:ui';
 
+import '../api/persistent_storage.dart';
 import '../constants.dart';
-import '../repo/persistent_storage.dart';
 
 final windowWidthKey = StorageAccessKey.windowWidth.name;
 final windowHeightKey = StorageAccessKey.windowHeight.name;

@@ -1,6 +1,6 @@
 import '../constants.dart';
 import '../entity/column_strategy.dart';
-import '../repo/persistent_storage.dart' as s;
+import '../api/persistent_storage.dart' as s;
 
 ColumnStrategyEnum initializeColumnStrategyUseCase(
   final s.PersistentStorage? storage,

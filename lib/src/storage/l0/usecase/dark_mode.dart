@@ -1,5 +1,5 @@
 import '../constants.dart';
-import '../repo/persistent_storage.dart';
+import '../api/persistent_storage.dart';
 
 final darkModeKey = StorageAccessKey.darkMode.name;
 const darkModeDefault = true;

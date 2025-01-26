@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../storage/di/storage.dart';
-import '../../storage/domain/usecase/ini_editor_arg.dart';
+import '../../storage/l0/usecase/ini_editor_arg.dart';
 import '../repo/fs_interface.dart';
 
 part 'fs_interface.g.dart';

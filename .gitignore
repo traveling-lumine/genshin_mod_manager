@@ -57,3 +57,4 @@ app.*.map.json
 
 # test
 /junit.xml
+/main.py

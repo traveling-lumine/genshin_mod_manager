@@ -1,10 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/repo/null_storage.dart';
-import '../data/repo/sharedpreference_storage.dart';
-import '../domain/repo/persistent_storage.dart' as s;
-import '../domain/usecase/shared_storage.dart';
+import '../l1/impl/null_storage.dart';
+import '../l1/impl/sharedpreference_storage.dart';
+import '../l0/api/persistent_storage.dart' as s;
+import '../l0/usecase/shared_storage.dart';
 
 part 'storage.g.dart';
 

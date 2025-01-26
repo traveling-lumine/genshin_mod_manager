@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genshin_mod_manager/src/storage/data/repo/sharedpreference_storage.dart';
+import 'package:genshin_mod_manager/src/storage/l1/impl/sharedpreference_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
