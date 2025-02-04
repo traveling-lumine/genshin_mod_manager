@@ -13,7 +13,8 @@ part 'nahida_page_result.g.dart';
 class NahidaPageQueryResult with _$NahidaPageQueryResult {
   const factory NahidaPageQueryResult({
     required final bool success,
-    required final NahidaPageResult data,
+    final NahidaPageResult? data,
+    final String? error,
   }) = _NahidaPageQueryResult;
 
   factory NahidaPageQueryResult.fromJson(final Map<String, dynamic> json) =>

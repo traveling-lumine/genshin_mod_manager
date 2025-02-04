@@ -32,7 +32,7 @@ void main() {
   });
   test('Fetch single', () async {
     final result =
-        (await api.getNahidaElementPage(pageNum: 1, authKey: Env.val8)).data;
+        (await api.getNahidaElementPage(pageNum: 1, authKey: Env.val8)).data!;
     expect(result.elements, isNotEmpty);
     final singleUuid = result.elements.first.uuid;
     final singleResult = await api.getNahidaElement(uuid: singleUuid);

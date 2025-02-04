@@ -46,7 +46,7 @@ class NahidaRepoImpl implements NahidaRepository {
       authKey: Env.val8,
       pageSize: pageSize,
     );
-    return nahidaElementPage.data.elements;
+    return nahidaElementPage.data!.elements;
   }
 
   @override
