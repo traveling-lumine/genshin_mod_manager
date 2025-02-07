@@ -24,7 +24,7 @@ class AutoResizeImage extends StatefulWidget {
 }
 
 class _AutoResizeImageState extends State<AutoResizeImage> {
-  double? _imageAspectRatio;
+  double _imageAspectRatio = 1;
 
   @override
   void initState() {
@@ -32,51 +32,47 @@ class _AutoResizeImageState extends State<AutoResizeImage> {
     widget.image.resolve(ImageConfiguration.empty).addListener(
       ImageStreamListener((final info, final _) {
         final p.Image(:width, :height) = info.image;
-        setState(() => _imageAspectRatio = width / height);
+        if (mounted) {
+          setState(() => _imageAspectRatio = width / height);
+        }
       }),
     );
   }
 
   @override
-  Widget build(final BuildContext context) {
-    final imageAspectRatio = _imageAspectRatio;
-    if (imageAspectRatio == null) {
-      return const Center(child: ProgressRing());
-    }
-    return LayoutBuilder(
-      builder: (final context, final constraints) {
-        final candidateWidth = constraints.maxWidth.ceil();
-        final candidateHeight = constraints.maxHeight.ceil();
-        final candidateAspectRatio = candidateWidth / candidateHeight;
+  Widget build(final BuildContext context) => LayoutBuilder(
+        builder: (final context, final constraints) {
+          final candidateWidth = constraints.maxWidth.ceil();
+          final candidateHeight = constraints.maxHeight.ceil();
+          final candidateAspectRatio = candidateWidth / candidateHeight;
 
-        const ceilConstant = 16;
-        final cacheWidth = imageAspectRatio < candidateAspectRatio
-            ? null
-            : _ceilToNextMultiple(candidateWidth, ceilConstant);
-        final cacheHeight = imageAspectRatio < candidateAspectRatio
-            ? _ceilToNextMultiple(candidateHeight, ceilConstant)
-            : null;
+          const ceilConstant = 16;
+          final cacheWidth = _imageAspectRatio < candidateAspectRatio
+              ? null
+              : _ceilToNextMultiple(candidateWidth, ceilConstant);
+          final cacheHeight = _imageAspectRatio < candidateAspectRatio
+              ? _ceilToNextMultiple(candidateHeight, ceilConstant)
+              : null;
 
-        return HookBuilder(
-          builder: (final context) {
-            final debouncedWidth = useEagerDebounced(cacheWidth);
-            final debouncedHeight = useEagerDebounced(cacheHeight);
+          return HookBuilder(
+            builder: (final context) {
+              final debouncedWidth = useEagerDebounced(cacheWidth);
+              final debouncedHeight = useEagerDebounced(cacheHeight);
 
-            final resizeIfNeeded = ResizeImage.resizeIfNeeded(
-              debouncedWidth,
-              debouncedHeight,
-              widget.image,
-            );
+              final resizeIfNeeded = ResizeImage.resizeIfNeeded(
+                debouncedWidth,
+                debouncedHeight,
+                widget.image,
+              );
 
-            return Image(
-              image: resizeIfNeeded,
-              fit: widget.fit,
-            );
-          },
-        );
-      },
-    );
-  }
+              return Image(
+                image: resizeIfNeeded,
+                fit: widget.fit,
+              );
+            },
+          );
+        },
+      );
 }
 
 int _ceilToNextMultiple(final int value, final int multiple) =>

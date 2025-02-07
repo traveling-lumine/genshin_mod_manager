@@ -4,17 +4,12 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:image_size_getter/file_input.dart';
-import 'package:image_size_getter/image_size_getter.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../fs_interface/di/fs_watcher.dart';
+import '../../filesystem/l1/di/file_event.dart';
+import '../util/time_aware_resize_image.dart' as s;
 import '../util/debouncer.dart';
-import '../util/eager_debounce_hook.dart';
-import '../util/third_party/time_aware_resize_image.dart' as s;
-
-int _ceilToNextMultiple(final int value, final int multiple) =>
-    (value + multiple - 1) ~/ multiple * multiple;
+import 'auto_resize_image.dart';
 
 class ModPreviewImage extends StatefulHookConsumerWidget {
   const ModPreviewImage({
@@ -52,66 +47,27 @@ class _ModPreviewImageState extends ConsumerState<ModPreviewImage>
 
   @override
   Widget build(final BuildContext context) {
-    final eventStream = ref.watch(
-      fileEventWatcherProvider(widget.path, detectModifications: true),
+    final evtWatcher = ref.watch(
+      fileEventProvider(path: widget.path),
     );
 
-    final imageSize = useState<Size>(_getImageSize());
     useEffect(
       () {
-        final subscription = eventStream.listen((final event) {
+        final subscription = evtWatcher.stream.listen((final event) {
           _debouncer(() {
             if (File(widget.path).existsSync()) {
-              imageSize.value = _getImageSize();
               _setCurMTime();
             }
           });
         });
         return subscription.cancel;
       },
-      [eventStream],
+      [evtWatcher],
     );
 
-    return LayoutBuilder(
-      builder: (final context, final constraints) {
-        final candidateWidth = constraints.maxWidth.ceil();
-        final candidateHeight = constraints.maxHeight.ceil();
-        final candidateAspectRatio = candidateWidth / candidateHeight;
-
-        final imageSize_ = imageSize.value;
-        final imageWidth = imageSize_.width;
-        final imageHeight = imageSize_.height;
-        final imageAspectRatio = imageWidth / imageHeight;
-
-        const ceilConstant = 16;
-        final cacheWidth = imageAspectRatio < candidateAspectRatio
-            ? null
-            : _ceilToNextMultiple(candidateWidth, ceilConstant);
-        final cacheHeight = imageAspectRatio < candidateAspectRatio
-            ? _ceilToNextMultiple(candidateHeight, ceilConstant)
-            : null;
-
-        return HookBuilder(
-          builder: (final context) {
-            final debouncedWidth = useEagerDebounced(cacheWidth);
-            final debouncedHeight = useEagerDebounced(cacheHeight);
-
-            final resizeIfNeeded = s.ResizeImage.resizeIfNeeded(
-              debouncedWidth,
-              debouncedHeight,
-              FileImage(File(widget.path)),
-              _curMTime,
-            );
-
-            return Image(
-              image: resizeIfNeeded,
-              key: ValueKey(_curMTime),
-              fit: widget.fit,
-              frameBuilder: widget.frameBuilder,
-            );
-          },
-        );
-      },
+    return AutoResizeImage(
+      image: s.TimeAwareImage(FileImage(File(widget.path)), mTime: _curMTime),
+      fit: widget.fit,
     );
   }
 
@@ -147,13 +103,17 @@ class _ModPreviewImageState extends ConsumerState<ModPreviewImage>
     _setCurMTime();
   }
 
-  Size _getImageSize() =>
-      ImageSizeGetter.getSizeResult(FileInput(File(widget.path))).size;
-
   int _getMTime() =>
       File(widget.path).lastModifiedSync().microsecondsSinceEpoch;
 
   void _setCurMTime() {
-    setState(() => _curMTime = _getMTime());
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      if (File(widget.path).existsSync()) {
+        _curMTime = _getMTime();
+      }
+    });
   }
 }

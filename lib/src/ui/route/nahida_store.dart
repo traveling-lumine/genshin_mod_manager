@@ -8,12 +8,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
+import '../../filesystem/l0/entity/mod_category.dart';
+import '../../filesystem/l1/di/categories.dart';
 import '../../l10n/app_localizations.dart';
+import '../../nahida/l1/di/nahida_repo.dart';
 import '../../nahida/l0/entity/nahida_element.dart';
 import '../../nahida/l0/usecase/get_element_page.dart';
-import '../../nahida/l1/di/nahida_repo.dart';
-import '../../structure/di/categories.dart';
-import '../../structure/entity/mod_category.dart';
 import '../constants.dart';
 import '../util/debouncer.dart';
 import '../util/tag_parser.dart';
@@ -32,7 +32,7 @@ class NahidaStoreRoute extends HookConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     ref.listen(categoriesProvider, (final previous, final next) {
-      final isIn = next.any((final e) => e.name == categoryName);
+      final isIn = next.requireValue.any((final e) => e.name == categoryName);
       if (!isIn) {
         context.goNamed(RouteNames.home.name);
       }
@@ -53,6 +53,7 @@ class NahidaStoreRoute extends HookConsumerWidget {
 
     final initCategory = ref
         .watch(categoriesProvider)
+        .requireValue
         .firstWhere((final e) => e.name == categoryName);
 
     final category = useState(initCategory);
@@ -65,6 +66,7 @@ class NahidaStoreRoute extends HookConsumerWidget {
               value: category.value,
               items: ref
                   .watch(categoriesProvider)
+                  .requireValue
                   .map(
                     (final e) => ComboBoxItem(value: e, child: Text(e.name)),
                   )

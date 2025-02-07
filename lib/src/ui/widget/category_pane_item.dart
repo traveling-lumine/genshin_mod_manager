@@ -5,12 +5,13 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../fs_interface/di/fs_watcher.dart';
+import '../../filesystem/l0/entity/mod.dart';
+import '../../filesystem/l0/entity/mod_category.dart';
+import '../../filesystem/l0/usecase/move_dir.dart';
+import '../../filesystem/l1/di/fs_watcher.dart';
+import '../../fs_interface/helper/path_op_string.dart';
 import '../../storage/di/folder_icon.dart';
 import '../../storage/di/use_paimon.dart';
-import '../../structure/entity/mod.dart';
-import '../../structure/entity/mod_category.dart';
-import '../../structure/usecase/move_mod.dart';
 import '../util/display_infobar.dart';
 import 'category_drop_target.dart';
 import 'fade_in.dart';
@@ -94,7 +95,10 @@ class FolderPaneItem extends PaneItem {
     final DragTargetDetails<Mod> details,
   ) {
     try {
-      moveModUseCase(category: category, mod: details.data);
+      moveDirUseCase(
+        Directory(details.data.path),
+        category.path.pJoin(details.data.path.pBasename),
+      );
     } on Exception catch (e) {
       _showMoveErrorInfoBar(context, e);
       return;
@@ -139,18 +143,27 @@ class FolderPaneItem extends PaneItem {
         child: Consumer(
           builder: (final context, final ref, final child) {
             final imageFile = ref.watch(folderIconPathProvider(name));
-            return AspectRatio(
-              aspectRatio: 1,
-              child: imageFile == null
-                  ? Consumer(
-                      builder: (final context, final ref, final child) =>
-                          Image.asset(
-                        ref.watch(paimonIconProvider)
-                            ? 'images/app_icon.ico'
-                            : 'images/idk_icon.png',
-                      ),
-                    )
-                  : Image.file(File(imageFile), fit: BoxFit.contain),
+            return StreamBuilder(
+              stream: imageFile.stream,
+              builder: (final context, final snapshot) {
+                if (snapshot.hasError && !snapshot.hasData) {
+                  return const Icon(FluentIcons.folder_open);
+                }
+                final imagePath = snapshot.data;
+                return AspectRatio(
+                  aspectRatio: 1,
+                  child: imagePath == null
+                      ? Consumer(
+                          builder: (final context, final ref, final child) =>
+                              Image.asset(
+                            ref.watch(paimonIconProvider)
+                                ? 'images/app_icon.ico'
+                                : 'images/idk_icon.png',
+                          ),
+                        )
+                      : Image.file(File(imagePath), fit: BoxFit.contain),
+                );
+              },
             );
           },
         ),

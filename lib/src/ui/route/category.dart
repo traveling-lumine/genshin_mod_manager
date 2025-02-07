@@ -8,15 +8,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
-import 'package:window_manager/window_manager.dart';
 
-import '../../fs_interface/di/fs_watcher.dart';
-import '../../fs_interface/usecase/open_folder.dart';
+import '../../filesystem/l0/entity/mod.dart';
+import '../../filesystem/l0/entity/mod_category.dart';
+import '../../filesystem/l0/usecase/open_folder.dart';
+import '../../filesystem/l1/di/categories.dart';
+import '../../filesystem/l1/di/mods_in_category.dart';
 import '../../storage/di/column_strategy.dart';
-import '../../structure/di/categories.dart';
-import '../../structure/di/mods.dart';
-import '../../structure/entity/mod.dart';
-import '../../structure/entity/mod_category.dart';
 import '../constants.dart';
 import '../widget/category_drop_target.dart';
 import '../widget/intrinsic_command_bar.dart';
@@ -34,7 +32,6 @@ import '../widget/third_party/flutter/sliver_grid_delegates/min_extent_delegate.
 
 class CategoryRoute extends StatefulHookConsumerWidget {
   const CategoryRoute({required this.categoryName, super.key});
-
   static const _mainAxisExtent = 400.0;
   static const _mainAxisSpacing = 8.0;
 
@@ -51,61 +48,14 @@ class CategoryRoute extends StatefulHookConsumerWidget {
   }
 }
 
-class _CategoryRouteState extends ConsumerState<CategoryRoute>
-    with WindowListener {
+class _CategoryRouteState extends ConsumerState<CategoryRoute> {
   ScrollController? scrollController;
-  ModCategory? _category;
-
-  @override
-  void initState() {
-    super.initState();
-    WindowManager.instance.addListener(this);
-  }
-
-  @override
-  void dispose() {
-    WindowManager.instance.removeListener(this);
-    super.dispose();
-  }
-
-  @override
-  void onWindowBlur() {
-    super.onWindowBlur();
-    final category = _category;
-    if (category == null) {
-      return;
-    }
-    ref
-        .read(
-          directoryEventWatcherProvider(
-            category.path,
-            detectModifications: true,
-          ).notifier,
-        )
-        .pause();
-  }
-
-  @override
-  void onWindowFocus() {
-    super.onWindowFocus();
-    final category = _category;
-    if (category == null) {
-      return;
-    }
-    ref
-      ..invalidate(
-        directoryEventWatcherProvider(
-          category.path,
-          detectModifications: true,
-        ),
-      )
-      ..invalidate(modsInCategoryProvider(category));
-  }
 
   @override
   Widget build(final BuildContext context) {
     ref.listen(categoriesProvider, (final previous, final next) {
-      final isIn = next.any((final e) => e.name == widget.categoryName);
+      final isIn =
+          next.requireValue.any((final e) => e.name == widget.categoryName);
       if (!isIn) {
         context.goNamed(RouteNames.home.name);
       }
@@ -113,13 +63,12 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute>
 
     final category = ref
         .watch(categoriesProvider)
+        .requireValue
         .firstWhereOrNull((final e) => e.name == widget.categoryName);
 
     if (category == null) {
       return const SizedBox.shrink();
     }
-
-    _category = category;
 
     final sliverGridDelegate = ref.watch(columnStrategyProvider).when(
           fixedCount: (final numChildren) =>
@@ -154,6 +103,68 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute>
           sliverGridDelegate,
         ),
         content: _buildContent(category, sliverGridDelegate),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('categoryName', widget.categoryName))
+      ..add(
+        DiagnosticsProperty<ScrollController?>(
+          'scrollController',
+          scrollController,
+        ),
+      );
+  }
+
+  Widget _buildContent(
+    final ModCategory category,
+    final CrossAxisAwareDelegate sliverGridDelegate,
+  ) =>
+      ThickScrollbar(
+        child: Consumer(
+          builder: (final context, final ref, final child) {
+            final data = ref.watch(modsInCategoryProvider(category));
+            return StreamBuilder(
+              stream: data.mods,
+              builder: (final context, final snapshot) {
+                if (snapshot.hasData) {
+                  final data = snapshot.requireData;
+                  return _buildData(data, sliverGridDelegate);
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: ProgressRing());
+                }
+                return const Center(child: Text('Error loading mods'));
+              },
+            );
+          },
+        ),
+      );
+
+  Widget _buildData(
+    final List<Mod> data,
+    final CrossAxisAwareDelegate sliverGridDelegate,
+  ) {
+    final children = data.map((final e) => ModCard(mod: e)).toList();
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: DynMouseScroll(
+        builder: (final context, final scrollController, final scrollPhysics) {
+          this.scrollController = scrollController;
+          return GridView.builder(
+            controller: scrollController,
+            physics: scrollPhysics,
+            padding: const EdgeInsets.all(8),
+            gridDelegate: sliverGridDelegate,
+            itemCount: children.length,
+            itemBuilder: (final context, final index) =>
+                RevertScrollbar(child: children[index]),
+          );
+        },
       ),
     );
   }
@@ -201,76 +212,51 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute>
     final ModCategory category,
     final CrossAxisAwareDelegate sliverGridDelegate,
   ) =>
-      Consumer(
-        builder: (final context, final ref, final child) {
-          final data = ref.watch(modsInCategoryProvider(category));
-          final items = data.indexed
-              .map(
-                (final e) => AutoSuggestBoxItem(
-                  value: e.$2.displayName,
-                  label: e.$2.displayName,
-                  onSelected: () {
-                    _moveTo(e.$1, sliverGridDelegate);
-                  },
-                ),
-              )
-              .toList();
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: AutoSuggestBox(
-              items: items,
-              trailingIcon: const Icon(FluentIcons.search),
-              onSubmissionFailed: (final text) {
-                if (text.isEmpty) {
-                  return;
-                }
-                final index = data.indexWhere((final e) {
-                  final name = e.displayName.toLowerCase();
-                  return name.startsWith(text.toLowerCase());
-                });
-                _moveTo(index, sliverGridDelegate);
-              },
-            ),
-          );
-        },
-      );
-
-  Widget _buildContent(
-    final ModCategory category,
-    final CrossAxisAwareDelegate sliverGridDelegate,
-  ) =>
-      ThickScrollbar(
+      Padding(
+        padding: const EdgeInsets.only(right: 8),
         child: Consumer(
-          builder: (final context, final ref, final child) => _buildData(
-            ref.watch(modsInCategoryProvider(category)),
-            sliverGridDelegate,
-          ),
+          builder: (final context, final ref, final child) {
+            final data = ref.watch(modsInCategoryProvider(category));
+            return StreamBuilder(
+              stream: data.mods,
+              builder: (final context, final snapshot) {
+                if (snapshot.hasData) {
+                  final data = snapshot.requireData;
+                  final items = data.indexed
+                      .map(
+                        (final e) => AutoSuggestBoxItem(
+                          value: e.$2.displayName,
+                          label: e.$2.displayName,
+                          onSelected: () {
+                            _moveTo(e.$1, sliverGridDelegate);
+                          },
+                        ),
+                      )
+                      .toList();
+                  return AutoSuggestBox(
+                    items: items,
+                    trailingIcon: const Icon(FluentIcons.search),
+                    onSubmissionFailed: (final text) {
+                      if (text.isEmpty) {
+                        return;
+                      }
+                      final index = data.indexWhere((final e) {
+                        final name = e.displayName.toLowerCase();
+                        return name.startsWith(text.toLowerCase());
+                      });
+                      _moveTo(index, sliverGridDelegate);
+                    },
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: ProgressRing());
+                }
+                return const Center(child: Text('Error loading mods'));
+              },
+            );
+          },
         ),
       );
-
-  Widget _buildData(
-    final List<Mod> data,
-    final CrossAxisAwareDelegate sliverGridDelegate,
-  ) {
-    final children = data.map((final e) => ModCard(mod: e)).toList();
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      child: DynMouseScroll(
-        builder: (final context, final scrollController, final scrollPhysics) {
-          this.scrollController = scrollController;
-          return GridView.builder(
-            controller: scrollController,
-            physics: scrollPhysics,
-            padding: const EdgeInsets.all(8),
-            gridDelegate: sliverGridDelegate,
-            itemCount: children.length,
-            itemBuilder: (final context, final index) =>
-                RevertScrollbar(child: children[index]),
-          );
-        },
-      ),
-    );
-  }
 
   void _moveTo(
     final int index,
@@ -293,10 +279,6 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute>
     );
   }
 
-  Future<void> _onFolderOpen(final ModCategory category) async {
-    await openFolderUseCase(category.path);
-  }
-
   void _onDownloadPressed(final BuildContext context) {
     unawaited(
       context.pushNamed(
@@ -306,16 +288,7 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute>
     );
   }
 
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(StringProperty('categoryName', widget.categoryName))
-      ..add(
-        DiagnosticsProperty<ScrollController?>(
-          'scrollController',
-          scrollController,
-        ),
-      );
+  Future<void> _onFolderOpen(final ModCategory category) async {
+    await openFolderUseCase(category.path);
   }
 }

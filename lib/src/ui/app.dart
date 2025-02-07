@@ -37,15 +37,6 @@ class _MyAppState extends ConsumerState<MyApp> {
         path: '/firstpage',
         builder: (final context, final state) => const FirstRoute(),
       ),
-      GoRoute(
-        name: RouteNames.categoryHero.name,
-        path: '/categoryHero/:${RouteParams.categoryHeroTag.name}',
-        pageBuilder: (final context, final state) {
-          final heroTag =
-              state.pathParameters[RouteParams.categoryHeroTag.name]!;
-          return heroPage(context, heroTag);
-        },
-      ),
       ShellRoute(
         builder: (final context, final state, final child) =>
             HomeShell(child: child),
@@ -55,6 +46,15 @@ class _MyAppState extends ConsumerState<MyApp> {
             path: '/',
             builder: (final context, final state) => const WelcomeRoute(),
             routes: [
+              GoRoute(
+                name: RouteNames.categoryHero.name,
+                path: '/categoryHero/:${RouteParams.categoryHeroTag.name}',
+                pageBuilder: (final context, final state) {
+                  final heroTag =
+                      state.pathParameters[RouteParams.categoryHeroTag.name]!;
+                  return heroPage(context, heroTag);
+                },
+              ),
               GoRoute(
                 name: RouteNames.setting.name,
                 path: 'setting',

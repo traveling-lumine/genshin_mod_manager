@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../fs_interface/entity/setting_data.dart';
+import '../../filesystem/l0/entity/setting_data.dart';
 import '../l0/usecase/move_on_drag.dart';
 import 'storage.dart';
 import 'value_settable.dart';

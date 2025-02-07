@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:rxdart/rxdart.dart';
+
 import 'path_op_string.dart';
 
 List<String> getUnderSync<T extends FileSystemEntity>(final String path) {
@@ -9,6 +11,18 @@ List<String> getUnderSync<T extends FileSystemEntity>(final String path) {
   }
   final res =
       dir.listSync().whereType<T>().map((final event) => event.path).toList();
+  return res;
+}
+
+Future<List<String>> getUnder<T extends FileSystemEntity>(
+  final String path,
+) async {
+  final dir = Directory(path);
+  if (!dir.existsSync()) {
+    return [];
+  }
+  final res =
+      dir.list().whereType<T>().map((final event) => event.path).toList();
   return res;
 }
 

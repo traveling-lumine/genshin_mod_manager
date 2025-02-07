@@ -11,6 +11,7 @@ import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../app_version/di/is_outdated.dart';
+import '../../filesystem/l1/di/categories.dart';
 import '../../fs_interface/helper/path_op_string.dart';
 import '../../l10n/app_localizations.dart';
 import '../../storage/di/current_target_game.dart';
@@ -20,7 +21,6 @@ import '../../storage/di/games_list.dart';
 import '../../storage/di/run_together.dart';
 import '../../storage/di/separate_run_override.dart';
 import '../../storage/di/window_size.dart';
-import '../../structure/di/categories.dart';
 import '../constants.dart';
 import '../util/display_infobar.dart';
 import '../widget/appbar.dart';
@@ -30,6 +30,7 @@ import '../widget/protocol_handler.dart';
 import '../widget/run_pane.dart';
 import '../widget/third_party/fluent_ui/auto_suggest_box.dart';
 import '../widget/update_popup.dart';
+import '../widget/window_listener.dart';
 
 class HomeShell extends StatefulHookConsumerWidget {
   const HomeShell({required this.child, super.key});
@@ -56,19 +57,21 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     final game = ref.watch(targetGameProvider);
     final updateMarker =
         (ref.watch(isOutdatedProvider).valueOrNull ?? false) ? 'update' : '';
-    return UpdatePopup(
-      child: DownloadQueue(
-        child: ProtocolHandlerWidget(
-          runBothCallback: _runBoth,
-          runLauncherCallback: _runLauncher,
-          runMigotoCallback: _runMigoto,
-          child: NavigationView(
-            appBar: getAppbar(
-              AppLocalizations.of(context)!.modManager(game, updateMarker),
-              presetControl: true,
+    return WindowListenerWidget(
+      child: UpdatePopup(
+        child: DownloadQueue(
+          child: ProtocolHandlerWidget(
+            runBothCallback: _runBoth,
+            runLauncherCallback: _runLauncher,
+            runMigotoCallback: _runMigoto,
+            child: NavigationView(
+              appBar: getAppbar(
+                AppLocalizations.of(context)!.modManager(game, updateMarker),
+                presetControl: true,
+              ),
+              pane: _buildPane(),
+              paneBodyBuilder: (final item, final body) => widget.child,
             ),
-            pane: _buildPane(),
-            paneBodyBuilder: (final item, final body) => widget.child,
           ),
         ),
       ),
@@ -159,19 +162,21 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   NavigationPane _buildPane() {
     final controller = useScrollController();
-    final items = ref
-        .watch(categoriesProvider)
-        .map(
-          (final e) => FolderPaneItem(
-            category: e,
-            key: Key('/${RouteNames.category.name}/${e.name}'),
-            onTap: () => context.goNamed(
-              RouteNames.category.name,
-              pathParameters: {RouteParams.category.name: e.name},
-            ),
-          ),
-        )
-        .toList();
+    final valueOrNull2 = ref.watch(categoriesProvider).valueOrNull;
+    final items = valueOrNull2 == null
+        ? <FolderPaneItem>[]
+        : valueOrNull2
+            .map(
+              (final e) => FolderPaneItem(
+                category: e,
+                key: Key('/${RouteNames.category.name}/${e.name}'),
+                onTap: () => context.goNamed(
+                  RouteNames.category.name,
+                  pathParameters: {RouteParams.category.name: e.name},
+                ),
+              ),
+            )
+            .toList();
     final footerItems = [
       PaneItemSeparator(),
       ..._buildPaneItemActions(),

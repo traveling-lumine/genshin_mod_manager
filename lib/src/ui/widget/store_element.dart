@@ -8,12 +8,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../filesystem/l0/entity/mod_category.dart';
 import '../../l10n/app_localizations.dart';
 import '../../nahida/l0/di/nahida_download_queue.dart';
+import '../../nahida/l1/di/nahida_repo.dart';
 import '../../nahida/l0/entity/nahida_element.dart';
 import '../../nahida/l0/usecase/download_url.dart';
-import '../../nahida/l1/di/nahida_repo.dart';
-import '../../structure/entity/mod_category.dart';
 import '../util/open_url.dart';
 import 'auto_resize_image.dart';
 import 'intrinsic_command_bar.dart';

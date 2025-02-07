@@ -1,4 +1,4 @@
-import '../api/nahida.dart';
+import '../api/nahida_repo.dart';
 import '../entity/nahida_element.dart';
 
 Future<NahidaliveElement> getNahidaElementUseCase({

@@ -1,6 +1,6 @@
-import '../../l0/entity/download_element.dart';
 import '../entity/nahida_page_result.dart';
 import '../entity/nahida_single_fetch_result.dart';
+import '../../l0/entity/download_element.dart';
 
 abstract interface class NahidaAPI {
   Future<NahidaSingleFetchResult> getNahidaElement({

@@ -7,14 +7,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../filesystem/l0/entity/mod_category.dart';
+import '../../filesystem/l1/di/categories.dart';
 import '../../nahida/l0/di/nahida_download_queue.dart';
+import '../../nahida/l1/di/nahida_repo.dart';
 import '../../nahida/l0/entity/nahida_element.dart';
 import '../../nahida/l0/usecase/download_url.dart';
 import '../../nahida/l0/usecase/get_element.dart';
-import '../../nahida/l1/di/nahida_repo.dart';
 import '../../storage/di/exe_arg.dart';
-import '../../structure/di/categories.dart';
-import '../../structure/entity/mod_category.dart';
 import 'turnstile_dialog.dart';
 
 String _convertUuid(final String uuid) {
@@ -130,6 +130,7 @@ class ProtocolHandlerWidget extends ConsumerWidget {
     final categoryName = GoRouterState.of(context).pathParameters['category'];
     final category = ref
         .read(categoriesProvider)
+        .requireValue
         .firstWhereOrNull((final e) => e.name == categoryName);
 
     _showProtocolConfirmDialog(context, url, rawUuid, category, password);
@@ -215,7 +216,7 @@ class _ProtocolDialog extends HookConsumerWidget {
           else
             const Text('Fetching element...'),
           const SizedBox(height: 10),
-          _buildCategorySelector(currentSelected, categories),
+          _buildCategorySelector(currentSelected, categories.requireValue),
         ],
       ),
       actions: [

@@ -1,5 +1,5 @@
-import '../constants.dart';
 import '../api/persistent_storage.dart';
+import '../constants.dart';
 
 String getKey(final String currentGame) =>
     '$currentGame${StorageAccessKey.separateRunSuffix.name}';

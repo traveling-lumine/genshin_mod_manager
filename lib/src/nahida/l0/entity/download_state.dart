@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../structure/entity/mod_category.dart';
+import '../../../filesystem/l0/entity/mod_category.dart';
 import 'nahida_element.dart';
 
 part 'download_state.freezed.dart';

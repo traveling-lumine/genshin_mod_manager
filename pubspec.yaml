@@ -38,6 +38,7 @@ dependencies:
   protocol_handler: ^0.2.0
   retrofit: ^4.4.2
   riverpod_annotation: ^2.6.1
+  rxdart: ^0.28.0
   shared_preferences: ^2.3.5
   smooth_scroll_multiplatform: ^1.0.8
   url_launcher: ^6.3.1

@@ -6,10 +6,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../filesystem/di/ini_widget.dart';
+import '../../filesystem/l0/entity/ini.dart';
 import '../../fs_interface/di/fs_interface.dart';
 import '../../fs_interface/helper/path_op_string.dart';
-import '../../structure/di/ini_widget.dart';
-import '../../structure/entity/ini.dart';
 
 class IniWidget extends ConsumerStatefulWidget {
   const IniWidget({required this.iniFile, super.key});
@@ -52,35 +52,39 @@ class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildIniHeader(widget.iniFile.path, ref),
-        ...iniSections
-            .where((final e) => e is! IniStatementVariable || e.numCycles > 1)
-            .map(
-              (final e) => switch (e) {
-                IniStatementSection(:final name) => Text(name),
-                IniStatementVariable(:final numCycles) =>
-                  Text('Cycles: $numCycles'),
-                IniStatementForward(
-                  :final section,
-                  :final lineNum,
-                  :final value
-                ) =>
-                  _buildForwardIniFieldEditor(
-                    section.iniFile,
-                    lineNum,
-                    value,
-                  ),
-                IniStatementBackward(
-                  :final section,
-                  :final lineNum,
-                  :final value
-                ) =>
-                  _buildBackwardIniFieldEditor(
-                    section.iniFile,
-                    lineNum,
-                    value,
-                  ),
-              },
-            ),
+        ...iniSections.when(
+          data: (final data) => data
+              .where((final e) => e is! IniStatementVariable || e.numCycles > 1)
+              .map(
+                (final e) => switch (e) {
+                  IniStatementSection(:final name) => Text(name),
+                  IniStatementVariable(:final numCycles) =>
+                    Text('Cycles: $numCycles'),
+                  IniStatementForward(
+                    :final section,
+                    :final lineNum,
+                    :final value
+                  ) =>
+                    _buildForwardIniFieldEditor(
+                      section.iniFile,
+                      lineNum,
+                      value,
+                    ),
+                  IniStatementBackward(
+                    :final section,
+                    :final lineNum,
+                    :final value
+                  ) =>
+                    _buildBackwardIniFieldEditor(
+                      section.iniFile,
+                      lineNum,
+                      value,
+                    ),
+                },
+              ),
+          error: (final error, final _) => [Text('Error: $error')],
+          loading: () => [const Center(child: ProgressRing())],
+        ),
       ],
     );
   }

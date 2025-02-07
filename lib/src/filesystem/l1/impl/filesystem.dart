@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
+import 'package:rxdart/rxdart.dart';
 
 import '../../l0/api/filesystem.dart';
 import '../../l0/api/watcher.dart';
@@ -31,7 +32,7 @@ class FilesystemImpl implements Filesystem {
 
     // these streams will be closed when the path is released
     // ignore: close_sinks
-    final controller = StreamController<FileSystemEvent?>.broadcast();
+    final controller = BehaviorSubject<FileSystemEvent?>.seeded(null);
     // see above
     // ignore: cancel_subscriptions
     final subscription = Directory(path).watch().listen(controller.add);
@@ -59,11 +60,9 @@ class FilesystemImpl implements Filesystem {
     }
     _isPaused = true;
 
-    final futures = <Future<void>>[];
-    for (final path in _watchStream.values) {
-      futures.add(path.$2.cancel());
-    }
-    await Future.wait(futures);
+    await Future.wait(
+      _watchStream.values.map((final stream) async => stream.$2.cancel()),
+    );
   }
 
   @override
@@ -78,8 +77,14 @@ class FilesystemImpl implements Filesystem {
       if (stream == null) {
         continue;
       }
-      _watchStream[path] =
-          (stream.$1, Directory(path).watch().listen(stream.$1.add), stream.$3);
+      stream.$1.add(null); // send null to indicate that the stream is resumed
+      if (Directory(path).existsSync()) {
+        _watchStream[path] = (
+          stream.$1,
+          Directory(path).watch().listen(stream.$1.add),
+          stream.$3
+        );
+      }
     }
   }
 
@@ -96,19 +101,17 @@ class FilesystemImpl implements Filesystem {
   @override
   Watcher watchDirectory({
     required final String path,
-    required final void Function(FileSystemEvent? event) onEvent,
   }) {
-    // check path is dir
     if (!Directory(path).existsSync()) {
-      throw FileSystemException('Directory does not exist', path);
+      return FSSubscription(
+        stream: const Stream.empty(),
+        onCancel: () async {},
+      );
     }
     final stream = _getSwitchStream(path);
 
-    // FSSubscription will cancel the stream when it is canceled
-    // ignore: cancel_subscriptions
-    final subscription = stream.listen(onEvent);
     return FSSubscription(
-      wrappee: subscription,
+      stream: stream,
       onCancel: () async => _releaseSwitchStream(path),
     );
   }
@@ -116,27 +119,28 @@ class FilesystemImpl implements Filesystem {
   @override
   Watcher watchFile({
     required final String path,
-    required final void Function(FileSystemEvent? event) onEvent,
   }) {
-    // check path is file
     if (!File(path).existsSync()) {
-      throw FileSystemException('File does not exist', path);
+      return FSSubscription(
+        stream: const Stream.empty(),
+        onCancel: () async {},
+      );
     }
     final dirPath = File(path).parent.path;
     final stream = _getSwitchStream(dirPath);
 
-    // FSSubscription will cancel the stream when it is canceled
-    // ignore: cancel_subscriptions
-    final subscription = stream.listen((final event) {
-      if (event == null ||
-          p.equals(event.path, path) ||
-          event is FileSystemMoveEvent &&
-              p.equals(event.destination ?? '', path)) {
-        onEvent(event);
-      }
-    });
     return FSSubscription(
-      wrappee: subscription,
+      stream: stream.where(
+        (final event) {
+          if (event == null) {
+            return true;
+          }
+          if (event is FileSystemMoveEvent) {
+            return p.equals(event.destination ?? '', path);
+          }
+          return p.equals(event.path, path);
+        },
+      ),
       onCancel: () async => _releaseSwitchStream(dirPath),
     );
   }

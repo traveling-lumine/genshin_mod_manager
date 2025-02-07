@@ -1,5 +1,5 @@
-import '../constants.dart';
 import '../api/persistent_storage.dart';
+import '../constants.dart';
 
 final runTogetherKey = StorageAccessKey.runTogether.name;
 const runTogetherDefault = false;

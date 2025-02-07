@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
-import '../../l0/api/nahida.dart';
+import '../api/nahida_api.dart';
+import '../../l0/api/nahida_repo.dart';
 import '../../l0/entity/nahida_element.dart';
-import '../api/nahida.dart';
 import '../secrets.dart';
 
 class NahidaRepoImpl implements NahidaRepository {

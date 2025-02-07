@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:genshin_mod_manager/src/nahida/l0/di/nahida_download_queue.dart';
+import 'package:genshin_mod_manager/src/nahida/l1/di/nahida_repo.dart';
 import 'package:genshin_mod_manager/src/nahida/l0/entity/download_state.dart';
 import 'package:genshin_mod_manager/src/nahida/l0/entity/nahida_element.dart';
-import 'package:genshin_mod_manager/src/nahida/l1/di/nahida_repo.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() {

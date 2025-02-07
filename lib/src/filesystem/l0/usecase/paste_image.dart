@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:flutter_image_converter/flutter_image_converter.dart';
 
-import '../../structure/entity/mod.dart';
-import '../helper/path_op_string.dart';
-import '../repo/fs_interface.dart';
+import '../../../fs_interface/helper/path_op_string.dart';
+import '../../../fs_interface/repo/fs_interface.dart';
+import '../entity/mod.dart';
 
 Future<void> pasteImageUseCase(
   final FileSystemInterface fsInterface,

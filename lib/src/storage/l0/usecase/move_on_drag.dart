@@ -1,5 +1,5 @@
-import '../constants.dart';
 import '../api/persistent_storage.dart';
+import '../constants.dart';
 
 final moveOnDragKey = StorageAccessKey.moveOnDrag.name;
 const moveOnDragDefault = true;

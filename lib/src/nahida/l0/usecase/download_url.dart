@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 
+import '../../../filesystem/l0/entity/mod_category.dart';
 import '../../../mod_writer/data/mod_writer.dart';
-import '../../../structure/entity/mod_category.dart';
-import '../api/nahida.dart';
+import '../api/nahida_repo.dart';
 import '../api/stream.dart';
 import '../entity/download_state.dart';
 import '../entity/nahida_element.dart';

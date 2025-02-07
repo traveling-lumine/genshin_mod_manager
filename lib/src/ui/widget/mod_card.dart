@@ -7,20 +7,18 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'package:window_manager/window_manager.dart';
 
+import '../../filesystem/di/mod_card.dart';
+import '../../filesystem/l0/entity/ini.dart';
+import '../../filesystem/l0/entity/mod.dart';
+import '../../filesystem/l0/entity/mod_toggle_exceptions.dart';
+import '../../filesystem/l0/usecase/open_folder.dart';
+import '../../filesystem/l0/usecase/paste_image.dart';
 import '../../fs_interface/di/fs_interface.dart';
-import '../../fs_interface/di/fs_watcher.dart';
-import '../../fs_interface/entity/mod_toggle_exceptions.dart';
 import '../../fs_interface/helper/mod_switcher.dart';
 import '../../fs_interface/helper/path_op_string.dart';
-import '../../fs_interface/usecase/open_folder.dart';
-import '../../fs_interface/usecase/paste_image.dart';
 import '../../storage/di/card_color.dart';
 import '../../storage/di/game_config.dart';
-import '../../structure/di/mod_card.dart';
-import '../../structure/entity/ini.dart';
-import '../../structure/entity/mod.dart';
 import '../constants.dart';
 import '../util/display_infobar.dart';
 import '../util/show_prompt_dialog.dart';
@@ -41,7 +39,7 @@ class ModCard extends ConsumerStatefulWidget {
   }
 }
 
-class _ModCardState extends ConsumerState<ModCard> with WindowListener {
+class _ModCardState extends ConsumerState<ModCard> {
   static const _minIniSectionWidth = 165.0;
   final _contextController = FlyoutController();
   final _contextAttachKey = GlobalKey();
@@ -91,53 +89,25 @@ class _ModCardState extends ConsumerState<ModCard> with WindowListener {
     properties.add(DiagnosticsProperty<Mod>('mod', widget.mod));
   }
 
-  @override
-  void dispose() {
-    _contextController.dispose();
-    WindowManager.instance.removeListener(this);
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WindowManager.instance.addListener(this);
-  }
-
-  @override
-  void onWindowBlur() {
-    super.onWindowBlur();
-    ref
-        .read(
-          directoryEventWatcherProvider(
-            widget.mod.path,
-            detectModifications: true,
-          ).notifier,
-        )
-        .pause();
-  }
-
-  @override
-  void onWindowFocus() {
-    super.onWindowFocus();
-    ref
-      ..invalidate(
-        directoryEventWatcherProvider(
-          widget.mod.path,
-          detectModifications: true,
-        ),
-      )
-      ..invalidate(iniPathsProvider(widget.mod))
-      ..invalidate(modIconPathProvider(widget.mod));
-  }
-
   Widget _buildDesc() => Consumer(
         builder: (final context, final ref, final child) {
-          final preview = ref.watch(modIconPathProvider(widget.mod));
-          if (preview == null) {
-            return child!;
-          }
-          return _buildImageDesc(preview);
+          final preview = ref.watch(modPreviewPathProvider(widget.mod));
+          return StreamBuilder(
+            stream: preview.stream,
+            builder: (final context, final snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: ProgressRing());
+              }
+              if (snapshot.hasError && !snapshot.hasData) {
+                return const Text('Error loading preview');
+              }
+              final data = snapshot.data;
+              if (data == null) {
+                return child!;
+              }
+              return _buildImageDesc(data);
+            },
+          );
         },
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -154,15 +124,30 @@ class _ModCardState extends ConsumerState<ModCard> with WindowListener {
   Widget _buildFolderContent() => Consumer(
         builder: (final _, final ref, final child) {
           final iniPaths = ref.watch(iniPathsProvider(widget.mod));
-          final isEmpty = iniPaths.isEmpty;
-          return Row(
-            mainAxisAlignment: isEmpty
-                ? MainAxisAlignment.center
-                : MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(child: child!),
-              if (!isEmpty) _buildIni(iniPaths),
-            ],
+          return StreamBuilder(
+            stream: iniPaths.stream,
+            builder: (final context, final snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: ProgressRing());
+              }
+              if (snapshot.hasData) {
+                final data = snapshot.requireData;
+                final isEmpty = data.isEmpty;
+                return Row(
+                  mainAxisAlignment: isEmpty
+                      ? MainAxisAlignment.center
+                      : MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(child: child!),
+                    if (!isEmpty) _buildIni(data),
+                  ],
+                );
+              }
+              if (snapshot.hasError) {
+                return const Text('Error loading ini files');
+              }
+              return const Center(child: ProgressRing());
+            },
           );
         },
         child: Center(child: _buildDesc()),

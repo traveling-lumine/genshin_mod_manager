@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genshin_mod_manager/src/nahida/l0/entity/download_element.dart';
-import 'package:genshin_mod_manager/src/nahida/l0/entity/nahida_element.dart';
-import 'package:genshin_mod_manager/src/nahida/l1/api/nahida.dart';
 import 'package:genshin_mod_manager/src/nahida/l1/entity/nahida_page_result.dart';
 import 'package:genshin_mod_manager/src/nahida/l1/entity/nahida_single_fetch_result.dart';
-import 'package:genshin_mod_manager/src/nahida/l1/impl/nahida.dart';
+import 'package:genshin_mod_manager/src/nahida/l1/impl/nahida_repo.dart';
+import 'package:genshin_mod_manager/src/nahida/l1/api/nahida_api.dart';
+import 'package:genshin_mod_manager/src/nahida/l0/entity/download_element.dart';
+import 'package:genshin_mod_manager/src/nahida/l0/entity/nahida_element.dart';
 
 const _elem = NahidaliveElement(
   uuid: 'uuid',

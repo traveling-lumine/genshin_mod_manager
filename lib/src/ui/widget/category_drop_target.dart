@@ -6,10 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../fs_interface/entity/setting_data.dart';
-import '../../fs_interface/usecase/folder_drop.dart';
+import '../../filesystem/l0/entity/mod_category.dart';
+import '../../filesystem/l0/entity/setting_data.dart';
+import '../../filesystem/l0/usecase/folder_drop.dart';
 import '../../storage/di/move_on_drag.dart';
-import '../../structure/entity/mod_category.dart';
 import '../util/display_infobar.dart';
 import 'fade_in.dart';
 

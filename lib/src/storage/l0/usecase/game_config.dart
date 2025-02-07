@@ -1,6 +1,6 @@
+import '../api/persistent_storage.dart';
 import '../entity/game_config.dart';
 import '../entity/preset.dart';
-import '../api/persistent_storage.dart';
 
 /// Initializes the game configuration.
 GameConfig initializeGameConfigUseCase(

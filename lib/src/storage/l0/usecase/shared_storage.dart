@@ -1,6 +1,6 @@
 import '../../../fs_interface/helper/path_op_string.dart';
-import '../constants.dart';
 import '../api/persistent_storage.dart';
+import '../constants.dart';
 import 'game_config.dart';
 
 final configVersionKey = StorageAccessKey.configVersion.name;

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -27,16 +26,12 @@ void main() {
     });
     test('Watch', () async {
       final fs = FilesystemImpl();
-      final ctrl = StreamController<FileSystemEvent?>();
 
-      final stream = fs.watchDirectory(
-        path: 'parent/target',
-        onEvent: ctrl.add,
-      );
+      final stream = fs.watchDirectory(path: 'parent/target');
       File('parent/target/file').createSync();
 
       await expectLater(
-        ctrl.stream,
+        stream.stream,
         emitsInOrder(
           <Matcher>[
             isNull,
@@ -45,7 +40,6 @@ void main() {
         ),
       );
 
-      await ctrl.close();
       await stream.cancel();
       await fs.dispose();
     });
@@ -53,10 +47,7 @@ void main() {
       final file = File('parent/target/file')..createSync();
       final fs = FilesystemImpl();
       expect(
-        () => fs.watchDirectory(
-          path: file.path,
-          onEvent: (final event) {},
-        ),
+        () => fs.watchDirectory(path: file.path),
         throwsA(isA<FileSystemException>()),
       );
       await fs.dispose();
@@ -66,10 +57,7 @@ void main() {
       late Watcher stream;
       setUp(() {
         fs = FilesystemImpl();
-        stream = fs.watchDirectory(
-          path: 'parent/target',
-          onEvent: (final event) {},
-        );
+        stream = fs.watchDirectory(path: 'parent/target');
         expect(
           () => Directory('parent').renameSync('parent2'),
           throwsA(isA<FileSystemException>()),
@@ -113,15 +101,11 @@ void main() {
     });
     test('Watch', () async {
       final fs = FilesystemImpl();
-      final ctrl = StreamController<FileSystemEvent?>();
-      final stream = fs.watchFile(
-        path: 'parent/target',
-        onEvent: ctrl.add,
-      );
+      final stream = fs.watchFile(path: 'parent/target');
       File('parent/target').writeAsStringSync('content');
 
       await expectLater(
-        ctrl.stream,
+        stream.stream,
         emitsInOrder(
           <Matcher>[
             isNull,
@@ -130,46 +114,34 @@ void main() {
         ),
       );
 
-      await ctrl.close();
       await stream.cancel();
       await fs.dispose();
     });
     test('File watch rejects sibling changes', () async {
       final fs = FilesystemImpl();
-      final ctrl = StreamController<FileSystemEvent?>();
-      final stream = fs.watchFile(
-        path: 'parent/target',
-        onEvent: ctrl.add,
-      );
+      final stream = fs.watchFile(path: 'parent/target');
       File('parent/other').createSync();
 
       await expectLater(
-        ctrl.stream,
+        stream.stream,
         emitsInOrder(
-          <Matcher>[
-            isNull,
-          ],
+          <Matcher>[],
         ),
       );
 
-      await ctrl.close();
       await stream.cancel();
       await fs.dispose();
     });
     test('File watch receives move ', () async {
       final fs = FilesystemImpl();
-      final ctrl = StreamController<FileSystemEvent?>();
-      final stream = fs.watchFile(
-        path: 'parent/target',
-        onEvent: ctrl.add,
-      );
+      final stream = fs.watchFile(path: 'parent/target');
       File('parent/target').deleteSync();
       File('parent/target3')
         ..createSync()
         ..renameSync('parent/target');
 
       await expectLater(
-        ctrl.stream,
+        stream.stream,
         emitsInOrder(
           <Matcher>[
             isNull,
@@ -185,7 +157,6 @@ void main() {
         ),
       );
 
-      await ctrl.close();
       await stream.cancel();
       await fs.dispose();
     });
@@ -193,13 +164,37 @@ void main() {
       final dir = Directory('parent/target2')..createSync();
       final fs = FilesystemImpl();
       expect(
-        () => fs.watchFile(
-          path: dir.path,
-          onEvent: (final event) {},
-        ),
+        () => fs.watchFile(path: dir.path),
         throwsA(isA<FileSystemException>()),
       );
       await fs.dispose();
     });
+  });
+  test('multiple stream handle test', () async {
+    final pdir = Directory('parent')..createSync();
+    final wdir = Directory('parent/target')..createSync();
+    final wfile = File('parent/target/file')..createSync();
+    final fs = FilesystemImpl();
+    final stream1 = fs.watchDirectory(path: wdir.path);
+    final stream2 = fs.watchFile(path: wfile.path);
+
+    // moving parent should throw
+    expect(
+      () => pdir.renameSync('parent2'),
+      throwsA(isA<FileSystemException>()),
+    );
+
+    await Future.wait([
+      stream1.cancel(),
+      stream2.cancel(),
+    ]);
+
+    // moving parent should not throw
+    expect(
+      () => pdir.renameSync('parent2'),
+      returnsNormally,
+    );
+
+    await fs.dispose();
   });
 }
