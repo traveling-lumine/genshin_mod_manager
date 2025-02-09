@@ -2,7 +2,11 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart'
-    hide AutoSuggestBox, AutoSuggestBoxItem;
+    hide
+        AutoSuggestBox,
+        AutoSuggestBoxItem,
+        SliverGridDelegateWithFixedCrossAxisCount,
+        SliverGridDelegateWithMaxCrossAxisExtent;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -23,12 +27,9 @@ import '../widget/preset_control.dart';
 import '../widget/thick_scrollbar.dart';
 import '../widget/third_party/fluent_ui/auto_suggest_box.dart';
 import '../widget/third_party/flutter/sliver_grid_delegates/cross_axis_aware_delegate.dart';
-import '../widget/third_party/flutter/sliver_grid_delegates/fixed_count_delegate.dart'
-    as s;
-import '../widget/third_party/flutter/sliver_grid_delegates/max_extent_delegate.dart'
-    as s;
-import '../widget/third_party/flutter/sliver_grid_delegates/min_extent_delegate.dart'
-    as s;
+import '../widget/third_party/flutter/sliver_grid_delegates/fixed_count_delegate.dart';
+import '../widget/third_party/flutter/sliver_grid_delegates/max_extent_delegate.dart';
+import '../widget/third_party/flutter/sliver_grid_delegates/min_extent_delegate.dart';
 
 class CategoryRoute extends StatefulHookConsumerWidget {
   const CategoryRoute({required this.categoryName, super.key});
@@ -72,21 +73,19 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
 
     final sliverGridDelegate = ref.watch(columnStrategyProvider).when(
           fixedCount: (final numChildren) =>
-              s.SliverGridDelegateWithFixedCrossAxisCount(
+              SliverGridDelegateWithFixedCrossAxisCount(
             mainAxisExtent: CategoryRoute._mainAxisExtent,
             crossAxisCount: numChildren,
             crossAxisSpacing: CategoryRoute._mainAxisSpacing,
             mainAxisSpacing: CategoryRoute._mainAxisSpacing,
           ),
-          maxExtent: (final extent) =>
-              s.SliverGridDelegateWithMaxCrossAxisExtent(
+          maxExtent: (final extent) => SliverGridDelegateWithMaxCrossAxisExtent(
             mainAxisExtent: CategoryRoute._mainAxisExtent,
             maxCrossAxisExtent: extent.toDouble(),
             crossAxisSpacing: CategoryRoute._mainAxisSpacing,
             mainAxisSpacing: CategoryRoute._mainAxisSpacing,
           ),
-          minExtent: (final extent) =>
-              s.SliverGridDelegateWithMinCrossAxisExtent(
+          minExtent: (final extent) => SliverGridDelegateWithMinCrossAxisExtent(
             mainAxisExtent: CategoryRoute._mainAxisExtent,
             minCrossAxisExtent: extent.toDouble(),
             crossAxisSpacing: CategoryRoute._mainAxisSpacing,

@@ -16,12 +16,12 @@ class LoadingRoute extends HookConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    ref.listen(persistentStorageProvider, (final previous, final next) {
+    ref.listen(persistentRepoProvider, (final previous, final next) {
       if (next.hasValue) {
         _goToLanding(context, ref);
       }
     });
-    return ref.watch(persistentStorageProvider).when(
+    return ref.watch(persistentRepoProvider).when(
           data: (final data) => _buildData(data, ref),
           error: (final error, final stackTrace) => _buildError(error, ref),
           loading: _buildLoading,
@@ -52,13 +52,13 @@ class LoadingRoute extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Button(
-                onPressed: () => ref.invalidate(persistentStorageProvider),
+                onPressed: () => ref.invalidate(persistentRepoProvider),
                 child: const Text('Retry'),
               ),
               const SizedBox(width: 16),
               Button(
                 onPressed: () {
-                  ref.read(persistentStorageProvider.notifier).useNullStorage();
+                  ref.read(persistentRepoProvider.notifier).useNullStorage();
                 },
                 child: const Text('Override'),
               ),

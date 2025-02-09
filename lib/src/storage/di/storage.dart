@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../l0/api/persistent_storage.dart' as s;
+import '../l0/api/persistent_storage.dart';
 import '../l0/usecase/shared_storage.dart';
 import '../l1/impl/null_storage.dart';
 import '../l1/impl/sharedpreference_storage.dart';
@@ -9,11 +9,11 @@ import '../l1/impl/sharedpreference_storage.dart';
 part 'storage.g.dart';
 
 @riverpod
-class PersistentStorage extends _$PersistentStorage {
+class PersistentRepo extends _$PersistentRepo {
   static const _timeout = Duration(seconds: 5);
 
   @override
-  Future<s.PersistentStorage> build() async {
+  Future<PersistentStorage> build() async {
     final sharedPreferenceStorage = SharedPreferenceStorage(
       await SharedPreferences.getInstance().timeout(_timeout),
     );

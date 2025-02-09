@@ -13,13 +13,13 @@ const showPaimonIconDefault = true;
 class PaimonIcon extends _$PaimonIcon implements ValueSettable<bool> {
   @override
   bool build() {
-    final watch = ref.watch(persistentStorageProvider).valueOrNull;
+    final watch = ref.watch(persistentRepoProvider).valueOrNull;
     return watch?.getBool(showPaimonIconKey) ?? showPaimonIconDefault;
   }
 
   @override
   void setValue(final bool value) {
-    final read = ref.read(persistentStorageProvider).valueOrNull;
+    final read = ref.read(persistentRepoProvider).valueOrNull;
     read?.setBool(showPaimonIconKey, value);
     state = value;
   }

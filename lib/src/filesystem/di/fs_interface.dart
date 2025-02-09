@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../storage/di/storage.dart' as s;
+import '../../storage/di/storage.dart';
 import '../../storage/l0/api/persistent_storage.dart';
 import '../../storage/l0/constants.dart';
 import '../../storage/l0/usecase/game_config.dart';
@@ -17,7 +17,7 @@ final _iniEditorArgKey = StorageAccessKey.iniEditorArg.name;
 class FsInterface extends _$FsInterface {
   @override
   FileSystemInterface build() {
-    final storage = ref.watch(s.persistentStorageProvider).requireValue;
+    final storage = ref.watch(persistentRepoProvider).requireValue;
     final fileSystemInterface = FileSystemInterface();
     final arg = storage.getString(_iniEditorArgKey);
     if (arg == null) {
@@ -33,7 +33,7 @@ class FsInterface extends _$FsInterface {
   }
 
   void setIniEditorArgument(final String? arg) {
-    final storage = ref.read(s.persistentStorageProvider).requireValue;
+    final storage = ref.read(persistentRepoProvider).requireValue;
     if (arg == null) {
       state.iniEditorArgument = null;
       storage.removeKey(_iniEditorArgKey);

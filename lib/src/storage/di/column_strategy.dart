@@ -10,24 +10,24 @@ part 'column_strategy.g.dart';
 class ColumnStrategy extends _$ColumnStrategy {
   @override
   ColumnStrategyEnum build() {
-    final storage = ref.watch(persistentStorageProvider).valueOrNull;
+    final storage = ref.watch(persistentRepoProvider).valueOrNull;
     return initializeColumnStrategyUseCase(storage);
   }
 
   void setFixedCount(final int numChildren) {
-    final storage = ref.read(persistentStorageProvider).valueOrNull;
+    final storage = ref.read(persistentRepoProvider).valueOrNull;
     setColumnStrategyUseCase(storage, 0, numChildren);
     state = ColumnStrategyEnum.fixedCount(numChildren);
   }
 
   void setMaxExtent(final int extent) {
-    final storage = ref.read(persistentStorageProvider).valueOrNull;
+    final storage = ref.read(persistentRepoProvider).valueOrNull;
     setColumnStrategyUseCase(storage, 1, extent);
     state = ColumnStrategyEnum.maxExtent(extent);
   }
 
   void setMinExtent(final int extent) {
-    final storage = ref.read(persistentStorageProvider).valueOrNull;
+    final storage = ref.read(persistentRepoProvider).valueOrNull;
     setColumnStrategyUseCase(storage, 2, extent);
     state = ColumnStrategyEnum.minExtent(extent);
   }

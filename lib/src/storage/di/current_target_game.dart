@@ -9,7 +9,7 @@ part 'current_target_game.g.dart';
 class TargetGame extends _$TargetGame {
   @override
   String build() {
-    final storage = ref.watch(persistentStorageProvider).requireValue;
+    final storage = ref.watch(persistentRepoProvider).requireValue;
     final gamesList = ref.watch(gamesListProvider);
     final lastGame = storage.getString('lastGame');
     if (gamesList.contains(lastGame)) {
@@ -22,7 +22,7 @@ class TargetGame extends _$TargetGame {
   }
 
   void setValue(final String value) {
-    final read = ref.read(persistentStorageProvider).requireValue;
+    final read = ref.read(persistentRepoProvider).requireValue;
     final gamesList = ref.read(gamesListProvider);
     if (!gamesList.contains(value)) {
       return;

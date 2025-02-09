@@ -1,9 +1,9 @@
-import '../api/persistent_storage.dart' as s;
+import '../api/persistent_storage.dart';
 import '../constants.dart';
 import '../entity/column_strategy.dart';
 
 ColumnStrategyEnum initializeColumnStrategyUseCase(
-  final s.PersistentStorage? storage,
+  final PersistentStorage? storage,
 ) {
   if (storage == null) {
     return const ColumnStrategyEnum.minExtent(440);
@@ -26,7 +26,7 @@ ColumnStrategyEnum initializeColumnStrategyUseCase(
 }
 
 void setColumnStrategyUseCase(
-  final s.PersistentStorage? storage,
+  final PersistentStorage? storage,
   final int strategy,
   final int value,
 ) {

@@ -13,13 +13,13 @@ const showFolderIconDefault = true;
 class FolderIcon extends _$FolderIcon implements ValueSettable<bool> {
   @override
   bool build() {
-    final watch = ref.watch(persistentStorageProvider).valueOrNull;
+    final watch = ref.watch(persistentRepoProvider).valueOrNull;
     return watch?.getBool(showFolderIconKey) ?? showFolderIconDefault;
   }
 
   @override
   void setValue(final bool value) {
-    final read = ref.read(persistentStorageProvider).valueOrNull;
+    final read = ref.read(persistentRepoProvider).valueOrNull;
     read?.setBool(showFolderIconKey, value);
     state = value;
   }
