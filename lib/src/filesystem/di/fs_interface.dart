@@ -6,8 +6,8 @@ import '../../storage/di/storage.dart' as s;
 import '../../storage/l0/api/persistent_storage.dart';
 import '../../storage/l0/constants.dart';
 import '../../storage/l0/usecase/game_config.dart';
-import '../helper/path_op_string.dart';
-import '../repo/fs_interface.dart';
+import '../l1/impl/fs_interface.dart';
+import '../l1/impl/path_op_string.dart';
 
 part 'fs_interface.g.dart';
 

@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import '../../../fs_interface/helper/fsops.dart';
 import '../../l0/api/filesystem.dart';
 import '../../l0/api/mod_preview.dart';
 import '../../l0/api/watcher.dart';
 import '../../l0/entity/mod.dart';
+import 'fsops.dart';
 
 class ModPreviewPathRepoImpl implements ModPreviewPathRepo {
   factory ModPreviewPathRepoImpl({

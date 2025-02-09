@@ -5,9 +5,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../filesystem/l0/entity/mod_category.dart';
-import '../../fs_interface/helper/fsops.dart';
-import '../../fs_interface/helper/mod_switcher.dart';
-import '../../fs_interface/helper/path_op_string.dart';
+import '../../filesystem/l1/impl/fsops.dart';
+import '../../filesystem/l1/impl/mod_switcher.dart';
+import '../../filesystem/l1/impl/path_op_string.dart';
 import '../l0/entity/preset.dart';
 import 'game_config.dart';
 

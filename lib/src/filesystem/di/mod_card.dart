@@ -3,14 +3,14 @@ import 'dart:io';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../fs_interface/helper/fsops.dart';
-import '../../fs_interface/helper/path_op_string.dart';
 import '../l0/api/filesystem.dart';
 import '../l0/api/mod_preview.dart';
 import '../l0/api/watcher.dart';
 import '../l0/entity/mod.dart';
 import '../l1/di/filesystem.dart';
+import '../l1/impl/fsops.dart';
 import '../l1/impl/mod_preview.dart';
+import '../l1/impl/path_op_string.dart';
 
 part 'mod_card.g.dart';
 

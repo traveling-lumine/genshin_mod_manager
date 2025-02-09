@@ -1,4 +1,4 @@
-import '../../../fs_interface/helper/path_op_string.dart';
+import '../../../filesystem/l1/impl/path_op_string.dart';
 import '../api/persistent_storage.dart';
 import '../constants.dart';
 import 'game_config.dart';

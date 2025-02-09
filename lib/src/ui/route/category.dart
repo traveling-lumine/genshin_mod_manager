@@ -130,20 +130,28 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
             final data = ref.watch(modsInCategoryProvider(category));
             return StreamBuilder(
               stream: data.mods,
-              builder: (final context, final snapshot) {
-                if (snapshot.hasData) {
-                  final data = snapshot.requireData;
-                  return _buildData(data, sliverGridDelegate);
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: ProgressRing());
-                }
-                return const Center(child: Text('Error loading mods'));
-              },
+              builder: (final context, final snapshot) => AnimatedSwitcher(
+                duration: const Duration(milliseconds: 100),
+                child: _buildModsStream(snapshot, sliverGridDelegate),
+              ),
             );
           },
         ),
       );
+
+  Widget _buildModsStream(
+    final AsyncSnapshot<List<Mod>> snapshot,
+    final CrossAxisAwareDelegate sliverGridDelegate,
+  ) {
+    if (snapshot.hasData) {
+      final data = snapshot.requireData;
+      return _buildData(data, sliverGridDelegate);
+    }
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: ProgressRing());
+    }
+    return const Center(child: Text('Error loading mods'));
+  }
 
   Widget _buildData(
     final List<Mod> data,
@@ -220,9 +228,11 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
             return StreamBuilder(
               stream: data.mods,
               builder: (final context, final snapshot) {
+                final List<Mod> data;
+                final List<AutoSuggestBoxItem<String>> items;
                 if (snapshot.hasData) {
-                  final data = snapshot.requireData;
-                  final items = data.indexed
+                  data = snapshot.requireData;
+                  items = data.indexed
                       .map(
                         (final e) => AutoSuggestBoxItem(
                           value: e.$2.displayName,
@@ -233,25 +243,24 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
                         ),
                       )
                       .toList();
-                  return AutoSuggestBox(
-                    items: items,
-                    trailingIcon: const Icon(FluentIcons.search),
-                    onSubmissionFailed: (final text) {
-                      if (text.isEmpty) {
-                        return;
-                      }
-                      final index = data.indexWhere((final e) {
-                        final name = e.displayName.toLowerCase();
-                        return name.startsWith(text.toLowerCase());
-                      });
-                      _moveTo(index, sliverGridDelegate);
-                    },
-                  );
+                } else {
+                  data = const [];
+                  items = const [];
                 }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: ProgressRing());
-                }
-                return const Center(child: Text('Error loading mods'));
+                return AutoSuggestBox(
+                  items: items,
+                  trailingIcon: const Icon(FluentIcons.search),
+                  onSubmissionFailed: (final text) {
+                    if (text.isEmpty) {
+                      return;
+                    }
+                    final index = data.indexWhere((final e) {
+                      final name = e.displayName.toLowerCase();
+                      return name.startsWith(text.toLowerCase());
+                    });
+                    _moveTo(index, sliverGridDelegate);
+                  },
+                );
               },
             );
           },

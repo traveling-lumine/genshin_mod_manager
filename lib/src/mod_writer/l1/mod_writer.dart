@@ -4,9 +4,9 @@ import 'dart:typed_data';
 import 'package:archive/archive_io.dart';
 import 'package:cp949_codec/cp949_codec.dart';
 
-import '../../fs_interface/helper/fsops.dart';
-import '../../fs_interface/helper/path_op_string.dart';
-import '../domain/mod_writer.dart';
+import '../../filesystem/l1/impl/fsops.dart';
+import '../../filesystem/l1/impl/path_op_string.dart';
+import '../l0/mod_writer.dart';
 
 /// Exception thrown when a mod zip extraction fails.
 class ModZipExtractionException implements Exception {

@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 
-import '../../../fs_interface/helper/fsops.dart';
-import '../../../fs_interface/helper/path_op_string.dart';
 import '../../l0/api/categories.dart';
 import '../../l0/api/filesystem.dart';
 import '../../l0/api/watcher.dart';
 import '../../l0/entity/mod_category.dart';
+import 'fsops.dart';
+import 'path_op_string.dart';
 
 class CategoriesRepoImpl implements CategoriesRepo {
   factory CategoriesRepoImpl({

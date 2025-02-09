@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import '../../../fs_interface/helper/fsops.dart';
-import '../../../fs_interface/repo/fs_interface.dart';
 import '../../l0/api/filesystem.dart';
 import '../../l0/api/folder_icon.dart';
 import '../../l0/api/watcher.dart';
 import '../../l0/entity/mod_category.dart';
+import 'fs_interface.dart';
+import 'fsops.dart';
 
 class FolderIconRepoImpl implements FolderIconRepo {
   factory FolderIconRepoImpl({

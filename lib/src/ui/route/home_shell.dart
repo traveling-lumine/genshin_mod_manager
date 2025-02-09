@@ -12,7 +12,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../app_version/di/is_outdated.dart';
 import '../../filesystem/l1/di/categories.dart';
-import '../../fs_interface/helper/path_op_string.dart';
+import '../../filesystem/l1/impl/path_op_string.dart';
 import '../../l10n/app_localizations.dart';
 import '../../storage/di/current_target_game.dart';
 import '../../storage/di/exe_arg.dart';
@@ -206,18 +206,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       size: const NavigationPaneSize(
         openWidth: _HomeShellState._navigationPaneOpenWidth,
       ),
-      autoSuggestBox: Row(
-        children: [
-          Expanded(child: _buildAutoSuggestBox(items, controller)),
-          Tooltip(
-            message: 'Refresh categories',
-            child: IconButton(
-              icon: const Icon(FluentIcons.refresh),
-              onPressed: () => ref.invalidate(categoriesProvider),
-            ),
-          ),
-        ],
-      ),
+      autoSuggestBox: _buildAutoSuggestBox(items, controller),
       autoSuggestBoxReplacement: const Icon(FluentIcons.search),
       scrollController: controller,
     );

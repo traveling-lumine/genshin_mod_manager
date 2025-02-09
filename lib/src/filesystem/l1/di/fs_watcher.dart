@@ -1,7 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../fs_interface/di/fs_interface.dart';
+import '../../di/fs_interface.dart';
 import '../../l0/api/folder_icon.dart';
 import '../../l0/entity/mod_category.dart';
 import '../impl/folder_icon.dart';

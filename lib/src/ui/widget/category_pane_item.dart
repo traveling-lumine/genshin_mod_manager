@@ -9,7 +9,7 @@ import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 import '../../filesystem/l0/usecase/move_dir.dart';
 import '../../filesystem/l1/di/fs_watcher.dart';
-import '../../fs_interface/helper/path_op_string.dart';
+import '../../filesystem/l1/impl/path_op_string.dart';
 import '../../storage/di/folder_icon.dart';
 import '../../storage/di/use_paimon.dart';
 import '../util/display_infobar.dart';

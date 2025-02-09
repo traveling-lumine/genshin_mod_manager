@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../helper/path_op_string.dart';
+import 'path_op_string.dart';
 
 class FileSystemInterface {
   List<String?>? iniEditorArgument;

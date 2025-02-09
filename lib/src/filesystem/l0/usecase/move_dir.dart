@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../../fs_interface/helper/copy_directory.dart';
+import '../../l1/impl/copy_directory.dart';
 
 void moveDirUseCase(final Directory sourceDir, final String newPath) {
   try {

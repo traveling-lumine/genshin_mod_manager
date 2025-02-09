@@ -8,15 +8,15 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
 
+import '../../filesystem/di/fs_interface.dart';
 import '../../filesystem/di/mod_card.dart';
 import '../../filesystem/l0/entity/ini.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_toggle_exceptions.dart';
 import '../../filesystem/l0/usecase/open_folder.dart';
 import '../../filesystem/l0/usecase/paste_image.dart';
-import '../../fs_interface/di/fs_interface.dart';
-import '../../fs_interface/helper/mod_switcher.dart';
-import '../../fs_interface/helper/path_op_string.dart';
+import '../../filesystem/l1/impl/mod_switcher.dart';
+import '../../filesystem/l1/impl/path_op_string.dart';
 import '../../storage/di/card_color.dart';
 import '../../storage/di/game_config.dart';
 import '../constants.dart';
@@ -94,19 +94,10 @@ class _ModCardState extends ConsumerState<ModCard> {
           final preview = ref.watch(modPreviewPathProvider(widget.mod));
           return StreamBuilder(
             stream: preview.stream,
-            builder: (final context, final snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: ProgressRing());
-              }
-              if (snapshot.hasError && !snapshot.hasData) {
-                return const Text('Error loading preview');
-              }
-              final data = snapshot.data;
-              if (data == null) {
-                return child!;
-              }
-              return _buildImageDesc(data);
-            },
+            builder: (final context, final snapshot) => AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: _buildDescStream(snapshot, child),
+            ),
           );
         },
         child: Column(
@@ -121,37 +112,61 @@ class _ModCardState extends ConsumerState<ModCard> {
         ),
       );
 
+  Widget _buildDescStream(
+    final AsyncSnapshot<String?> snapshot,
+    final Widget? child,
+  ) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: ProgressRing());
+    }
+    if (snapshot.hasError && !snapshot.hasData) {
+      return const Text('Error loading preview');
+    }
+    final data = snapshot.data;
+    if (data == null) {
+      return child!;
+    }
+    return _buildImageDesc(data);
+  }
+
   Widget _buildFolderContent() => Consumer(
         builder: (final _, final ref, final child) {
           final iniPaths = ref.watch(iniPathsProvider(widget.mod));
           return StreamBuilder(
             stream: iniPaths.stream,
-            builder: (final context, final snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: ProgressRing());
-              }
-              if (snapshot.hasData) {
-                final data = snapshot.requireData;
-                final isEmpty = data.isEmpty;
-                return Row(
-                  mainAxisAlignment: isEmpty
-                      ? MainAxisAlignment.center
-                      : MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(child: child!),
-                    if (!isEmpty) _buildIni(data),
-                  ],
-                );
-              }
-              if (snapshot.hasError) {
-                return const Text('Error loading ini files');
-              }
-              return const Center(child: ProgressRing());
-            },
+            builder: (final context, final snapshot) => AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: _buildIniStream(snapshot, child),
+            ),
           );
         },
         child: Center(child: _buildDesc()),
       );
+
+  Widget _buildIniStream(
+    final AsyncSnapshot<List<String>> snapshot,
+    final Widget? child,
+  ) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: ProgressRing());
+    }
+    if (snapshot.hasData) {
+      final data = snapshot.requireData;
+      final isEmpty = data.isEmpty;
+      return Row(
+        mainAxisAlignment:
+            isEmpty ? MainAxisAlignment.center : MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(child: child!),
+          if (!isEmpty) _buildIni(data),
+        ],
+      );
+    }
+    if (snapshot.hasError) {
+      return const Text('Error loading ini files');
+    }
+    return const Center(child: ProgressRing());
+  }
 
   Widget _buildFolderHeader() => Row(
         children: [
