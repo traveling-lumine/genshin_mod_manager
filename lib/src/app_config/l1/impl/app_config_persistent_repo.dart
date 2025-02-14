@@ -19,32 +19,35 @@ class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
       Stream.value(null),
       Directory.current.watch().where(
         (final event) {
-          if (p.equals(event.path, _settingsFile.path)) {
+          if (p.equals(event.path, settingsFile.path)) {
             return true;
           }
           if (event is FileSystemMoveEvent) {
             final dest = event.destination;
             if (dest != null) {
-              return p.equals(dest, _settingsFile.path);
+              return p.equals(dest, settingsFile.path);
             }
           }
           return false;
         },
       ).debounceTime(const Duration(milliseconds: 500)),
     ]).asyncMap(
-      (final _) async => jsonDecode(await _settingsFile.readAsString())
-          as Map<String, dynamic>,
+      (final _) async =>
+          jsonDecode(await settingsFile.readAsString()) as Map<String, dynamic>,
     );
 
     // the class will close this
     // ignore: cancel_subscriptions
-    final subscription =
-        // silently ignore errors
-        mergeStream.listen(controller.add, onError: (final _) {});
+    final subscription = mergeStream.listen(
+      controller.add,
+      onError: (final e, final st) => controller.hasValue
+          ? controller.add(controller.value)
+          : controller.add({}),
+    );
     return AppConfigPersistentRepoImpl._(subscription, controller);
   }
   AppConfigPersistentRepoImpl._(this._subscription, this._controller);
-  static final _settingsFile = File('settings.json');
+  static final settingsFile = File('settings.json');
   static const _encoder = JsonEncoder.withIndent('  ');
   final StreamSubscription<Map<String, dynamic>> _subscription;
   final BehaviorSubject<Map<String, dynamic>> _controller;
@@ -63,6 +66,6 @@ class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
 
   @override
   Future<void> save(final AppConfig value) async {
-    await _settingsFile.writeAsString(_encoder.convert(value));
+    await settingsFile.writeAsString(_encoder.convert(value));
   }
 }

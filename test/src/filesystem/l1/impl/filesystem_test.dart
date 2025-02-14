@@ -6,11 +6,11 @@ import 'package:genshin_mod_manager/src/filesystem/l1/impl/filesystem.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
-  final testRoot = Directory('testDirectory');
+  late Directory testRoot;
   late Directory curDir;
   setUp(() {
     curDir = Directory.current;
-    testRoot.createSync();
+    testRoot = curDir.createTempSync();
     Directory.current = testRoot;
   });
   tearDown(() {

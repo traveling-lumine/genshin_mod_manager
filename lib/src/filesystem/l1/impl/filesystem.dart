@@ -19,11 +19,6 @@ class FilesystemImpl implements Filesystem {
       )> _watchStream = {};
 
   Stream<FileSystemEvent?> _getSwitchStream(final String path) {
-    // check path is dir
-    if (!Directory(path).existsSync()) {
-      throw FileSystemException('Directory does not exist', path);
-    }
-
     final stream = _watchStream[path];
     if (stream != null) {
       _watchStream[path] = (stream.$1, stream.$2, stream.$3 + 1);
@@ -32,7 +27,7 @@ class FilesystemImpl implements Filesystem {
 
     // these streams will be closed when the path is released
     // ignore: close_sinks
-    final controller = BehaviorSubject<FileSystemEvent?>.seeded(null);
+    final controller = StreamController<FileSystemEvent?>.broadcast();
 
     final streamForSubscription = _isPaused
         ? const Stream<FileSystemEvent>.empty()
@@ -107,16 +102,25 @@ class FilesystemImpl implements Filesystem {
     required final String path,
   }) {
     if (!Directory(path).existsSync()) {
+      final nullBehaviorSubject =
+          BehaviorSubject<FileSystemEvent?>.seeded(null);
       return FSSubscription(
-        stream: Stream.value(null),
-        onCancel: () async {},
+        stream: nullBehaviorSubject,
+        onCancel: nullBehaviorSubject.close,
       );
     }
+
+    final controller = BehaviorSubject<FileSystemEvent?>.seeded(null);
     final stream = _getSwitchStream(path);
+    final subscription = stream.listen(controller.add);
 
     return FSSubscription(
-      stream: stream,
-      onCancel: () async => _releaseSwitchStream(path),
+      stream: controller.stream,
+      onCancel: () async => Future.wait([
+        subscription.cancel(),
+        controller.close(),
+        _releaseSwitchStream(path),
+      ]),
     );
   }
 
@@ -125,27 +129,39 @@ class FilesystemImpl implements Filesystem {
     required final String path,
   }) {
     if (!File(path).existsSync()) {
+      final nullBehaviorSubject =
+          BehaviorSubject<FileSystemEvent?>.seeded(null);
       return FSSubscription(
-        stream: Stream.value(null),
-        onCancel: () async {},
+        stream: nullBehaviorSubject,
+        onCancel: nullBehaviorSubject.close,
       );
     }
     final dirPath = File(path).parent.path;
+
+    final controller = BehaviorSubject<FileSystemEvent?>.seeded(null);
     final stream = _getSwitchStream(dirPath);
+    final subscription = stream.listen(
+      (final event) {
+        if (event == null) {
+          return;
+        }
+        if (event is FileSystemMoveEvent) {
+          if (p.equals(event.destination ?? '', path)) {
+            controller.add(event);
+          }
+        } else if (p.equals(event.path, path)) {
+          controller.add(event);
+        }
+      },
+    );
 
     return FSSubscription(
-      stream: stream.where(
-        (final event) {
-          if (event == null) {
-            return true;
-          }
-          if (event is FileSystemMoveEvent) {
-            return p.equals(event.destination ?? '', path);
-          }
-          return p.equals(event.path, path);
-        },
-      ),
-      onCancel: () async => _releaseSwitchStream(dirPath),
+      stream: controller.stream,
+      onCancel: () async => Future.wait([
+        subscription.cancel(),
+        controller.close(),
+        _releaseSwitchStream(dirPath),
+      ]),
     );
   }
 }

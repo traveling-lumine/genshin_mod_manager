@@ -28,7 +28,6 @@ void main() {
     await expectLater(
       a.stream,
       emitsInOrder([
-        <String, dynamic>{},
         <String, dynamic>{'key': 'value'},
       ]),
     );
@@ -38,11 +37,10 @@ void main() {
   test('add entry', () async {
     final a = AppConfigPersistentRepoImpl();
     final entry = stringEntry(key: 'key', defaultValue: 'value');
-    await a.save(AppConfig(entry.toJson('value') as Map<String, dynamic>));
+    await a.save(AppConfig({'key': entry.defaultValue}));
     await expectLater(
       a.stream,
       emitsInOrder([
-        <String, dynamic>{},
         <String, dynamic>{'key': 'value'},
       ]),
     );
