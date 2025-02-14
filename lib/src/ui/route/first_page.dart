@@ -2,7 +2,12 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../storage/di/games_list.dart';
+import '../../app_config/l0/usecase/change_app_config.dart';
+import '../../app_config/l1/di/app_config.dart';
+import '../../app_config/l1/di/app_config_facade.dart';
+import '../../app_config/l1/di/app_config_persistent_repo.dart';
+import '../../app_config/l1/entity/entries.dart';
+import '../../app_config/l1/entity/game_config.dart';
 import '../constants.dart';
 import '../widget/appbar.dart';
 
@@ -11,7 +16,10 @@ class FirstRoute extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    ref.listen(gamesListProvider, (final previous, final next) {
+    ref.listen(
+        appConfigFacadeProvider.select(
+          (final value) => value.obtainValue(games).gameConfig.keys.toList(),
+        ), (final previous, final next) {
       if (next.isNotEmpty) {
         context.goNamed(RouteNames.home.name);
       }
@@ -31,7 +39,19 @@ class FirstRoute extends ConsumerWidget {
                 child: TextFormBox(
                   placeholder: 'Game name',
                   onFieldSubmitted: (final value) {
-                    ref.read(gamesListProvider.notifier).addGame(value);
+                    final newGameConfig = GameConfigMediator(
+                      current: value,
+                      gameConfig: {value: const GameConfig()},
+                    );
+                    final newConfig =
+                        changeAppConfigUseCase<GameConfigMediator>(
+                      appConfigFacade: ref.read(appConfigFacadeProvider),
+                      appConfigPersistentRepo:
+                          ref.read(appConfigPersistentRepoProvider),
+                      entry: games,
+                      value: newGameConfig,
+                    );
+                    ref.read(appConfigCProvider.notifier).update(newConfig);
                   },
                 ),
               ),

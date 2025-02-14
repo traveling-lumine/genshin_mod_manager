@@ -13,12 +13,13 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
+import '../../app_config/l1/di/app_config_facade.dart';
+import '../../app_config/l1/entity/entries.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 import '../../filesystem/l0/usecase/open_folder.dart';
 import '../../filesystem/l1/di/categories.dart';
 import '../../filesystem/l1/di/mods_in_category.dart';
-import '../../storage/di/column_strategy.dart';
 import '../constants.dart';
 import '../widget/category_drop_target.dart';
 import '../widget/intrinsic_command_bar.dart';
@@ -71,7 +72,13 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
       return const SizedBox.shrink();
     }
 
-    final sliverGridDelegate = ref.watch(columnStrategyProvider).when(
+    final sliverGridDelegate = ref
+        .watch(
+          appConfigFacadeProvider
+              .select((final value) => value.obtainValue(columnStrategy)),
+        )
+        .strategy
+        .when(
           fixedCount: (final numChildren) =>
               SliverGridDelegateWithFixedCrossAxisCount(
             mainAxisExtent: CategoryRoute._mainAxisExtent,
@@ -126,31 +133,19 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
       ThickScrollbar(
         child: Consumer(
           builder: (final context, final ref, final child) {
-            final data = ref.watch(modsInCategoryProvider(category));
-            return StreamBuilder(
-              stream: data.mods,
-              builder: (final context, final snapshot) => AnimatedSwitcher(
-                duration: const Duration(milliseconds: 100),
-                child: _buildModsStream(snapshot, sliverGridDelegate),
+            final data = ref.watch(modsInCategoryStreamProvider(category));
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 100),
+              child: data.when(
+                data: (final mods) => _buildData(mods, sliverGridDelegate),
+                error: (final error, final stacktrace) =>
+                    Center(child: Text('Error loading mods: $error')),
+                loading: () => const Center(child: ProgressRing()),
               ),
             );
           },
         ),
       );
-
-  Widget _buildModsStream(
-    final AsyncSnapshot<List<Mod>> snapshot,
-    final CrossAxisAwareDelegate sliverGridDelegate,
-  ) {
-    if (snapshot.hasData) {
-      final data = snapshot.requireData;
-      return _buildData(data, sliverGridDelegate);
-    }
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return const Center(child: ProgressRing());
-    }
-    return const Center(child: Text('Error loading mods'));
-  }
 
   Widget _buildData(
     final List<Mod> data,
@@ -223,43 +218,34 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
         padding: const EdgeInsets.only(right: 8),
         child: Consumer(
           builder: (final context, final ref, final child) {
-            final data = ref.watch(modsInCategoryProvider(category));
-            return StreamBuilder(
-              stream: data.mods,
-              builder: (final context, final snapshot) {
-                final List<Mod> data;
-                final List<AutoSuggestBoxItem<String>> items;
-                if (snapshot.hasData) {
-                  data = snapshot.requireData;
-                  items = data.indexed
-                      .map(
-                        (final e) => AutoSuggestBoxItem(
-                          value: e.$2.displayName,
-                          label: e.$2.displayName,
-                          onSelected: () {
-                            _moveTo(e.$1, sliverGridDelegate);
-                          },
-                        ),
-                      )
-                      .toList();
-                } else {
-                  data = const [];
-                  items = const [];
+            final data = ref.watch(modsInCategoryStreamProvider(category));
+            final dataList = data.maybeWhen(
+              orElse: () => const <Mod>[],
+              data: (final data) => data,
+            );
+            final items = dataList.indexed
+                .map(
+                  (final e) => AutoSuggestBoxItem(
+                    value: e.$2.displayName,
+                    label: e.$2.displayName,
+                    onSelected: () {
+                      _moveTo(e.$1, sliverGridDelegate);
+                    },
+                  ),
+                )
+                .toList();
+            return AutoSuggestBox(
+              items: items,
+              trailingIcon: const Icon(FluentIcons.search),
+              onSubmissionFailed: (final text) {
+                if (text.isEmpty) {
+                  return;
                 }
-                return AutoSuggestBox(
-                  items: items,
-                  trailingIcon: const Icon(FluentIcons.search),
-                  onSubmissionFailed: (final text) {
-                    if (text.isEmpty) {
-                      return;
-                    }
-                    final index = data.indexWhere((final e) {
-                      final name = e.displayName.toLowerCase();
-                      return name.startsWith(text.toLowerCase());
-                    });
-                    _moveTo(index, sliverGridDelegate);
-                  },
-                );
+                final index = dataList.indexWhere((final e) {
+                  final name = e.displayName.toLowerCase();
+                  return name.startsWith(text.toLowerCase());
+                });
+                _moveTo(index, sliverGridDelegate);
               },
             );
           },

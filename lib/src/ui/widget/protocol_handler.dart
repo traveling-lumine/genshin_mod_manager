@@ -14,7 +14,7 @@ import '../../nahida/l0/entity/nahida_element.dart';
 import '../../nahida/l0/usecase/download_url.dart';
 import '../../nahida/l0/usecase/get_element.dart';
 import '../../nahida/l1/di/nahida_repo.dart';
-import '../../storage/di/exe_arg.dart';
+import '../../app_config/l1/di/exe_arg.dart';
 import 'turnstile_dialog.dart';
 
 String _convertUuid(final String uuid) {

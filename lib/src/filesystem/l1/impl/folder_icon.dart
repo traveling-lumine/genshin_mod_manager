@@ -4,16 +4,15 @@ import '../../l0/api/filesystem.dart';
 import '../../l0/api/folder_icon.dart';
 import '../../l0/api/watcher.dart';
 import '../../l0/entity/mod_category.dart';
-import 'fs_interface.dart';
 import 'fsops.dart';
 
 class FolderIconRepoImpl implements FolderIconRepo {
   factory FolderIconRepoImpl({
     required final Filesystem fs,
-    required final FileSystemInterface fsi,
+    required final Directory iconDir,
     required final ModCategory category,
   }) {
-    final path = (fsi.iconDir(category.name)..createSync(recursive: true)).path;
+    final path = (iconDir..createSync(recursive: true)).path;
     final Watcher watcher;
     try {
       watcher = fs.watchFile(path: path);

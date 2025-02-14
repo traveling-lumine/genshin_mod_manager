@@ -6,10 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../app_config/l1/di/app_config_facade.dart';
+import '../../app_config/l1/entity/entries.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
-import '../../filesystem/l0/entity/setting_data.dart';
 import '../../filesystem/l0/usecase/folder_drop.dart';
-import '../../storage/di/move_on_drag.dart';
 import '../util/display_infobar.dart';
 import 'fade_in.dart';
 
@@ -53,10 +53,13 @@ class CategoryDropTarget extends HookConsumerWidget {
     final ValueNotifier<bool> state,
   ) {
     final context = useContext();
-    final moveMethod = switch (ref.watch(moveOnDragProvider)) {
-      DragImportType.move => 'move',
-      DragImportType.copy => 'copy',
-    };
+    final moveMethod = ref.watch(
+      appConfigFacadeProvider
+          .select((final value) => value.obtainValue(moveOnDrag)),
+    )
+        ? 'move'
+        : 'copy';
+
     final typography = FluentTheme.of(context).typography;
     return RichText(
       text: TextSpan(
@@ -80,7 +83,8 @@ class CategoryDropTarget extends HookConsumerWidget {
     final BuildContext context,
     final WidgetRef ref,
   ) async {
-    final moveInsteadOfCopy = ref.read(moveOnDragProvider);
+    final moveInsteadOfCopy =
+        ref.read(appConfigFacadeProvider).obtainValue(moveOnDrag);
     final result = await dragToImportUseCase(
       details.files.map((final e) => e.path),
       category.path,
@@ -100,10 +104,7 @@ class CategoryDropTarget extends HookConsumerWidget {
       final join = result.exists
           .map((final e) => "'${e.source}' -> '${e.destination}'")
           .join('\n');
-      final dragImportType = switch (moveInsteadOfCopy) {
-        DragImportType.move => 'moved',
-        DragImportType.copy => 'copied',
-      };
+      final dragImportType = moveInsteadOfCopy ? 'moved' : 'copied';
       if (context.mounted) {
         unawaited(
           displayInfoBarInContext(

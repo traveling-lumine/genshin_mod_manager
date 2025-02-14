@@ -2,8 +2,9 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../app_config/l1/di/app_config_facade.dart';
+import '../app_config/l1/entity/entries.dart';
 import '../l10n/app_localizations.dart';
-import '../storage/di/dark_mode.dart';
 import 'constants.dart';
 import 'route/category.dart';
 import 'route/first_page.dart';
@@ -98,14 +99,17 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   Widget build(final BuildContext context) {
-    final darkMode = ref.watch(darkModeProvider);
+    final darkMode1 = ref.watch(
+      appConfigFacadeProvider
+          .select((final value) => value.obtainValue(darkMode)),
+    );
     return FluentApp.router(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: const Locale.fromSubtags(languageCode: 'en'),
       theme: FluentThemeData.light(),
       darkTheme: FluentThemeData.dark(),
-      themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
+      themeMode: darkMode1 ? ThemeMode.dark : ThemeMode.light,
       title: 'Genshin Mod Manager',
       routerDelegate: _router.routerDelegate,
       routeInformationParser: _router.routeInformationParser,

@@ -1,7 +1,8 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../storage/di/game_config.dart';
+import '../../../app_config/l1/di/app_config_facade.dart';
+import '../../../app_config/l1/entity/entries.dart';
 import '../../l0/api/categories.dart';
 import '../../l0/entity/mod_category.dart';
 import '../impl/categories.dart';
@@ -11,8 +12,11 @@ part 'categories.g.dart';
 
 @riverpod
 CategoriesRepo categoriesRepo(final Ref ref) {
-  final modRoot = ref
-      .watch(gameConfigNotifierProvider.select((final state) => state.modRoot));
+  final modRoot = ref.watch(
+    appConfigFacadeProvider.select(
+      (final value) => value.obtainValue(games).currentGameConfig.modRoot,
+    ),
+  );
   final fs = ref.watch(filesystemProvider);
   final categoriesRepoImpl = CategoriesRepoImpl(modRoot: modRoot, fs: fs);
   ref.onDispose(categoriesRepoImpl.dispose);

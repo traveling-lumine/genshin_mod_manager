@@ -1,8 +1,10 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../storage/di/display_enabled_mods_first.dart';
+import '../../../app_config/l1/di/app_config_facade.dart';
+import '../../../app_config/l1/entity/entries.dart';
 import '../../l0/api/mods_in_category.dart';
+import '../../l0/entity/mod.dart';
 import '../../l0/entity/mod_category.dart';
 import '../impl/mods_in_category.dart';
 import 'filesystem.dart';
@@ -16,9 +18,21 @@ ModsInCategory modsInCategory(
 ) {
   final data = ModsInCategoryImpl(
     category: category,
-    enabledModsFirst: ref.watch(displayEnabledModsFirstProvider),
+    enabledModsFirst: ref.watch(
+      appConfigFacadeProvider
+          .select((final value) => value.obtainValue(darkMode)),
+    ),
     fs: ref.watch(filesystemProvider),
   );
   ref.onDispose(data.dispose);
   return data;
+}
+
+@riverpod
+Stream<List<Mod>> modsInCategoryStream(
+  final Ref ref,
+  final ModCategory category,
+) {
+  final modsInCategory = ref.watch(modsInCategoryProvider(category));
+  return modsInCategory.mods;
 }

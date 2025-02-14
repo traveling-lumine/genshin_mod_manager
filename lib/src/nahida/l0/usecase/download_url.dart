@@ -30,6 +30,7 @@ Future<void> downloadUrlUseCase({
     final responseData = await repo.addDownload(
       element: element,
       turnstile: turnstile,
+      pw: pw,
     );
 
     await createModWriter(categoryPath: category.path)(

@@ -6,7 +6,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../filesystem/di/fs_interface.dart';
+import '../../app_config/l1/di/app_config_facade.dart';
+import '../../app_config/l1/entity/entries.dart';
 import '../../filesystem/di/ini_widget.dart';
 import '../../filesystem/l0/entity/ini.dart';
 import '../../filesystem/l1/impl/path_op_string.dart';
@@ -156,8 +157,23 @@ class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
   }
 
   Future<void> _onIniOpen(final WidgetRef ref, final String iniPath) async {
-    final fsInterface = ref.read(fsInterfaceProvider);
-    await fsInterface.runIniEdit(File(iniPath));
+    final iniEditorArgument = ref
+        .read(appConfigFacadeProvider)
+        .obtainValue(iniEditorArg)
+        ?.split(' ')
+        .map((final e) => e == '%0' ? null : e)
+        .toList();
+    final program = File(iniPath);
+    final pwd = program.parent.path;
+    final pName = program.path.pBasename;
+    final List<String> arg;
+    final iniEditorArgument2 = iniEditorArgument;
+    if (iniEditorArgument2 != null) {
+      arg = iniEditorArgument2.map((final e) => e ?? pName).toList();
+    } else {
+      arg = [pName];
+    }
+    await Process.run('start', ['/b', '/d', pwd, '', ...arg], runInShell: true);
   }
 }
 

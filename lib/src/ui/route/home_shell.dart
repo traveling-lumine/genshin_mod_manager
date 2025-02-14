@@ -10,17 +10,16 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../app_config/l0/usecase/change_app_config.dart';
+import '../../app_config/l1/di/app_config.dart';
+import '../../app_config/l1/di/app_config_facade.dart';
+import '../../app_config/l1/di/app_config_persistent_repo.dart';
+import '../../app_config/l1/entity/entries.dart';
 import '../../app_version/di/is_outdated.dart';
 import '../../filesystem/l1/di/categories.dart';
 import '../../filesystem/l1/impl/path_op_string.dart';
 import '../../l10n/app_localizations.dart';
-import '../../storage/di/current_target_game.dart';
-import '../../storage/di/exe_arg.dart';
-import '../../storage/di/game_config.dart';
-import '../../storage/di/games_list.dart';
-import '../../storage/di/run_together.dart';
-import '../../storage/di/separate_run_override.dart';
-import '../../storage/di/window_size.dart';
+import '../../app_config/l1/di/exe_arg.dart';
 import '../constants.dart';
 import '../util/display_infobar.dart';
 import '../widget/appbar.dart';
@@ -48,13 +47,20 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   @override
   Widget build(final BuildContext context) {
-    ref.listen(gamesListProvider, (final previous, final next) {
+    ref.listen(
+        appConfigFacadeProvider.select(
+          (final value) => value.obtainValue(games).gameConfig.keys.toList(),
+        ), (final previous, final next) {
       if (next.isEmpty) {
         context.goNamed(RouteNames.firstpage.name);
       }
     });
 
-    final game = ref.watch(targetGameProvider);
+    final game = ref.watch(
+      appConfigFacadeProvider.select(
+        (final value) => value.obtainValue(games).current!,
+      ),
+    );
     final updateMarker =
         (ref.watch(isOutdatedProvider).valueOrNull ?? false) ? 'update' : '';
     return WindowListenerWidget(
@@ -93,7 +99,7 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     protocolHandler.addListener(this);
     WindowManager.instance.addListener(this);
 
-    final read = ref.read(windowSizeProvider);
+    final read = ref.read(appConfigFacadeProvider).obtainValue(windowSize);
     if (read != null) {
       unawaited(WindowManager.instance.setSize(read));
     }
@@ -108,9 +114,17 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   void onWindowResized() {
     super.onWindowResized();
     unawaited(
-      WindowManager.instance
-          .getSize()
-          .then(ref.read(windowSizeProvider.notifier).setValue),
+      WindowManager.instance.getSize().then(
+        (final value) {
+          final newState = changeAppConfigUseCase(
+            appConfigFacade: ref.read(appConfigFacadeProvider),
+            appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
+            entry: windowSize,
+            value: value,
+          );
+          ref.read(appConfigCProvider.notifier).update(newState);
+        },
+      ),
     );
   }
 
@@ -214,8 +228,17 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
 
   List<PaneItemAction> _buildPaneItemActions() {
     const icon = Icon(FluentIcons.user_window);
-    final select = ref.watch(runTogetherProvider);
-    final override = ref.watch(separateRunOverrideProvider);
+    final select = ref.watch(
+      appConfigFacadeProvider.select(
+        (final value) => value.obtainValue(runTogether),
+      ),
+    );
+    final override = ref.watch(
+      appConfigFacadeProvider.select(
+        (final value) =>
+            value.obtainValue(games).currentGameConfig.separateRunOverride,
+      ),
+    );
     return override ?? select
         ? [
             RunAndExitPaneAction(
@@ -250,7 +273,11 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   }
 
   Future<void> _runLauncher() async {
-    final launcher = ref.read(gameConfigNotifierProvider).launcherFile;
+    final launcher = ref
+        .read(appConfigFacadeProvider)
+        .obtainValue(games)
+        .currentGameConfig
+        .launcherFile;
     if (launcher == null) {
       return;
     }
@@ -258,7 +285,11 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   }
 
   Future<void> _runMigoto() async {
-    final path = ref.read(gameConfigNotifierProvider).modExecFile;
+    final path = ref
+        .read(appConfigFacadeProvider)
+        .obtainValue(games)
+        .currentGameConfig
+        .modExecFile;
     if (path == null) {
       return;
     }

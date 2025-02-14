@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genshin_mod_manager/src/storage/l1/impl/null_storage.dart';
+import 'package:genshin_mod_manager/src/legacy_storage/l1/impl/null_storage.dart';
 
 void main() {
   late NullSharedPreferenceStorage nullStorage;

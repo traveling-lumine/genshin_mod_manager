@@ -4,9 +4,12 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../storage/di/current_target_game.dart';
-import '../../storage/di/games_list.dart';
-import '../util/display_infobar.dart';
+import '../../app_config/l0/usecase/change_app_config.dart';
+import '../../app_config/l1/di/app_config.dart';
+import '../../app_config/l1/di/app_config_facade.dart';
+import '../../app_config/l1/di/app_config_persistent_repo.dart';
+import '../../app_config/l1/entity/entries.dart';
+import '../../app_config/l1/entity/game_config.dart';
 
 /// Game selector widget.
 class GameSelector extends HookConsumerWidget {
@@ -15,7 +18,11 @@ class GameSelector extends HookConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final value = ref.watch(targetGameProvider);
+    final value = ref.watch(
+      appConfigFacadeProvider.select(
+        (final value) => value.obtainValue(games).current!,
+      ),
+    );
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -48,7 +55,12 @@ class GameSelector extends HookConsumerWidget {
       RepaintBoundary(
         child: ComboBox<String>(
           items: ref
-              .watch(gamesListProvider)
+              .watch(
+                appConfigFacadeProvider.select(
+                  (final value) =>
+                      value.obtainValue(games).gameConfig.keys.toList(),
+                ),
+              )
               .map(
                 (final e) => ComboBoxItem<String>(
                   value: e,
@@ -77,19 +89,25 @@ class GameSelector extends HookConsumerWidget {
               .toList(),
           onChanged: (final value) {
             if (value == null) {
-              unawaited(
-                displayInfoBarInContext(
-                  context,
-                  title: const Text('Whaat?'),
-                  severity: InfoBarSeverity.error,
-                  content: const Text(
-                    'Null value. This is a bug. Please report.',
-                  ),
-                ),
-              );
               return;
             }
-            ref.read(targetGameProvider.notifier).setValue(value);
+            final currentGameConfig =
+                ref.read(appConfigFacadeProvider).obtainValue(games);
+            if (!currentGameConfig.gameConfig.containsKey(value)) {
+              return;
+            }
+            final newGameConfig = GameConfigMediator(
+              current: value,
+              gameConfig: currentGameConfig.gameConfig,
+            );
+            final newConfig = changeAppConfigUseCase<GameConfigMediator>(
+              appConfigFacade: ref.read(appConfigFacadeProvider),
+              appConfigPersistentRepo:
+                  ref.read(appConfigPersistentRepoProvider),
+              entry: games,
+              value: newGameConfig,
+            );
+            ref.read(appConfigCProvider.notifier).update(newConfig);
           },
           value: value,
         ),
@@ -112,8 +130,12 @@ class GameSelector extends HookConsumerWidget {
               controller: controller,
               placeholder: 'Game Name',
               validator: (final value) {
-                final games = ref.read(gamesListProvider);
-                if (games.contains(value)) {
+                final gameList = ref
+                    .read(appConfigFacadeProvider)
+                    .obtainValue(games)
+                    .gameConfig
+                    .keys;
+                if (gameList.contains(value)) {
                   return 'Game already exists';
                 }
                 return null;
@@ -127,14 +149,30 @@ class GameSelector extends HookConsumerWidget {
             ),
             FilledButton(
               onPressed: () {
-                final games = ref.read(gamesListProvider);
+                final obtainValue =
+                    ref.read(appConfigFacadeProvider).obtainValue(games);
+                final gameList = obtainValue.gameConfig.keys;
                 final text = controller.text;
-                if (games.contains(text)) {
+                if (gameList.contains(text)) {
                   return;
                 }
                 Navigator.of(dCtx).pop();
                 controller.clear();
-                ref.read(gamesListProvider.notifier).addGame(text);
+                final newGameConfig = obtainValue.copyWith(
+                  current: text,
+                  gameConfig: {
+                    ...obtainValue.gameConfig,
+                    text: const GameConfig(),
+                  },
+                );
+                final newConfig = changeAppConfigUseCase<GameConfigMediator>(
+                  appConfigFacade: ref.read(appConfigFacadeProvider),
+                  appConfigPersistentRepo:
+                      ref.read(appConfigPersistentRepoProvider),
+                  entry: games,
+                  value: newGameConfig,
+                );
+                ref.read(appConfigCProvider.notifier).update(newConfig);
               },
               child: const Text('Add'),
             ),
@@ -167,7 +205,29 @@ class GameSelector extends HookConsumerWidget {
                 onPressed: () {
                   Navigator.of(dCtx).pop();
                   controller.clear();
-                  ref.read(gamesListProvider.notifier).removeGame(value);
+                  final currentGameConfig =
+                      ref.read(appConfigFacadeProvider).obtainValue(games);
+                  if (!currentGameConfig.gameConfig.containsKey(value)) {
+                    return;
+                  }
+                  final map = {
+                    ...currentGameConfig.gameConfig,
+                  }..remove(value);
+                  final current = value == currentGameConfig.current
+                      ? (map.keys.isNotEmpty ? map.keys.first : null)
+                      : currentGameConfig.current;
+                  final newGameConfig = GameConfigMediator(
+                    current: current,
+                    gameConfig: map,
+                  );
+                  final newConfig = changeAppConfigUseCase<GameConfigMediator>(
+                    appConfigFacade: ref.read(appConfigFacadeProvider),
+                    appConfigPersistentRepo:
+                        ref.read(appConfigPersistentRepoProvider),
+                    entry: games,
+                    value: newGameConfig,
+                  );
+                  ref.read(appConfigCProvider.notifier).update(newConfig);
                 },
                 child: const Text('Delete'),
               ),

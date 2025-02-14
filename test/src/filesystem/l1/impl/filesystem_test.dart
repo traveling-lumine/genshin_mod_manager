@@ -43,12 +43,12 @@ void main() {
       await stream.cancel();
       await fs.dispose();
     });
-    test('non-directory throws error', () async {
+    test('non-directory does not throw error', () async {
       final file = File('parent/target/file')..createSync();
       final fs = FilesystemImpl();
       expect(
         () => fs.watchDirectory(path: file.path),
-        throwsA(isA<FileSystemException>()),
+        returnsNormally,
       );
       await fs.dispose();
     });
@@ -160,12 +160,12 @@ void main() {
       await stream.cancel();
       await fs.dispose();
     });
-    test('non-file throws error', () async {
+    test('non-file does not throw error', () async {
       final dir = Directory('parent/target2')..createSync();
       final fs = FilesystemImpl();
       expect(
         () => fs.watchFile(path: dir.path),
-        throwsA(isA<FileSystemException>()),
+        returnsNormally,
       );
       await fs.dispose();
     });

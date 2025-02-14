@@ -4,13 +4,12 @@ import '../../../mod_writer/l1/mod_writer.dart';
 import '../../l1/impl/copy_directory.dart';
 import '../../l1/impl/path_op_string.dart';
 import '../entity/folder_move_result.dart';
-import '../entity/setting_data.dart';
 import 'move_dir.dart';
 
 Future<FolderMoveResult> dragToImportUseCase(
   final Iterable<String> dropPaths,
   final String categoryPath,
-  final DragImportType type,
+  final bool type,
 ) async {
   final result = FolderMoveResult();
   for (final path in dropPaths) {
@@ -22,15 +21,14 @@ Future<FolderMoveResult> dragToImportUseCase(
       }
 
       final sourceDir = Directory(path);
-      switch (type) {
-        case DragImportType.move:
-          try {
-            moveDirUseCase(sourceDir, newPath);
-          } on FileSystemException catch (e) {
-            result.addError(e);
-          }
-        case DragImportType.copy:
-          sourceDir.copyToPath(newPath);
+      if (type) {
+        try {
+          moveDirUseCase(sourceDir, newPath);
+        } on FileSystemException catch (e) {
+          result.addError(e);
+        }
+      } else {
+        sourceDir.copyToPath(newPath);
       }
     } else if (FileSystemEntity.isFileSync(path) &&
         path.pExtension.pEquals('.zip')) {

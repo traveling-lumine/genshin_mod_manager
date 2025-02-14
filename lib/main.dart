@@ -5,7 +5,7 @@ import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'src/error_handler/error_handler.dart';
-import 'src/storage/di/exe_arg.dart';
+import 'src/app_config/l1/di/exe_arg.dart';
 import 'src/ui/app.dart';
 import 'src/ui/constants.dart';
 

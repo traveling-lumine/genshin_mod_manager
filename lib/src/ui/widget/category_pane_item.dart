@@ -5,13 +5,13 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../app_config/l1/di/app_config_facade.dart';
+import '../../app_config/l1/entity/entries.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 import '../../filesystem/l0/usecase/move_dir.dart';
 import '../../filesystem/l1/di/fs_watcher.dart';
 import '../../filesystem/l1/impl/path_op_string.dart';
-import '../../storage/di/folder_icon.dart';
-import '../../storage/di/use_paimon.dart';
 import '../util/display_infobar.dart';
 import 'category_drop_target.dart';
 import 'fade_in.dart';
@@ -132,38 +132,38 @@ class FolderPaneItem extends PaneItem {
   }
 
   static Widget _buildIcon(final String name) => Consumer(
-        builder: (final context, final ref, final child) =>
-            ref.watch(folderIconProvider)
-                ? _buildImage(name)
-                : const Icon(FluentIcons.folder_open),
+        builder: (final context, final ref, final child) => ref.watch(
+          appConfigFacadeProvider
+              .select((final value) => value.obtainValue(showFolderIcon)),
+        )
+            ? _buildImage(name)
+            : const Icon(FluentIcons.folder_open),
       );
 
   static Widget _buildImage(final String name) => ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: maxIconWidth),
         child: Consumer(
           builder: (final context, final ref, final child) {
-            final imageFile = ref.watch(folderIconPathProvider(name));
-            return StreamBuilder(
-              stream: imageFile.stream,
-              builder: (final context, final snapshot) {
-                if (snapshot.hasError && !snapshot.hasData) {
-                  return const Icon(FluentIcons.folder_open);
-                }
-                final imagePath = snapshot.data;
-                return AspectRatio(
-                  aspectRatio: 1,
-                  child: imagePath == null
-                      ? Consumer(
-                          builder: (final context, final ref, final child) =>
-                              Image.asset(
-                            ref.watch(paimonIconProvider)
-                                ? 'images/app_icon.ico'
-                                : 'images/idk_icon.png',
+            final imagePath = ref
+                .watch(folderIconPathStreamProvider(name))
+                .maybeWhen(orElse: () => null, data: (final path) => path);
+            return AspectRatio(
+              aspectRatio: 1,
+              child: imagePath == null
+                  ? Consumer(
+                      builder: (final context, final ref, final child) =>
+                          Image.asset(
+                        ref.watch(
+                          appConfigFacadeProvider.select(
+                            (final value) => value
+                                .obtainValue(showPaimonAsEmptyIconFolderIcon),
                           ),
                         )
-                      : Image.file(File(imagePath), fit: BoxFit.contain),
-                );
-              },
+                            ? 'images/app_icon.ico'
+                            : 'images/idk_icon.png',
+                      ),
+                    )
+                  : Image.file(File(imagePath), fit: BoxFit.contain),
             );
           },
         ),

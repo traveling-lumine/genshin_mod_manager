@@ -33,9 +33,13 @@ class FilesystemImpl implements Filesystem {
     // these streams will be closed when the path is released
     // ignore: close_sinks
     final controller = BehaviorSubject<FileSystemEvent?>.seeded(null);
+
+    final streamForSubscription = _isPaused
+        ? const Stream<FileSystemEvent>.empty()
+        : Directory(path).watch();
     // see above
     // ignore: cancel_subscriptions
-    final subscription = Directory(path).watch().listen(controller.add);
+    final subscription = streamForSubscription.listen(controller.add);
     _watchStream[path] = (controller, subscription, 1);
     return controller.stream;
   }
@@ -104,7 +108,7 @@ class FilesystemImpl implements Filesystem {
   }) {
     if (!Directory(path).existsSync()) {
       return FSSubscription(
-        stream: const Stream.empty(),
+        stream: Stream.value(null),
         onCancel: () async {},
       );
     }
@@ -122,7 +126,7 @@ class FilesystemImpl implements Filesystem {
   }) {
     if (!File(path).existsSync()) {
       return FSSubscription(
-        stream: const Stream.empty(),
+        stream: Stream.value(null),
         onCancel: () async {},
       );
     }

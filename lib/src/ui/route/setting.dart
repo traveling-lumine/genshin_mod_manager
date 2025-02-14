@@ -8,24 +8,21 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
+import '../../app_config/l0/entity/app_config_entry.dart';
+import '../../app_config/l0/usecase/change_app_config.dart';
+import '../../app_config/l0/usecase/change_game_separate_run_override.dart';
+import '../../app_config/l0/usecase/change_mod_exec.dart';
+import '../../app_config/l0/usecase/change_mod_launcher.dart';
+import '../../app_config/l0/usecase/change_mod_root.dart';
+import '../../app_config/l1/di/app_config.dart';
+import '../../app_config/l1/di/app_config_facade.dart';
+import '../../app_config/l1/di/app_config_persistent_repo.dart';
+import '../../app_config/l1/entity/column_strategy.dart';
+import '../../app_config/l1/entity/entries.dart';
+import '../../app_config/l1/entity/game_config.dart';
 import '../../app_version/di/current_version.dart';
 import '../../app_version/di/is_outdated.dart';
 import '../../app_version/di/remote_version.dart';
-import '../../filesystem/di/fs_interface.dart';
-import '../../filesystem/l0/entity/setting_data.dart';
-import '../../storage/di/card_color.dart';
-import '../../storage/di/column_strategy.dart';
-import '../../storage/di/dark_mode.dart';
-import '../../storage/di/display_enabled_mods_first.dart';
-import '../../storage/di/folder_icon.dart';
-import '../../storage/di/game_config.dart';
-import '../../storage/di/move_on_drag.dart';
-import '../../storage/di/run_together.dart';
-import '../../storage/di/separate_run_override.dart';
-import '../../storage/di/use_paimon.dart';
-import '../../storage/di/value_settable.dart';
-import '../../storage/l0/entity/game_config.dart';
-import '../../storage/l0/usecase/card_color.dart';
 import '../constants.dart';
 import '../widget/game_selector.dart';
 import '../widget/setting_element.dart';
@@ -63,9 +60,13 @@ class SettingRoute extends ConsumerWidget {
                 if (dir == null) {
                   return;
                 }
-                ref
-                    .read(gameConfigNotifierProvider.notifier)
-                    .changeModRoot(dir.path);
+                final newConfig = changeModRootUseCase(
+                  appConfigFacade: ref.read(appConfigFacadeProvider),
+                  appConfigPersistentRepo:
+                      ref.read(appConfigPersistentRepoProvider),
+                  value: dir.path,
+                );
+                ref.read(appConfigCProvider.notifier).update(newConfig);
               },
             ),
             _PathSelectItem(
@@ -78,9 +79,13 @@ class SettingRoute extends ConsumerWidget {
                 if (file == null) {
                   return;
                 }
-                ref
-                    .read(gameConfigNotifierProvider.notifier)
-                    .changeModExecFile(file.path);
+                final newConfig = changeModExecUseCase(
+                  appConfigFacade: ref.read(appConfigFacadeProvider),
+                  appConfigPersistentRepo:
+                      ref.read(appConfigPersistentRepoProvider),
+                  value: file.path,
+                );
+                ref.read(appConfigCProvider.notifier).update(newConfig);
               },
             ),
             _PathSelectItem(
@@ -93,30 +98,45 @@ class SettingRoute extends ConsumerWidget {
                 if (file == null) {
                   return;
                 }
-                ref
-                    .read(gameConfigNotifierProvider.notifier)
-                    .changeLauncherFile(file.path);
+                final newConfig = changeModLauncherUseCase(
+                  appConfigFacade: ref.read(appConfigFacadeProvider),
+                  appConfigPersistentRepo:
+                      ref.read(appConfigPersistentRepoProvider),
+                  value: file.path,
+                );
+                ref.read(appConfigCProvider.notifier).update(newConfig);
               },
             ),
             const _SectionHeader(title: 'Options'),
             _SwitchItem(
               text: 'Run 3d migoto and launcher using one button',
-              provider: runTogetherProvider,
+              entry: runTogether,
               content: Row(
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Checkbox(
-                      checked: ref.watch(separateRunOverrideProvider),
+                      checked: ref.watch(
+                        appConfigFacadeProvider.select(
+                          (final value) => value
+                              .obtainValue(games)
+                              .currentGameConfig
+                              .separateRunOverride,
+                        ),
+                      ),
                       onChanged: (final value) {
                         final res = switch (value) {
                           true => null,
                           false => false,
                           null => true,
                         };
-                        ref
-                            .read(separateRunOverrideProvider.notifier)
-                            .setValue(res);
+                        final newConfig = changeGameSeparateRunOverrideUseCase(
+                          appConfigFacade: ref.read(appConfigFacadeProvider),
+                          appConfigPersistentRepo:
+                              ref.read(appConfigPersistentRepoProvider),
+                          value: res,
+                        );
+                        ref.read(appConfigCProvider.notifier).update(newConfig);
                       },
                     ),
                   ),
@@ -127,20 +147,17 @@ class SettingRoute extends ConsumerWidget {
             _SwitchItem(
               text:
                   'Move folder instead of copying for mod folder drag-and-drop',
-              provider: moveOnDragProvider,
-              boolMapper: (final value) => value == DragImportType.move,
-              typedMapper: (final value) =>
-                  value ? DragImportType.move : DragImportType.copy,
+              entry: moveOnDrag,
             ),
             _SwitchItem(
               text: 'Show folder icon images',
-              provider: folderIconProvider,
+              entry: showFolderIcon,
             ),
             _SwitchItem(
               text: 'Show enabled mods first',
-              provider: displayEnabledModsFirstProvider,
+              entry: showEnabledModsFirst,
             ),
-            _SwitchItem(text: 'Dark mode', provider: darkModeProvider),
+            _SwitchItem(text: 'Dark mode', entry: darkMode),
             const _ComboItem(text: 'Target Game'),
             const _SectionHeader(title: 'Themes'),
             const SettingElement(
@@ -155,96 +172,99 @@ class SettingRoute extends ConsumerWidget {
                 ],
               ),
             ),
-            HookConsumer(
+            Consumer(
               builder: (final context, final ref, final child) {
-                final initialStrategy = ref.watch(columnStrategyProvider).when(
-                      fixedCount: (final numChildren) => (0, numChildren),
-                      maxExtent: (final extent) => (1, extent),
-                      minExtent: (final extent) => (2, extent),
-                    );
-                final columnStrategy = useState<int?>(initialStrategy.$1);
-                final columnParameter = useState<int?>(initialStrategy.$2);
+                final watch = ref.watch(
+                  appConfigFacadeProvider.select(
+                    (final value) => value.obtainValue(columnStrategy),
+                  ),
+                );
                 return SettingElement(
                   initiallyExpanded: true,
                   text: 'Column Display Strategy',
                   trailing: ComboBox(
-                    value: columnStrategy.value,
+                    value: watch.current,
                     items: const [
-                      ComboBoxItem(value: 0, child: Text('Fixed Count')),
-                      ComboBoxItem(value: 1, child: Text('Max Extent')),
-                      ComboBoxItem(value: 2, child: Text('Min Extent')),
+                      ComboBoxItem(
+                        value: ColumnStrategyEntryEnum.fixedCount(),
+                        child: Text('Fixed Count'),
+                      ),
+                      ComboBoxItem(
+                        value: ColumnStrategyEntryEnum.maxExtent(),
+                        child: Text('Max Extent'),
+                      ),
+                      ComboBoxItem(
+                        value: ColumnStrategyEntryEnum.minExtent(),
+                        child: Text('Min Extent'),
+                      ),
                     ],
-                    onChanged: (final value) => columnStrategy.value = value,
+                    onChanged: (final value) {
+                      if (value == null) {
+                        return;
+                      }
+                      final newColumnStrategy = watch.copyWith(current: value);
+                      final newConfig =
+                          changeAppConfigUseCase<ColumnStrategySettingMediator>(
+                        appConfigFacade: ref.read(appConfigFacadeProvider),
+                        appConfigPersistentRepo:
+                            ref.read(appConfigPersistentRepoProvider),
+                        entry: columnStrategy,
+                        value: newColumnStrategy,
+                      );
+                      ref.read(appConfigCProvider.notifier).update(newConfig);
+                    },
                   ),
                   content: Padding(
                     padding: const EdgeInsets.only(left: 16),
-                    child: switch (columnStrategy.value) {
-                      0 => Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text('Fixed number of columns: '),
-                            SizedBox(
-                              width: 100,
-                              child: NumberBox<int>(
-                                value: columnParameter.value,
-                                onChanged: (final value) {
-                                  if (value == null) {
-                                    return;
-                                  }
-                                  ref
-                                      .read(columnStrategyProvider.notifier)
-                                      .setFixedCount(value);
-                                  columnParameter.value = value;
-                                },
-                                mode: SpinButtonPlacementMode.none,
-                              ),
-                            ),
-                          ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          watch.current.when(
+                            fixedCount: () => 'Fixed number of columns',
+                            maxExtent: () => 'Column max width limit',
+                            minExtent: () => 'Column min width limit',
+                          ),
                         ),
-                      1 => Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text('Column max width limit: '),
-                            SizedBox(
-                              width: 100,
-                              child: NumberBox(
-                                value: columnParameter.value,
-                                onChanged: (final value) {
-                                  if (value == null) {
-                                    return;
-                                  }
-                                  ref
-                                      .read(columnStrategyProvider.notifier)
-                                      .setMaxExtent(value);
-                                },
-                                mode: SpinButtonPlacementMode.none,
-                              ),
+                        SizedBox(
+                          width: 100,
+                          child: NumberBox<int>(
+                            value: watch.current.when(
+                              fixedCount: () => watch.fixedCount,
+                              maxExtent: () => watch.maxExtent,
+                              minExtent: () => watch.minExtent,
                             ),
-                          ],
+                            onChanged: (final value) {
+                              if (value == null) {
+                                return;
+                              }
+                              final newColumnStrategy = watch.current.when(
+                                fixedCount: () =>
+                                    watch.copyWith(fixedCount: value),
+                                maxExtent: () =>
+                                    watch.copyWith(maxExtent: value),
+                                minExtent: () =>
+                                    watch.copyWith(minExtent: value),
+                              );
+
+                              final newConfig = changeAppConfigUseCase<
+                                  ColumnStrategySettingMediator>(
+                                appConfigFacade:
+                                    ref.read(appConfigFacadeProvider),
+                                appConfigPersistentRepo:
+                                    ref.read(appConfigPersistentRepoProvider),
+                                entry: columnStrategy,
+                                value: newColumnStrategy,
+                              );
+                              ref.read(appConfigCProvider.notifier).update(
+                                    newConfig,
+                                  );
+                            },
+                            mode: SpinButtonPlacementMode.none,
+                          ),
                         ),
-                      2 => Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text('Column min width limit: '),
-                            SizedBox(
-                              width: 100,
-                              child: NumberBox(
-                                value: columnParameter.value,
-                                onChanged: (final value) {
-                                  if (value == null) {
-                                    return;
-                                  }
-                                  ref
-                                      .read(columnStrategyProvider.notifier)
-                                      .setMinExtent(value);
-                                },
-                                mode: SpinButtonPlacementMode.none,
-                              ),
-                            ),
-                          ],
-                        ),
-                      _ => null,
-                    },
+                      ],
+                    ),
                   ),
                 );
               },
@@ -253,7 +273,7 @@ class SettingRoute extends ConsumerWidget {
             const _StringItem(title: 'Ini file editor arguments'),
             _SwitchItem(
               text: 'Use Paimon for folders without icons',
-              provider: paimonIconProvider,
+              entry: showPaimonAsEmptyIconFolderIcon,
             ),
             const SizedBox(height: 200),
           ],
@@ -315,7 +335,11 @@ class _ColorChanger extends ConsumerWidget {
       padding: const EdgeInsets.all(4),
       child: Icon(isBright ? FluentIcons.sunny : FluentIcons.clear_night),
     );
-    if (isBright != ref.watch(darkModeProvider)) {
+    if (isBright !=
+        ref.watch(
+          appConfigFacadeProvider
+              .select((final value) => value.obtainValue(darkMode)),
+        )) {
       // add a green border to indicate that the color is visible
       brightModeIcon = DecoratedBox(
         decoration: BoxDecoration(
@@ -325,6 +349,12 @@ class _ColorChanger extends ConsumerWidget {
         child: brightModeIcon,
       );
     }
+    final entry = switch ((isBright, isEnabled)) {
+      (false, false) => cardColorDarkDisabled,
+      (false, true) => cardColorDarkEnabled,
+      (true, false) => cardColorBrightDisabled,
+      (true, true) => cardColorBrightEnabled,
+    };
     return ListTile(
       title: FluentTheme(
         data: FluentTheme.of(context).copyWith(
@@ -367,10 +397,8 @@ class _ColorChanger extends ConsumerWidget {
               height: 32,
               decoration: BoxDecoration(
                 color: ref.watch(
-                  cardColorProvider(
-                    isBright: isBright,
-                    isEnabled: isEnabled,
-                  ),
+                  appConfigFacadeProvider
+                      .select((final value) => value.obtainValue(entry)),
                 ),
                 border: Border.all(
                   color: FluentTheme.of(context).inactiveColor,
@@ -402,8 +430,17 @@ class _ColorPickerDialog extends HookConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final entry = switch ((isBright, isEnabled)) {
+      (false, false) => cardColorDarkDisabled,
+      (false, true) => cardColorDarkEnabled,
+      (true, false) => cardColorBrightDisabled,
+      (true, true) => cardColorBrightEnabled,
+    };
     final currentColor = useState(
-      ref.watch(cardColorProvider(isBright: isBright, isEnabled: isEnabled)),
+      ref.watch(
+        appConfigFacadeProvider
+            .select((final value) => value.obtainValue(entry)),
+      ),
     );
     return ContentDialog(
       title: const Text('Pick a color!'),
@@ -416,18 +453,15 @@ class _ColorPickerDialog extends HookConsumerWidget {
       actions: [
         Button(
           onPressed: () {
-            final defaultColor = getDefaultValueUseCase(
-              isBright: isBright,
-              isEnabled: isEnabled,
+            final defaultColor = entry.defaultValue;
+            final newState = changeAppConfigUseCase(
+              appConfigFacade: ref.read(appConfigFacadeProvider),
+              appConfigPersistentRepo:
+                  ref.read(appConfigPersistentRepoProvider),
+              entry: entry,
+              value: defaultColor,
             );
-            ref
-                .read(
-                  cardColorProvider(
-                    isBright: isBright,
-                    isEnabled: isEnabled,
-                  ).notifier,
-                )
-                .setColor(defaultColor);
+            ref.read(appConfigCProvider.notifier).update(newState);
             Navigator.of(context).pop();
           },
           child: const Text('Restore default'),
@@ -440,14 +474,14 @@ class _ColorPickerDialog extends HookConsumerWidget {
         ),
         FilledButton(
           onPressed: () {
-            ref
-                .read(
-                  cardColorProvider(
-                    isBright: isBright,
-                    isEnabled: isEnabled,
-                  ).notifier,
-                )
-                .setColor(currentColor.value);
+            final newState = changeAppConfigUseCase(
+              appConfigFacade: ref.read(appConfigFacadeProvider),
+              appConfigPersistentRepo:
+                  ref.read(appConfigPersistentRepoProvider),
+              entry: entry,
+              value: currentColor.value,
+            );
+            ref.read(appConfigCProvider.notifier).update(newState);
             Navigator.of(context).pop();
           },
           child: const Text('Set'),
@@ -503,8 +537,12 @@ class _PathSelectItem extends StatelessWidget {
         ),
         subTitle: Consumer(
           builder: (final context, final ref, final child) {
-            final value =
-                ref.watch(gameConfigNotifierProvider.select(selector));
+            final value = ref.watch(
+              appConfigFacadeProvider.select(
+                (final value) =>
+                    selector(value.obtainValue(games).currentGameConfig),
+              ),
+            );
             return Text(value ?? 'Please select...');
           },
         ),
@@ -543,57 +581,49 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _SwitchItem<T> extends StatelessWidget {
-  _SwitchItem({
-    required final String text,
-    required final AutoDisposeNotifierProvider<ValueSettable<T>, T> provider,
-    final String? subText,
+class _SwitchItem extends StatelessWidget {
+  const _SwitchItem({
+    required this.text,
+    required this.entry,
     this.content,
-    this.leading,
-    final bool Function(T)? boolMapper,
-    final T Function(bool)? typedMapper,
-  })  : _provider = provider,
-        _text = text,
-        _subText = subText,
-        _boolMapper = boolMapper ??
-            ((final value) {
-              if (T == bool) {
-                return value as bool;
-              }
-              throw ArgumentError('boolMapper must be provided for $T');
-            }),
-        _typedMapper = typedMapper ??
-            ((final value) {
-              if (T == bool) {
-                return value as T;
-              }
-              throw ArgumentError('typedMapper must be provided for $T');
-            });
-  final String _text;
-  final String? _subText;
-  final AutoDisposeNotifierProvider<ValueSettable<T>, T> _provider;
-
-  final bool Function(T) _boolMapper;
-  final T Function(bool) _typedMapper;
+  });
+  final String text;
+  final AppConfigEntry<bool> entry;
   final Widget? content;
-  final Widget? leading;
 
   @override
   Widget build(final BuildContext context) => SettingElement(
-        text: _text,
-        subTitle: _subText == null ? null : Text(_subText),
+        text: text,
         content: content,
         trailing: Consumer(
           builder: (final context, final ref, final child) => RepaintBoundary(
             child: ToggleSwitch(
-              checked: _boolMapper(ref.watch(_provider)),
+              checked: ref.watch(
+                appConfigFacadeProvider
+                    .select((final value) => value.obtainValue(entry)),
+              ),
               onChanged: (final value) {
-                ref.read(_provider.notifier).setValue(_typedMapper(value));
+                final newState = changeAppConfigUseCase<bool>(
+                  appConfigFacade: ref.read(appConfigFacadeProvider),
+                  appConfigPersistentRepo:
+                      ref.read(appConfigPersistentRepoProvider),
+                  entry: entry,
+                  value: value,
+                );
+                ref.read(appConfigCProvider.notifier).update(newState);
               },
             ),
           ),
         ),
       );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('text', text))
+      ..add(DiagnosticsProperty<AppConfigEntry<bool>>('entry', entry));
+  }
 }
 
 class _StringItem extends ConsumerWidget {
@@ -602,13 +632,10 @@ class _StringItem extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final initArguments = ref.watch(fsInterfaceProvider).iniEditorArgument;
-    final String? initString;
-    if (initArguments == null) {
-      initString = null;
-    } else {
-      initString = initArguments.map((final e) => e ?? '%0').join(' ');
-    }
+    final initString = ref.watch(
+      appConfigFacadeProvider
+          .select((final value) => value.obtainValue(iniEditorArg)),
+    );
     return SettingElement(
       text: title,
       subTitle:
@@ -617,9 +644,14 @@ class _StringItem extends ConsumerWidget {
         width: 300,
         child: TextFormBox(
           onChanged: (final value) {
-            ref
-                .read(fsInterfaceProvider.notifier)
-                .setIniEditorArgument(value.isEmpty ? null : value);
+            final newState = changeAppConfigUseCase(
+              appConfigFacade: ref.read(appConfigFacadeProvider),
+              appConfigPersistentRepo:
+                  ref.read(appConfigPersistentRepoProvider),
+              entry: iniEditorArg,
+              value: value,
+            );
+            ref.read(appConfigCProvider.notifier).update(newState);
           },
           initialValue: initString,
           placeholder: 'Arguments...',

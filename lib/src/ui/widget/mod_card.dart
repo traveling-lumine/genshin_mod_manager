@@ -4,21 +4,21 @@ import 'dart:ui';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_image_converter/flutter_image_converter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
 
-import '../../filesystem/di/fs_interface.dart';
+import '../../app_config/l1/di/app_config_facade.dart';
+import '../../app_config/l1/entity/entries.dart';
 import '../../filesystem/di/mod_card.dart';
 import '../../filesystem/l0/entity/ini.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_toggle_exceptions.dart';
 import '../../filesystem/l0/usecase/open_folder.dart';
-import '../../filesystem/l0/usecase/paste_image.dart';
 import '../../filesystem/l1/impl/mod_switcher.dart';
 import '../../filesystem/l1/impl/path_op_string.dart';
-import '../../storage/di/card_color.dart';
-import '../../storage/di/game_config.dart';
 import '../constants.dart';
 import '../util/display_infobar.dart';
 import '../util/show_prompt_dialog.dart';
@@ -59,17 +59,26 @@ class _ModCardState extends ConsumerState<ModCard> {
         child: GestureDetector(
           onTap: _onToggle,
           child: Consumer(
-            builder: (final context, final ref, final child) => Card(
-              backgroundColor: ref.watch(
-                cardColorProvider(
-                  isBright:
-                      FluentTheme.of(context).brightness == Brightness.light,
-                  isEnabled: widget.mod.isEnabled,
-                ),
-              ),
-              padding: const EdgeInsets.all(6),
-              child: child!,
-            ),
+            builder: (final context, final ref, final child) {
+              final isBright =
+                  FluentTheme.of(context).brightness == Brightness.light;
+              final isEnabled2 = widget.mod.isEnabled;
+              final entry = switch ((isBright, isEnabled2)) {
+                (false, false) => cardColorDarkDisabled,
+                (false, true) => cardColorDarkEnabled,
+                (true, false) => cardColorBrightDisabled,
+                (true, true) => cardColorBrightEnabled,
+              };
+              final watch = ref.watch(
+                appConfigFacadeProvider
+                    .select((final value) => value.obtainValue(entry)),
+              );
+              return Card(
+                backgroundColor: watch,
+                padding: const EdgeInsets.all(6),
+                child: child!,
+              );
+            },
             child: FocusTraversalGroup(
               child: Column(
                 children: [
@@ -92,11 +101,12 @@ class _ModCardState extends ConsumerState<ModCard> {
   Widget _buildDesc() => Consumer(
         builder: (final context, final ref, final child) {
           final preview = ref.watch(modPreviewPathProvider(widget.mod));
-          return StreamBuilder(
-            stream: preview.stream,
-            builder: (final context, final snapshot) => AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: _buildDescStream(snapshot, child),
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: preview.when(
+              data: (final data) => _buildDescStream(data, child!),
+              loading: () => const Center(child: ProgressRing()),
+              error: (final e, final _) => const Text('Error loading preview'),
             ),
           );
         },
@@ -113,21 +123,10 @@ class _ModCardState extends ConsumerState<ModCard> {
       );
 
   Widget _buildDescStream(
-    final AsyncSnapshot<String?> snapshot,
-    final Widget? child,
-  ) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return const Center(child: ProgressRing());
-    }
-    if (snapshot.hasError && !snapshot.hasData) {
-      return const Text('Error loading preview');
-    }
-    final data = snapshot.data;
-    if (data == null) {
-      return child!;
-    }
-    return _buildImageDesc(data);
-  }
+    final String? data,
+    final Widget child,
+  ) =>
+      data == null ? child : _buildImageDesc(data);
 
   Widget _buildFolderContent() => Consumer(
         builder: (final _, final ref, final child) {
@@ -335,12 +334,31 @@ class _ModCardState extends ConsumerState<ModCard> {
   }
 
   Future<void> _onPaste() async {
-    final image = await Pasteboard.image;
+    final Uint8List? image;
+    try {
+      image = await Pasteboard.image;
+    } on PlatformException catch (e) {
+      if (mounted) {
+        unawaited(
+          displayInfoBar(
+            context,
+            builder: (final _, final close) => InfoBar(
+              onClose: close,
+              severity: InfoBarSeverity.error,
+              title: const Text('Image paste failed'),
+              content: Text('Failed to paste image: ${e.message}'),
+            ),
+          ),
+        );
+      }
+      return;
+    }
     if (image == null) {
       return;
     }
-    final fsInterface = ref.read(fsInterfaceProvider);
-    await pasteImageUseCase(fsInterface, image, widget.mod);
+    final filePath = widget.mod.path.pJoin('preview.png');
+    final bytes = await image.pngUint8List;
+    await File(filePath).writeAsBytes(bytes);
     if (mounted) {
       unawaited(
         displayInfoBar(
@@ -357,7 +375,9 @@ class _ModCardState extends ConsumerState<ModCard> {
 
   Future<void> _onToggle() async {
     final shaderFixesPath = ref
-        .read(gameConfigNotifierProvider)
+        .read(appConfigFacadeProvider)
+        .obtainValue(games)
+        .currentGameConfig
         .modExecFile
         ?.pDirname
         .pJoin(kShaderFixes);
