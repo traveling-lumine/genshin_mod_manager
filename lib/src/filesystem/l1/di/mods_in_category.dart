@@ -26,6 +26,15 @@ ModsInCategory modsInCategory(final Ref ref, final ModCategory category) {
 }
 
 @riverpod
+Stream<List<Mod>> modsUnsortedInCategoryStream(
+  final Ref ref,
+  final ModCategory category,
+) {
+  final modsInCategory = ref.watch(modsInCategoryProvider(category));
+  return modsInCategory.modsUnsorted;
+}
+
+@riverpod
 Stream<List<Mod>> modsInCategoryStream(
   final Ref ref,
   final ModCategory category,

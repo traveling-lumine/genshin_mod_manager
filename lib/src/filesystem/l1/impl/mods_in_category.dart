@@ -18,59 +18,64 @@ class ModsInCategoryImpl implements ModsInCategory {
     required final Filesystem fs,
   }) {
     final fsStream = fs.watchDirectory(path: category.path);
+    final debounceTime = fsStream.stream
+        .where((final event) => event is! FileSystemModifyEvent)
+        .debounceTime(const Duration(milliseconds: 100));
+    final modsUnsorted = debounceTime.asyncMap(
+      (final _) async => (await getUnder<Directory>(category.path))
+          .map(
+            (final e) => Mod(
+              path: e,
+              displayName: e.pEnabledForm.pBasename,
+              isEnabled: e.pIsEnabled,
+              category: category,
+            ),
+          )
+          .toList(),
+    );
+    final mods = modsUnsorted.map(
+      (final modsUnsorted) => sortMods(
+        list: modsUnsorted,
+        enabledModsFirst: enabledModsFirst,
+      ),
+    );
     return ModsInCategoryImpl._(
       fsStream: fsStream,
-      mods: fsStream.stream
-          .where((final event) => event is! FileSystemModifyEvent)
-          .debounceTime(const Duration(milliseconds: 100))
-          .asyncMap(
-            (final _) async => modsInCategory(
-              category: category,
-              enabledModsFirst: enabledModsFirst,
-            ),
-          ),
+      modsUnsorted: modsUnsorted,
+      mods: mods,
     );
   }
   const ModsInCategoryImpl._({
     required this.fsStream,
     required this.mods,
+    required this.modsUnsorted,
   });
-
   final Watcher fsStream;
   @override
   final Stream<List<Mod>> mods;
+  @override
+  final Stream<List<Mod>> modsUnsorted;
 
   @override
   Future<void> dispose() async {
     await fsStream.cancel();
   }
 
-  static Future<List<Mod>> modsInCategory({
-    required final ModCategory category,
+  static List<Mod> sortMods({
+    required final List<Mod> list,
     required final bool enabledModsFirst,
-  }) async {
-    final under = await getUnder<Directory>(category.path);
-    return under
-        .map(
-          (final e) => Mod(
-            path: e,
-            displayName: e.pEnabledForm.pBasename,
-            isEnabled: e.pIsEnabled,
-            category: category,
-          ),
-        )
-        .toList()
-      ..sort((final a, final b) {
-        if (enabledModsFirst) {
-          final aEnabled = a.isEnabled;
-          final bEnabled = b.isEnabled;
-          if (aEnabled && !bEnabled) {
-            return -1;
-          } else if (!aEnabled && bEnabled) {
-            return 1;
+  }) =>
+      list
+        ..sort((final a, final b) {
+          if (enabledModsFirst) {
+            final aEnabled = a.isEnabled;
+            final bEnabled = b.isEnabled;
+            if (aEnabled && !bEnabled) {
+              return -1;
+            } else if (!aEnabled && bEnabled) {
+              return 1;
+            }
           }
-        }
-        return compareNatural(a.displayName, b.displayName);
-      });
-  }
+          return compareNatural(a.displayName, b.displayName);
+        });
 }

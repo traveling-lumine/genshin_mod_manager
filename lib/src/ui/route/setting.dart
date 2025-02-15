@@ -9,7 +9,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
 import '../../app_config/l0/entity/app_config_entry.dart';
+import '../../app_config/l0/entity/column_strategy.dart';
 import '../../app_config/l0/entity/entries.dart';
+import '../../app_config/l0/entity/game_config.dart';
 import '../../app_config/l0/usecase/change_app_config.dart';
 import '../../app_config/l0/usecase/change_game_separate_run_override.dart';
 import '../../app_config/l0/usecase/change_mod_exec.dart';
@@ -18,8 +20,6 @@ import '../../app_config/l0/usecase/change_mod_root.dart';
 import '../../app_config/l1/di/app_config.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_config/l1/di/app_config_persistent_repo.dart';
-import '../../app_config/l0/entity/column_strategy.dart';
-import '../../app_config/l0/entity/game_config.dart';
 import '../../app_version/di/current_version.dart';
 import '../../app_version/di/is_outdated.dart';
 import '../../app_version/di/remote_version.dart';

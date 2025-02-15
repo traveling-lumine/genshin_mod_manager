@@ -5,11 +5,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../app_config/l0/entity/entries.dart';
+import '../../app_config/l0/entity/game_config.dart';
 import '../../app_config/l0/usecase/change_app_config.dart';
 import '../../app_config/l1/di/app_config.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_config/l1/di/app_config_persistent_repo.dart';
-import '../../app_config/l0/entity/game_config.dart';
 
 /// Game selector widget.
 class GameSelector extends HookConsumerWidget {

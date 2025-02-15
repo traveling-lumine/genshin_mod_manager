@@ -1,7 +1,7 @@
 import '../../l0/api/app_config_facade.dart';
+import '../../l0/entity/app_config.dart';
 import '../../l0/entity/app_config_entry.dart';
 import '../../l0/entity/entries.dart';
-import '../../l0/entity/app_config.dart';
 
 class AppConfigFacadeImpl implements AppConfigFacade {
   const AppConfigFacadeImpl({required this.currentConfig});

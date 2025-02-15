@@ -1,8 +1,8 @@
-import '../entity/app_config.dart';
-import '../entity/preset.dart';
 import '../api/app_config_facade.dart';
 import '../api/app_config_persistent_repo.dart';
+import '../entity/app_config.dart';
 import '../entity/entries.dart';
+import '../entity/preset.dart';
 import 'change_app_config.dart';
 
 AppConfig changePresetUseCase({

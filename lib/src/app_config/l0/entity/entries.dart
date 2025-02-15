@@ -1,9 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
-import 'column_strategy.dart';
-import 'game_config.dart';
 import 'app_config_entry.dart';
+import 'column_strategy.dart';
 import 'entry_helpers.dart';
+import 'game_config.dart';
 
 final cardColorBrightEnabled = colorEntry(
   key: 'cardColorBrightEnabled',
