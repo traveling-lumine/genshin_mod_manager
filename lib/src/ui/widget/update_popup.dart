@@ -21,10 +21,7 @@ Future<Never> _runUpdateScript() async {
   final url = Uri.parse('$kRepoReleases/download/GenshinModManager.zip');
   final response = await http.get(url);
   final archive = ZipDecoder().decodeBytes(response.bodyBytes);
-  await extractArchiveToDisk(
-    archive,
-    Directory.current.path,
-  );
+  await extractArchiveToDisk(archive, Directory.current.path);
   const updateScript = 'setlocal\n'
       'echo update script running\n'
       'set "sourceFolder=GenshinModManager"\n'

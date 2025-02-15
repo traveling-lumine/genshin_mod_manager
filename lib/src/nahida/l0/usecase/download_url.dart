@@ -17,21 +17,14 @@ Future<void> downloadUrlUseCase({
   final String? pw,
 }) async {
   if (element.password && pw == null) {
-    downloadQueue.add(
-      NahidaDownloadState.wrongPassword(
-        element: element,
-        wrongPw: pw,
-      ),
-    );
+    downloadQueue
+        .add(NahidaDownloadState.wrongPassword(element: element, wrongPw: pw));
     return;
   }
 
   try {
-    final responseData = await repo.addDownload(
-      element: element,
-      turnstile: turnstile,
-      pw: pw,
-    );
+    final responseData =
+        await repo.addDownload(element: element, turnstile: turnstile, pw: pw);
 
     await createModWriter(categoryPath: category.path)(
       modName: element.title,
@@ -41,10 +34,7 @@ Future<void> downloadUrlUseCase({
     switch (e.error) {
       case WrongPasswordException _:
         downloadQueue.add(
-          NahidaDownloadState.wrongPassword(
-            element: element,
-            wrongPw: pw,
-          ),
+          NahidaDownloadState.wrongPassword(element: element, wrongPw: pw),
         );
         return;
     }
@@ -58,7 +48,5 @@ Future<void> downloadUrlUseCase({
     );
     return;
   }
-  downloadQueue.add(
-    NahidaDownloadState.completed(element: element),
-  );
+  downloadQueue.add(NahidaDownloadState.completed(element: element));
 }

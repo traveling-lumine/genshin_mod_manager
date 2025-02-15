@@ -89,12 +89,9 @@ class __TurnstileWebviewState extends State<_TurnstileWebview>
     } else {
       return Webview(
         _controller,
-        permissionRequested: (
-          final url,
-          final permissionKind,
-          final isUserInitiated,
-        ) async =>
-            _onPermissionRequested(
+        permissionRequested:
+            (final url, final permissionKind, final isUserInitiated) async =>
+                _onPermissionRequested(
           context,
           url,
           permissionKind,

@@ -146,10 +146,8 @@ class StoreElement extends ConsumerWidget {
                     expiresAtDateTime.difference(DateTime.now()).inDays < 7,
                 child: Text(
                   'Expires soon!',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style:
+                      TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -224,8 +222,10 @@ class StoreElement extends ConsumerWidget {
                     Colors.black.withValues(alpha: 0.6),
                     BlendMode.darken,
                   ),
-                  child:
-                      AutoResizeImage(image: imageProvider, fit: BoxFit.cover),
+                  child: AutoResizeImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
@@ -260,10 +260,7 @@ class StoreElement extends ConsumerWidget {
                 color = Colors.red;
               }
               return Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 1,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 margin: const EdgeInsets.symmetric(horizontal: 2),
                 decoration: BoxDecoration(
                   border: Border.all(color: color),
@@ -271,10 +268,7 @@ class StoreElement extends ConsumerWidget {
                 ),
                 child: Text(
                   e,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: color),
                 ),
               );
             }),

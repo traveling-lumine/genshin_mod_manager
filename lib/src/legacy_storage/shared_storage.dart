@@ -220,10 +220,7 @@ Future<AppConfig?> migrateUseCase({
           minExtent: 440,
         ),
     };
-    final config2 = facade.storeValue(
-      columnStrategy,
-      mediator,
-    );
+    final config2 = facade.storeValue(columnStrategy, mediator);
     config = config.copyWith(
       entry: {
         ...config.entry,
@@ -248,10 +245,7 @@ Future<AppConfig?> migrateUseCase({
       );
       gameMap[game] = gameConfig;
     }
-    final game = GameConfigMediator(
-      gameConfig: gameMap,
-      current: lastGame,
-    );
+    final game = GameConfigMediator(gameConfig: gameMap, current: lastGame);
     final config2 = facade.storeValue(games, game);
     config = config.copyWith(
       entry: {

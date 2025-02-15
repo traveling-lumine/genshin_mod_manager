@@ -15,6 +15,9 @@ import 'route/loading.dart';
 import 'route/nahida_store.dart';
 import 'route/setting.dart';
 import 'route/welcome.dart';
+import 'widget/category_provider_widget.dart';
+import 'widget/empty_game_redirector.dart';
+import 'widget/game_redirector.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
@@ -36,11 +39,12 @@ class _MyAppState extends ConsumerState<MyApp> {
       GoRoute(
         name: RouteNames.firstpage.name,
         path: '/firstpage',
-        builder: (final context, final state) => const FirstRoute(),
+        builder: (final context, final state) =>
+            const GameRedirector(child: FirstRoute()),
       ),
       ShellRoute(
         builder: (final context, final state, final child) =>
-            HomeShell(child: child),
+            EmptyGameRedirector(child: HomeShell(child: child)),
         routes: [
           GoRoute(
             name: RouteNames.home.name,
@@ -75,9 +79,12 @@ class _MyAppState extends ConsumerState<MyApp> {
                 builder: (final context, final state) {
                   final categoryName =
                       state.pathParameters[RouteParams.category.name]!;
-                  return CategoryRoute(
+                  return CategoryProviderWidget(
+                    builder: (final category) => CategoryRoute(
+                      category: category,
+                      key: ValueKey(categoryName),
+                    ),
                     categoryName: categoryName,
-                    key: ValueKey(categoryName),
                   );
                 },
               ),

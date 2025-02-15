@@ -4,13 +4,12 @@ import '../entity/app_config.dart';
 import '../entity/entries.dart';
 
 class AppConfigFacadeImpl implements AppConfigFacade {
-  const AppConfigFacadeImpl({required this.config});
-
-  final AppConfig? config;
+  const AppConfigFacadeImpl({required this.currentConfig});
+  final AppConfig? currentConfig;
 
   @override
   T obtainValue<T>(final AppConfigEntry<T> entry) {
-    final config = this.config;
+    final config = currentConfig;
     if (config == null) {
       if (entry == darkMode) {
         return entry.defaultValue;
@@ -32,11 +31,9 @@ class AppConfigFacadeImpl implements AppConfigFacade {
 
   @override
   AppConfig storeValue<T>(final AppConfigEntry<T> entry, final T value) {
-    final config = this.config;
+    final config = currentConfig;
     if (config == null) {
-      throw StateError(
-        'AppConfig is not initialized. Value cannot be stored.',
-      );
+      throw StateError('AppConfig is not initialized. Value cannot be stored.');
     }
     final entries = {
       ...config.entry,

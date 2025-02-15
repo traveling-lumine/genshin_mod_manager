@@ -140,20 +140,18 @@ class FilesystemImpl implements Filesystem {
 
     final controller = BehaviorSubject<FileSystemEvent?>.seeded(null);
     final stream = _getSwitchStream(dirPath);
-    final subscription = stream.listen(
-      (final event) {
-        if (event == null) {
-          return;
-        }
-        if (event is FileSystemMoveEvent) {
-          if (p.equals(event.destination ?? '', path)) {
-            controller.add(event);
-          }
-        } else if (p.equals(event.path, path)) {
+    final subscription = stream.listen((final event) {
+      if (event == null) {
+        return;
+      }
+      if (event is FileSystemMoveEvent) {
+        if (p.equals(event.destination ?? '', path)) {
           controller.add(event);
         }
-      },
-    );
+      } else if (p.equals(event.path, path)) {
+        controller.add(event);
+      }
+    });
 
     return FSSubscription(
       stream: controller.stream,

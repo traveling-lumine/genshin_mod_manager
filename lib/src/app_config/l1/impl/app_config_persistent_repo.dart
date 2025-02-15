@@ -17,20 +17,18 @@ class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
 
     final mergeStream = MergeStream([
       Stream.value(null),
-      Directory.current.watch().where(
-        (final event) {
-          if (p.equals(event.path, settingsFile.path)) {
-            return true;
+      Directory.current.watch().where((final event) {
+        if (p.equals(event.path, settingsFile.path)) {
+          return true;
+        }
+        if (event is FileSystemMoveEvent) {
+          final dest = event.destination;
+          if (dest != null) {
+            return p.equals(dest, settingsFile.path);
           }
-          if (event is FileSystemMoveEvent) {
-            final dest = event.destination;
-            if (dest != null) {
-              return p.equals(dest, settingsFile.path);
-            }
-          }
-          return false;
-        },
-      ).debounceTime(const Duration(milliseconds: 500)),
+        }
+        return false;
+      }).debounceTime(const Duration(milliseconds: 500)),
     ]).asyncMap(
       (final _) async =>
           jsonDecode(await settingsFile.readAsString()) as Map<String, dynamic>,

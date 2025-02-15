@@ -22,10 +22,7 @@ class ModToggler extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) =>
-      GestureDetector(
-        onTap: () async => _onToggle(context, ref),
-        child: child,
-      );
+      GestureDetector(onTap: () async => _onToggle(context, ref), child: child);
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {

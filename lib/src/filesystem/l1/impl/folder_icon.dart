@@ -28,10 +28,7 @@ class FolderIconRepoImpl implements FolderIconRepo {
       ),
     );
 
-    return FolderIconRepoImpl._(
-      watcher: watcher,
-      stream: stream,
-    );
+    return FolderIconRepoImpl._(watcher: watcher, stream: stream);
   }
   FolderIconRepoImpl._({
     required this.stream,

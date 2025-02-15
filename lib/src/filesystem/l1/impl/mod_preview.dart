@@ -16,10 +16,7 @@ class ModPreviewPathRepoImpl implements ModPreviewPathRepo {
       (final event) async =>
           findPreviewFileInString(await getUnder<File>(mod.path)),
     );
-    return ModPreviewPathRepoImpl._(
-      watcher: watcher,
-      stream: stream,
-    );
+    return ModPreviewPathRepoImpl._(watcher: watcher, stream: stream);
   }
 
   ModPreviewPathRepoImpl._({

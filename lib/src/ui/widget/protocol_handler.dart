@@ -7,6 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../app_config/l1/di/exe_arg.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 import '../../filesystem/l1/di/categories.dart';
 import '../../nahida/l0/di/nahida_download_queue.dart';
@@ -14,7 +15,6 @@ import '../../nahida/l0/entity/nahida_element.dart';
 import '../../nahida/l0/usecase/download_url.dart';
 import '../../nahida/l0/usecase/get_element.dart';
 import '../../nahida/l1/di/nahida_repo.dart';
-import '../../app_config/l1/di/exe_arg.dart';
 import 'turnstile_dialog.dart';
 
 String _convertUuid(final String uuid) {
@@ -250,10 +250,7 @@ class _ProtocolDialog extends HookConsumerWidget {
       ..add(StringProperty('url', url))
       ..add(StringProperty('rawUuid', rawUuid))
       ..add(
-        DiagnosticsProperty<ModCategory?>(
-          'initialCategory',
-          initialCategory,
-        ),
+        DiagnosticsProperty<ModCategory?>('initialCategory', initialCategory),
       )
       ..add(StringProperty('password', password));
   }
@@ -268,10 +265,7 @@ class _ProtocolDialog extends HookConsumerWidget {
         value: currentSelected.value?.name ?? emptyPlaceholder,
         items: categories
             .map(
-              (final e) => ComboBoxItem(
-                value: e.name,
-                child: Text(e.name),
-              ),
+              (final e) => ComboBoxItem(value: e.name, child: Text(e.name)),
             )
             .toList(),
         onChanged: (final value) {

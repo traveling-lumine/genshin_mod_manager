@@ -9,4 +9,4 @@ part 'app_config_facade.g.dart';
 
 @riverpod
 AppConfigFacade appConfigFacade(final Ref ref) =>
-    AppConfigFacadeImpl(config: ref.watch(appConfigCProvider));
+    AppConfigFacadeImpl(currentConfig: ref.watch(appConfigCProvider));

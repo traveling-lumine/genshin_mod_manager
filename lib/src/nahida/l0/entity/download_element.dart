@@ -17,9 +17,7 @@ class NahidaDownloadUrlElement with _$NahidaDownloadUrlElement {
     final NahidaDownloadUrlError? error,
   }) = _NahidaDownloadUrlElement;
 
-  factory NahidaDownloadUrlElement.fromJson(
-    final Map<String, dynamic> json,
-  ) =>
+  factory NahidaDownloadUrlElement.fromJson(final Map<String, dynamic> json) =>
       _$NahidaDownloadUrlElementFromJson(json);
 }
 

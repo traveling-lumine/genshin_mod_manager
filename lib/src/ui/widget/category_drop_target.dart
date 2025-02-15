@@ -48,10 +48,7 @@ class CategoryDropTarget extends HookConsumerWidget {
     );
   }
 
-  Widget _buildDropHint(
-    final WidgetRef ref,
-    final ValueNotifier<bool> state,
-  ) {
+  Widget _buildDropHint(final WidgetRef ref, final ValueNotifier<bool> state) {
     final context = useContext();
     final moveMethod = ref.watch(
       appConfigFacadeProvider

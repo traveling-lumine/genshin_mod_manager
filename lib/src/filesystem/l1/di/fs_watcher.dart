@@ -14,11 +14,8 @@ part 'fs_watcher.g.dart';
 FolderIconRepo folderIconPath(final Ref ref, final String categoryName) {
   final fs = ref.watch(filesystemProvider);
   final category = ModCategory(path: '/f', name: categoryName);
-  final folderIconRepoImpl = FolderIconRepoImpl(
-    fs: fs,
-    iconDir: Directory(''),
-    category: category,
-  );
+  final folderIconRepoImpl =
+      FolderIconRepoImpl(fs: fs, iconDir: Directory(''), category: category);
   ref.onDispose(folderIconRepoImpl.dispose);
   return folderIconRepoImpl;
 }

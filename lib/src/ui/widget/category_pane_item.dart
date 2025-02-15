@@ -155,8 +155,9 @@ class FolderPaneItem extends PaneItem {
                           Image.asset(
                         ref.watch(
                           appConfigFacadeProvider.select(
-                            (final value) => value
-                                .obtainValue(showPaimonAsEmptyIconFolderIcon),
+                            (final value) => value.obtainValue(
+                              showPaimonAsEmptyIconFolderIcon,
+                            ),
                           ),
                         )
                             ? 'images/app_icon.ico'

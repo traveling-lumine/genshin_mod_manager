@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import '../../l0/api/filesystem.dart';
@@ -19,10 +18,7 @@ class IniPathsRepoImpl implements IniPathsRepo {
           .where((final e) => e.pExtension.pEquals('.ini') && e.pIsEnabled)
           .toList(),
     );
-    return IniPathsRepoImpl._(
-      watcher: watcher,
-      stream: stream,
-    );
+    return IniPathsRepoImpl._(watcher: watcher, stream: stream);
   }
   IniPathsRepoImpl._({
     required this.watcher,

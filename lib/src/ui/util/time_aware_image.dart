@@ -10,10 +10,7 @@ import 'package:flutter/painting.dart';
 
 @immutable
 class TimeAwareImageKey {
-  const TimeAwareImageKey._(
-    this._providerCacheKey,
-    this._mTime,
-  );
+  const TimeAwareImageKey._(this._providerCacheKey, this._mTime);
   final Object _providerCacheKey;
   final int _mTime;
   @override
@@ -27,10 +24,7 @@ class TimeAwareImageKey {
   }
 
   @override
-  int get hashCode => Object.hash(
-        _providerCacheKey,
-        _mTime,
-      );
+  int get hashCode => Object.hash(_providerCacheKey, _mTime);
 }
 
 class TimeAwareImage extends ImageProvider<TimeAwareImageKey> {
@@ -65,9 +59,7 @@ class TimeAwareImage extends ImageProvider<TimeAwareImageKey> {
           TimeAwareImageKey._(key, mTime),
         );
       } else {
-        completer.complete(
-          TimeAwareImageKey._(key, mTime),
-        );
+        completer.complete(TimeAwareImageKey._(key, mTime));
       }
     });
     if (result != null) {

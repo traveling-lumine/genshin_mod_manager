@@ -19,9 +19,8 @@ class GameSelector extends HookConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final value = ref.watch(
-      appConfigFacadeProvider.select(
-        (final value) => value.obtainValue(games).current!,
-      ),
+      appConfigFacadeProvider
+          .select((final value) => value.obtainValue(games).current!),
     );
     return Row(
       mainAxisSize: MainAxisSize.min,

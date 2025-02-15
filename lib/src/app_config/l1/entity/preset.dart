@@ -22,10 +22,7 @@ class PresetData with _$PresetData {
           in (json['local'] as Map<String, dynamic>).entries)
         key: PresetListMap.fromJson(value as Map<String, dynamic>),
     };
-    return PresetData(
-      global: global,
-      local: local,
-    );
+    return PresetData(global: global, local: local);
   }
 
   Map<String, dynamic> toJson() => {

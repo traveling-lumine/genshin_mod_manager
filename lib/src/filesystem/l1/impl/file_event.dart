@@ -10,10 +10,7 @@ class FileEventImpl implements FileEvent {
     required final String path,
   }) {
     final watcher = fs.watchFile(path: path);
-    return FileEventImpl._(
-      watcher: watcher,
-      stream: watcher.stream,
-    );
+    return FileEventImpl._(watcher: watcher, stream: watcher.stream);
   }
 
   FileEventImpl._({

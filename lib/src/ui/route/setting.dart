@@ -132,8 +132,9 @@ class SettingRoute extends ConsumerWidget {
                         };
                         final newConfig = changeGameSeparateRunOverrideUseCase(
                           appConfigFacade: ref.read(appConfigFacadeProvider),
-                          appConfigPersistentRepo:
-                              ref.read(appConfigPersistentRepoProvider),
+                          appConfigPersistentRepo: ref.read(
+                            appConfigPersistentRepoProvider,
+                          ),
                           value: res,
                         );
                         ref.read(appConfigCProvider.notifier).update(newConfig);
@@ -239,26 +240,30 @@ class SettingRoute extends ConsumerWidget {
                                 return;
                               }
                               final newColumnStrategy = watch.current.when(
-                                fixedCount: () =>
-                                    watch.copyWith(fixedCount: value),
-                                maxExtent: () =>
-                                    watch.copyWith(maxExtent: value),
-                                minExtent: () =>
-                                    watch.copyWith(minExtent: value),
+                                fixedCount: () => watch.copyWith(
+                                  fixedCount: value,
+                                ),
+                                maxExtent: () => watch.copyWith(
+                                  maxExtent: value,
+                                ),
+                                minExtent: () => watch.copyWith(
+                                  minExtent: value,
+                                ),
                               );
 
                               final newConfig = changeAppConfigUseCase<
                                   ColumnStrategySettingMediator>(
                                 appConfigFacade:
                                     ref.read(appConfigFacadeProvider),
-                                appConfigPersistentRepo:
-                                    ref.read(appConfigPersistentRepoProvider),
+                                appConfigPersistentRepo: ref.read(
+                                  appConfigPersistentRepoProvider,
+                                ),
                                 entry: columnStrategy,
                                 value: newColumnStrategy,
                               );
-                              ref.read(appConfigCProvider.notifier).update(
-                                    newConfig,
-                                  );
+                              ref
+                                  .read(appConfigCProvider.notifier)
+                                  .update(newConfig);
                             },
                             mode: SpinButtonPlacementMode.none,
                           ),
@@ -397,8 +402,9 @@ class _ColorChanger extends ConsumerWidget {
               height: 32,
               decoration: BoxDecoration(
                 color: ref.watch(
-                  appConfigFacadeProvider
-                      .select((final value) => value.obtainValue(entry)),
+                  appConfigFacadeProvider.select(
+                    (final value) => value.obtainValue(entry),
+                  ),
                 ),
                 border: Border.all(
                   color: FluentTheme.of(context).inactiveColor,

@@ -12,15 +12,12 @@ import 'filesystem.dart';
 part 'mods_in_category.g.dart';
 
 @riverpod
-ModsInCategory modsInCategory(
-  final Ref ref,
-  final ModCategory category,
-) {
+ModsInCategory modsInCategory(final Ref ref, final ModCategory category) {
   final data = ModsInCategoryImpl(
     category: category,
     enabledModsFirst: ref.watch(
       appConfigFacadeProvider
-          .select((final value) => value.obtainValue(darkMode)),
+          .select((final value) => value.obtainValue(showEnabledModsFirst)),
     ),
     fs: ref.watch(filesystemProvider),
   );

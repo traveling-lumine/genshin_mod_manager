@@ -7,7 +7,6 @@ import 'package:fluent_ui/fluent_ui.dart'
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../app_config/l0/usecase/change_app_config.dart';
@@ -19,13 +18,13 @@ import '../../app_version/di/is_outdated.dart';
 import '../../filesystem/l1/di/categories.dart';
 import '../../filesystem/l1/impl/path_op_string.dart';
 import '../../l10n/app_localizations.dart';
-import '../../app_config/l1/di/exe_arg.dart';
 import '../constants.dart';
 import '../util/display_infobar.dart';
 import '../widget/appbar.dart';
 import '../widget/category_pane_item.dart';
 import '../widget/download_queue.dart';
 import '../widget/protocol_handler.dart';
+import '../widget/protocol_url_forward_widget.dart';
 import '../widget/run_pane.dart';
 import '../widget/third_party/fluent_ui/auto_suggest_box.dart';
 import '../widget/update_popup.dart';
@@ -40,43 +39,33 @@ class HomeShell extends StatefulHookConsumerWidget {
 }
 
 class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
-    with WindowListener, ProtocolListener {
+    with WindowListener {
   static const _navigationPaneOpenWidth = 270.0;
-  final _flyoutController = FlyoutController();
-  final _flyoutController2 = FlyoutController();
 
   @override
   Widget build(final BuildContext context) {
-    ref.listen(
-        appConfigFacadeProvider.select(
-          (final value) => value.obtainValue(games).gameConfig.keys.toList(),
-        ), (final previous, final next) {
-      if (next.isEmpty) {
-        context.goNamed(RouteNames.firstpage.name);
-      }
-    });
-
     final game = ref.watch(
-      appConfigFacadeProvider.select(
-        (final value) => value.obtainValue(games).current!,
-      ),
+      appConfigFacadeProvider
+          .select((final value) => value.obtainValue(games).current!),
     );
     final updateMarker =
         (ref.watch(isOutdatedProvider).valueOrNull ?? false) ? 'update' : '';
-    return WindowListenerWidget(
-      child: UpdatePopup(
-        child: DownloadQueue(
-          child: ProtocolHandlerWidget(
-            runBothCallback: _runBoth,
-            runLauncherCallback: _runLauncher,
-            runMigotoCallback: _runMigoto,
-            child: NavigationView(
-              appBar: getAppbar(
-                AppLocalizations.of(context)!.modManager(game, updateMarker),
-                presetControl: true,
+    return ProtocolUrlForwardWidget(
+      child: WindowListenerWidget(
+        child: UpdatePopup(
+          child: DownloadQueue(
+            child: ProtocolHandlerWidget(
+              runBothCallback: _runBoth,
+              runLauncherCallback: _runLauncher,
+              runMigotoCallback: _runMigoto,
+              child: NavigationView(
+                appBar: getAppbar(
+                  AppLocalizations.of(context)!.modManager(game, updateMarker),
+                  presetControl: true,
+                ),
+                pane: _buildPane(),
+                paneBodyBuilder: (final item, final body) => widget.child,
               ),
-              pane: _buildPane(),
-              paneBodyBuilder: (final item, final body) => widget.child,
             ),
           ),
         ),
@@ -87,16 +76,12 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   @override
   void dispose() {
     WindowManager.instance.removeListener(this);
-    protocolHandler.removeListener(this);
-    _flyoutController.dispose();
-    _flyoutController2.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    protocolHandler.addListener(this);
     WindowManager.instance.addListener(this);
 
     final read = ref.read(appConfigFacadeProvider).obtainValue(windowSize);
@@ -106,26 +91,9 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   }
 
   @override
-  void onProtocolUrlReceived(final String url) {
-    ref.read(argProviderProvider.notifier).add(url);
-  }
-
-  @override
   void onWindowResized() {
     super.onWindowResized();
-    unawaited(
-      WindowManager.instance.getSize().then(
-        (final value) {
-          final newState = changeAppConfigUseCase(
-            appConfigFacade: ref.read(appConfigFacadeProvider),
-            appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
-            entry: windowSize,
-            value: value,
-          );
-          ref.read(appConfigCProvider.notifier).update(newState);
-        },
-      ),
-    );
+    unawaited(_saveNewWindowSize());
   }
 
   Widget _buildAutoSuggestBox(
@@ -229,9 +197,8 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
   List<PaneItemAction> _buildPaneItemActions() {
     const icon = Icon(FluentIcons.user_window);
     final select = ref.watch(
-      appConfigFacadeProvider.select(
-        (final value) => value.obtainValue(runTogether),
-      ),
+      appConfigFacadeProvider
+          .select((final value) => value.obtainValue(runTogether)),
     );
     final override = ref.watch(
       appConfigFacadeProvider.select(
@@ -246,7 +213,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
               icon: icon,
               title: const Text('Run 3d migoto & launcher'),
               onTap: _runBoth,
-              flyoutController: _flyoutController,
             ),
           ]
         : [
@@ -255,14 +221,12 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
               icon: icon,
               title: const Text('Run 3d migoto'),
               onTap: _runMigoto,
-              flyoutController: _flyoutController,
             ),
             RunAndExitPaneAction(
               key: const Key('<run_launcher>'),
               icon: icon,
               title: const Text('Run launcher'),
               onTap: _runLauncher,
-              flyoutController: _flyoutController2,
             ),
           ];
   }
@@ -307,5 +271,16 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     final pwd = file.parent.path;
     final pName = file.path.pBasename;
     await Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
+  }
+
+  Future<void> _saveNewWindowSize() async {
+    final newSize = await WindowManager.instance.getSize();
+    final newState = changeAppConfigUseCase(
+      appConfigFacade: ref.read(appConfigFacadeProvider),
+      appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
+      entry: windowSize,
+      value: newSize,
+    );
+    ref.read(appConfigCProvider.notifier).update(newState);
   }
 }

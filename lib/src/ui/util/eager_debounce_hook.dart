@@ -4,9 +4,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-T? useEagerDebounced<T>(final T toDebounce) => use(
-      _EagerDebouncedHook(toDebounce: toDebounce),
-    );
+T? useEagerDebounced<T>(final T toDebounce) =>
+    use(_EagerDebouncedHook(toDebounce: toDebounce));
 
 class _EagerDebouncedHook<T> extends Hook<T?> {
   const _EagerDebouncedHook({required this.toDebounce});

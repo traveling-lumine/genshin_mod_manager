@@ -55,7 +55,9 @@ class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
         _buildIniHeader(widget.iniFile.path, ref),
         ...iniSections.when(
           data: (final data) => data
-              .where((final e) => e is! IniStatementVariable || e.numCycles > 1)
+              .where(
+                (final e) => e is! IniStatementVariable || e.numCycles > 1,
+              )
               .map(
                 (final e) => switch (e) {
                   IniStatementSection(:final name) => Text(name),

@@ -5,10 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../widget/mod_preview_image.dart';
 
-Page<dynamic> heroPage(
-  final BuildContext context,
-  final String heroTag,
-) =>
+Page<dynamic> heroPage(final BuildContext context, final String heroTag) =>
     CustomTransitionPage(
       barrierDismissible: true,
       opaque: false,

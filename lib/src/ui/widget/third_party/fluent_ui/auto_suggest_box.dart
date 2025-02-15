@@ -521,9 +521,8 @@ class AutoSuggestBoxState<T> extends State<AutoSuggestBox<T>> {
   late FocusNode _focusNode = widget.focusNode ?? FocusNode();
   OverlayEntry? _entry;
   final LayerLink _layerLink = LayerLink();
-  final GlobalKey _textBoxKey = GlobalKey(
-    debugLabel: "AutoSuggestBox's TextBox Key",
-  );
+  final GlobalKey _textBoxKey =
+      GlobalKey(debugLabel: "AutoSuggestBox's TextBox Key");
 
   late TextEditingController _controller;
   final FocusScopeNode _overlayNode = FocusScopeNode();
@@ -654,11 +653,8 @@ class AutoSuggestBoxState<T> extends State<AutoSuggestBox<T>> {
   bool get isOverlayVisible => _entry != null;
 
   void _insertOverlay() {
-    final overlayState = Overlay.of(
-      context,
-      rootOverlay: true,
-      debugRequiredFor: widget,
-    );
+    final overlayState =
+        Overlay.of(context, rootOverlay: true, debugRequiredFor: widget);
 
     _entry = OverlayEntry(
       builder: (final context) {
@@ -680,10 +676,8 @@ class AutoSuggestBoxState<T> extends State<AutoSuggestBox<T>> {
         final screenHeight = MediaQuery.sizeOf(context).height -
             MediaQuery.viewPaddingOf(context).bottom;
         final overlayY = globalOffset.dy + box.size.height;
-        final maxHeight = (screenHeight - overlayY).clamp(
-          0.0,
-          widget.maxPopupHeight,
-        );
+        final maxHeight =
+            (screenHeight - overlayY).clamp(0.0, widget.maxPopupHeight);
 
         Widget child = PositionedDirectional(
           width: box.size.width,
@@ -774,9 +768,8 @@ class AutoSuggestBoxState<T> extends State<AutoSuggestBox<T>> {
   }
 
   void _onSubmitted() {
-    final currentlySelectedIndex = _localItems.indexWhere(
-      (final item) => item._selected,
-    );
+    final currentlySelectedIndex =
+        _localItems.indexWhere((final item) => item._selected);
     if (currentlySelectedIndex.isNegative) {
       widget.onSubmissionFailed?.call(_controller.text);
       return;
@@ -811,10 +804,8 @@ class AutoSuggestBoxState<T> extends State<AutoSuggestBox<T>> {
               icon: const Icon(FluentIcons.chrome_close, size: 9),
               onPressed: () {
                 _controller.clear();
-                widget.onChanged?.call(
-                  _controller.text,
-                  TextChangedReason.cleared,
-                );
+                widget.onChanged
+                    ?.call(_controller.text, TextChangedReason.cleared);
               },
             ),
           ),
@@ -841,9 +832,8 @@ class AutoSuggestBoxState<T> extends State<AutoSuggestBox<T>> {
             return KeyEventResult.ignored;
           }
 
-          final currentlySelectedIndex = _localItems.indexWhere(
-            (final item) => item._selected,
-          );
+          final currentlySelectedIndex =
+              _localItems.indexWhere((final item) => item._selected);
 
           void select(final int index) {
             _unselectAll();
@@ -1094,9 +1084,7 @@ class _AutoSuggestBoxOverlayState<T> extends State<_AutoSuggestBoxOverlay<T>> {
           constraints: BoxConstraints(maxHeight: widget.maxHeight),
           decoration: ShapeDecoration(
             shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(4),
-              ),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(4)),
             ),
             color: theme.resources.cardBackgroundFillColorDefault,
             shadows: [
@@ -1123,9 +1111,13 @@ class _AutoSuggestBoxOverlayState<T> extends State<_AutoSuggestBoxOverlay<T>> {
                 if (sortedItems.isEmpty) {
                   result = widget.noResultsFoundBuilder?.call(context) ??
                       Padding(
-                        padding: const EdgeInsetsDirectional.only(bottom: 4),
+                        padding: const EdgeInsetsDirectional.only(
+                          bottom: 4,
+                        ),
                         child: _AutoSuggestBoxOverlayTile(
-                          text: Text(localizations.noResultsFoundLabel),
+                          text: Text(
+                            localizations.noResultsFoundLabel,
+                          ),
                         ),
                       );
                 } else {
@@ -1238,14 +1230,8 @@ class __AutoSuggestBoxOverlayTileState extends State<_AutoSuggestBoxOverlayTile>
     return ListTile.selectable(
       semanticLabel: widget.semanticLabel,
       title: EntrancePageTransition(
-        animation: Tween<double>(
-          begin: 0.75,
-          end: 1,
-        ).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Curves.easeOut,
-          ),
+        animation: Tween<double>(begin: 0.75, end: 1).animate(
+          CurvedAnimation(parent: controller, curve: Curves.easeOut),
         ),
         child: DefaultTextStyle.merge(
           style: theme.typography.body,
