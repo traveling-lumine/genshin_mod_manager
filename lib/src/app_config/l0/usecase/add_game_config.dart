@@ -1,9 +1,14 @@
-import '../entity/app_config.dart';
-import '../entity/game_config.dart';
+import 'dart:async';
+import 'dart:io';
+
+import 'package:path/path.dart' as p;
+
 import '../api/app_config_facade.dart';
 import '../api/app_config_persistent_repo.dart';
+import '../entity/app_config.dart';
 import '../entity/entries.dart';
 import '../entity/game_already_exists_exception.dart';
+import '../entity/game_config.dart';
 import 'change_app_config.dart';
 
 AppConfig addGameConfig({
@@ -16,6 +21,7 @@ AppConfig addGameConfig({
   if (currentGameConfig.gameConfig.containsKey(gameName) && !force) {
     throw GameAlreadyExistsException(gameName);
   }
+  unawaited(Directory(p.join('Resources', gameName)).create(recursive: true));
   final storeValue = currentGameConfig.copyWith(
     current: gameName,
     gameConfig: {

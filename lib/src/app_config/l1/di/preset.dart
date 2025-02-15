@@ -77,7 +77,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
         value: res,
         appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
       );
-      ref.read(appConfigCProvider.notifier).update(newState);
+      ref.read(appConfigCProvider.notifier).setData(newState);
     } else {
       final bundledPreset =
           PresetListMap(bundledPresets: {name: presetTargetData});
@@ -87,7 +87,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
         value: res,
         appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
       );
-      ref.read(appConfigCProvider.notifier).update(newState);
+      ref.read(appConfigCProvider.notifier).setData(newState);
     }
   }
 
@@ -131,7 +131,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
       value: res,
       appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
     );
-    ref.read(appConfigCProvider.notifier).update(newState);
+    ref.read(appConfigCProvider.notifier).setData(newState);
   }
 
   @override
@@ -170,7 +170,7 @@ class LocalPresetNotifier extends _$LocalPresetNotifier
       value: res,
       appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
     );
-    ref.read(appConfigCProvider.notifier).update(newState);
+    ref.read(appConfigCProvider.notifier).setData(newState);
   }
 
   void _toggleLocal(
@@ -228,7 +228,7 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
         value: res,
         appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
       );
-      ref.read(appConfigCProvider.notifier).update(newState);
+      ref.read(appConfigCProvider.notifier).setData(newState);
     } else {
       final res = PresetData(global: {name: bpd}, local: {});
       final newState = changePresetUseCase(
@@ -236,7 +236,7 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
         value: res,
         appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
       );
-      ref.read(appConfigCProvider.notifier).update(newState);
+      ref.read(appConfigCProvider.notifier).setData(newState);
     }
   }
 
@@ -277,7 +277,7 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
       value: res,
       appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
     );
-    ref.read(appConfigCProvider.notifier).update(newState);
+    ref.read(appConfigCProvider.notifier).setData(newState);
   }
 
   @override
@@ -312,7 +312,7 @@ class GlobalPresetNotifier extends _$GlobalPresetNotifier
       value: res,
       appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
     );
-    ref.read(appConfigCProvider.notifier).update(newState);
+    ref.read(appConfigCProvider.notifier).setData(newState);
   }
 
   void _toggleGlobal(final Map<String, List<String>> directives) {

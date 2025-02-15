@@ -106,7 +106,7 @@ class GameSelector extends HookConsumerWidget {
               entry: games,
               value: newGameConfig,
             );
-            ref.read(appConfigCProvider.notifier).update(newConfig);
+            ref.read(appConfigCProvider.notifier).setData(newConfig);
           },
           value: value,
         ),
@@ -171,7 +171,7 @@ class GameSelector extends HookConsumerWidget {
                   entry: games,
                   value: newGameConfig,
                 );
-                ref.read(appConfigCProvider.notifier).update(newConfig);
+                ref.read(appConfigCProvider.notifier).setData(newConfig);
               },
               child: const Text('Add'),
             ),
@@ -226,7 +226,7 @@ class GameSelector extends HookConsumerWidget {
                     entry: games,
                     value: newGameConfig,
                   );
-                  ref.read(appConfigCProvider.notifier).update(newConfig);
+                  ref.read(appConfigCProvider.notifier).setData(newConfig);
                 },
                 child: const Text('Delete'),
               ),

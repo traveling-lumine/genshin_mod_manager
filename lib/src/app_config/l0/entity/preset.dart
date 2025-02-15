@@ -9,8 +9,6 @@ class PresetData with _$PresetData {
     required final Map<String, PresetListMap> global,
     required final Map<String, PresetListMap> local,
   }) = _PresetData;
-  const PresetData._();
-
   factory PresetData.fromJson(final Map<String, dynamic> json) {
     final global = {
       for (final MapEntry(:key, :value)
@@ -25,6 +23,8 @@ class PresetData with _$PresetData {
     return PresetData(global: global, local: local);
   }
 
+  const PresetData._();
+
   Map<String, dynamic> toJson() => {
         'global': {
           for (final MapEntry(:key, :value) in global.entries)
@@ -38,12 +38,27 @@ class PresetData with _$PresetData {
 }
 
 @freezed
+class PresetList with _$PresetList {
+  const factory PresetList({
+    required final List<String> mods,
+  }) = _PresetList;
+  factory PresetList.fromJson(final dynamic json) {
+    if (json is List) {
+      return PresetList(mods: List<String>.from(json));
+    }
+    throw Exception('Invalid value type');
+  }
+
+  const PresetList._();
+
+  List<String> toJson() => mods;
+}
+
+@freezed
 class PresetListMap with _$PresetListMap {
   const factory PresetListMap({
     required final Map<String, PresetList> bundledPresets,
   }) = _PresetListMap;
-  const PresetListMap._();
-
   factory PresetListMap.fromJson(final Map<String, dynamic> json) {
     final map = {
       for (final MapEntry(:key, :value) in json.entries)
@@ -52,25 +67,10 @@ class PresetListMap with _$PresetListMap {
     return PresetListMap(bundledPresets: map);
   }
 
+  const PresetListMap._();
+
   Map<String, List<String>> toJson() => {
         for (final MapEntry(:key, :value) in bundledPresets.entries)
           key: value.toJson(),
       };
-}
-
-@freezed
-class PresetList with _$PresetList {
-  const factory PresetList({
-    required final List<String> mods,
-  }) = _PresetList;
-  const PresetList._();
-
-  factory PresetList.fromJson(final dynamic json) {
-    if (json is List) {
-      return PresetList(mods: List<String>.from(json));
-    }
-    throw Exception('Invalid value type');
-  }
-
-  List<String> toJson() => mods;
 }

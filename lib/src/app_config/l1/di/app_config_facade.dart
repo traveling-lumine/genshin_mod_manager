@@ -8,5 +8,7 @@ import 'app_config.dart';
 part 'app_config_facade.g.dart';
 
 @riverpod
-AppConfigFacade appConfigFacade(final Ref ref) =>
-    AppConfigFacadeImpl(currentConfig: ref.watch(appConfigCProvider));
+AppConfigFacade appConfigFacade(final Ref ref) {
+  final watch = ref.watch(appConfigCProvider);
+  return AppConfigFacadeImpl(currentConfig: watch.valueOrNull);
+}

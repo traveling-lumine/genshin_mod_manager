@@ -281,6 +281,6 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
       entry: windowSize,
       value: newSize,
     );
-    ref.read(appConfigCProvider.notifier).update(newState);
+    ref.read(appConfigCProvider.notifier).setData(newState);
   }
 }

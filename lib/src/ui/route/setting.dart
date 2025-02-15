@@ -66,7 +66,7 @@ class SettingRoute extends ConsumerWidget {
                       ref.read(appConfigPersistentRepoProvider),
                   value: dir.path,
                 );
-                ref.read(appConfigCProvider.notifier).update(newConfig);
+                ref.read(appConfigCProvider.notifier).setData(newConfig);
               },
             ),
             _PathSelectItem(
@@ -85,7 +85,7 @@ class SettingRoute extends ConsumerWidget {
                       ref.read(appConfigPersistentRepoProvider),
                   value: file.path,
                 );
-                ref.read(appConfigCProvider.notifier).update(newConfig);
+                ref.read(appConfigCProvider.notifier).setData(newConfig);
               },
             ),
             _PathSelectItem(
@@ -104,7 +104,7 @@ class SettingRoute extends ConsumerWidget {
                       ref.read(appConfigPersistentRepoProvider),
                   value: file.path,
                 );
-                ref.read(appConfigCProvider.notifier).update(newConfig);
+                ref.read(appConfigCProvider.notifier).setData(newConfig);
               },
             ),
             const _SectionHeader(title: 'Options'),
@@ -137,7 +137,9 @@ class SettingRoute extends ConsumerWidget {
                           ),
                           value: res,
                         );
-                        ref.read(appConfigCProvider.notifier).update(newConfig);
+                        ref
+                            .read(appConfigCProvider.notifier)
+                            .setData(newConfig);
                       },
                     ),
                   ),
@@ -212,7 +214,7 @@ class SettingRoute extends ConsumerWidget {
                         entry: columnStrategy,
                         value: newColumnStrategy,
                       );
-                      ref.read(appConfigCProvider.notifier).update(newConfig);
+                      ref.read(appConfigCProvider.notifier).setData(newConfig);
                     },
                   ),
                   content: Padding(
@@ -263,7 +265,7 @@ class SettingRoute extends ConsumerWidget {
                               );
                               ref
                                   .read(appConfigCProvider.notifier)
-                                  .update(newConfig);
+                                  .setData(newConfig);
                             },
                             mode: SpinButtonPlacementMode.none,
                           ),
@@ -467,7 +469,7 @@ class _ColorPickerDialog extends HookConsumerWidget {
               entry: entry,
               value: defaultColor,
             );
-            ref.read(appConfigCProvider.notifier).update(newState);
+            ref.read(appConfigCProvider.notifier).setData(newState);
             Navigator.of(context).pop();
           },
           child: const Text('Restore default'),
@@ -487,7 +489,7 @@ class _ColorPickerDialog extends HookConsumerWidget {
               entry: entry,
               value: currentColor.value,
             );
-            ref.read(appConfigCProvider.notifier).update(newState);
+            ref.read(appConfigCProvider.notifier).setData(newState);
             Navigator.of(context).pop();
           },
           child: const Text('Set'),
@@ -616,7 +618,7 @@ class _SwitchItem extends StatelessWidget {
                   entry: entry,
                   value: value,
                 );
-                ref.read(appConfigCProvider.notifier).update(newState);
+                ref.read(appConfigCProvider.notifier).setData(newState);
               },
             ),
           ),
@@ -657,7 +659,7 @@ class _StringItem extends ConsumerWidget {
               entry: iniEditorArg,
               value: value,
             );
-            ref.read(appConfigCProvider.notifier).update(newState);
+            ref.read(appConfigCProvider.notifier).setData(newState);
           },
           initialValue: initString,
           placeholder: 'Arguments...',

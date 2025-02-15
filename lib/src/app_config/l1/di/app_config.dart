@@ -8,16 +8,12 @@ part 'app_config.g.dart';
 @riverpod
 class AppConfigC extends _$AppConfigC {
   @override
-  AppConfig? build() {
+  Stream<AppConfig> build() {
     final appConfig = ref.watch(appConfigPersistentRepoProvider);
-    final subscription = appConfig.stream.listen((final config) {
-      state = AppConfig.fromJson(config);
-    });
-    ref.onDispose(subscription.cancel);
-    return null;
+    return appConfig.stream.map(AppConfig.fromJson);
   }
 
-  void update(final AppConfig appConfig) {
-    state = appConfig;
+  void setData(final AppConfig appConfig) {
+    state = AsyncValue.data(appConfig);
   }
 }

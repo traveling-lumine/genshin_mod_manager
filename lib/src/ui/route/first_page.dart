@@ -43,6 +43,6 @@ class FirstRoute extends ConsumerWidget {
       appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
       gameName: value,
     );
-    ref.read(appConfigCProvider.notifier).update(newConfig);
+    ref.read(appConfigCProvider.notifier).setData(newConfig);
   }
 }
