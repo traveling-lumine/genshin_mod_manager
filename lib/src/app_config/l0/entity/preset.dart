@@ -10,14 +10,20 @@ class PresetData with _$PresetData {
     required final Map<String, PresetListMap> local,
   }) = _PresetData;
   factory PresetData.fromJson(final Map<String, dynamic> json) {
+    final rawJsonGlobal = json['global'];
+    final rawJsonLocal = json['local'];
+    final jsonGlobal = rawJsonGlobal is Map<String, dynamic>
+        ? rawJsonGlobal
+        : <String, dynamic>{};
+    final jsonLocal = rawJsonLocal is Map<String, dynamic>
+        ? rawJsonLocal
+        : <String, dynamic>{};
     final global = {
-      for (final MapEntry(:key, :value)
-          in (json['global'] as Map<String, dynamic>).entries)
+      for (final MapEntry(:key, :value) in jsonGlobal.entries)
         key: PresetListMap.fromJson(value as Map<String, dynamic>),
     };
     final local = {
-      for (final MapEntry(:key, :value)
-          in (json['local'] as Map<String, dynamic>).entries)
+      for (final MapEntry(:key, :value) in jsonLocal.entries)
         key: PresetListMap.fromJson(value as Map<String, dynamic>),
     };
     return PresetData(global: global, local: local);
@@ -26,14 +32,16 @@ class PresetData with _$PresetData {
   const PresetData._();
 
   Map<String, dynamic> toJson() => {
-        'global': {
-          for (final MapEntry(:key, :value) in global.entries)
-            key: value.toJson(),
-        },
-        'local': {
-          for (final MapEntry(:key, :value) in local.entries)
-            key: value.toJson(),
-        },
+        if (global.isNotEmpty)
+          'global': {
+            for (final MapEntry(:key, :value) in global.entries)
+              if (value.bundledPresets.isNotEmpty) key: value.toJson(),
+          },
+        if (local.isNotEmpty)
+          'local': {
+            for (final MapEntry(:key, :value) in local.entries)
+              if (value.bundledPresets.isNotEmpty) key: value.toJson(),
+          },
       };
 }
 

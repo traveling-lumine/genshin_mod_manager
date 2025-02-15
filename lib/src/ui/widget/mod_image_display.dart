@@ -67,17 +67,12 @@ class ModImageDisplay extends ConsumerWidget {
                     Colors.black.withValues(alpha: 0.6),
                     BlendMode.darken,
                   ),
-                  child: LatestImage(
-                    path: imagePath,
-                    fit: BoxFit.cover,
-                  ),
+                  child: LatestImage(path: imagePath, fit: BoxFit.cover),
                 ),
               ),
             ),
           ),
-          Center(
-            child: ModFlyoutImage(imagePath: imagePath),
-          ),
+          Center(child: ModFlyoutImage(imagePath: imagePath)),
         ],
       );
 

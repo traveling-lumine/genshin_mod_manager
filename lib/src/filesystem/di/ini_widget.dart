@@ -4,16 +4,32 @@ import 'dart:io';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../l0/entity/ini.dart';
-import '../l1/di/file_event.dart';
+import '../l1/di/filesystem.dart';
 
 part 'ini_widget.g.dart';
+
+String _getLHS(final String line) {
+  final indexOfFirstEqual = line.indexOf('=');
+  return line.substring(0, indexOfFirstEqual).trim();
+}
+
+String _getRHS(final String line) {
+  final indexOfFirstEqual = line.indexOf('=');
+  final start = indexOfFirstEqual + 1;
+  if (start >= line.length) {
+    return '';
+  }
+  return line.substring(start).trim();
+}
 
 @riverpod
 class IniLines extends _$IniLines {
   @override
   Stream<List<IniStatement>> build(final IniFile iniFile) {
-    final watch = ref.watch(fileEventProvider(path: iniFile.path));
-    return watch.stream.asyncMap((final event) {
+    final fs = ref.watch(filesystemProvider);
+    final watcher = fs.watchFile(path: iniFile.path);
+    ref.onDispose(watcher.cancel);
+    return watcher.stream.asyncMap((final event) {
       final List<String> lines;
       final statements = <IniStatement>[];
       try {
@@ -95,18 +111,4 @@ class IniLines extends _$IniLines {
       flush: true,
     );
   }
-}
-
-String _getLHS(final String line) {
-  final indexOfFirstEqual = line.indexOf('=');
-  return line.substring(0, indexOfFirstEqual).trim();
-}
-
-String _getRHS(final String line) {
-  final indexOfFirstEqual = line.indexOf('=');
-  final start = indexOfFirstEqual + 1;
-  if (start >= line.length) {
-    return '';
-  }
-  return line.substring(start).trim();
 }

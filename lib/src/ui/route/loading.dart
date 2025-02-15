@@ -86,13 +86,10 @@ class _LoadingRouteState extends ConsumerState<LoadingRoute> {
       );
 
   Widget _buildConfigStatus() => ref.watch(appConfigCProvider).when(
-        data: (final config) => const Text(
-          'Configuration loading: done',
-        ),
+        data: (final config) => const Text('Configuration loading: done'),
         loading: () => const Text('Configuration loading: in progress...'),
-        error: (final error, final stackTrace) => Text(
-          'Configuration loading: failed: $error',
-        ),
+        error: (final error, final stackTrace) =>
+            Text('Configuration loading: failed: $error'),
       );
 
   Future<void> _createIconFolders(final AppConfigFacade facade) async {

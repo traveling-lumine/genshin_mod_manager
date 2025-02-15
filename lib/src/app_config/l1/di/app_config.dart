@@ -14,6 +14,6 @@ class AppConfigC extends _$AppConfigC {
   }
 
   void setData(final AppConfig appConfig) {
-    state = AsyncValue.data(appConfig);
+    state = AsyncData(appConfig);
   }
 }

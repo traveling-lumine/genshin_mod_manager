@@ -4,7 +4,6 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../filesystem/l1/di/file_event.dart';
 import '../util/time_aware_image.dart';
@@ -22,20 +21,12 @@ class LatestImage extends HookConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final curMTime = useState(_getMTime());
-    final evtWatcher = ref.watch(fileEventProvider(path: path));
-    useEffect(
-      () {
-        final listen = evtWatcher.stream
-            .debounceTime(const Duration(milliseconds: 300))
-            .listen((final event) {
-          if (File(path).existsSync()) {
-            curMTime.value = _getMTime();
-          }
-        });
-        return listen.cancel;
-      },
-      [evtWatcher.stream],
-    );
+    ref.listen(fileEventDebouncedProvider(path: path),
+        (final previous, final next) {
+      if (next.hasValue && File(path).existsSync()) {
+        curMTime.value = _getMTime();
+      }
+    });
 
     final value = curMTime.value;
     if (value == null) {

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
-import 'package:rxdart/rxdart.dart';
 
 import '../../l0/api/filesystem.dart';
 import '../../l0/api/watcher.dart';
@@ -71,11 +70,7 @@ class FilesystemImpl implements Filesystem {
     }
     _isPaused = false;
 
-    for (final path in _watchStream.keys) {
-      final stream = _watchStream[path];
-      if (stream == null) {
-        continue;
-      }
+    for (final MapEntry(key: path, value: stream) in _watchStream.entries) {
       stream.$1.add(null); // send null to indicate that the stream is resumed
       if (Directory(path).existsSync()) {
         _watchStream[path] = (
@@ -102,15 +97,15 @@ class FilesystemImpl implements Filesystem {
     required final String path,
   }) {
     if (!Directory(path).existsSync()) {
-      final nullBehaviorSubject =
-          BehaviorSubject<FileSystemEvent?>.seeded(null);
+      final nullBehaviorSubject = StreamController<FileSystemEvent?>()
+        ..add(null);
       return FSSubscription(
-        stream: nullBehaviorSubject,
+        stream: nullBehaviorSubject.stream,
         onCancel: nullBehaviorSubject.close,
       );
     }
 
-    final controller = BehaviorSubject<FileSystemEvent?>.seeded(null);
+    final controller = StreamController<FileSystemEvent?>()..add(null);
     final stream = _getSwitchStream(path);
     final subscription = stream.listen(controller.add);
 
@@ -129,7 +124,7 @@ class FilesystemImpl implements Filesystem {
     required final String path,
   }) {
     final dirPath = File(path).parent.path;
-    final controller = BehaviorSubject<FileSystemEvent?>.seeded(null);
+    final controller = StreamController<FileSystemEvent?>()..add(null);
     final stream = _getSwitchStream(dirPath);
     final subscription = stream.listen((final event) {
       if (event == null) {

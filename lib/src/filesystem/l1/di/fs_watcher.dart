@@ -7,7 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../app_config/l0/entity/entries.dart';
 import '../../../app_config/l1/di/app_config_facade.dart';
 import '../../l0/entity/mod_category.dart';
-import '../impl/folder_icon.dart';
+import '../impl/fsops.dart';
 import 'filesystem.dart';
 
 part 'fs_watcher.g.dart';
@@ -17,14 +17,21 @@ Stream<String?> folderIconPathStream(
   final Ref ref,
   final ModCategory category,
 ) {
-  final fs = ref.watch(filesystemProvider);
   final currentGame = ref.watch(
     appConfigFacadeProvider
         .select((final value) => value.obtainValue(games).current!),
   );
   final iconDir = Directory(p.join('Resources', currentGame));
-  final folderIconRepoImpl =
-      FolderIconRepoImpl(fs: fs, iconDir: iconDir, category: category);
-  ref.onDispose(folderIconRepoImpl.dispose);
-  return folderIconRepoImpl.stream;
+  final path = (iconDir..createSync(recursive: true)).path;
+
+  final fs = ref.watch(filesystemProvider);
+  final watcher = fs.watchFile(path: path);
+  ref.onDispose(watcher.cancel);
+  
+  return watcher.stream.asyncMap(
+    (final event) async => findPreviewFileInString(
+      await getUnder<File>(path),
+      name: category.name,
+    ),
+  );
 }

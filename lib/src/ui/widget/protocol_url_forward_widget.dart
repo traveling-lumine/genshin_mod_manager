@@ -11,13 +11,11 @@ class ProtocolUrlForwardWidget extends HookConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    useEffect(
-      () {
-        final listener = _ProtocolListenerWrapper(ref);
-        protocolHandler.addListener(listener);
-        return () => protocolHandler.removeListener(listener);
-      },
-    );
+    useEffect(() {
+      final listener = _ProtocolListenerWrapper(ref);
+      protocolHandler.addListener(listener);
+      return () => protocolHandler.removeListener(listener);
+    });
     return child;
   }
 }

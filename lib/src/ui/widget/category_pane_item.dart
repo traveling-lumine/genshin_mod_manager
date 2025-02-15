@@ -174,8 +174,7 @@ class FolderPaneItem extends PaneItem {
 
   static Widget _buildInfoBadge(final ModCategory category) => Consumer(
         builder: (final context, final ref, final child) {
-          final mods =
-              ref.watch(modsInCategoryProvider(category));
+          final mods = ref.watch(modsInCategoryProvider(category));
           return mods.when(
             data: (final data) {
               final totalCount = data.length;
@@ -191,10 +190,7 @@ class FolderPaneItem extends PaneItem {
               };
               return Text(
                 '$activeCount/$totalCount',
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(color: color, fontWeight: FontWeight.bold),
               );
             },
             error: (final error, final stackTrace) =>
