@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../filesystem/l0/entity/mod_category.dart';
 import 'nahida_element.dart';
 
 part 'download_state.freezed.dart';
@@ -18,8 +17,8 @@ sealed class NahidaDownloadState with _$NahidaDownloadState {
   }) = NahidaDownloadStateWrongPassword;
 
   const factory NahidaDownloadState.modZipExtractionException({
-    required final NahidaliveElement element,
-    required final ModCategory category,
-    required final Uint8List data,
+    required final bool writeSuccess,
+    required final String fileName,
+    final Exception? exception,
   }) = NahidaDownloadStateModZipExtractionException;
 }

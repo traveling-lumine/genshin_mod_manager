@@ -11,10 +11,12 @@ import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 import '../../filesystem/l0/usecase/move_dir.dart';
 import '../../filesystem/l1/di/fs_watcher.dart';
+import '../../filesystem/l1/di/mods_in_category.dart';
 import '../../filesystem/l1/impl/path_op_string.dart';
 import '../util/display_infobar.dart';
 import 'category_drop_target.dart';
 import 'fade_in.dart';
+import 'latest_image.dart';
 
 class FolderPaneItem extends PaneItem {
   FolderPaneItem({
@@ -26,8 +28,38 @@ class FolderPaneItem extends PaneItem {
             category.name,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          icon: _buildIcon(category.name),
+          icon: _buildIcon(category),
           body: const SizedBox.shrink(),
+          infoBadge: Consumer(
+            builder: (final context, final ref, final child) {
+              final mods = ref.watch(
+                modsInCategoryStreamProvider(category).select(
+                  (final value) => value.whenOrNull(data: (final data) => data),
+                ),
+              );
+              if (mods == null) {
+                return const SizedBox.shrink();
+              }
+              final totalCount = mods.length;
+              if (totalCount == 0) {
+                return const SizedBox.shrink();
+              }
+              final activeCount = mods.where((final e) => e.isEnabled).length;
+              final color = switch (activeCount) {
+                <= 1 => null,
+                <= 2 => Colors.yellow,
+                <= 5 => Colors.orange,
+                _ => Colors.red,
+              };
+              return Text(
+                '$activeCount/$totalCount',
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
+          ),
         );
   static const maxIconWidth = 80.0;
   ModCategory category;
@@ -131,22 +163,22 @@ class FolderPaneItem extends PaneItem {
     );
   }
 
-  static Widget _buildIcon(final String name) => Consumer(
+  static Widget _buildIcon(final ModCategory category) => Consumer(
         builder: (final context, final ref, final child) => ref.watch(
           appConfigFacadeProvider
               .select((final value) => value.obtainValue(showFolderIcon)),
         )
-            ? _buildImage(name)
+            ? _buildImage(category)
             : const Icon(FluentIcons.folder_open),
       );
 
-  static Widget _buildImage(final String name) => ConstrainedBox(
+  static Widget _buildImage(final ModCategory category) => ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: maxIconWidth),
         child: Consumer(
           builder: (final context, final ref, final child) {
             final imagePath = ref
-                .watch(folderIconPathStreamProvider(name))
-                .maybeWhen(orElse: () => null, data: (final path) => path);
+                .watch(folderIconPathStreamProvider(category))
+                .whenOrNull(data: (final path) => path);
             return AspectRatio(
               aspectRatio: 1,
               child: imagePath == null
@@ -164,7 +196,7 @@ class FolderPaneItem extends PaneItem {
                             : 'images/idk_icon.png',
                       ),
                     )
-                  : Image.file(File(imagePath), fit: BoxFit.contain),
+                  : LatestImage(path: imagePath),
             );
           },
         ),

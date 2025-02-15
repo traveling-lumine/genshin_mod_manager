@@ -6,67 +6,14 @@ import 'package:cp949_codec/cp949_codec.dart';
 
 import '../../filesystem/l1/impl/fsops.dart';
 import '../../filesystem/l1/impl/path_op_string.dart';
-import '../l0/mod_writer.dart';
 
-/// Exception thrown when a mod zip extraction fails.
-class ModZipExtractionException implements Exception {
-  /// Default constructor.
-  const ModZipExtractionException({required this.data});
-
-  /// The data that failed to extract.
-  final Uint8List data;
-}
-
-/// Writes mods to [categoryPath] directory.
-ModWriter createModWriter({required final String categoryPath}) => ({
-      required final modName,
-      required final data,
-    }) async {
-      final destDirName = await _getNonCollidingModName(categoryPath, modName);
-      final destDirPath = categoryPath.pJoin(destDirName);
-      try {
-        final archive = _collapseArchiveFolder(ZipDecoder().decodeBytes(data));
-        await extractArchiveToDisk(archive, destDirPath);
-      } on Exception {
-        throw ModZipExtractionException(data: data);
-      }
-    };
-
-Future<String> _getNonCollidingModName(
-  final String categoryPath,
-  final String name,
-) {
-  final sanitizedName = sanitizeString(name);
-  return _getNonCollidingName(categoryPath, sanitizedName.pEnabledForm);
-}
-
-String sanitizeString(final String name) {
-  final sanitizedName = name.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
-  return sanitizedName.trim();
-}
-
-Future<String> _getNonCollidingName(
-  final String categoryPath,
-  final String destDirName,
-) async {
-  final enabledFormDirNames = getUnderSync<Directory>(categoryPath)
-      .map((final e) => e.pEnabledForm.pBasename)
-      .toSet();
-  var counter = 0;
-  var noCollisionDestDirName = destDirName;
-  while (enabledFormDirNames.contains(noCollisionDestDirName)) {
-    counter++;
-    noCollisionDestDirName = '$destDirName ($counter)';
-  }
-  return noCollisionDestDirName;
-}
-
-Archive _collapseArchiveFolder(final Archive archive) {
-  final longestCommonPrefix =
-      _longestCommonPrefix(archive.files.map((final e) => e.name).toList());
+Archive collapseArchiveFolder(final Archive archive) {
+  final longestCommonPrefix1 =
+      longestCommonPrefix(archive.files.map((final e) => e.name).toList());
   final int longestCommonLen;
-  if (longestCommonPrefix.endsWith('/') || longestCommonPrefix.endsWith(r'\')) {
-    longestCommonLen = longestCommonPrefix.length;
+  if (longestCommonPrefix1.endsWith('/') ||
+      longestCommonPrefix1.endsWith(r'\')) {
+    longestCommonLen = longestCommonPrefix1.length;
   } else {
     longestCommonLen = 0;
   }
@@ -93,7 +40,31 @@ Archive _collapseArchiveFolder(final Archive archive) {
   return newArchive;
 }
 
-String _longestCommonPrefix(final List<String> strings) {
+Future<String> getNonCollidingModName(
+  final String categoryPath,
+  final String name,
+) {
+  final sanitizedName = sanitizeString(name);
+  return getNonCollidingName(categoryPath, sanitizedName.pEnabledForm);
+}
+
+Future<String> getNonCollidingName(
+  final String categoryPath,
+  final String destDirName,
+) async {
+  final enabledFormDirNames = getUnderSync<Directory>(categoryPath)
+      .map((final e) => e.pEnabledForm.pBasename)
+      .toSet();
+  var counter = 0;
+  var noCollisionDestDirName = destDirName;
+  while (enabledFormDirNames.contains(noCollisionDestDirName)) {
+    counter++;
+    noCollisionDestDirName = '$destDirName ($counter)';
+  }
+  return noCollisionDestDirName;
+}
+
+String longestCommonPrefix(final List<String> strings) {
   if (strings.isEmpty) {
     return '';
   }
@@ -114,4 +85,18 @@ String _longestCommonPrefix(final List<String> strings) {
     }
   }
   return s1.substring(0, i);
+}
+
+String sanitizeString(final String name) {
+  final sanitizedName = name.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
+  return sanitizedName.trim();
+}
+
+/// Exception thrown when a mod zip extraction fails.
+class ModZipExtractionException implements Exception {
+  /// Default constructor.
+  const ModZipExtractionException({required this.data});
+
+  /// The data that failed to extract.
+  final Uint8List data;
 }

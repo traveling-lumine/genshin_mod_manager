@@ -26,25 +26,61 @@ class IniWidget extends ConsumerStatefulWidget {
   }
 }
 
+class _EditorText extends HookConsumerWidget {
+  const _EditorText({
+    required this.lineNum,
+    required this.keyBinding,
+    required this.iniFile,
+  });
+  final int lineNum;
+  final String keyBinding;
+
+  final IniFile iniFile;
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final textEditingController = useTextEditingController();
+    useEffect(
+      () {
+        textEditingController.text = keyBinding;
+        return null;
+      },
+      [keyBinding],
+    );
+    return Focus(
+      onFocusChange: (final event) =>
+          _onFocusChange(event, textEditingController),
+      child: TextBox(
+        controller: textEditingController,
+        onSubmitted: (final value) => ref
+            .read(iniLinesProvider(iniFile).notifier)
+            .editIniFile(lineNum, value),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('value', keyBinding))
+      ..add(IntProperty('lineNum', lineNum))
+      ..add(DiagnosticsProperty<IniFile>('iniFile', iniFile));
+  }
+
+  void _onFocusChange(
+    final bool focusGained,
+    final TextEditingController textEditingController,
+  ) {
+    if (focusGained) {
+      return;
+    }
+    // focus lost
+    textEditingController.text = keyBinding;
+  }
+}
+
 class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
-  @override
-  void dispose() {
-    WindowManager.instance.removeListener(this);
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WindowManager.instance.addListener(this);
-  }
-
-  @override
-  void onWindowFocus() {
-    super.onWindowFocus();
-    ref.invalidate(iniLinesProvider(widget.iniFile));
-  }
-
   @override
   Widget build(final BuildContext context) {
     final iniSections = ref.watch(iniLinesProvider(widget.iniFile));
@@ -98,14 +134,32 @@ class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
     properties.add(DiagnosticsProperty<IniFile>('iniFile', widget.iniFile));
   }
 
-  Widget _buildForwardIniFieldEditor(
+  @override
+  void dispose() {
+    WindowManager.instance.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WindowManager.instance.addListener(this);
+  }
+
+  @override
+  void onWindowFocus() {
+    super.onWindowFocus();
+    ref.invalidate(iniLinesProvider(widget.iniFile));
+  }
+
+  Widget _buildBackwardIniFieldEditor(
     final IniFile iniFile,
     final int lineNum,
     final String value,
   ) =>
       Row(
         children: [
-          const Text('key:'),
+          const Text('back:'),
           Expanded(
             child: _EditorText(
               iniFile: iniFile,
@@ -116,14 +170,14 @@ class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
         ],
       );
 
-  Widget _buildBackwardIniFieldEditor(
+  Widget _buildForwardIniFieldEditor(
     final IniFile iniFile,
     final int lineNum,
     final String value,
   ) =>
       Row(
         children: [
-          const Text('back:'),
+          const Text('key:'),
           Expanded(
             child: _EditorText(
               iniFile: iniFile,
@@ -159,77 +213,29 @@ class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
   }
 
   Future<void> _onIniOpen(final WidgetRef ref, final String iniPath) async {
-    final iniEditorArgument = ref
-        .read(appConfigFacadeProvider)
-        .obtainValue(iniEditorArg)
-        ?.split(' ')
-        .map((final e) => e == '%0' ? null : e)
-        .toList();
     final program = File(iniPath);
     final pwd = program.parent.path;
     final pName = program.path.pBasename;
-    final List<String> arg;
-    final iniEditorArgument2 = iniEditorArgument;
-    if (iniEditorArgument2 != null) {
-      arg = iniEditorArgument2.map((final e) => e ?? pName).toList();
-    } else {
-      arg = [pName];
-    }
-    await Process.run('start', ['/b', '/d', pwd, '', ...arg], runInShell: true);
-  }
-}
-
-class _EditorText extends HookConsumerWidget {
-  const _EditorText({
-    required this.lineNum,
-    required this.keyBinding,
-    required this.iniFile,
-  });
-  final int lineNum;
-
-  final String keyBinding;
-
-  final IniFile iniFile;
-
-  @override
-  Widget build(final BuildContext context, final WidgetRef ref) {
-    final textEditingController = useTextEditingController();
-    useEffect(
-      () {
-        textEditingController.text = keyBinding;
-        return null;
-      },
-      [keyBinding],
-    );
-    return Focus(
-      onFocusChange: (final event) =>
-          _onFocusChange(event, textEditingController),
-      child: TextBox(
-        controller: textEditingController,
-        onSubmitted: (final value) => ref
-            .read(iniLinesProvider(iniFile).notifier)
-            .editIniFile(lineNum, value),
-      ),
-    );
-  }
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(StringProperty('value', keyBinding))
-      ..add(IntProperty('lineNum', lineNum))
-      ..add(DiagnosticsProperty<IniFile>('iniFile', iniFile));
-  }
-
-  void _onFocusChange(
-    final bool focusGained,
-    final TextEditingController textEditingController,
-  ) {
-    if (focusGained) {
+    final obtainValue =
+        ref.read(appConfigFacadeProvider).obtainValue(iniEditorArg);
+    if (obtainValue == null || obtainValue.isEmpty) {
+      await Process.run(
+        'start',
+        [pName],
+        runInShell: true,
+        workingDirectory: pwd,
+      );
       return;
     }
-    // focus lost
-    textEditingController.text = keyBinding;
+    final iniEditorArgument =
+        obtainValue.split(' ').map((final e) => e == '%0' ? null : e).toList();
+    final List<String> arg;
+    arg = iniEditorArgument.map((final e) => e ?? pName).toList();
+    await Process.run(
+      'start',
+      ['/b', '', ...arg],
+      runInShell: true,
+      workingDirectory: pwd,
+    );
   }
 }

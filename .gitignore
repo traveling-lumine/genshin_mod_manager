@@ -59,5 +59,6 @@ app.*.map.json
 /junit.xml
 /main.py
 
-# settings
+# app generated files
 /settings.json
+/Resources/**

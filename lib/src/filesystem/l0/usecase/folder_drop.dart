@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:archive/archive_io.dart';
+
 import '../../../mod_writer/l1/mod_writer.dart';
 import '../../l1/impl/copy_directory.dart';
 import '../../l1/impl/path_op_string.dart';
@@ -33,9 +35,17 @@ Future<FolderMoveResult> dragToImportUseCase(
     } else if (FileSystemEntity.isFileSync(path) &&
         path.pExtension.pEquals('.zip')) {
       final content = File(path).readAsBytesSync();
-      final writer = createModWriter(categoryPath: categoryPath);
       try {
-        await writer(modName: path.pBNameWoExt, data: content);
+        final destDirName =
+            await getNonCollidingModName(categoryPath, path.pBNameWoExt);
+        final destDirPath = categoryPath.pJoin(destDirName);
+        try {
+          final archive =
+              collapseArchiveFolder(ZipDecoder().decodeBytes(content));
+          await extractArchiveToDisk(archive, destDirPath);
+        } on Exception {
+          throw ModZipExtractionException(data: content);
+        }
       } on FileSystemException catch (e) {
         result.addError(e);
       }

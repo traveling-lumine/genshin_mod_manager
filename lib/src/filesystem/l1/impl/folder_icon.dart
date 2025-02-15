@@ -13,14 +13,7 @@ class FolderIconRepoImpl implements FolderIconRepo {
     required final ModCategory category,
   }) {
     final path = (iconDir..createSync(recursive: true)).path;
-    final Watcher watcher;
-    try {
-      watcher = fs.watchFile(path: path);
-    } on FileSystemException catch (_) {
-      return FolderIconRepoImpl._(
-        stream: Stream.value(null).asBroadcastStream(),
-      );
-    }
+    final watcher = fs.watchFile(path: path);
     final stream = watcher.stream.asyncMap(
       (final event) async => findPreviewFileInString(
         await getUnder<File>(path),
@@ -30,12 +23,12 @@ class FolderIconRepoImpl implements FolderIconRepo {
 
     return FolderIconRepoImpl._(watcher: watcher, stream: stream);
   }
+
   FolderIconRepoImpl._({
     required this.stream,
     this.watcher,
   });
   final Watcher? watcher;
-
   @override
   final Stream<String?> stream;
 

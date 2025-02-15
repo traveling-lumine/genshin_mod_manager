@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:archive/archive_io.dart';
 import 'package:dio/dio.dart';
 
 import '../../../filesystem/l0/entity/mod_category.dart';
+import '../../../filesystem/l1/impl/path_op_string.dart';
 import '../../../mod_writer/l1/mod_writer.dart';
 import '../api/nahida_repo.dart';
 import '../api/stream.dart';
@@ -26,10 +30,16 @@ Future<void> downloadUrlUseCase({
     final responseData =
         await repo.addDownload(element: element, turnstile: turnstile, pw: pw);
 
-    await createModWriter(categoryPath: category.path)(
-      modName: element.title,
-      data: responseData,
-    );
+    final destDirName =
+        await getNonCollidingModName(category.path, element.title);
+    final destDirPath = category.path.pJoin(destDirName);
+    try {
+      final archive =
+          collapseArchiveFolder(ZipDecoder().decodeBytes(responseData));
+      await extractArchiveToDisk(archive, destDirPath);
+    } on Exception {
+      throw ModZipExtractionException(data: responseData);
+    }
   } on DioException catch (e) {
     switch (e.error) {
       case WrongPasswordException _:
@@ -39,11 +49,21 @@ Future<void> downloadUrlUseCase({
         return;
     }
   } on ModZipExtractionException catch (e) {
+    var writeSuccess = false;
+    Exception? exception;
+    final fileName = sanitizeString('${element.title}.zip');
+    try {
+      await File(category.path.pJoin(fileName)).writeAsBytes(e.data);
+      writeSuccess = true;
+    } on Exception catch (e) {
+      writeSuccess = false;
+      exception = e;
+    }
     downloadQueue.add(
       NahidaDownloadState.modZipExtractionException(
-        element: element,
-        category: category,
-        data: e.data,
+        writeSuccess: writeSuccess,
+        fileName: fileName,
+        exception: exception,
       ),
     );
     return;

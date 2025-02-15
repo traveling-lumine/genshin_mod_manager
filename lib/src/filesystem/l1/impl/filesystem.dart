@@ -128,20 +128,12 @@ class FilesystemImpl implements Filesystem {
   Watcher watchFile({
     required final String path,
   }) {
-    if (!File(path).existsSync()) {
-      final nullBehaviorSubject =
-          BehaviorSubject<FileSystemEvent?>.seeded(null);
-      return FSSubscription(
-        stream: nullBehaviorSubject,
-        onCancel: nullBehaviorSubject.close,
-      );
-    }
     final dirPath = File(path).parent.path;
-
     final controller = BehaviorSubject<FileSystemEvent?>.seeded(null);
     final stream = _getSwitchStream(dirPath);
     final subscription = stream.listen((final event) {
       if (event == null) {
+        controller.add(null);
         return;
       }
       if (event is FileSystemMoveEvent) {
