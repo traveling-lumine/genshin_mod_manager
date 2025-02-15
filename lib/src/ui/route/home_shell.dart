@@ -7,13 +7,9 @@ import 'package:fluent_ui/fluent_ui.dart'
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../../app_config/l0/entity/entries.dart';
-import '../../app_config/l0/usecase/change_app_config.dart';
-import '../../app_config/l1/di/app_config.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
-import '../../app_config/l1/di/app_config_persistent_repo.dart';
 import '../../app_version/di/is_outdated.dart';
 import '../../filesystem/l1/di/categories.dart';
 import '../../filesystem/l1/impl/path_op_string.dart';
@@ -23,6 +19,7 @@ import '../util/display_infobar.dart';
 import '../widget/appbar.dart';
 import '../widget/category_pane_item.dart';
 import '../widget/download_queue.dart';
+import '../widget/persistent_window_size_widget.dart';
 import '../widget/protocol_handler.dart';
 import '../widget/protocol_url_forward_widget.dart';
 import '../widget/run_pane.dart';
@@ -38,8 +35,8 @@ class HomeShell extends StatefulHookConsumerWidget {
   ConsumerState<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
-    with WindowListener {
+class _HomeShellState<T extends StatefulWidget>
+    extends ConsumerState<HomeShell> {
   static const _navigationPaneOpenWidth = 270.0;
 
   @override
@@ -50,50 +47,30 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     );
     final updateMarker =
         (ref.watch(isOutdatedProvider).valueOrNull ?? false) ? 'update' : '';
-    return ProtocolUrlForwardWidget(
-      child: WindowListenerWidget(
-        child: UpdatePopup(
-          child: DownloadQueue(
-            child: ProtocolHandlerWidget(
-              runBothCallback: _runBoth,
-              runLauncherCallback: _runLauncher,
-              runMigotoCallback: _runMigoto,
-              child: NavigationView(
-                appBar: getAppbar(
-                  AppLocalizations.of(context)!.modManager(game, updateMarker),
-                  presetControl: true,
+    return PersistentWindowSizeWidget(
+      child: ProtocolUrlForwardWidget(
+        child: WindowListenerWidget(
+          child: UpdatePopup(
+            child: DownloadQueue(
+              child: ProtocolHandlerWidget(
+                runBothCallback: _runBoth,
+                runLauncherCallback: _runLauncher,
+                runMigotoCallback: _runMigoto,
+                child: NavigationView(
+                  appBar: getAppbar(
+                    AppLocalizations.of(context)!
+                        .modManager(game, updateMarker),
+                    presetControl: true,
+                  ),
+                  pane: _buildPane(),
+                  paneBodyBuilder: (final item, final body) => widget.child,
                 ),
-                pane: _buildPane(),
-                paneBodyBuilder: (final item, final body) => widget.child,
               ),
             ),
           ),
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    WindowManager.instance.removeListener(this);
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WindowManager.instance.addListener(this);
-
-    final read = ref.read(appConfigFacadeProvider).obtainValue(windowSize);
-    if (read != null) {
-      unawaited(WindowManager.instance.setSize(read));
-    }
-  }
-
-  @override
-  void onWindowResized() {
-    super.onWindowResized();
-    unawaited(_saveNewWindowSize());
   }
 
   Widget _buildAutoSuggestBox(
@@ -271,16 +248,5 @@ class _HomeShellState<T extends StatefulWidget> extends ConsumerState<HomeShell>
     final pwd = file.parent.path;
     final pName = file.path.pBasename;
     await Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
-  }
-
-  Future<void> _saveNewWindowSize() async {
-    final newSize = await WindowManager.instance.getSize();
-    final newState = changeAppConfigUseCase(
-      appConfigFacade: ref.read(appConfigFacadeProvider),
-      appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
-      entry: windowSize,
-      value: newSize,
-    );
-    ref.read(appConfigCProvider.notifier).setData(newState);
   }
 }

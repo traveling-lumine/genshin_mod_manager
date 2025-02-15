@@ -25,7 +25,8 @@ import 'src/ui/widget/empty_game_redirector.dart';
 import 'src/ui/widget/game_redirector.dart';
 
 void main(final List<String> args) async {
-  await _initialize();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Future.wait([protocolHandler.register(protocol), initializeWindow()]);
   if (!kDebugMode) {
     registerErrorHandlers();
   }
@@ -33,9 +34,7 @@ void main(final List<String> args) async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-Future<void> _initialize() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await protocolHandler.register(protocol);
+Future<void> initializeWindow() async {
   await windowManager.ensureInitialized();
   await windowManager.waitUntilReadyToShow(
     const WindowOptions(
@@ -54,7 +53,6 @@ class MyApp extends ConsumerStatefulWidget {
 
 class _MyAppState extends ConsumerState<MyApp> {
   final _router = GoRouter(
-    debugLogDiagnostics: true,
     initialLocation: '/loading',
     routes: [
       GoRoute(

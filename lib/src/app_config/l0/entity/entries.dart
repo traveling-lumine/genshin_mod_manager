@@ -43,8 +43,11 @@ final windowSize = AppConfigEntry<Size?>(
   key: 'windowSize',
   defaultValue: null,
   fromJson: (final dynamic json) {
-    if (json is Map<String, double>) {
-      return Size(json['width']!, json['height']!);
+    if (json is Map<String, dynamic>) {
+      return Size(
+        doubleConverter(json['width']),
+        doubleConverter(json['height']),
+      );
     }
     throw Exception('Invalid json type for windowSize');
   },

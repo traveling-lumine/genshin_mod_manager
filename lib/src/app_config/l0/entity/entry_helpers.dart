@@ -30,7 +30,7 @@ bool _boolConverter(final dynamic value) {
   throw Exception('Invalid value type');
 }
 
-double _doubleConverter(final dynamic value) {
+double doubleConverter(final dynamic value) {
   if (value is double) {
     return value;
   }
@@ -93,10 +93,10 @@ AppConfigEntry<Color> colorEntry({
       fromJson: (final dynamic value) {
         if (value is Map<String, dynamic>) {
           return Color.from(
-            alpha: _doubleConverter(value['a']),
-            red: _doubleConverter(value['r']),
-            green: _doubleConverter(value['g']),
-            blue: _doubleConverter(value['b']),
+            alpha: doubleConverter(value['a']),
+            red: doubleConverter(value['r']),
+            green: doubleConverter(value['g']),
+            blue: doubleConverter(value['b']),
           );
         }
         throw Exception('Invalid value type');

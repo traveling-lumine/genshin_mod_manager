@@ -27,7 +27,7 @@ Stream<String?> folderIconPathStream(
   final fs = ref.watch(filesystemProvider);
   final watcher = fs.watchFile(path: path);
   ref.onDispose(watcher.cancel);
-  
+
   return watcher.stream.asyncMap(
     (final event) async => findPreviewFileInString(
       await getUnder<File>(path),

@@ -8,30 +8,11 @@ extension PathOpString on String {
   /// Returns the last part of the path.
   String get pBasename => p.basename(this);
 
-  /// Returns the directory part of the path.
-  String get pDirname => p.dirname(this);
-
-  /// Returns the extension part of the path.
-  String get pExtension => p.extension(this);
-
   /// Returns the file name without extension.
   String get pBNameWoExt => p.basenameWithoutExtension(this);
 
-  /// Returns whether the path is enabled.
-  bool get pIsEnabled => !pBasename.startsWith(_disabledHeader);
-
-  /// Returns the path in enabled form.
-  String get pEnabledForm {
-    var baseName = pBasename;
-    while (!baseName.pIsEnabled) {
-      baseName = baseName.substring(_disabledHeaderLength).trimLeft();
-    }
-    if (p.split(this).length == 1) {
-      return baseName;
-    } else {
-      return pDirname.pJoin(baseName);
-    }
-  }
+  /// Returns the directory part of the path.
+  String get pDirname => p.dirname(this);
 
   /// Returns the path in disabled form.
   String get pDisabledForm {
@@ -46,8 +27,31 @@ extension PathOpString on String {
     }
   }
 
+  /// Returns the path in enabled form.
+  String get pEnabledForm {
+    var baseName = pBasename;
+    while (!baseName.pIsEnabled) {
+      baseName = baseName.substring(_disabledHeaderLength).trimLeft();
+    }
+    if (p.split(this).length == 1) {
+      return baseName;
+    } else {
+      return pDirname.pJoin(baseName);
+    }
+  }
+
+  /// Returns the extension part of the path.
+  String get pExtension => p.extension(this);
+
+  /// Returns whether the path is enabled.
+  bool get pIsEnabled =>
+      !pBasename.toLowerCase().startsWith(_disabledHeader.toLowerCase());
+
   /// Returns whether the paths are equal.
   bool pEquals(final String other) => p.equals(this, other);
+
+  /// Check whether this path is contained in [other].
+  bool pIsWithin(final String other) => p.isWithin(other, this);
 
   /// Join the path with the given parts.
   String pJoin(
@@ -85,7 +89,4 @@ extension PathOpString on String {
         part15,
         part16,
       );
-
-  /// Check whether this path is contained in [other].
-  bool pIsWithin(final String other) => p.isWithin(other, this);
 }

@@ -23,7 +23,7 @@ Stream<List<ModCategory>> categories(final Ref ref) {
   if (modRoot == null) {
     return Stream.value(<ModCategory>[]);
   }
-  
+
   final fs = ref.watch(filesystemProvider);
   final watch = fs.watchDirectory(path: modRoot);
   ref.onDispose(watch.cancel);

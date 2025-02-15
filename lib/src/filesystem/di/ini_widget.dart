@@ -85,14 +85,38 @@ class IniLines extends _$IniLines {
             ),
           );
         } else if (line.startsWith(r'$') && metKeySection) {
-          statements.add(
-            IniStatement.variable(
-              lineNum: lineNum,
-              section: lastSection,
-              name: _getLHS(rawLine),
-              numCycles: ','.allMatches(rawLine).length + 1,
-            ),
-          );
+          final numCycles = ','.allMatches(rawLine).length + 1;
+          if (statements.isEmpty) {
+            statements.add(
+              IniStatement.variable(
+                lineNum: lineNum,
+                section: lastSection,
+                name: _getLHS(rawLine),
+                numCycles: numCycles,
+              ),
+            );
+          } else {
+            final lastStatement = statements.last;
+            if (lastStatement is! IniStatementVariable) {
+              statements.add(
+                IniStatement.variable(
+                  lineNum: lineNum,
+                  section: lastSection,
+                  name: _getLHS(rawLine),
+                  numCycles: numCycles,
+                ),
+              );
+            } else if (lastStatement.numCycles != numCycles) {
+              statements.add(
+                IniStatement.variable(
+                  lineNum: lineNum,
+                  section: lastSection,
+                  name: _getLHS(rawLine),
+                  numCycles: numCycles,
+                ),
+              );
+            }
+          }
         }
       }
       return statements;

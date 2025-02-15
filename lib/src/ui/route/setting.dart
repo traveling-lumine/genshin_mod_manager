@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
-import '../../app_config/l0/entity/app_config_entry.dart';
 import '../../app_config/l0/entity/column_strategy.dart';
 import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l0/entity/game_config.dart';
@@ -25,7 +24,9 @@ import '../../app_version/di/is_outdated.dart';
 import '../../app_version/di/remote_version.dart';
 import '../constants.dart';
 import '../widget/game_selector.dart';
+import '../widget/ini_editor_arg_setting.dart';
 import '../widget/setting_element.dart';
+import '../widget/switch_setting.dart';
 
 class SettingRoute extends ConsumerWidget {
   const SettingRoute({super.key});
@@ -108,7 +109,7 @@ class SettingRoute extends ConsumerWidget {
               },
             ),
             const _SectionHeader(title: 'Options'),
-            _SwitchItem(
+            SwitchSetting(
               text: 'Run 3d migoto and launcher using one button',
               entry: runTogether,
               content: Row(
@@ -147,21 +148,21 @@ class SettingRoute extends ConsumerWidget {
                 ],
               ),
             ),
-            _SwitchItem(
+            SwitchSetting(
               text:
                   'Move folder instead of copying for mod folder drag-and-drop',
               entry: moveOnDrag,
             ),
-            _SwitchItem(
+            SwitchSetting(
               text: 'Show folder icon images',
               entry: showFolderIcon,
             ),
-            _SwitchItem(
+            SwitchSetting(
               text: 'Show enabled mods first',
               entry: showEnabledModsFirst,
             ),
-            _SwitchItem(text: 'Dark mode', entry: darkMode),
-            const _ComboItem(text: 'Target Game'),
+            SwitchSetting(text: 'Dark mode', entry: darkMode),
+            const SettingElement(text: 'Target Game', trailing: GameSelector()),
             const _SectionHeader(title: 'Themes'),
             const SettingElement(
               text: 'Card colors (hover on the icons to see details)',
@@ -277,8 +278,8 @@ class SettingRoute extends ConsumerWidget {
               },
             ),
             const _SectionHeader(title: 'Misc'),
-            const _StringItem(title: 'Ini file editor arguments'),
-            _SwitchItem(
+            const IniEditorArgSetting(title: 'Ini file editor arguments'),
+            SwitchSetting(
               text: 'Use Paimon for folders without icons',
               entry: showPaimonAsEmptyIconFolderIcon,
             ),
@@ -507,23 +508,6 @@ class _ColorPickerDialog extends HookConsumerWidget {
   }
 }
 
-class _ComboItem extends StatelessWidget {
-  const _ComboItem({
-    required this.text,
-  });
-  final String text;
-
-  @override
-  Widget build(final BuildContext context) =>
-      SettingElement(text: text, trailing: const GameSelector());
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(StringProperty('text', text));
-  }
-}
-
 class _PathSelectItem extends StatelessWidget {
   const _PathSelectItem({
     required this.title,
@@ -533,7 +517,6 @@ class _PathSelectItem extends StatelessWidget {
   });
   final String title;
   final String? Function(GameConfig vm) selector;
-
   final IconData icon;
   final VoidCallback onPressed;
 
@@ -581,92 +564,6 @@ class _SectionHeader extends StatelessWidget {
         padding: const EdgeInsets.only(top: 24, left: 8, right: 16, bottom: 8),
         child: Text(title, style: FluentTheme.of(context).typography.subtitle),
       );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(StringProperty('title', title));
-  }
-}
-
-class _SwitchItem extends StatelessWidget {
-  const _SwitchItem({
-    required this.text,
-    required this.entry,
-    this.content,
-  });
-  final String text;
-  final AppConfigEntry<bool> entry;
-  final Widget? content;
-
-  @override
-  Widget build(final BuildContext context) => SettingElement(
-        text: text,
-        content: content,
-        trailing: Consumer(
-          builder: (final context, final ref, final child) => RepaintBoundary(
-            child: ToggleSwitch(
-              checked: ref.watch(
-                appConfigFacadeProvider
-                    .select((final value) => value.obtainValue(entry)),
-              ),
-              onChanged: (final value) {
-                final newState = changeAppConfigUseCase<bool>(
-                  appConfigFacade: ref.read(appConfigFacadeProvider),
-                  appConfigPersistentRepo:
-                      ref.read(appConfigPersistentRepoProvider),
-                  entry: entry,
-                  value: value,
-                );
-                ref.read(appConfigCProvider.notifier).setData(newState);
-              },
-            ),
-          ),
-        ),
-      );
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(StringProperty('text', text))
-      ..add(DiagnosticsProperty<AppConfigEntry<bool>>('entry', entry));
-  }
-}
-
-class _StringItem extends ConsumerWidget {
-  const _StringItem({required this.title});
-  final String title;
-
-  @override
-  Widget build(final BuildContext context, final WidgetRef ref) {
-    final initString = ref.watch(
-      appConfigFacadeProvider
-          .select((final value) => value.obtainValue(iniEditorArg)),
-    );
-    return SettingElement(
-      text: title,
-      subTitle:
-          const Text('Leave blank to use default. Use %0 for the file path.'),
-      trailing: SizedBox(
-        width: 300,
-        child: TextFormBox(
-          onChanged: (final value) {
-            final newState = changeAppConfigUseCase(
-              appConfigFacade: ref.read(appConfigFacadeProvider),
-              appConfigPersistentRepo:
-                  ref.read(appConfigPersistentRepoProvider),
-              entry: iniEditorArg,
-              value: value,
-            );
-            ref.read(appConfigCProvider.notifier).setData(newState);
-          },
-          initialValue: initString,
-          placeholder: 'Arguments...',
-        ),
-      ),
-    );
-  }
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
