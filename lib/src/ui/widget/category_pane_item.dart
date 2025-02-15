@@ -175,7 +175,7 @@ class FolderPaneItem extends PaneItem {
   static Widget _buildInfoBadge(final ModCategory category) => Consumer(
         builder: (final context, final ref, final child) {
           final mods =
-              ref.watch(modsUnsortedInCategoryStreamProvider(category));
+              ref.watch(modsInCategoryProvider(category));
           return mods.when(
             data: (final data) {
               final totalCount = data.length;

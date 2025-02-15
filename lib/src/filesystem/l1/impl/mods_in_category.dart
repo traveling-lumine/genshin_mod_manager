@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../l0/api/filesystem.dart';
@@ -14,7 +13,6 @@ import 'path_op_string.dart';
 class ModsInCategoryImpl implements ModsInCategory {
   factory ModsInCategoryImpl({
     required final ModCategory category,
-    required final bool enabledModsFirst,
     required final Filesystem fs,
   }) {
     final fsStream = fs.watchDirectory(path: category.path);
@@ -33,26 +31,16 @@ class ModsInCategoryImpl implements ModsInCategory {
           )
           .toList(),
     );
-    final mods = modsUnsorted.map(
-      (final modsUnsorted) => sortMods(
-        list: modsUnsorted,
-        enabledModsFirst: enabledModsFirst,
-      ),
-    );
     return ModsInCategoryImpl._(
       fsStream: fsStream,
       modsUnsorted: modsUnsorted,
-      mods: mods,
     );
   }
   const ModsInCategoryImpl._({
     required this.fsStream,
-    required this.mods,
     required this.modsUnsorted,
   });
   final Watcher fsStream;
-  @override
-  final Stream<List<Mod>> mods;
   @override
   final Stream<List<Mod>> modsUnsorted;
 
@@ -60,22 +48,4 @@ class ModsInCategoryImpl implements ModsInCategory {
   Future<void> dispose() async {
     await fsStream.cancel();
   }
-
-  static List<Mod> sortMods({
-    required final List<Mod> list,
-    required final bool enabledModsFirst,
-  }) =>
-      list
-        ..sort((final a, final b) {
-          if (enabledModsFirst) {
-            final aEnabled = a.isEnabled;
-            final bEnabled = b.isEnabled;
-            if (aEnabled && !bEnabled) {
-              return -1;
-            } else if (!aEnabled && bEnabled) {
-              return 1;
-            }
-          }
-          return compareNatural(a.displayName, b.displayName);
-        });
 }

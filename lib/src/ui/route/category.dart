@@ -104,7 +104,7 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
         child: Consumer(
           builder: (final context, final ref, final child) {
             final data =
-                ref.watch(modsInCategoryStreamProvider(widget.category));
+                ref.watch(modsInCategorySortedProvider(widget.category));
             return AnimatedSwitcher(
               duration: const Duration(milliseconds: 100),
               child: data.when(
@@ -180,7 +180,7 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
         child: Consumer(
           builder: (final context, final ref, final child) {
             final data =
-                ref.watch(modsInCategoryStreamProvider(widget.category));
+                ref.watch(modsInCategorySortedProvider(widget.category));
             final dataList = data.maybeWhen(
               orElse: () => const <Mod>[],
               data: (final data) => data,
