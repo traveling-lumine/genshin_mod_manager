@@ -7,8 +7,8 @@ import 'package:flutter/gestures.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
-import '../../app_config/l1/entity/entries.dart';
 import '../../app_version/data/github.dart';
 import '../../app_version/di/is_outdated.dart';
 import '../../app_version/di/remote_version.dart';

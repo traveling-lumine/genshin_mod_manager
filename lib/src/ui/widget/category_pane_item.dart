@@ -5,8 +5,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
-import '../../app_config/l1/entity/entries.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 import '../../filesystem/l0/usecase/move_dir.dart';
@@ -30,40 +30,10 @@ class FolderPaneItem extends PaneItem {
           ),
           icon: _buildIcon(category),
           body: const SizedBox.shrink(),
-          infoBadge: Consumer(
-            builder: (final context, final ref, final child) {
-              final mods = ref.watch(
-                modsInCategoryStreamProvider(category).select(
-                  (final value) => value.whenOrNull(data: (final data) => data),
-                ),
-              );
-              if (mods == null) {
-                return const SizedBox.shrink();
-              }
-              final totalCount = mods.length;
-              if (totalCount == 0) {
-                return const SizedBox.shrink();
-              }
-              final activeCount = mods.where((final e) => e.isEnabled).length;
-              final color = switch (activeCount) {
-                <= 1 => null,
-                <= 2 => Colors.yellow,
-                <= 5 => Colors.orange,
-                _ => Colors.red,
-              };
-              return Text(
-                '$activeCount/$totalCount',
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
-              );
-            },
-          ),
+          infoBadge: _buildInfoBadge(category),
         );
   static const maxIconWidth = 80.0;
   ModCategory category;
-
   @override
   Widget build(
     final BuildContext context,
@@ -200,5 +170,41 @@ class FolderPaneItem extends PaneItem {
             );
           },
         ),
+      );
+
+  static Widget _buildInfoBadge(final ModCategory category) => Consumer(
+        builder: (final context, final ref, final child) {
+          final mods = ref.watch(modsInCategoryStreamProvider(category));
+          return mods.when(
+            data: (final data) {
+              final totalCount = data.length;
+              if (totalCount == 0) {
+                return const SizedBox.shrink();
+              }
+              final activeCount = data.where((final e) => e.isEnabled).length;
+              final color = switch (activeCount) {
+                <= 1 => null,
+                <= 2 => Colors.yellow,
+                <= 5 => Colors.orange,
+                _ => Colors.red,
+              };
+              return Text(
+                '$activeCount/$totalCount',
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
+            error: (final error, final stackTrace) =>
+                const Icon(FluentIcons.error_badge),
+            loading: () => const Center(
+              child: SizedBox.square(
+                dimension: 20,
+                child: ProgressRing(strokeWidth: 2),
+              ),
+            ),
+          );
+        },
       );
 }

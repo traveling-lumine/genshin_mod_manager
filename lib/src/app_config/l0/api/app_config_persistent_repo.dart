@@ -1,4 +1,4 @@
-import '../../l1/entity/app_config.dart';
+import '../entity/app_config.dart';
 
 abstract interface class AppConfigPersistentRepo {
   Stream<Map<String, dynamic>> get stream;

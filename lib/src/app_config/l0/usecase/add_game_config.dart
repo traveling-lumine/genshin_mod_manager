@@ -1,8 +1,8 @@
-import '../../l1/entity/app_config.dart';
-import '../../l1/entity/entries.dart';
-import '../../l1/entity/game_config.dart';
+import '../entity/app_config.dart';
+import '../entity/game_config.dart';
 import '../api/app_config_facade.dart';
 import '../api/app_config_persistent_repo.dart';
+import '../entity/entries.dart';
 import '../entity/game_already_exists_exception.dart';
 import 'change_app_config.dart';
 

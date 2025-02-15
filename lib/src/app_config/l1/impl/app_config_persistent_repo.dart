@@ -7,7 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:rxdart/rxdart.dart';
 
 import '../../l0/api/app_config_persistent_repo.dart';
-import '../entity/app_config.dart';
+import '../../l0/entity/app_config.dart';
 
 class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
   factory AppConfigPersistentRepoImpl() {
@@ -38,9 +38,9 @@ class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
     // ignore: cancel_subscriptions
     final subscription = mergeStream.listen(
       controller.add,
-      onError: (final e, final st) => controller.hasValue
+      onError: (final Object e, final StackTrace? st) => controller.hasValue
           ? controller.add(controller.value)
-          : controller.add({}),
+          : controller.addError(e, st),
     );
     return AppConfigPersistentRepoImpl._(subscription, controller);
   }

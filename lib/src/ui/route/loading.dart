@@ -5,11 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_config/l1/di/app_config_persistent_repo.dart';
-import '../../app_config/l1/entity/app_config.dart';
-import '../../app_config/l1/entity/entries.dart';
+import '../../app_config/l0/entity/app_config.dart';
 import '../../app_config/l1/impl/app_config_facade.dart';
 import '../../app_config/l1/impl/app_config_persistent_repo.dart';
 import '../../error_handler/error_handler.dart';

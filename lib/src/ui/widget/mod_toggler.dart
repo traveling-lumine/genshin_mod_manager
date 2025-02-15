@@ -4,8 +4,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
-import '../../app_config/l1/entity/entries.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_toggle_exceptions.dart';
 import '../../filesystem/l1/impl/mod_switcher.dart';

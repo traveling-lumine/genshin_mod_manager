@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../entity/app_config.dart';
+import '../../l0/entity/app_config.dart';
 import 'app_config_persistent_repo.dart';
 
 part 'app_config.g.dart';

@@ -12,8 +12,8 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
+import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
-import '../../app_config/l1/entity/entries.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 import '../../filesystem/l0/usecase/open_folder.dart';

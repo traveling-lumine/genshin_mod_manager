@@ -9,11 +9,11 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l0/usecase/change_app_config.dart';
 import '../../app_config/l1/di/app_config.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_config/l1/di/app_config_persistent_repo.dart';
-import '../../app_config/l1/entity/entries.dart';
 import '../../app_version/di/is_outdated.dart';
 import '../../filesystem/l1/di/categories.dart';
 import '../../filesystem/l1/impl/path_op_string.dart';

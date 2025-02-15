@@ -1,7 +1,7 @@
-import '../../l1/entity/app_config.dart';
-import '../../l1/entity/entries.dart';
+import '../entity/app_config.dart';
 import '../api/app_config_facade.dart';
 import '../api/app_config_persistent_repo.dart';
+import '../entity/entries.dart';
 import 'change_app_config.dart';
 
 AppConfig changeModLauncherUseCase({

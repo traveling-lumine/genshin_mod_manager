@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import '../../l0/entity/app_config_entry.dart';
+import 'app_config_entry.dart';
 
 String _stringConverter(final dynamic value) {
   if (value is String) {
@@ -25,6 +25,13 @@ int _intConverter(final dynamic value) {
 
 bool _boolConverter(final dynamic value) {
   if (value is bool) {
+    return value;
+  }
+  throw Exception('Invalid value type');
+}
+
+double _doubleConverter(final dynamic value) {
+  if (value is double) {
     return value;
   }
   throw Exception('Invalid value type');
@@ -84,10 +91,20 @@ AppConfigEntry<Color> colorEntry({
       key: key,
       defaultValue: defaultValue,
       fromJson: (final dynamic value) {
-        if (value is int) {
-          return Color(value);
+        if (value is Map<String, dynamic>) {
+          return Color.from(
+            alpha: _doubleConverter(value['a']),
+            red: _doubleConverter(value['r']),
+            green: _doubleConverter(value['g']),
+            blue: _doubleConverter(value['b']),
+          );
         }
         throw Exception('Invalid value type');
       },
-      toJson: (final value) => value.value,
+      toJson: (final value) => {
+        'r': value.r,
+        'g': value.g,
+        'b': value.b,
+        'a': value.a,
+      },
     );

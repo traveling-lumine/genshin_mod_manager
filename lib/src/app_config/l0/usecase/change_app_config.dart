@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../../l1/entity/app_config.dart';
+import '../entity/app_config.dart';
 import '../api/app_config_facade.dart';
 import '../api/app_config_persistent_repo.dart';
 import '../entity/app_config_entry.dart';
