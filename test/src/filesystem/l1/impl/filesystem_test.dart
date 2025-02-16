@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genshin_mod_manager/src/filesystem/l0/api/watcher.dart';
 import 'package:genshin_mod_manager/src/filesystem/l1/impl/filesystem.dart';
 import 'package:path/path.dart' as p;
 
@@ -20,9 +19,6 @@ void main() {
   group('Folder watch', () {
     setUp(() {
       Directory('parent/target').createSync(recursive: true);
-    });
-    tearDown(() {
-      Directory('parent').deleteSync(recursive: true);
     });
     test('Watch', () async {
       final fs = FilesystemImpl();
@@ -53,38 +49,65 @@ void main() {
       await fs.dispose();
     });
     group('handle test', () {
-      late FilesystemImpl fs;
-      late Watcher stream;
-      setUp(() {
-        fs = FilesystemImpl();
-        stream = fs.watchDirectory(path: 'parent/target');
+      test(
+        'directory is movable after pause',
+        () async {
+          final fs = FilesystemImpl();
+          final stream = fs.watchDirectory(path: 'parent/target');
+          await stream.stream.listen((final _) {}).cancel();
+          expect(
+            () => Directory('parent').renameSync('parent2'),
+            throwsA(isA<FileSystemException>()),
+          );
+          await fs.pauseAllWatchers();
+          expect(
+            () => Directory('parent').renameSync('parent2'),
+            returnsNormally,
+          );
+          await stream.cancel();
+          await fs.dispose();
+        },
+      );
+      test('directory is movable after cancel', () async {
+        final fs = FilesystemImpl();
+        final stream = fs.watchDirectory(path: 'parent/target');
+        await stream.stream.listen((final _) {}).cancel();
         expect(
           () => Directory('parent').renameSync('parent2'),
           throwsA(isA<FileSystemException>()),
         );
-      });
-      tearDown(() async {
+        await stream.cancel();
         expect(
           () => Directory('parent').renameSync('parent2'),
           returnsNormally,
         );
-        Directory('parent2').renameSync('parent');
         await stream.cancel();
         await fs.dispose();
       });
-      test(
-        'directory is movable after pause',
-        () async {
-          await fs.pauseAllWatchers();
-        },
-      );
-      test('directory is movable after cancel', () async {
-        await stream.cancel();
-      });
       test('directory is movable after dispose', () async {
+        final fs = FilesystemImpl();
+        final stream = fs.watchDirectory(path: 'parent/target');
+        await stream.stream.listen((final _) {}).cancel();
+        expect(
+          () => Directory('parent').renameSync('parent2'),
+          throwsA(isA<FileSystemException>()),
+        );
+        await fs.dispose();
+        expect(
+          () => Directory('parent').renameSync('parent2'),
+          returnsNormally,
+        );
+        await stream.cancel();
         await fs.dispose();
       });
       test('directory is not movable after resume', () async {
+        final fs = FilesystemImpl();
+        final stream = fs.watchDirectory(path: 'parent/target');
+        await stream.stream.listen((final _) {}).cancel();
+        expect(
+          () => Directory('parent').renameSync('parent2'),
+          throwsA(isA<FileSystemException>()),
+        );
         await fs.pauseAllWatchers();
         fs.resumeAllWatchers();
 
@@ -94,6 +117,12 @@ void main() {
         );
 
         await fs.pauseAllWatchers();
+        expect(
+          () => Directory('parent').renameSync('parent2'),
+          returnsNormally,
+        );
+        await stream.cancel();
+        await fs.dispose();
       });
     });
   });
@@ -183,6 +212,9 @@ void main() {
     final fs = FilesystemImpl();
     final stream1 = fs.watchDirectory(path: wdir.path);
     final stream2 = fs.watchFile(path: wfile.path);
+    final f1 = stream1.stream.listen((final _) {}).cancel();
+    await stream2.stream.listen((final _) {}).cancel();
+    await f1;
 
     // moving parent should throw
     expect(

@@ -8,6 +8,8 @@ on:
       - reopened
       - labeled
       - unlabeled
+    paths: 
+      - pubspec.yml
 
 jobs:
   check_version_increment:
@@ -27,13 +29,11 @@ jobs:
 
       - name: Get the head version
         id: get_head_version
-        run: |
-          HEAD_OUTPUT=$(grep -E '^version:' pubspec.yml | sed -E 's/version: *//')
-          echo "HEAD_OUTPUT=v$HEAD_OUTPUT" >> $GITHUB_OUTPUT
+        run: "echo \"head_output=v$(grep -E '^version:' a.yml | sed -E 's/version: *//')\" >> \"$GITHUB_OUTPUT\""
 
       - name: Check version increment
         run: |
-          if [ ${{ steps.get_head_version.outputs.HEAD_OUTPUT }} == ${{ steps.get_latest_tag.outputs.tag_name }} ]; then
+          if [ ${{ steps.get_head_version.outputs.head_output }} == ${{ steps.get_latest_tag.outputs.tag_name }} ]; then
             echo "Version number has not changed in the PR."
             exit 1
           fi
