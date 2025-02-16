@@ -16,19 +16,10 @@ sealed class ColumnStrategyEnum with _$ColumnStrategyEnum {
       ColumnStrategyMinExtent;
 }
 
-@freezed
-sealed class ColumnStrategyEntryEnum with _$ColumnStrategyEntryEnum {
-  const factory ColumnStrategyEntryEnum.fixedCount() =
-      ColumnStrategyEntryFixedCount;
-
-  const factory ColumnStrategyEntryEnum.maxExtent() =
-      ColumnStrategyEntryMaxExtent;
-
-  const factory ColumnStrategyEntryEnum.minExtent() =
-      ColumnStrategyEntryMinExtent;
-
-  factory ColumnStrategyEntryEnum.fromJson(final Map<String, dynamic> json) =>
-      _$ColumnStrategyEntryEnumFromJson(json);
+enum ColumnStrategyEnumType {
+  fixedCount,
+  maxExtent,
+  minExtent,
 }
 
 @freezed
@@ -37,7 +28,7 @@ class ColumnStrategySettingMediator with _$ColumnStrategySettingMediator {
   // ignore: invalid_annotation_target
   @JsonSerializable(explicitToJson: true)
   const factory ColumnStrategySettingMediator({
-    required final ColumnStrategyEntryEnum current,
+    required final ColumnStrategyEnumType current,
     required final int fixedCount,
     required final int maxExtent,
     required final int minExtent,
@@ -49,9 +40,12 @@ class ColumnStrategySettingMediator with _$ColumnStrategySettingMediator {
       _$ColumnStrategySettingMediatorFromJson(json);
   const ColumnStrategySettingMediator._();
 
-  ColumnStrategyEnum get strategy => current.when(
-        fixedCount: () => ColumnStrategyEnum.fixedCount(fixedCount),
-        maxExtent: () => ColumnStrategyEnum.maxExtent(maxExtent),
-        minExtent: () => ColumnStrategyEnum.minExtent(minExtent),
-      );
+  ColumnStrategyEnum get strategy => switch (current) {
+        ColumnStrategyEnumType.fixedCount =>
+          ColumnStrategyEnum.fixedCount(fixedCount),
+        ColumnStrategyEnumType.maxExtent =>
+          ColumnStrategyEnum.maxExtent(maxExtent),
+        ColumnStrategyEnumType.minExtent =>
+          ColumnStrategyEnum.minExtent(minExtent),
+      };
 }

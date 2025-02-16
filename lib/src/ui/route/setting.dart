@@ -190,15 +190,15 @@ class SettingRoute extends ConsumerWidget {
                     value: watch.current,
                     items: const [
                       ComboBoxItem(
-                        value: ColumnStrategyEntryEnum.fixedCount(),
+                        value: ColumnStrategyEnumType.fixedCount,
                         child: Text('Fixed Count'),
                       ),
                       ComboBoxItem(
-                        value: ColumnStrategyEntryEnum.maxExtent(),
+                        value: ColumnStrategyEnumType.maxExtent,
                         child: Text('Max Extent'),
                       ),
                       ComboBoxItem(
-                        value: ColumnStrategyEntryEnum.minExtent(),
+                        value: ColumnStrategyEnumType.minExtent,
                         child: Text('Min Extent'),
                       ),
                     ],
@@ -224,35 +224,38 @@ class SettingRoute extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          watch.current.when(
-                            fixedCount: () => 'Fixed number of columns',
-                            maxExtent: () => 'Column max width limit',
-                            minExtent: () => 'Column min width limit',
-                          ),
+                          switch (watch.current) {
+                            ColumnStrategyEnumType.fixedCount =>
+                              'Fixed number of columns',
+                            ColumnStrategyEnumType.maxExtent =>
+                              'Column max width limit',
+                            ColumnStrategyEnumType.minExtent =>
+                              'Column min width limit',
+                          },
                         ),
                         SizedBox(
                           width: 100,
                           child: NumberBox<int>(
-                            value: watch.current.when(
-                              fixedCount: () => watch.fixedCount,
-                              maxExtent: () => watch.maxExtent,
-                              minExtent: () => watch.minExtent,
-                            ),
+                            value: switch (watch.current) {
+                              ColumnStrategyEnumType.fixedCount =>
+                                watch.fixedCount,
+                              ColumnStrategyEnumType.maxExtent =>
+                                watch.maxExtent,
+                              ColumnStrategyEnumType.minExtent =>
+                                watch.minExtent,
+                            },
                             onChanged: (final value) {
                               if (value == null) {
                                 return;
                               }
-                              final newColumnStrategy = watch.current.when(
-                                fixedCount: () => watch.copyWith(
-                                  fixedCount: value,
-                                ),
-                                maxExtent: () => watch.copyWith(
-                                  maxExtent: value,
-                                ),
-                                minExtent: () => watch.copyWith(
-                                  minExtent: value,
-                                ),
-                              );
+                              final newColumnStrategy = switch (watch.current) {
+                                ColumnStrategyEnumType.fixedCount =>
+                                  watch.copyWith(fixedCount: value),
+                                ColumnStrategyEnumType.maxExtent =>
+                                  watch.copyWith(maxExtent: value),
+                                ColumnStrategyEnumType.minExtent =>
+                                  watch.copyWith(minExtent: value),
+                              };
 
                               final newConfig = changeAppConfigUseCase<
                                   ColumnStrategySettingMediator>(

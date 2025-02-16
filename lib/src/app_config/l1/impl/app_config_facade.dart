@@ -24,7 +24,9 @@ class AppConfigFacadeImpl implements AppConfigFacade {
     }
     try {
       return entry.fromJson(value);
-    } on Exception {
+      // sometimes the json is not valid
+      // ignore: avoid_catches_without_on_clauses
+    } catch (e) {
       return entry.defaultValue;
     }
   }

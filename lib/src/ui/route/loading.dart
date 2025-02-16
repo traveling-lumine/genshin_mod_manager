@@ -6,6 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart' as p;
+import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../app_config/l0/api/app_config_facade.dart';
@@ -92,70 +93,79 @@ class _LoadingRouteState extends ConsumerState<LoadingRoute> {
             Text('Configuration loading: failed: $error'),
       );
 
+  Future<void> _copyGameIcons(
+    final String name,
+    final String? modRoot,
+    final List<File> rawIcons,
+  ) async {
+    if (modRoot == null) {
+      return;
+    }
+    final modRootDir = Directory(modRoot);
+    if (!modRootDir.existsSync()) {
+      return;
+    }
+    final iconDirGame = Directory(p.join('Resources', name));
+    if (!iconDirGame.existsSync()) {
+      return;
+    }
+    final modRootSubDirs = await modRootDir
+        .list()
+        .whereType<Directory>()
+        .map(
+          (final event) => p.basename(event.path).toLowerCase(),
+        )
+        .toList();
+
+    final commonFiles = rawIcons
+        .where(
+          (final e) => modRootSubDirs
+              .contains(p.basenameWithoutExtension(e.path).toLowerCase()),
+        )
+        .toList();
+
+    await Future.wait(
+      commonFiles.map<Future<void>>(
+        (final e) async {
+          final join = p.join(iconDirGame.path, p.basename(e.path));
+          if (File(join).existsSync()) {
+            return;
+          }
+          await e.copy(join);
+        },
+      ),
+    );
+  }
+
   Future<void> _createIconFolders(final AppConfigFacade facade) async {
     await Directory('Resources').create(recursive: true);
     final gameList = facade.obtainValue(games).gameConfig;
-    await Future.wait(
+    final gameDirCreateFuture = Future.wait(
       gameList.keys
           .toList()
           .map((final e) => Directory(p.join('Resources', e)))
           .whereNot((final e) => e.existsSync())
           .map((final e) => e.create(recursive: true)),
     );
-// void _copyIcons(
-//   final SharedPreferenceStorage storage,
-//   final FileSystemInterface fsInterface,
-// ) {
-//   final games = storage.getList('games');
-//   if (games == null) {
-//     return;
-//   }
-//   final iconDirRoot = Directory(fsInterface.iconDirRoot);
-//   for (final game in games) {
-//     final iconDirGame = fsInterface.iconDir(game);
-//     try {
-//       if (!iconDirGame.existsSync()) {
-//         iconDirGame.createSync(recursive: true);
-//       }
-//     } on Exception catch (_) {
-//       continue;
-//     }
-//     final modRoot = getModRootUseCase(storage, game);
-//     if (modRoot == null) {
-//       continue;
-//     }
-//     final modRootDir = Directory(modRoot);
-//     if (!modRootDir.existsSync()) {
-//       continue;
-//     }
-//     final modRootSubDirs = modRootDir.listSync().whereType<Directory>();
-//     _copyFilenames(
-//       iconDirRoot,
-//       iconDirGame,
-//       modRootSubDirs.map((final e) => e.path.pBasename).toList(),
-//     );
-//   }
-// }
-
-// void _copyFilenames(
-//   final Directory from,
-//   final Directory to,
-//   final List<String> filenames,
-// ) {
-//   // iterate files in from directory,
-//   // find the ones in filenames,
-//   // copy to to directory
-//   final lowerFilenames = filenames.map((final e) => e.toLowerCase()).toSet();
-//   for (final file in from.listSync().whereType<File>()) {
-//     if (lowerFilenames.contains(file.path.pBNameWoExt.toLowerCase())) {
-//       // if file does not exist in to directory, copy
-//       final toFile = File(to.path.pJoin(file.path.pBasename));
-//       if (!toFile.existsSync()) {
-//         file.copySync(toFile.path);
-//       }
-//     }
-//   }
-// }
+    final listFiles =
+        await Directory('Resources').list().whereType<File>().toList();
+    try {
+      await gameDirCreateFuture;
+    } on FileSystemException {
+      // do nothing. the rest of the code will continue
+    }
+    if (listFiles.isEmpty) {
+      return;
+    }
+    await Future.wait(
+      gameList.entries.map(
+        (final e) => _copyGameIcons(
+          e.key,
+          e.value.modRoot,
+          listFiles,
+        ),
+      ),
+    );
   }
 
   Future<void> _migrate() async {

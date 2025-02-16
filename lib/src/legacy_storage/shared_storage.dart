@@ -196,25 +196,25 @@ Future<AppConfig?> migrateUseCase({
   if (cst != null && csv != null) {
     final mediator = switch (cst) {
       0 => ColumnStrategySettingMediator(
-          current: const ColumnStrategyEntryEnum.fixedCount(),
+          current: ColumnStrategyEnumType.fixedCount,
           fixedCount: csv,
           maxExtent: 440,
           minExtent: 440,
         ),
       1 => ColumnStrategySettingMediator(
-          current: const ColumnStrategyEntryEnum.maxExtent(),
+          current: ColumnStrategyEnumType.maxExtent,
           fixedCount: 3,
           maxExtent: csv,
           minExtent: 440,
         ),
       2 => ColumnStrategySettingMediator(
-          current: const ColumnStrategyEntryEnum.minExtent(),
+          current: ColumnStrategyEnumType.minExtent,
           fixedCount: 3,
           maxExtent: 440,
           minExtent: csv,
         ),
       _ => const ColumnStrategySettingMediator(
-          current: ColumnStrategyEntryEnum.minExtent(),
+          current: ColumnStrategyEnumType.minExtent,
           fixedCount: 3,
           maxExtent: 440,
           minExtent: 440,

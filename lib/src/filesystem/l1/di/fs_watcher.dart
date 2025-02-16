@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../app_config/l0/entity/entries.dart';
 import '../../../app_config/l1/di/app_config_facade.dart';
@@ -28,10 +29,12 @@ Stream<String?> folderIconPathStream(
   final watcher = fs.watchFile(path: path);
   ref.onDispose(watcher.cancel);
 
-  return watcher.stream.asyncMap(
-    (final event) async => findPreviewFileInString(
-      await getUnder<File>(path),
-      name: category.name,
-    ),
-  );
+  return watcher.stream
+      .debounceTime(const Duration(milliseconds: 100))
+      .asyncMap(
+        (final event) async => findPreviewFileInString(
+          await getUnder<File>(path),
+          name: category.name,
+        ),
+      );
 }

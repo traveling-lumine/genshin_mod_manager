@@ -69,7 +69,7 @@ final windowSize = AppConfigEntry<Size?>(
 final columnStrategy = AppConfigEntry<ColumnStrategySettingMediator>(
   key: 'columnStrategy',
   defaultValue: const ColumnStrategySettingMediator(
-    current: ColumnStrategyEntryMinExtent(),
+    current: ColumnStrategyEnumType.minExtent,
     fixedCount: 3,
     maxExtent: 440,
     minExtent: 440,

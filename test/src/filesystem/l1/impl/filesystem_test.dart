@@ -74,10 +74,16 @@ void main() {
       });
       test(
         'directory is movable after pause',
-        () async => fs.pauseAllWatchers(),
+        () async {
+          await fs.pauseAllWatchers();
+        },
       );
-      test('directory is movable after cancel', () async => stream.cancel());
-      test('directory is movable after dispose', () async => fs.dispose());
+      test('directory is movable after cancel', () async {
+        await stream.cancel();
+      });
+      test('directory is movable after dispose', () async {
+        await fs.dispose();
+      });
       test('directory is not movable after resume', () async {
         await fs.pauseAllWatchers();
         fs.resumeAllWatchers();
