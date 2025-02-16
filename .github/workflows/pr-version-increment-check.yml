@@ -9,7 +9,7 @@ on:
       - labeled
       - unlabeled
     paths: 
-      - pubspec.yml
+      - pubspec.yaml
 
 jobs:
   check_version_increment:
