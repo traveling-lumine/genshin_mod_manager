@@ -38,7 +38,7 @@ class _Lexer {
   };
 
   final String text;
-  var position = 0;
+  int position = 0;
   _Token? currentToken;
 
   _Token? nextToken() {

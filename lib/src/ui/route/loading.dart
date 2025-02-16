@@ -67,8 +67,10 @@ class _LoadingRouteState extends ConsumerState<LoadingRoute> {
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Setting migration: failed: ${snapshot.error}\n'
-                    '${elideLines(snapshot.stackTrace.toString())}'),
+                Expanded(
+                  child: Text('Setting migration: failed: ${snapshot.error}\n'
+                      '${elideLines(snapshot.stackTrace.toString())}'),
+                ),
                 const SizedBox(width: 16),
                 FilledButton(
                   onPressed: () => setState(() {
@@ -105,7 +107,13 @@ class _LoadingRouteState extends ConsumerState<LoadingRoute> {
     if (!modRootDir.existsSync()) {
       return;
     }
-    final iconDirGame = Directory(p.join('Resources', name));
+    final iconDirGame = Directory(
+      p.join(
+        File(Platform.resolvedExecutable).parent.path,
+        'Resources',
+        name,
+      ),
+    );
     if (!iconDirGame.existsSync()) {
       return;
     }
@@ -138,17 +146,28 @@ class _LoadingRouteState extends ConsumerState<LoadingRoute> {
   }
 
   Future<void> _createIconFolders(final AppConfigFacade facade) async {
-    await Directory('Resources').create(recursive: true);
+    await Directory(
+      p.join(File(Platform.resolvedExecutable).parent.path, 'Resources'),
+    ).create(recursive: true);
     final gameList = facade.obtainValue(games).gameConfig;
     final gameDirCreateFuture = Future.wait(
       gameList.keys
           .toList()
-          .map((final e) => Directory(p.join('Resources', e)))
+          .map(
+            (final e) => Directory(
+              p.join(
+                File(Platform.resolvedExecutable).parent.path,
+                'Resources',
+                e,
+              ),
+            ),
+          )
           .whereNot((final e) => e.existsSync())
           .map((final e) => e.create(recursive: true)),
     );
-    final listFiles =
-        await Directory('Resources').list().whereType<File>().toList();
+    final listFiles = await Directory(
+      p.join(File(Platform.resolvedExecutable).parent.path, 'Resources'),
+    ).list().whereType<File>().toList();
     try {
       await gameDirCreateFuture;
     } on FileSystemException {

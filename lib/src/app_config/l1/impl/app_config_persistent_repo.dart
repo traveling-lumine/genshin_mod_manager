@@ -45,7 +45,8 @@ class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
     return AppConfigPersistentRepoImpl._(subscription, controller);
   }
   AppConfigPersistentRepoImpl._(this._subscription, this._controller);
-  static final settingsFile = File('settings.json');
+  static final settingsFile = File(
+      p.join(File(Platform.resolvedExecutable).parent.path, 'settings.json'),);
   static const _encoder = JsonEncoder.withIndent('  ');
   final StreamSubscription<Map<String, dynamic>> _subscription;
   final BehaviorSubject<Map<String, dynamic>> _controller;

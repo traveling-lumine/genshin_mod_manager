@@ -21,7 +21,9 @@ AppConfig addGameConfig({
   if (currentGameConfig.gameConfig.containsKey(gameName) && !force) {
     throw GameAlreadyExistsException(gameName);
   }
-  unawaited(Directory(p.join('Resources', gameName)).create(recursive: true));
+  unawaited(Directory(p.join(
+          File(Platform.resolvedExecutable).parent.path, 'Resources', gameName,),)
+      .create(recursive: true),);
   final storeValue = currentGameConfig.copyWith(
     current: gameName,
     gameConfig: {

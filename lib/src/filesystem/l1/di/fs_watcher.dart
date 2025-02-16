@@ -22,7 +22,8 @@ Stream<String?> folderIconPathStream(
     appConfigFacadeProvider
         .select((final value) => value.obtainValue(games).current!),
   );
-  final iconDir = Directory(p.join('Resources', currentGame));
+  final iconDir = Directory(p.join(
+      File(Platform.resolvedExecutable).parent.path, 'Resources', currentGame,),);
   final path = (iconDir..createSync(recursive: true)).path;
 
   final fs = ref.watch(filesystemProvider);

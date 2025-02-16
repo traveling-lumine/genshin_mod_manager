@@ -23,9 +23,9 @@ class MockUrlLauncher extends Fake
 
   bool? response;
 
-  var closeWebViewCalled = false;
-  var canLaunchCalled = false;
-  var launchCalled = false;
+  bool closeWebViewCalled = false;
+  bool canLaunchCalled = false;
+  bool launchCalled = false;
 
   void setLaunchExpectations({
     required final String url,
