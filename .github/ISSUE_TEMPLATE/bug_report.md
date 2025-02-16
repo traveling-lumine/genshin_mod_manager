@@ -1,25 +1,29 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: Bug Report
+about: Report a bug to help improve the program
 title: ''
 labels: 'bug'
 assignees: ''
 
 ---
 
-## Description
-[Provide a clear and concise description of the bug you've encountered.]
+## Bug Description
+[Provide a clear and concise description of the issue you encountered.]
 
 ## Steps to Reproduce
-1. [Outline the steps you took to encounter the bug.]
-2. [Provide additional steps if necessary.]
-3. [Explain what actually happened.]
+1. [List the steps to reproduce the bug in detail.]
+2. [Add more steps if needed.]
+3. [Describe what happened during or after performing the steps.]
 
 ## Expected Behavior
-[Explain what you expected to happen when performing the steps above.]
+[Describe what you expected to happen instead of the actual outcome.]
 
-## Screenshots/Recordings
-[Attach any screenshots, recordings, or error messages related to the bug.]
+## Screenshots or Logs
+[Attach any relevant screenshots, logs, or error messages to help diagnose the issue.]
+
+## Program Details
+- **Program Version:** [e.g., v1.0.0]
+- **Environment:** [e.g., Operating System, dependencies, or configurations specific to your setup.]
 
 ## Additional Context
-[Any additional information or context that might be helpful for understanding the bug.]
+[Provide any other information or context that could be useful for understanding or fixing the bug.]

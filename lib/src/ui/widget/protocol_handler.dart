@@ -7,12 +7,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../nahida/di/nahida_download_queue.dart';
-import '../../nahida/di/nahida_store.dart';
-import '../../nahida/domain/entity/nahida_element.dart';
-import '../../storage/di/exe_arg.dart';
-import '../../structure/di/categories.dart';
-import '../../structure/entity/mod_category.dart';
+import '../../app_config/l1/di/exe_arg.dart';
+import '../../filesystem/l0/entity/mod_category.dart';
+import '../../filesystem/l1/di/categories.dart';
+import '../../nahida/l0/di/nahida_download_queue.dart';
+import '../../nahida/l0/entity/nahida_element.dart';
+import '../../nahida/l0/usecase/download_url.dart';
+import '../../nahida/l0/usecase/get_element.dart';
+import '../../nahida/l1/di/nahida_repo.dart';
 import 'turnstile_dialog.dart';
 
 String _convertUuid(final String uuid) {
@@ -37,12 +39,11 @@ String _convertUuid(final String uuid) {
 Future<NahidaliveElement> _getElement(
   final WidgetRef ref,
   final String rawUuid,
-) async {
-  final nahida = ref.read(nahidaApiProvider);
-  final uuid = _convertUuid(rawUuid);
-  final elem = await nahida.fetchNahidaliveElement(uuid: uuid);
-  return elem;
-}
+) async =>
+    getNahidaElementUseCase(
+      repository: ref.read(nahidaRepositoryProvider),
+      uuid: _convertUuid(rawUuid),
+    );
 
 typedef VoidFutureCallback = Future<void> Function();
 
@@ -129,6 +130,7 @@ class ProtocolHandlerWidget extends ConsumerWidget {
     final categoryName = GoRouterState.of(context).pathParameters['category'];
     final category = ref
         .read(categoriesProvider)
+        .requireValue
         .firstWhereOrNull((final e) => e.name == categoryName);
 
     _showProtocolConfirmDialog(context, url, rawUuid, category, password);
@@ -214,7 +216,7 @@ class _ProtocolDialog extends HookConsumerWidget {
           else
             const Text('Fetching element...'),
           const SizedBox(height: 10),
-          _buildCategorySelector(currentSelected, categories),
+          _buildCategorySelector(currentSelected, categories.requireValue),
         ],
       ),
       actions: [
@@ -248,10 +250,7 @@ class _ProtocolDialog extends HookConsumerWidget {
       ..add(StringProperty('url', url))
       ..add(StringProperty('rawUuid', rawUuid))
       ..add(
-        DiagnosticsProperty<ModCategory?>(
-          'initialCategory',
-          initialCategory,
-        ),
+        DiagnosticsProperty<ModCategory?>('initialCategory', initialCategory),
       )
       ..add(StringProperty('password', password));
   }
@@ -266,10 +265,7 @@ class _ProtocolDialog extends HookConsumerWidget {
         value: currentSelected.value?.name ?? emptyPlaceholder,
         items: categories
             .map(
-              (final e) => ComboBoxItem(
-                value: e.name,
-                child: Text(e.name),
-              ),
+              (final e) => ComboBoxItem(value: e.name, child: Text(e.name)),
             )
             .toList(),
         onChanged: (final value) {
@@ -311,17 +307,16 @@ class _ProtocolDialog extends HookConsumerWidget {
     if (turnstile == null) {
       return;
     }
+
     unawaited(
-      ref
-          .read(
-            nahidaDownloadQueueProvider.notifier,
-          )
-          .addDownload(
-            element: elem,
-            category: currentSelected,
-            pw: password,
-            turnstile: turnstile,
-          ),
+      downloadUrlUseCase(
+        repo: ref.read(nahidaRepositoryProvider),
+        downloadQueue: ref.read(nahidaDownloadQueueProvider.notifier),
+        element: elem,
+        category: currentSelected,
+        pw: password,
+        turnstile: turnstile,
+      ),
     );
     if (context.mounted) {
       Navigator.of(context).pop();

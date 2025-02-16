@@ -1,4 +1,0 @@
-enum DragImportType {
-  move,
-  copy,
-}

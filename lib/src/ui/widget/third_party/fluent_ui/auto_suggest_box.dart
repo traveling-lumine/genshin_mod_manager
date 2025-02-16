@@ -5,17 +5,48 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-typedef AutoSuggestBoxSorter<T> = List<AutoSuggestBoxItem2<T>> Function(
-    String text, List<AutoSuggestBoxItem2<T>> items);
+typedef AutoSuggestBoxSorter<T> = List<AutoSuggestBoxItem<T>> Function(
+  String text,
+  List<AutoSuggestBoxItem<T>> items,
+);
 
 typedef OnChangeAutoSuggestBox<T> = void Function(
-    String text, TextChangedReason reason);
+  String text,
+  TextChangedReason reason,
+);
 
 typedef AutoSuggestBoxItemBuilder<T> = Widget Function(
-    BuildContext context, AutoSuggestBoxItem2<T> item);
+  BuildContext context,
+  AutoSuggestBoxItem<T> item,
+);
 
-/// An item used in [AutoSuggestBox2]
-class AutoSuggestBoxItem2<T> {
+enum TextChangedReason {
+  /// Whether the text in an [AutoSuggestBox] was changed by user input
+  userInput,
+
+  /// Whether the text in an [AutoSuggestBox] was changed because the user
+  /// chose the suggestion
+  suggestionChosen,
+
+  /// Whether the text in an [AutoSuggestBox] was cleared by the user
+  cleared,
+}
+
+/// The default max height the auto suggest box popup can have
+const kAutoSuggestBoxPopupMaxHeight = 380.0;
+
+/// An item used in [AutoSuggestBox]
+class AutoSuggestBoxItem<T> {
+  /// Creates an auto suggest box item
+  AutoSuggestBoxItem({
+    required this.value,
+    required this.label,
+    this.child,
+    this.onFocusChange,
+    this.onSelected,
+    this.semanticLabel,
+  });
+
   /// The value attached to this item
   final T? value;
 
@@ -42,29 +73,19 @@ class AutoSuggestBoxItem2<T> {
   /// If not provided, [label] is used
   final String? semanticLabel;
 
-  bool _selected = false;
-
-  /// Creates an auto suggest box item
-  AutoSuggestBoxItem2({
-    required this.value,
-    required this.label,
-    this.child,
-    this.onFocusChange,
-    this.onSelected,
-    this.semanticLabel,
-  });
+  var _selected = false;
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+  bool operator ==(final Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
 
-    return other is AutoSuggestBoxItem2 && other.value == value;
+    return other is AutoSuggestBoxItem && other.value == value;
   }
 
   @override
-  int get hashCode {
-    return value.hashCode;
-  }
+  int get hashCode => value.hashCode;
 }
 
 /// An AutoSuggestBox provides a list of suggestions for a user to select from
@@ -78,16 +99,16 @@ class AutoSuggestBoxItem2<T> {
 ///  * [TextFormBox], which is used by this widget by Form
 ///  * [Overlay], which is used to show the suggestion popup
 ///  * <https://docs.microsoft.com/en-us/windows/apps/design/controls/auto-suggest-box>
-class AutoSuggestBox2<T> extends StatefulWidget {
+class AutoSuggestBox<T> extends StatefulWidget {
   /// Creates a fluent-styled auto suggest box.
-  const AutoSuggestBox2({
-    super.key,
+  const AutoSuggestBox({
     required this.items,
+    super.key,
     this.controller,
     this.onChanged,
     this.onSelected,
-    this.onSubmissionFailed,
     this.onOverlayVisibilityChanged,
+    this.onSubmissionFailed,
     this.itemBuilder,
     this.noResultsFoundBuilder,
     this.sorter,
@@ -103,11 +124,11 @@ class AutoSuggestBox2<T> extends StatefulWidget {
     this.unfocusedColor,
     this.cursorColor,
     this.cursorHeight,
-    this.cursorRadius = const Radius.circular(2.0),
+    this.cursorRadius = const Radius.circular(2),
     this.cursorWidth = 1.5,
     this.showCursor,
     this.keyboardAppearance,
-    this.scrollPadding = const EdgeInsets.all(20.0),
+    this.scrollPadding = const EdgeInsets.all(20),
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
     this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.textInputAction,
@@ -121,14 +142,14 @@ class AutoSuggestBox2<T> extends StatefulWidget {
         validator = null;
 
   /// Creates a fluent-styled auto suggest form box.
-  const AutoSuggestBox2.form({
-    super.key,
+  const AutoSuggestBox.form({
     required this.items,
+    super.key,
     this.controller,
     this.onChanged,
     this.onSelected,
-    this.onSubmissionFailed,
     this.onOverlayVisibilityChanged,
+    this.onSubmissionFailed,
     this.itemBuilder,
     this.noResultsFoundBuilder,
     this.sorter,
@@ -144,11 +165,11 @@ class AutoSuggestBox2<T> extends StatefulWidget {
     this.unfocusedColor,
     this.cursorColor,
     this.cursorHeight,
-    this.cursorRadius = const Radius.circular(2.0),
+    this.cursorRadius = const Radius.circular(2),
     this.cursorWidth = 1.5,
     this.showCursor,
     this.keyboardAppearance,
-    this.scrollPadding = const EdgeInsets.all(20.0),
+    this.scrollPadding = const EdgeInsets.all(20),
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
     this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.validator,
@@ -163,19 +184,16 @@ class AutoSuggestBox2<T> extends StatefulWidget {
   });
 
   /// The list of items to display to the user to pick
-  final List<AutoSuggestBoxItem2<T>> items;
+  final List<AutoSuggestBoxItem<T>> items;
 
   /// The controller used to have control over what to show on the [TextBox].
   final TextEditingController? controller;
 
   /// Called when the text is updated
-  final OnChangeAutoSuggestBox? onChanged;
+  final OnChangeAutoSuggestBox<dynamic>? onChanged;
 
   /// Called when the user selected a value.
-  final ValueChanged<AutoSuggestBoxItem2<T>>? onSelected;
-
-  /// Called when the user submitted the text and no item was selected.
-  final void Function(String text)? onSubmissionFailed;
+  final ValueChanged<AutoSuggestBoxItem<T>>? onSelected;
 
   /// Called when the overlay visibility changes
   final ValueChanged<bool>? onOverlayVisibilityChanged;
@@ -183,7 +201,7 @@ class AutoSuggestBox2<T> extends StatefulWidget {
   /// A callback function that builds the items in the overlay.
   ///
   /// Use [noResultsFoundBuilder] to build the overlay when no item is provided
-  final AutoSuggestBoxItemBuilder? itemBuilder;
+  final AutoSuggestBoxItemBuilder<dynamic>? itemBuilder;
 
   /// Widget to be displayed when none of the items fit the [sorter]
   final WidgetBuilder? noResultsFoundBuilder;
@@ -192,7 +210,7 @@ class AutoSuggestBox2<T> extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [AutoSuggestBox2.defaultItemSorter], the default item sorter
+  ///  * [AutoSuggestBox.defaultItemSorter], the default item sorter
   final AutoSuggestBoxSorter<T>? sorter;
 
   /// A widget displayed at the start of the text box
@@ -228,12 +246,15 @@ class AutoSuggestBox2<T> extends StatefulWidget {
   final TextStyle? style;
 
   /// Controls the [BoxDecoration] of the box behind the text input.
-  final BoxDecoration? decoration;
+  ///
+  /// Defaults to having a rounded rectangle grey border and can be null to have
+  /// no box decoration.
+  final WidgetStateProperty<BoxDecoration>? decoration;
 
   /// Controls the [BoxDecoration] of the box in front of the text input.
   ///
   /// If [highlightColor] is provided, this must not be provided
-  final BoxDecoration? foregroundDecoration;
+  final WidgetStateProperty<BoxDecoration>? foregroundDecoration;
 
   /// The highlight color of the text box.
   ///
@@ -334,55 +355,180 @@ class AutoSuggestBox2<T> extends StatefulWidget {
   /// than the available space, the box is limited to the available space.
   final double maxPopupHeight;
 
-  @override
-  State<AutoSuggestBox2<T>> createState() => AutoSuggestBox2State2<T>();
+  final void Function(String)? onSubmissionFailed;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  State<AutoSuggestBox<T>> createState() => AutoSuggestBoxState<T>();
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(IterableProperty<AutoSuggestBoxItem2<T>>('items', items))
-      ..add(ObjectFlagProperty<ValueChanged<AutoSuggestBoxItem2<T>>?>(
-          'onSelected', onSelected,
-          ifNull: 'disabled'))
-      ..add(FlagProperty('clearButtonEnabled',
+      ..add(IterableProperty<AutoSuggestBoxItem<T>>('items', items))
+      ..add(
+        ObjectFlagProperty<ValueChanged<AutoSuggestBoxItem<T>>?>(
+          'onSelected',
+          onSelected,
+          ifNull: 'disabled',
+        ),
+      )
+      ..add(
+        FlagProperty(
+          'clearButtonEnabled',
           value: clearButtonEnabled,
           defaultValue: true,
-          ifFalse: 'clear button disabled'))
-      ..add(FlagProperty('enableKeyboardControls',
+          ifFalse: 'clear button disabled',
+        ),
+      )
+      ..add(
+        FlagProperty(
+          'enableKeyboardControls',
           value: enableKeyboardControls,
           defaultValue: true,
-          ifFalse: 'keyboard controls disabled'))
-      ..add(DoubleProperty('maxPopupHeight', maxPopupHeight,
-          defaultValue: kAutoSuggestBoxPopupMaxHeight));
+          ifFalse: 'keyboard controls disabled',
+        ),
+      )
+      ..add(
+        DoubleProperty(
+          'maxPopupHeight',
+          maxPopupHeight,
+          defaultValue: kAutoSuggestBoxPopupMaxHeight,
+        ),
+      );
+    properties.add(
+      DiagnosticsProperty<TextEditingController?>('controller', controller),
+    );
+    properties.add(
+      ObjectFlagProperty<OnChangeAutoSuggestBox<dynamic>?>.has(
+        'onChanged',
+        onChanged,
+      ),
+    );
+    properties.add(
+      ObjectFlagProperty<ValueChanged<bool>?>.has(
+        'onOverlayVisibilityChanged',
+        onOverlayVisibilityChanged,
+      ),
+    );
+    properties.add(
+      ObjectFlagProperty<AutoSuggestBoxItemBuilder<dynamic>?>.has(
+        'itemBuilder',
+        itemBuilder,
+      ),
+    );
+    properties.add(
+      ObjectFlagProperty<WidgetBuilder?>.has(
+        'noResultsFoundBuilder',
+        noResultsFoundBuilder,
+      ),
+    );
+    properties.add(
+      ObjectFlagProperty<AutoSuggestBoxSorter<T>?>.has('sorter', sorter),
+    );
+    properties.add(StringProperty('placeholder', placeholder));
+    properties.add(
+      DiagnosticsProperty<TextStyle?>('placeholderStyle', placeholderStyle),
+    );
+    properties.add(DiagnosticsProperty<TextStyle?>('style', style));
+    properties.add(
+      DiagnosticsProperty<WidgetStateProperty<BoxDecoration>?>(
+        'decoration',
+        decoration,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<WidgetStateProperty<BoxDecoration>?>(
+        'foregroundDecoration',
+        foregroundDecoration,
+      ),
+    );
+    properties.add(ColorProperty('highlightColor', highlightColor));
+    properties.add(ColorProperty('unfocusedColor', unfocusedColor));
+    properties.add(DoubleProperty('cursorWidth', cursorWidth));
+    properties.add(DoubleProperty('cursorHeight', cursorHeight));
+    properties
+        .add(DiagnosticsProperty<ui.Radius>('cursorRadius', cursorRadius));
+    properties.add(ColorProperty('cursorColor', cursorColor));
+    properties.add(DiagnosticsProperty<bool?>('showCursor', showCursor));
+    properties.add(
+      EnumProperty<ui.BoxHeightStyle>(
+        'selectionHeightStyle',
+        selectionHeightStyle,
+      ),
+    );
+    properties.add(
+      EnumProperty<ui.BoxWidthStyle>(
+        'selectionWidthStyle',
+        selectionWidthStyle,
+      ),
+    );
+    properties.add(
+      EnumProperty<ui.Brightness?>('keyboardAppearance', keyboardAppearance),
+    );
+    properties
+        .add(DiagnosticsProperty<EdgeInsets>('scrollPadding', scrollPadding));
+    properties.add(
+      ObjectFlagProperty<FormFieldValidator<String>?>.has(
+        'validator',
+        validator,
+      ),
+    );
+    properties.add(
+      EnumProperty<AutovalidateMode>('autovalidateMode', autovalidateMode),
+    );
+    properties.add(
+      EnumProperty<TextInputAction?>('textInputAction', textInputAction),
+    );
+    properties.add(DiagnosticsProperty<FocusNode?>('focusNode', focusNode));
+    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus));
+    properties.add(DiagnosticsProperty<bool>('enabled', enabled));
+    properties.add(
+      IterableProperty<TextInputFormatter>(
+        'inputFormatters',
+        inputFormatters,
+      ),
+    );
+    properties.add(
+      ObjectFlagProperty<void Function(String p1)?>.has(
+        'onSubmissionFailed',
+        onSubmissionFailed,
+      ),
+    );
   }
 
   /// The default item sorter.
   ///
   /// This sorter will filter the items based on their label.
-  List<AutoSuggestBoxItem2<T>> defaultItemSorter(
-      String text, List<AutoSuggestBoxItem2<T>> items) {
+  List<AutoSuggestBoxItem<T>> defaultItemSorter(
+    String text,
+    final List<AutoSuggestBoxItem<T>> items,
+  ) {
     text = text.trim();
-    if (text.isEmpty) return items;
+    if (text.isEmpty) {
+      return items;
+    }
 
-    return items.where((element) {
-      return element.label.toLowerCase().contains(text.toLowerCase());
-    }).toList();
+    return items
+        .where(
+          (final element) =>
+              element.label.toLowerCase().contains(text.toLowerCase()),
+        )
+        .toList();
   }
 }
 
-class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
+class AutoSuggestBoxState<T> extends State<AutoSuggestBox<T>> {
   late FocusNode _focusNode = widget.focusNode ?? FocusNode();
   OverlayEntry? _entry;
-  final LayerLink _layerLink = LayerLink();
+  final _layerLink = LayerLink();
   final GlobalKey _textBoxKey =
       GlobalKey(debugLabel: "AutoSuggestBox's TextBox Key");
 
   late TextEditingController _controller;
-  final FocusScopeNode _overlayNode = FocusScopeNode();
+  final _overlayNode = FocusScopeNode();
   final _focusStreamController = StreamController<int>.broadcast();
   final _dynamicItemsController =
-      StreamController<List<AutoSuggestBoxItem2<T>>>.broadcast();
+      StreamController<List<AutoSuggestBoxItem<T>>>.broadcast();
 
   AutoSuggestBoxSorter<T> get sorter =>
       widget.sorter ?? widget.defaultItemSorter;
@@ -393,10 +539,12 @@ class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
   /// changes.
   Size _boxSize = Size.zero;
 
-  late List<AutoSuggestBoxItem2<T>> _localItems;
+  late List<AutoSuggestBoxItem<T>> _localItems;
 
   void _updateLocalItems() {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     setState(() => _localItems = sorter(_controller.text, widget.items));
   }
 
@@ -411,10 +559,12 @@ class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
     _localItems = sorter(_controller.text, widget.items);
 
     // Update the overlay when the text box size has changed
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((final _) async {
+      if (!mounted) {
+        return;
+      }
 
-      final box = _textBoxKey.currentContext!.findRenderObject() as RenderBox;
+      final box = _textBoxKey.currentContext!.findRenderObject()! as RenderBox;
       if (_boxSize != box.size) {
         dismissOverlay();
         _boxSize = box.size;
@@ -432,25 +582,33 @@ class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
 
     // If the TextEditingController and FocusNode objects are created locally,
     // we must dispose them.
-    if (widget.controller == null) _controller.dispose();
-    if (widget.focusNode == null) _focusNode.dispose();
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
 
     super.dispose();
   }
 
   @override
-  void didUpdateWidget(covariant AutoSuggestBox2<T> oldWidget) {
+  void didUpdateWidget(covariant final AutoSuggestBox<T> oldWidget) {
     {
       // if the focusNode or controller objects were changed, we must reflect the
       // changes here. This is mostly used for a good dev-experience with hot
       // reload, but can also be used to create fancy focus effects
       if (widget.focusNode != oldWidget.focusNode) {
-        if (oldWidget.focusNode == null) _focusNode.dispose();
+        if (oldWidget.focusNode == null) {
+          _focusNode.dispose();
+        }
         _focusNode = widget.focusNode ?? FocusNode();
       }
 
       if (widget.controller != oldWidget.controller) {
-        if (oldWidget.controller == null) _controller.dispose();
+        if (oldWidget.controller == null) {
+          _controller.dispose();
+        }
         _controller = widget.controller ?? TextEditingController();
       }
     }
@@ -473,14 +631,20 @@ class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
   }
 
   void _handleTextChanged() {
-    if (!mounted) return;
-    if (_controller.text.length < 2) setState(() {});
+    if (!mounted) {
+      return;
+    }
+    if (_controller.text.length < 2) {
+      setState(() {});
+    }
 
     _updateLocalItems();
 
     // Update the overlay when the text box size has changed
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((final _) async {
+      if (!mounted) {
+        return;
+      }
       _updateLocalItems();
     });
   }
@@ -492,73 +656,88 @@ class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
     final overlayState =
         Overlay.of(context, rootOverlay: true, debugRequiredFor: widget);
 
-    _entry = OverlayEntry(builder: (context) {
-      assert(debugCheckHasMediaQuery(context));
-      assert(debugCheckHasFluentTheme(context));
+    _entry = OverlayEntry(
+      builder: (final context) {
+        assert(debugCheckHasMediaQuery(context));
+        assert(debugCheckHasFluentTheme(context));
 
-      final boxContext = _textBoxKey.currentContext;
-      if (boxContext == null) return const SizedBox.shrink();
-      final box = boxContext.findRenderObject() as RenderBox;
+        final boxContext = _textBoxKey.currentContext;
+        if (boxContext == null) {
+          return const SizedBox.shrink();
+        }
+        final box = boxContext.findRenderObject()! as RenderBox;
 
-      // ancestor is not necessary here because we are not dealing with routes, but overlays
-      final globalOffset = box.localToGlobal(Offset.zero,
-          ancestor: overlayState.context.findRenderObject());
+        // ancestor is not necessary here because we are not dealing with routes, but overlays
+        final globalOffset = box.localToGlobal(
+          Offset.zero,
+          ancestor: overlayState.context.findRenderObject(),
+        );
 
-      final screenHeight = MediaQuery.sizeOf(context).height -
-          MediaQuery.viewPaddingOf(context).bottom;
-      final overlayY = globalOffset.dy + box.size.height;
-      final maxHeight =
-          (screenHeight - overlayY).clamp(0.0, widget.maxPopupHeight);
+        final screenHeight = MediaQuery.sizeOf(context).height -
+            MediaQuery.viewPaddingOf(context).bottom;
+        final overlayY = globalOffset.dy + box.size.height;
+        final maxHeight =
+            (screenHeight - overlayY).clamp(0.0, widget.maxPopupHeight);
 
-      Widget child = PositionedDirectional(
+        Widget child = PositionedDirectional(
           width: box.size.width,
           child: CompositedTransformFollower(
-              link: _layerLink,
-              showWhenUnlinked: false,
-              offset: Offset(0, box.size.height + 0.8),
-              child: SizedBox(
-                  width: box.size.width,
-                  child: FluentTheme(
-                      data: FluentTheme.of(context),
-                      child: _AutoSuggestBoxOverlay2<T>(
-                          maxHeight: maxHeight,
-                          node: _overlayNode,
-                          controller: _controller,
-                          items: widget.items,
-                          itemBuilder: widget.itemBuilder,
-                          focusStream: _focusStreamController.stream,
-                          itemsStream: _dynamicItemsController.stream,
-                          sorter: sorter,
-                          onSelected: (AutoSuggestBoxItem2<T> item) {
-                            item.onSelected?.call();
-                            widget.onSelected?.call(item);
-                            _controller
-                              ..text = item.label
-                              ..selection = TextSelection.collapsed(
-                                  offset: item.label.length);
-                            widget.onChanged?.call(
-                                item.label, TextChangedReason.suggestionChosen);
+            link: _layerLink,
+            showWhenUnlinked: false,
+            offset: Offset(0, box.size.height + 0.8),
+            child: SizedBox(
+              width: box.size.width,
+              child: FluentTheme(
+                data: FluentTheme.of(context),
+                child: _AutoSuggestBoxOverlay<T>(
+                  maxHeight: maxHeight,
+                  node: _overlayNode,
+                  controller: _controller,
+                  items: widget.items,
+                  itemBuilder: widget.itemBuilder,
+                  focusStream: _focusStreamController.stream,
+                  itemsStream: _dynamicItemsController.stream,
+                  sorter: sorter,
+                  onSelected: (final item) {
+                    item.onSelected?.call();
+                    widget.onSelected?.call(item);
+                    _controller
+                      ..text = item.label
+                      ..selection = TextSelection.collapsed(
+                        offset: item.label.length,
+                      );
+                    widget.onChanged?.call(
+                      item.label,
+                      TextChangedReason.suggestionChosen,
+                    );
 
-                            // After selected, the overlay is dismissed and the text box is
-                            // unfocused
-                            dismissOverlay();
-                            _focusNode.unfocus(
-                                disposition:
-                                    UnfocusDisposition.previouslyFocusedChild);
-                          },
-                          noResultsFoundBuilder:
-                              widget.noResultsFoundBuilder)))));
+                    // After selected, the overlay is dismissed and the text box is
+                    // unfocused
+                    dismissOverlay();
+                    _focusNode.unfocus(
+                      disposition: UnfocusDisposition.previouslyFocusedChild,
+                    );
+                  },
+                  noResultsFoundBuilder: widget.noResultsFoundBuilder,
+                ),
+              ),
+            ),
+          ),
+        );
 
-      if (DisableAcrylic.of(context) != null) {
-        child = DisableAcrylic(child: child);
-      }
+        if (DisableAcrylic.of(context) != null) {
+          child = DisableAcrylic(child: child);
+        }
 
-      return child;
-    });
+        return child;
+      },
+    );
 
     if (_textBoxKey.currentContext != null) {
       overlayState.insert(_entry!);
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     }
   }
 
@@ -583,14 +762,14 @@ class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
     }
   }
 
-  void _onChanged(String text) {
+  void _onChanged(final String text) {
     widget.onChanged?.call(text, TextChangedReason.userInput);
     showOverlay();
   }
 
   void _onSubmitted() {
     final currentlySelectedIndex =
-        _localItems.indexWhere((item) => item._selected);
+        _localItems.indexWhere((final item) => item._selected);
     if (currentlySelectedIndex.isNegative) {
       widget.onSubmissionFailed?.call(_controller.text);
       return;
@@ -611,157 +790,177 @@ class AutoSuggestBox2State2<T> extends State<AutoSuggestBox2<T>> {
   double? _width;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasFluentTheme(context));
     assert(debugCheckHasFluentLocalizations(context));
 
-    final suffix = Row(mainAxisSize: MainAxisSize.min, children: [
-      if (widget.clearButtonEnabled && _controller.text.isNotEmpty)
-        Padding(
-            padding: const EdgeInsetsDirectional.only(start: 2.0),
+    final suffix = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (widget.clearButtonEnabled && _controller.text.isNotEmpty)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 2),
             child: IconButton(
-                icon: const Icon(FluentIcons.chrome_close, size: 9.0),
-                onPressed: () {
-                  _controller.clear();
-                  widget.onChanged
-                      ?.call(_controller.text, TextChangedReason.cleared);
-                })),
-      if (widget.trailingIcon != null) widget.trailingIcon!,
-    ]);
+              icon: const Icon(FluentIcons.chrome_close, size: 9),
+              onPressed: () {
+                _controller.clear();
+                widget.onChanged
+                    ?.call(_controller.text, TextChangedReason.cleared);
+              },
+            ),
+          ),
+        if (widget.trailingIcon != null) widget.trailingIcon!,
+      ],
+    );
 
     return CompositedTransformTarget(
-        link: _layerLink,
-        child: Focus(
-            skipTraversal: true,
-            onKeyEvent: (node, event) {
-              if (!(event is KeyDownEvent || event is KeyRepeatEvent) ||
-                  !widget.enableKeyboardControls) {
-                return KeyEventResult.ignored;
-              }
+      link: _layerLink,
+      child: Focus(
+        skipTraversal: true,
+        onKeyEvent: (final node, final event) {
+          if (!(event is KeyDownEvent || event is KeyRepeatEvent) ||
+              !widget.enableKeyboardControls) {
+            return KeyEventResult.ignored;
+          }
 
-              if (event.logicalKey == LogicalKeyboardKey.escape) {
-                dismissOverlay();
-                return KeyEventResult.handled;
-              }
+          if (event.logicalKey == LogicalKeyboardKey.escape) {
+            dismissOverlay();
+            return KeyEventResult.handled;
+          }
 
-              if (_localItems.isEmpty) return KeyEventResult.ignored;
+          if (_localItems.isEmpty) {
+            return KeyEventResult.ignored;
+          }
 
-              final currentlySelectedIndex =
-                  _localItems.indexWhere((item) => item._selected);
+          final currentlySelectedIndex =
+              _localItems.indexWhere((final item) => item._selected);
 
-              void select(int index) {
-                _unselectAll();
-                final item = (_localItems[index]).._selected = true;
-                item.onFocusChange?.call(true);
-                _focusStreamController.add(index);
-              }
+          void select(final int index) {
+            _unselectAll();
+            final item = (_localItems[index]).._selected = true;
+            item.onFocusChange?.call(true);
+            _focusStreamController.add(index);
+          }
 
-              final lastIndex = _localItems.length - 1;
+          final lastIndex = _localItems.length - 1;
 
-              if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-                // if nothing is selected, select the first
-                if (currentlySelectedIndex == -1 ||
-                    currentlySelectedIndex == lastIndex) {
-                  select(0);
-                } else if (currentlySelectedIndex >= 0) {
-                  select(currentlySelectedIndex + 1);
+          if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+            // if nothing is selected, select the first
+            if (currentlySelectedIndex == -1 ||
+                currentlySelectedIndex == lastIndex) {
+              select(0);
+            } else if (currentlySelectedIndex >= 0) {
+              select(currentlySelectedIndex + 1);
+            }
+            return KeyEventResult.handled;
+          } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+            // if nothing is selected, select the last
+            if (currentlySelectedIndex == -1 || currentlySelectedIndex == 0) {
+              select(_localItems.length - 1);
+            } else {
+              select(currentlySelectedIndex - 1);
+            }
+            return KeyEventResult.handled;
+          } else {
+            return KeyEventResult.ignored;
+          }
+        },
+        child: LayoutBuilder(
+          builder: (final context, final constraints) {
+            _width ??= constraints.maxWidth;
+            if (_width! != constraints.maxWidth) {
+              WidgetsBinding.instance.addPostFrameCallback((final _) {
+                if (_entry != null && _entry!.mounted) {
+                  _entry!.remove();
+                  _entry = null;
+                  showOverlay();
                 }
-                return KeyEventResult.handled;
-              } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-                // if nothing is selected, select the last
-                if (currentlySelectedIndex == -1 ||
-                    currentlySelectedIndex == 0) {
-                  select(_localItems.length - 1);
-                } else {
-                  select(currentlySelectedIndex - 1);
-                }
-                return KeyEventResult.handled;
-              } else {
-                return KeyEventResult.ignored;
-              }
-            },
-            child: LayoutBuilder(builder: (context, constraints) {
-              _width ??= constraints.maxWidth;
-              if (_width! != constraints.maxWidth) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (_entry != null && _entry!.mounted) {
-                    _entry!.remove();
-                    _entry = null;
-                    showOverlay();
-                  }
-                });
-                _width = constraints.maxWidth;
-              }
+              });
+              _width = constraints.maxWidth;
+            }
 
-              if (isForm) {
-                return TextFormBox(
-                    key: _textBoxKey,
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    autofocus: widget.autofocus,
-                    placeholder: widget.placeholder,
-                    placeholderStyle: widget.placeholderStyle,
-                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                    prefix: widget.leadingIcon,
-                    suffix: suffix,
-                    onChanged: _onChanged,
-                    onSaved: print,
-                    onFieldSubmitted: (text) => _onSubmitted(),
-                    style: widget.style,
-                    decoration: widget.decoration,
-                    highlightColor: widget.highlightColor,
-                    unfocusedColor: widget.unfocusedColor,
-                    cursorColor: widget.cursorColor,
-                    cursorHeight: widget.cursorHeight,
-                    cursorRadius: widget.cursorRadius,
-                    cursorWidth: widget.cursorWidth,
-                    showCursor: widget.showCursor,
-                    scrollPadding: widget.scrollPadding,
-                    selectionHeightStyle: widget.selectionHeightStyle,
-                    selectionWidthStyle: widget.selectionWidthStyle,
-                    validator: widget.validator,
-                    autovalidateMode: widget.autovalidateMode,
-                    textInputAction: widget.textInputAction,
-                    keyboardAppearance: widget.keyboardAppearance,
-                    enabled: widget.enabled,
-                    inputFormatters: widget.inputFormatters);
-              }
-              return TextBox(
-                  key: _textBoxKey,
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  autofocus: widget.autofocus,
-                  placeholder: widget.placeholder,
-                  placeholderStyle: widget.placeholderStyle,
-                  clipBehavior: Clip.antiAliasWithSaveLayer,
-                  prefix: widget.leadingIcon,
-                  suffix: suffix,
-                  onChanged: _onChanged,
-                  onSubmitted: (text) => _onSubmitted(),
-                  style: widget.style,
-                  decoration: widget.decoration,
-                  foregroundDecoration: widget.foregroundDecoration,
-                  highlightColor: widget.highlightColor,
-                  unfocusedColor: widget.unfocusedColor,
-                  cursorColor: widget.cursorColor,
-                  cursorHeight: widget.cursorHeight,
-                  cursorRadius: widget.cursorRadius,
-                  cursorWidth: widget.cursorWidth,
-                  showCursor: widget.showCursor,
-                  scrollPadding: widget.scrollPadding,
-                  selectionHeightStyle: widget.selectionHeightStyle,
-                  selectionWidthStyle: widget.selectionWidthStyle,
-                  textInputAction: widget.textInputAction,
-                  keyboardAppearance: widget.keyboardAppearance,
-                  enabled: widget.enabled,
-                  inputFormatters: widget.inputFormatters);
-            })));
+            if (isForm) {
+              return TextFormBox(
+                key: _textBoxKey,
+                controller: _controller,
+                focusNode: _focusNode,
+                autofocus: widget.autofocus,
+                placeholder: widget.placeholder,
+                placeholderStyle: widget.placeholderStyle,
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                prefix: widget.leadingIcon,
+                suffix: suffix,
+                onChanged: _onChanged,
+                onFieldSubmitted: (final text) => _onSubmitted(),
+                style: widget.style,
+                decoration: widget.decoration,
+                highlightColor: widget.highlightColor,
+                unfocusedColor: widget.unfocusedColor,
+                cursorColor: widget.cursorColor,
+                cursorHeight: widget.cursorHeight,
+                cursorRadius: widget.cursorRadius,
+                cursorWidth: widget.cursorWidth,
+                showCursor: widget.showCursor,
+                scrollPadding: widget.scrollPadding,
+                selectionHeightStyle: widget.selectionHeightStyle,
+                selectionWidthStyle: widget.selectionWidthStyle,
+                validator: widget.validator,
+                autovalidateMode: widget.autovalidateMode,
+                textInputAction: widget.textInputAction,
+                keyboardAppearance: widget.keyboardAppearance,
+                enabled: widget.enabled,
+                inputFormatters: widget.inputFormatters,
+              );
+            }
+            return TextBox(
+              key: _textBoxKey,
+              controller: _controller,
+              focusNode: _focusNode,
+              autofocus: widget.autofocus,
+              placeholder: widget.placeholder,
+              placeholderStyle: widget.placeholderStyle,
+              clipBehavior: Clip.antiAliasWithSaveLayer,
+              prefix: widget.leadingIcon,
+              suffix: suffix,
+              onChanged: _onChanged,
+              onSubmitted: (final text) => _onSubmitted(),
+              style: widget.style,
+              decoration: widget.decoration,
+              foregroundDecoration: widget.foregroundDecoration,
+              highlightColor: widget.highlightColor,
+              unfocusedColor: widget.unfocusedColor,
+              cursorColor: widget.cursorColor,
+              cursorHeight: widget.cursorHeight,
+              cursorRadius: widget.cursorRadius,
+              cursorWidth: widget.cursorWidth,
+              showCursor: widget.showCursor,
+              scrollPadding: widget.scrollPadding,
+              selectionHeightStyle: widget.selectionHeightStyle,
+              selectionWidthStyle: widget.selectionWidthStyle,
+              textInputAction: widget.textInputAction,
+              keyboardAppearance: widget.keyboardAppearance,
+              enabled: widget.enabled,
+              inputFormatters: widget.inputFormatters,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+        .add(ObjectFlagProperty<AutoSuggestBoxSorter<T>>.has('sorter', sorter));
+    properties
+        .add(DiagnosticsProperty<bool>('isOverlayVisible', isOverlayVisible));
+    properties.add(DiagnosticsProperty<bool>('isForm', isForm));
   }
 }
 
-class _AutoSuggestBoxOverlay2<T> extends StatefulWidget {
-  const _AutoSuggestBoxOverlay2({
-    super.key,
+class _AutoSuggestBoxOverlay<T> extends StatefulWidget {
+  const _AutoSuggestBoxOverlay({
     required this.items,
     required this.itemBuilder,
     required this.controller,
@@ -772,48 +971,92 @@ class _AutoSuggestBoxOverlay2<T> extends StatefulWidget {
     required this.sorter,
     required this.maxHeight,
     required this.noResultsFoundBuilder,
+    super.key,
   });
 
-  final List<AutoSuggestBoxItem2<T>> items;
+  final List<AutoSuggestBoxItem<T>> items;
   final AutoSuggestBoxItemBuilder<T>? itemBuilder;
   final TextEditingController controller;
-  final ValueChanged<AutoSuggestBoxItem2<T>> onSelected;
+  final ValueChanged<AutoSuggestBoxItem<T>> onSelected;
   final FocusScopeNode node;
   final Stream<int> focusStream;
-  final Stream<List<AutoSuggestBoxItem2<T>>> itemsStream;
+  final Stream<List<AutoSuggestBoxItem<T>>> itemsStream;
   final AutoSuggestBoxSorter<T> sorter;
   final double maxHeight;
   final WidgetBuilder? noResultsFoundBuilder;
 
   @override
-  State<_AutoSuggestBoxOverlay2<T>> createState() =>
-      _AutoSuggestBoxOverlay2State2<T>();
+  State<_AutoSuggestBoxOverlay<T>> createState() =>
+      _AutoSuggestBoxOverlayState<T>();
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IterableProperty<AutoSuggestBoxItem<T>>('items', items));
+    properties.add(
+      ObjectFlagProperty<AutoSuggestBoxItemBuilder<T>?>.has(
+        'itemBuilder',
+        itemBuilder,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextEditingController>('controller', controller),
+    );
+    properties.add(
+      ObjectFlagProperty<ValueChanged<AutoSuggestBoxItem<T>>>.has(
+        'onSelected',
+        onSelected,
+      ),
+    );
+    properties.add(DiagnosticsProperty<FocusScopeNode>('node', node));
+    properties
+        .add(DiagnosticsProperty<Stream<int>>('focusStream', focusStream));
+    properties.add(
+      DiagnosticsProperty<Stream<List<AutoSuggestBoxItem<T>>>>(
+        'itemsStream',
+        itemsStream,
+      ),
+    );
+    properties
+        .add(ObjectFlagProperty<AutoSuggestBoxSorter<T>>.has('sorter', sorter));
+    properties.add(DoubleProperty('maxHeight', maxHeight));
+    properties.add(
+      ObjectFlagProperty<WidgetBuilder?>.has(
+        'noResultsFoundBuilder',
+        noResultsFoundBuilder,
+      ),
+    );
+  }
 }
 
-class _AutoSuggestBoxOverlay2State2<T>
-    extends State<_AutoSuggestBoxOverlay2<T>> {
-  late final StreamSubscription focusSubscription;
-  late final StreamSubscription itemsSubscription;
-  final ScrollController scrollController = ScrollController();
+class _AutoSuggestBoxOverlayState<T> extends State<_AutoSuggestBoxOverlay<T>> {
+  late final StreamSubscription<dynamic> focusSubscription;
+  late final StreamSubscription<dynamic> itemsSubscription;
+  final scrollController = ScrollController();
 
   /// Tile height + padding
-  static const tileHeight = kOneLineTileHeight + 2.0;
+  static const double tileHeight = kOneLineTileHeight + 2.0;
 
-  late List<AutoSuggestBoxItem2<T>> items = widget.items;
+  late List<AutoSuggestBoxItem<T>> items = widget.items;
 
   @override
   void initState() {
     super.initState();
-    focusSubscription = widget.focusStream.listen((index) {
-      if (!mounted) return;
+    focusSubscription = widget.focusStream.listen((final index) {
+      if (!mounted) {
+        return;
+      }
 
       final currentSelectedOffset = tileHeight * index;
 
-      scrollController.animateTo(currentSelectedOffset,
-          duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+      scrollController.animateTo(
+        currentSelectedOffset,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeInOut,
+      );
       setState(() {});
     });
-    itemsSubscription = widget.itemsStream.listen((items) {
+    itemsSubscription = widget.itemsStream.listen((final items) {
       this.items = items;
     });
   }
@@ -827,7 +1070,7 @@ class _AutoSuggestBoxOverlay2State2<T>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasFluentTheme(context));
     assert(debugCheckHasFluentLocalizations(context));
 
@@ -835,72 +1078,104 @@ class _AutoSuggestBoxOverlay2State2<T>
     final localizations = FluentLocalizations.of(context);
 
     return TextFieldTapRegion(
-        child: FocusScope(
-            node: widget.node,
-            child: Container(
-                constraints: BoxConstraints(maxHeight: widget.maxHeight),
-                decoration: ShapeDecoration(
-                    shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                            bottom: Radius.circular(4.0))),
-                    color: theme.resources.cardBackgroundFillColorDefault,
-                    shadows: [
-                      BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          offset: const Offset(-1, 1),
-                          blurRadius: 2.0,
-                          spreadRadius: 3.0),
-                      BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          offset: const Offset(1, 1),
-                          blurRadius: 2.0,
-                          spreadRadius: 3.0),
-                    ]),
-                child: Acrylic(
-                    child: ValueListenableBuilder<TextEditingValue>(
-                        valueListenable: widget.controller,
-                        builder: (context, value, _) {
-                          final sortedItems = widget.sorter(value.text, items);
-                          late Widget result;
-                          if (sortedItems.isEmpty) {
-                            result = widget.noResultsFoundBuilder
-                                    ?.call(context) ??
-                                Padding(
-                                    padding: const EdgeInsetsDirectional.only(
-                                        bottom: 4.0),
-                                    child: _AutoSuggestBoxOverlayTile2(
-                                        text: Text(localizations
-                                            .noResultsFoundLabel)));
-                          } else {
-                            result = ListView.builder(
-                                itemExtent: tileHeight,
-                                controller: scrollController,
-                                key: ValueKey<int>(sortedItems.length),
-                                shrinkWrap: true,
-                                padding: const EdgeInsetsDirectional.only(
-                                    bottom: 4.0),
-                                itemCount: sortedItems.length,
-                                itemBuilder: (context, index) {
-                                  final item = sortedItems[index];
-                                  return widget.itemBuilder
-                                          ?.call(context, item) ??
-                                      _AutoSuggestBoxOverlayTile2(
-                                          text: item.child ?? Text(item.label),
-                                          semanticLabel:
-                                              item.semanticLabel ?? item.label,
-                                          selected: item._selected ||
-                                              widget.node.hasFocus,
-                                          onSelected: () =>
-                                              widget.onSelected(item));
-                                });
-                          }
-                          return result;
-                        })))));
+      child: FocusScope(
+        node: widget.node,
+        child: Container(
+          constraints: BoxConstraints(maxHeight: widget.maxHeight),
+          decoration: ShapeDecoration(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(4)),
+            ),
+            color: theme.resources.cardBackgroundFillColorDefault,
+            shadows: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                offset: const Offset(-1, 1),
+                blurRadius: 2,
+                spreadRadius: 3,
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                offset: const Offset(1, 1),
+                blurRadius: 2,
+                spreadRadius: 3,
+              ),
+            ],
+          ),
+          child: Acrylic(
+            child: ValueListenableBuilder<TextEditingValue>(
+              valueListenable: widget.controller,
+              builder: (final context, final value, final _) {
+                final sortedItems = widget.sorter(value.text, items);
+                late Widget result;
+                if (sortedItems.isEmpty) {
+                  result = widget.noResultsFoundBuilder?.call(context) ??
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          bottom: 4,
+                        ),
+                        child: _AutoSuggestBoxOverlayTile(
+                          text: Text(
+                            localizations.noResultsFoundLabel,
+                          ),
+                        ),
+                      );
+                } else {
+                  result = ListView.builder(
+                    itemExtent: tileHeight,
+                    controller: scrollController,
+                    key: ValueKey<int>(sortedItems.length),
+                    shrinkWrap: true,
+                    padding: const EdgeInsetsDirectional.only(bottom: 4),
+                    itemCount: sortedItems.length,
+                    itemBuilder: (final context, final index) {
+                      final item = sortedItems[index];
+                      return widget.itemBuilder?.call(context, item) ??
+                          _AutoSuggestBoxOverlayTile(
+                            text: item.child ?? Text(item.label),
+                            semanticLabel: item.semanticLabel ?? item.label,
+                            selected: item._selected || widget.node.hasFocus,
+                            onSelected: () => widget.onSelected(item),
+                          );
+                    },
+                  );
+                }
+                return result;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<StreamSubscription<dynamic>>(
+        'focusSubscription',
+        focusSubscription,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<StreamSubscription<dynamic>>(
+        'itemsSubscription',
+        itemsSubscription,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<ScrollController>(
+        'scrollController',
+        scrollController,
+      ),
+    );
+    properties.add(IterableProperty<AutoSuggestBoxItem<T>>('items', items));
   }
 }
 
-class _AutoSuggestBoxOverlayTile2 extends StatefulWidget {
-  const _AutoSuggestBoxOverlayTile2({
+class _AutoSuggestBoxOverlayTile extends StatefulWidget {
+  const _AutoSuggestBoxOverlayTile({
     required this.text,
     this.selected = false,
     this.onSelected,
@@ -913,12 +1188,21 @@ class _AutoSuggestBoxOverlayTile2 extends StatefulWidget {
   final String? semanticLabel;
 
   @override
-  State<_AutoSuggestBoxOverlayTile2> createState() =>
-      _AutoSuggestBoxOverlayTile2State2();
+  State<_AutoSuggestBoxOverlayTile> createState() =>
+      __AutoSuggestBoxOverlayTileState();
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      ObjectFlagProperty<ui.VoidCallback?>.has('onSelected', onSelected),
+    );
+    properties.add(DiagnosticsProperty<bool>('selected', selected));
+    properties.add(StringProperty('semanticLabel', semanticLabel));
+  }
 }
 
-class _AutoSuggestBoxOverlayTile2State2
-    extends State<_AutoSuggestBoxOverlayTile2>
+class __AutoSuggestBoxOverlayTileState extends State<_AutoSuggestBoxOverlayTile>
     with SingleTickerProviderStateMixin {
   late AnimationController controller;
 
@@ -926,7 +1210,9 @@ class _AutoSuggestBoxOverlayTile2State2
   void initState() {
     super.initState();
     controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 125));
+      vsync: this,
+      duration: const Duration(milliseconds: 125),
+    );
     controller.forward();
   }
 
@@ -937,18 +1223,31 @@ class _AutoSuggestBoxOverlayTile2State2
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasFluentTheme(context));
     final theme = FluentTheme.of(context);
 
     return ListTile.selectable(
-        semanticLabel: widget.semanticLabel,
-        title: EntrancePageTransition(
-            animation: Tween<double>(begin: 0.75, end: 1.0).animate(
-                CurvedAnimation(parent: controller, curve: Curves.easeOut)),
-            child: DefaultTextStyle.merge(
-                style: theme.typography.body, child: widget.text)),
-        selected: widget.selected,
-        onPressed: widget.onSelected);
+      semanticLabel: widget.semanticLabel,
+      title: EntrancePageTransition(
+        animation: Tween<double>(begin: 0.75, end: 1).animate(
+          CurvedAnimation(parent: controller, curve: Curves.easeOut),
+        ),
+        child: DefaultTextStyle.merge(
+          style: theme.typography.body,
+          child: widget.text,
+        ),
+      ),
+      selected: widget.selected,
+      onPressed: widget.onSelected,
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<AnimationController>('controller', controller),
+    );
   }
 }

@@ -7,12 +7,13 @@ import 'package:flutter/gestures.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import '../../app_config/l0/entity/entries.dart';
+import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_version/data/github.dart';
 import '../../app_version/di/is_outdated.dart';
 import '../../app_version/di/remote_version.dart';
 import '../../app_version/domain/entity/version.dart';
-import '../../fs_interface/helper/path_op_string.dart';
-import '../../storage/di/game_config.dart';
+import '../../filesystem/l1/impl/path_op_string.dart';
 import '../util/display_infobar.dart';
 import '../util/open_url.dart';
 
@@ -20,10 +21,7 @@ Future<Never> _runUpdateScript() async {
   final url = Uri.parse('$kRepoReleases/download/GenshinModManager.zip');
   final response = await http.get(url);
   final archive = ZipDecoder().decodeBytes(response.bodyBytes);
-  await extractArchiveToDisk(
-    archive,
-    Directory.current.path,
-  );
+  await extractArchiveToDisk(archive, Directory.current.path);
   const updateScript = 'setlocal\n'
       'echo update script running\n'
       'set "sourceFolder=GenshinModManager"\n'
@@ -76,7 +74,8 @@ class UpdatePopup extends ConsumerWidget {
   }
 
   List<String> _findUpdateUnableReason(final WidgetRef ref) {
-    final appState = ref.read(gameConfigNotifierProvider);
+    final appState =
+        ref.read(appConfigFacadeProvider).obtainValue(games).currentGameConfig;
     final modRoot = appState.modRoot;
     final migotoRoot = appState.modExecFile;
     final launcherRoot = appState.launcherFile;

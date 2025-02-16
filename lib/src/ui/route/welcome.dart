@@ -2,8 +2,9 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../app_config/l0/entity/entries.dart';
+import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_version/data/github.dart';
-import '../../storage/di/current_target_game.dart';
 import '../util/open_url.dart';
 
 /// This route welcomes you!
@@ -27,7 +28,11 @@ class _WelcomeRouteState extends State<WelcomeRoute> {
             children: [
               Consumer(
                 builder: (final context, final ref, final child) {
-                  final game = ref.watch(targetGameProvider);
+                  final game = ref.watch(
+                    appConfigFacadeProvider.select(
+                      (final value) => value.obtainValue(games).current!,
+                    ),
+                  );
                   return Text('Welcome to $game Mod Manager!');
                 },
               ),

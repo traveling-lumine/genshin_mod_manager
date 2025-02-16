@@ -1,21 +1,23 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:fluent_ui/fluent_ui.dart'
+    hide
+        AutoSuggestBox,
+        AutoSuggestBoxItem,
+        SliverGridDelegateWithFixedCrossAxisCount,
+        SliverGridDelegateWithMaxCrossAxisExtent;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
-import 'package:window_manager/window_manager.dart';
 
-import '../../fs_interface/di/fs_watcher.dart';
-import '../../fs_interface/usecase/open_folder.dart';
-import '../../storage/di/column_strategy.dart';
-import '../../structure/di/categories.dart';
-import '../../structure/di/mods.dart';
-import '../../structure/entity/mod.dart';
-import '../../structure/entity/mod_category.dart';
+import '../../app_config/l0/entity/entries.dart';
+import '../../app_config/l1/di/app_config_facade.dart';
+import '../../filesystem/l0/entity/mod.dart';
+import '../../filesystem/l0/entity/mod_category.dart';
+import '../../filesystem/l0/usecase/open_folder.dart';
+import '../../filesystem/l1/di/mods_in_category.dart';
 import '../constants.dart';
 import '../widget/category_drop_target.dart';
 import '../widget/intrinsic_command_bar.dart';
@@ -24,21 +26,15 @@ import '../widget/preset_control.dart';
 import '../widget/thick_scrollbar.dart';
 import '../widget/third_party/fluent_ui/auto_suggest_box.dart';
 import '../widget/third_party/flutter/sliver_grid_delegates/cross_axis_aware_delegate.dart';
-import '../widget/third_party/flutter/sliver_grid_delegates/fixed_count_delegate.dart'
-    as s;
-import '../widget/third_party/flutter/sliver_grid_delegates/max_extent_delegate.dart'
-    as s;
-import '../widget/third_party/flutter/sliver_grid_delegates/min_extent_delegate.dart'
-    as s;
+import '../widget/third_party/flutter/sliver_grid_delegates/fixed_count_delegate.dart';
+import '../widget/third_party/flutter/sliver_grid_delegates/max_extent_delegate.dart';
+import '../widget/third_party/flutter/sliver_grid_delegates/min_extent_delegate.dart';
 
 class CategoryRoute extends StatefulHookConsumerWidget {
-  const CategoryRoute({required this.categoryName, super.key});
-
+  const CategoryRoute({required this.category, super.key});
   static const _mainAxisExtent = 400.0;
   static const _mainAxisSpacing = 8.0;
-
-  /// The category to display
-  final String categoryName;
+  final ModCategory category;
 
   @override
   ConsumerState<CategoryRoute> createState() => _CategoryRouteState();
@@ -46,97 +42,36 @@ class CategoryRoute extends StatefulHookConsumerWidget {
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('categoryName', categoryName));
+    properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
 }
 
-class _CategoryRouteState extends ConsumerState<CategoryRoute>
-    with WindowListener {
+class _CategoryRouteState extends ConsumerState<CategoryRoute> {
   ScrollController? scrollController;
-  ModCategory? _category;
-
-  @override
-  void initState() {
-    super.initState();
-    WindowManager.instance.addListener(this);
-  }
-
-  @override
-  void dispose() {
-    WindowManager.instance.removeListener(this);
-    super.dispose();
-  }
-
-  @override
-  void onWindowBlur() {
-    super.onWindowBlur();
-    final category = _category;
-    if (category == null) {
-      return;
-    }
-    ref
-        .read(
-          directoryEventWatcherProvider(
-            category.path,
-            detectModifications: true,
-          ).notifier,
-        )
-        .pause();
-  }
-
-  @override
-  void onWindowFocus() {
-    super.onWindowFocus();
-    final category = _category;
-    if (category == null) {
-      return;
-    }
-    ref
-      ..invalidate(
-        directoryEventWatcherProvider(
-          category.path,
-          detectModifications: true,
-        ),
-      )
-      ..invalidate(modsInCategoryProvider(category));
-  }
 
   @override
   Widget build(final BuildContext context) {
-    ref.listen(categoriesProvider, (final previous, final next) {
-      final isIn = next.any((final e) => e.name == widget.categoryName);
-      if (!isIn) {
-        context.goNamed(RouteNames.home.name);
-      }
-    });
-
-    final category = ref
-        .watch(categoriesProvider)
-        .firstWhereOrNull((final e) => e.name == widget.categoryName);
-
-    if (category == null) {
-      return const SizedBox.shrink();
-    }
-
-    _category = category;
-
-    final sliverGridDelegate = ref.watch(columnStrategyProvider).when(
+    final sliverGridDelegate = ref
+        .watch(
+          appConfigFacadeProvider
+              .select((final value) => value.obtainValue(columnStrategy)),
+        )
+        .strategy
+        .when(
           fixedCount: (final numChildren) =>
-              s.SliverGridDelegateWithFixedCrossAxisCount(
+              SliverGridDelegateWithFixedCrossAxisCount(
             mainAxisExtent: CategoryRoute._mainAxisExtent,
             crossAxisCount: numChildren,
             crossAxisSpacing: CategoryRoute._mainAxisSpacing,
             mainAxisSpacing: CategoryRoute._mainAxisSpacing,
           ),
-          maxExtent: (final extent) =>
-              s.SliverGridDelegateWithMaxCrossAxisExtent(
+          maxExtent: (final extent) => SliverGridDelegateWithMaxCrossAxisExtent(
             mainAxisExtent: CategoryRoute._mainAxisExtent,
             maxCrossAxisExtent: extent.toDouble(),
             crossAxisSpacing: CategoryRoute._mainAxisSpacing,
             mainAxisSpacing: CategoryRoute._mainAxisSpacing,
           ),
-          minExtent: (final extent) =>
-              s.SliverGridDelegateWithMinCrossAxisExtent(
+          minExtent: (final extent) => SliverGridDelegateWithMinCrossAxisExtent(
             mainAxisExtent: CategoryRoute._mainAxisExtent,
             minCrossAxisExtent: extent.toDouble(),
             crossAxisSpacing: CategoryRoute._mainAxisSpacing,
@@ -145,44 +80,87 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute>
         );
 
     return CategoryDropTarget(
-      category: category,
+      category: widget.category,
       child: ScaffoldPage(
-        header: _buildHeader(
-          category,
-          ref,
-          sliverGridDelegate,
-        ),
-        content: _buildContent(category, sliverGridDelegate),
+        header: _buildHeader(ref, sliverGridDelegate),
+        content: _buildContent(sliverGridDelegate),
       ),
     );
   }
 
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<ScrollController?>(
+        'scrollController',
+        scrollController,
+      ),
+    );
+  }
+
+  Widget _buildContent(final CrossAxisAwareDelegate sliverGridDelegate) =>
+      ThickScrollbar(
+        child: Consumer(
+          builder: (final context, final ref, final child) {
+            final data =
+                ref.watch(modsInCategorySortedProvider(widget.category));
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 100),
+              child: data.when(
+                data: (final mods) => _buildGrid(mods, sliverGridDelegate),
+                error: (final error, final stacktrace) =>
+                    Center(child: Text('Error loading mods: $error')),
+                loading: () => const Center(child: ProgressRing()),
+              ),
+            );
+          },
+        ),
+      );
+
+  Widget _buildGrid(
+    final List<Mod> data,
+    final CrossAxisAwareDelegate sliverGridDelegate,
+  ) =>
+      AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: DynMouseScroll(
+          builder:
+              (final context, final scrollController, final scrollPhysics) {
+            this.scrollController = scrollController;
+            return GridView.builder(
+              controller: scrollController,
+              physics: scrollPhysics,
+              padding: const EdgeInsets.all(8),
+              gridDelegate: sliverGridDelegate,
+              itemCount: data.length,
+              itemBuilder: (final context, final index) =>
+                  RevertScrollbar(child: ModCard(mod: data[index])),
+            );
+          },
+        ),
+      );
+
   Widget _buildHeader(
-    final ModCategory category,
     final WidgetRef ref,
     final CrossAxisAwareDelegate sliverGridDelegate,
   ) {
     final context = useContext();
     return PageHeader(
-      title: Text(category.name),
+      title: Text(widget.category.name),
       commandBar: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          PresetControlWidget(isLocal: true, category: category),
+          PresetControlWidget(isLocal: true, category: widget.category),
           const SizedBox(width: 8),
-          Expanded(
-            child: _buildSearchBox(
-              category,
-              sliverGridDelegate,
-            ),
-          ),
+          Expanded(child: _buildSearchBox(sliverGridDelegate)),
           IntrinsicCommandBarCard(
             child: CommandBar(
               overflowBehavior: CommandBarOverflowBehavior.clip,
               primaryItems: [
                 CommandBarButton(
                   icon: const Icon(FluentIcons.folder_open),
-                  onPressed: () async => _onFolderOpen(category),
+                  onPressed: _onFolderOpen,
                 ),
                 CommandBarButton(
                   icon: const Icon(FluentIcons.download),
@@ -196,81 +174,45 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute>
     );
   }
 
-  Widget _buildSearchBox(
-    final ModCategory category,
-    final CrossAxisAwareDelegate sliverGridDelegate,
-  ) =>
-      Consumer(
-        builder: (final context, final ref, final child) {
-          final data = ref.watch(modsInCategoryProvider(category));
-          final items = data.indexed
-              .map(
-                (final e) => AutoSuggestBoxItem2(
-                  value: e.$2.displayName,
-                  label: e.$2.displayName,
-                  onSelected: () {
-                    _moveTo(e.$1, sliverGridDelegate);
-                  },
-                ),
-              )
-              .toList();
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: AutoSuggestBox2(
+  Widget _buildSearchBox(final CrossAxisAwareDelegate sliverGridDelegate) =>
+      Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: Consumer(
+          builder: (final context, final ref, final child) {
+            final data =
+                ref.watch(modsInCategorySortedProvider(widget.category));
+            final dataList = data.maybeWhen(
+              orElse: () => const <Mod>[],
+              data: (final data) => data,
+            );
+            final items = dataList.indexed
+                .map(
+                  (final e) => AutoSuggestBoxItem(
+                    value: e.$2.displayName,
+                    label: e.$2.displayName,
+                    onSelected: () {
+                      _moveTo(e.$1, sliverGridDelegate);
+                    },
+                  ),
+                )
+                .toList();
+            return AutoSuggestBox(
               items: items,
               trailingIcon: const Icon(FluentIcons.search),
               onSubmissionFailed: (final text) {
                 if (text.isEmpty) {
                   return;
                 }
-                final index = data.indexWhere((final e) {
+                final index = dataList.indexWhere((final e) {
                   final name = e.displayName.toLowerCase();
                   return name.startsWith(text.toLowerCase());
                 });
                 _moveTo(index, sliverGridDelegate);
               },
-            ),
-          );
-        },
-      );
-
-  Widget _buildContent(
-    final ModCategory category,
-    final CrossAxisAwareDelegate sliverGridDelegate,
-  ) =>
-      ThickScrollbar(
-        child: Consumer(
-          builder: (final context, final ref, final child) => _buildData(
-            ref.watch(modsInCategoryProvider(category)),
-            sliverGridDelegate,
-          ),
+            );
+          },
         ),
       );
-
-  Widget _buildData(
-    final List<Mod> data,
-    final CrossAxisAwareDelegate sliverGridDelegate,
-  ) {
-    final children = data.map((final e) => ModCard(mod: e)).toList();
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      child: DynMouseScroll(
-        scrollSpeed: 1,
-        builder: (final context, final scrollController, final scrollPhysics) {
-          this.scrollController = scrollController;
-          return GridView.builder(
-            controller: scrollController,
-            physics: scrollPhysics,
-            padding: const EdgeInsets.all(8),
-            gridDelegate: sliverGridDelegate,
-            itemCount: children.length,
-            itemBuilder: (final context, final index) =>
-                RevertScrollbar(child: children[index]),
-          );
-        },
-      ),
-    );
-  }
 
   void _moveTo(
     final int index,
@@ -293,29 +235,16 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute>
     );
   }
 
-  Future<void> _onFolderOpen(final ModCategory category) async {
-    await openFolderUseCase(category.path);
-  }
-
   void _onDownloadPressed(final BuildContext context) {
     unawaited(
       context.pushNamed(
         RouteNames.nahidaStore.name,
-        pathParameters: {RouteParams.category.name: widget.categoryName},
+        pathParameters: {RouteParams.category.name: widget.category.name},
       ),
     );
   }
 
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(StringProperty('categoryName', widget.categoryName))
-      ..add(
-        DiagnosticsProperty<ScrollController?>(
-          'scrollController',
-          scrollController,
-        ),
-      );
+  Future<void> _onFolderOpen() async {
+    await openFolderUseCase(widget.category.path);
   }
 }

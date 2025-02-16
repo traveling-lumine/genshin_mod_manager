@@ -5,7 +5,7 @@ import 'package:protocol_handler/protocol_handler.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:webview_windows/webview_windows.dart';
 
-import '../../nahida/data/secrets.dart';
+import '../../nahida/l1/secrets.dart';
 
 class TurnstileDialog extends StatelessWidget {
   const TurnstileDialog({super.key});
@@ -89,12 +89,9 @@ class __TurnstileWebviewState extends State<_TurnstileWebview>
     } else {
       return Webview(
         _controller,
-        permissionRequested: (
-          final url,
-          final permissionKind,
-          final isUserInitiated,
-        ) async =>
-            _onPermissionRequested(
+        permissionRequested:
+            (final url, final permissionKind, final isUserInitiated) async =>
+                _onPermissionRequested(
           context,
           url,
           permissionKind,

@@ -58,7 +58,6 @@ const allDependencies = <Package>[
   _fluent_ui,
   _flutter,
   _flutter_cache_manager,
-  _flutter_colorpicker,
   _flutter_hooks,
   _flutter_image_converter,
   _flutter_lints,
@@ -71,14 +70,12 @@ const allDependencies = <Package>[
   _glob,
   _go_router,
   _graphs,
-  _hashcodes,
   _hooks_riverpod,
   _hotreloader,
   _http,
   _http_multi_server,
   _http_parser,
   _image,
-  _image_size_getter,
   _infinite_scroll_pagination,
   _intl,
   _io,
@@ -89,9 +86,7 @@ const allDependencies = <Package>[
   _leak_tracker_flutter_testing,
   _leak_tracker_testing,
   _lints,
-  _logger,
   _logging,
-  _macros,
   _matcher,
   _material_color_utilities,
   _math_expressions,
@@ -203,34 +198,29 @@ const dependencies = <Package>[
   _desktop_drop,
   _dio,
   _envied,
-  _ffi,
   _filepicker_windows,
   _fluent_ui,
   _flutter,
-  _flutter_colorpicker,
   _flutter_hooks,
   _flutter_image_converter,
   _freezed_annotation,
   _go_router,
   _hooks_riverpod,
   _http,
-  _image_size_getter,
   _infinite_scroll_pagination,
   _intl,
   _json_annotation,
-  _logger,
-  _meta,
   _package_info_plus,
   _pasteboard,
   _path,
   _protocol_handler,
   _retrofit,
   _riverpod_annotation,
+  _rxdart,
   _shared_preferences,
   _smooth_scroll_multiplatform,
   _url_launcher,
   _webview_windows,
-  _win32,
   _window_manager
 ];
 
@@ -296,13 +286,13 @@ class PackageRef {
   Package resolve() => allDependencies.firstWhere((d) => d.name == name);
 }
 
-/// _fe_analyzer_shared 76.0.0
+/// _fe_analyzer_shared 80.0.0
 const __fe_analyzer_shared = Package(
     name: '_fe_analyzer_shared',
     description: 'Logic that is shared between the front_end and analyzer packages.',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/_fe_analyzer_shared',
     authors: [],
-    version: '76.0.0',
+    version: '80.0.0',
     license: '''Copyright 2019, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -335,13 +325,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('meta')]
   );
 
-/// analyzer 6.11.0
+/// analyzer 7.3.0
 const _analyzer = Package(
     name: 'analyzer',
     description: 'This package provides a library that performs static analysis of Dart code.',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/analyzer',
     authors: [],
-    version: '6.11.0',
+    version: '7.3.0',
     license: '''Copyright 2013, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -371,16 +361,16 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('_fe_analyzer_shared'), PackageRef('collection'), PackageRef('convert'), PackageRef('crypto'), PackageRef('glob'), PackageRef('macros'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span'), PackageRef('watcher'), PackageRef('yaml')]
+    dependencies: [PackageRef('_fe_analyzer_shared'), PackageRef('collection'), PackageRef('convert'), PackageRef('crypto'), PackageRef('glob'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span'), PackageRef('watcher'), PackageRef('yaml')]
   );
 
-/// analyzer_plugin 0.11.3
+/// analyzer_plugin 0.12.0
 const _analyzer_plugin = Package(
     name: 'analyzer_plugin',
     description: 'A framework and support code for building plugins for the analysis server.',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/analyzer_plugin',
     authors: [],
-    version: '0.11.3',
+    version: '0.12.0',
     license: '''Copyright 2017, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -410,7 +400,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('collection'), PackageRef('dart_style'), PackageRef('pub_semver'), PackageRef('yaml')]
+    dependencies: [PackageRef('analyzer'), PackageRef('collection'), PackageRef('dart_style'), PackageRef('meta'), PackageRef('pub_semver'), PackageRef('yaml'), PackageRef('path')]
   );
 
 /// archive 4.0.2
@@ -486,13 +476,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// async 2.11.0
+/// async 2.12.0
 const _async = Package(
     name: 'async',
     description: "Utility functions and classes related to the 'dart:async' library.",
-    repository: 'https://github.com/dart-lang/async',
+    repository: 'https://github.com/dart-lang/core/tree/main/pkgs/async',
     authors: [],
-    version: '2.11.0',
+    version: '2.12.0',
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -525,13 +515,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('collection'), PackageRef('meta')]
   );
 
-/// boolean_selector 2.1.1
+/// boolean_selector 2.1.2
 const _boolean_selector = Package(
     name: 'boolean_selector',
     description: "A flexible syntax for boolean expressions, based on a simplified version of Dart's expression syntax.",
-    repository: 'https://github.com/dart-lang/boolean_selector',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/boolean_selector',
     authors: [],
-    version: '2.1.1',
+    version: '2.1.2',
     license: '''Copyright 2016, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -564,13 +554,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('source_span'), PackageRef('string_scanner')]
   );
 
-/// build 2.4.1
+/// build 2.4.2
 const _build = Package(
     name: 'build',
     description: 'A package for authoring build_runner compatible code generators.',
     repository: 'https://github.com/dart-lang/build/tree/master/build',
     authors: [],
-    version: '2.4.1',
+    version: '2.4.2',
     license: '''Copyright 2016, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -603,13 +593,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('convert'), PackageRef('crypto'), PackageRef('glob'), PackageRef('logging'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path')]
   );
 
-/// build_config 1.1.1
+/// build_config 1.1.2
 const _build_config = Package(
     name: 'build_config',
     description: 'Format definition and support for parsing `build.yaml` configuration.',
     repository: 'https://github.com/dart-lang/build/tree/master/build_config',
     authors: [],
-    version: '1.1.1',
+    version: '1.1.2',
     license: '''Copyright 2017, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -642,13 +632,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('checked_yaml'), PackageRef('json_annotation'), PackageRef('path'), PackageRef('pubspec_parse'), PackageRef('yaml')]
   );
 
-/// build_daemon 4.0.2
+/// build_daemon 4.0.4
 const _build_daemon = Package(
     name: 'build_daemon',
     description: 'A daemon for running Dart builds.',
     repository: 'https://github.com/dart-lang/build/tree/master/build_daemon',
     authors: [],
-    version: '4.0.2',
+    version: '4.0.4',
     license: '''Copyright 2019, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -681,13 +671,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('built_collection'), PackageRef('built_value'), PackageRef('crypto'), PackageRef('http_multi_server'), PackageRef('logging'), PackageRef('path'), PackageRef('pool'), PackageRef('shelf'), PackageRef('shelf_web_socket'), PackageRef('stream_transform'), PackageRef('watcher'), PackageRef('web_socket_channel')]
   );
 
-/// build_resolvers 2.4.2
+/// build_resolvers 2.4.4
 const _build_resolvers = Package(
     name: 'build_resolvers',
     description: 'Resolve Dart code in a Builder',
     repository: 'https://github.com/dart-lang/build/tree/master/build_resolvers',
     authors: [],
-    version: '2.4.2',
+    version: '2.4.4',
     license: '''Copyright 2018, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -720,13 +710,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('build'), PackageRef('collection'), PackageRef('convert'), PackageRef('crypto'), PackageRef('graphs'), PackageRef('logging'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('pub_semver'), PackageRef('stream_transform'), PackageRef('yaml')]
   );
 
-/// build_runner 2.4.13
+/// build_runner 2.4.15
 const _build_runner = Package(
     name: 'build_runner',
     description: 'A build system for Dart code generation and modular compilation.',
     repository: 'https://github.com/dart-lang/build/tree/master/build_runner',
     authors: [],
-    version: '2.4.13',
+    version: '2.4.15',
     license: '''Copyright 2016, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -756,16 +746,16 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('async'), PackageRef('build'), PackageRef('build_config'), PackageRef('build_daemon'), PackageRef('build_resolvers'), PackageRef('build_runner_core'), PackageRef('code_builder'), PackageRef('collection'), PackageRef('crypto'), PackageRef('dart_style'), PackageRef('frontend_server_client'), PackageRef('glob'), PackageRef('graphs'), PackageRef('http_multi_server'), PackageRef('io'), PackageRef('js'), PackageRef('logging'), PackageRef('meta'), PackageRef('mime'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('shelf'), PackageRef('shelf_web_socket'), PackageRef('stack_trace'), PackageRef('stream_transform'), PackageRef('timing'), PackageRef('watcher'), PackageRef('web_socket_channel'), PackageRef('yaml')]
+    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('async'), PackageRef('build'), PackageRef('build_config'), PackageRef('build_daemon'), PackageRef('build_resolvers'), PackageRef('build_runner_core'), PackageRef('code_builder'), PackageRef('collection'), PackageRef('crypto'), PackageRef('dart_style'), PackageRef('frontend_server_client'), PackageRef('glob'), PackageRef('graphs'), PackageRef('http'), PackageRef('http_multi_server'), PackageRef('io'), PackageRef('js'), PackageRef('logging'), PackageRef('meta'), PackageRef('mime'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('shelf'), PackageRef('shelf_web_socket'), PackageRef('stack_trace'), PackageRef('stream_transform'), PackageRef('timing'), PackageRef('watcher'), PackageRef('web'), PackageRef('web_socket_channel'), PackageRef('yaml')]
   );
 
-/// build_runner_core 7.3.2
+/// build_runner_core 8.0.0
 const _build_runner_core = Package(
     name: 'build_runner_core',
     description: 'Core tools to organize the structure of a build and run Builders.',
     repository: 'https://github.com/dart-lang/build/tree/master/build_runner_core',
     authors: [],
-    version: '7.3.2',
+    version: '8.0.0',
     license: '''Copyright 2018, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -839,14 +829,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// built_value 8.9.2
+/// built_value 8.9.3
 const _built_value = Package(
     name: 'built_value',
     description: '''Value types with builders, Dart classes as enums, and serialization. This library is the runtime dependency.
 ''',
     repository: 'https://github.com/google/built_value.dart/tree/master/built_value',
     authors: [],
-    version: '8.9.2',
+    version: '8.9.3',
     license: '''Copyright 2015, Google Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -979,13 +969,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('cached_network_image_platform_interface'), PackageRef('flutter'), PackageRef('flutter_cache_manager'), PackageRef('web')]
   );
 
-/// characters 1.3.0
+/// characters 1.4.0
 const _characters = Package(
     name: 'characters',
     description: 'String replacement with operations that are Unicode/grapheme cluster aware.',
-    repository: 'https://github.com/dart-lang/characters',
+    repository: 'https://github.com/dart-lang/core/tree/main/pkgs/characters',
     authors: [],
-    version: '1.3.0',
+    version: '1.4.0',
     license: '''Copyright 2019, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -1308,13 +1298,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('meta'), PackageRef('path')]
   );
 
-/// clock 1.1.1
+/// clock 1.1.2
 const _clock = Package(
     name: 'clock',
     description: 'A fakeable wrapper for dart:core clock APIs.',
-    repository: 'https://github.com/dart-lang/clock',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/clock',
     authors: [],
-    version: '1.1.1',
+    version: '1.1.2',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -1560,13 +1550,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('built_collection'), PackageRef('built_value'), PackageRef('collection'), PackageRef('matcher'), PackageRef('meta')]
   );
 
-/// collection 1.19.0
+/// collection 1.19.1
 const _collection = Package(
     name: 'collection',
     description: 'Collections and utilities functions and classes related to collections.',
-    repository: 'https://github.com/dart-lang/collection',
+    repository: 'https://github.com/dart-lang/core/tree/main/pkgs/collection',
     authors: [],
-    version: '1.19.0',
+    version: '1.19.1',
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -1755,13 +1745,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('typed_data')]
   );
 
-/// custom_lint 0.7.0
+/// custom_lint 0.7.3
 const _custom_lint = Package(
     name: 'custom_lint',
     description: 'Lint rules are a powerful way to improve the maintainability of a project. Custom Lint allows package authors and developers to easily write custom lint rules.',
     repository: 'https://github.com/invertase/dart_custom_lint',
     authors: [],
-    version: '0.7.0',
+    version: '0.7.3',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -1968,13 +1958,13 @@ const _custom_lint = Package(
     dependencies: [PackageRef('analyzer'), PackageRef('analyzer_plugin'), PackageRef('args'), PackageRef('async'), PackageRef('ci'), PackageRef('cli_util'), PackageRef('collection'), PackageRef('custom_lint_core'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('rxdart'), PackageRef('uuid'), PackageRef('yaml')]
   );
 
-/// custom_lint_builder 0.7.0
+/// custom_lint_builder 0.7.3
 const _custom_lint_builder = Package(
     name: 'custom_lint_builder',
     description: 'A package to help writing custom linters',
     repository: 'https://github.com/invertase/dart_custom_lint',
     authors: [],
-    version: '0.7.0',
+    version: '0.7.3',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -2181,13 +2171,13 @@ const _custom_lint_builder = Package(
     dependencies: [PackageRef('analyzer'), PackageRef('analyzer_plugin'), PackageRef('collection'), PackageRef('custom_lint'), PackageRef('custom_lint_core'), PackageRef('custom_lint_visitor'), PackageRef('glob'), PackageRef('hotreloader'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pubspec_parse'), PackageRef('rxdart')]
   );
 
-/// custom_lint_core 0.7.0
+/// custom_lint_core 0.7.1
 const _custom_lint_core = Package(
     name: 'custom_lint_core',
     description: 'A package to help writing custom linters',
     repository: 'https://github.com/invertase/dart_custom_lint',
     authors: [],
-    version: '0.7.0',
+    version: '0.7.1',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -2394,13 +2384,13 @@ const _custom_lint_core = Package(
     dependencies: [PackageRef('analyzer'), PackageRef('analyzer_plugin'), PackageRef('collection'), PackageRef('custom_lint_visitor'), PackageRef('glob'), PackageRef('matcher'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pubspec_parse'), PackageRef('source_span'), PackageRef('uuid'), PackageRef('yaml')]
   );
 
-/// custom_lint_visitor 1.0.0+6.11.0
+/// custom_lint_visitor 1.0.0+7.3.0
 const _custom_lint_visitor = Package(
     name: 'custom_lint_visitor',
     description: 'A package that exports visitors for CustomLint.',
     repository: 'https://github.com/invertase/dart_custom_lint',
     authors: [],
-    version: '1.0.0+6.11.0',
+    version: '1.0.0+7.3.0',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -2641,13 +2631,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('yaml'), PackageRef('path'), PackageRef('json_annotation')]
   );
 
-/// dart_style 2.3.7
+/// dart_style 3.0.1
 const _dart_style = Package(
     name: 'dart_style',
     description: 'Opinionated, automatic Dart source code formatter. Provides an API and a CLI tool.',
     repository: 'https://github.com/dart-lang/dart_style',
     authors: [],
-    version: '2.3.7',
+    version: '3.0.1',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -2677,16 +2667,16 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('collection'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span')]
+    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('collection'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span'), PackageRef('yaml')]
   );
 
-/// dependency_validator 4.1.2
+/// dependency_validator 5.0.2
 const _dependency_validator = Package(
     name: 'dependency_validator',
     description: 'Checks for missing, under-promoted, over-promoted, and unused dependencies.',
     homepage: 'https://github.com/Workiva/dependency_validator',
     authors: [],
-    version: '4.1.2',
+    version: '5.0.2',
     license: '''Copyright 2017 Workiva Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -2918,7 +2908,7 @@ const _desktop_drop = Package(
     dependencies: [PackageRef('flutter'), PackageRef('cross_file'), PackageRef('web')]
   );
 
-/// dio 5.7.0
+/// dio 5.8.0+1
 const _dio = Package(
     name: 'dio',
     description: '''A powerful HTTP networking package,
@@ -2929,7 +2919,7 @@ Custom adapters, Transformers, etc.
     homepage: 'https://github.com/cfug/dio',
     repository: 'https://github.com/cfug/dio/blob/main/dio',
     authors: [],
-    version: '5.7.0',
+    version: '5.8.0+1',
     license: '''MIT License
 
 Copyright (c) 2018 Wen Du (wendux)
@@ -2954,17 +2944,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('http_parser'), PackageRef('meta'), PackageRef('path'), PackageRef('dio_web_adapter')]
+    dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('http_parser'), PackageRef('meta'), PackageRef('path'), PackageRef('dio_web_adapter')]
   );
 
-/// dio_web_adapter 2.0.0
+/// dio_web_adapter 2.1.0
 const _dio_web_adapter = Package(
     name: 'dio_web_adapter',
     description: 'An adapter that supports Dio on Web.',
     homepage: 'https://github.com/cfug/dio',
     repository: 'https://github.com/cfug/dio/blob/main/plugins/web_adapter',
     authors: [],
-    version: '2.0.0',
+    version: '2.1.0',
     license: '''MIT License
 
 Copyright (c) 2018 Wen Du (wendux)
@@ -2992,14 +2982,14 @@ SOFTWARE.''',
     dependencies: [PackageRef('dio'), PackageRef('http_parser'), PackageRef('meta'), PackageRef('web')]
   );
 
-/// envied 1.0.0
+/// envied 1.1.1
 const _envied = Package(
     name: 'envied',
     description: 'Explicitly reads environment variables into a dart file from a .env file for more security and faster start up times.',
     homepage: 'https://github.com/petercinibulk/envied',
     repository: 'https://github.com/petercinibulk/envied',
     authors: [],
-    version: '1.0.0',
+    version: '1.1.1',
     license: '''The MIT License (MIT)
 
 Copyright © 2022 Peter Cinibulk
@@ -3014,14 +3004,14 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
     dependencies: []
   );
 
-/// envied_generator 1.0.0
+/// envied_generator 1.1.1
 const _envied_generator = Package(
     name: 'envied_generator',
     description: 'Generator for the Envied package. See https://pub.dev/packages/envied.',
     homepage: 'https://github.com/petercinibulk/envied',
     repository: 'https://github.com/petercinibulk/envied',
     authors: [],
-    version: '1.0.0',
+    version: '1.1.1',
     license: '''The MIT License (MIT)
 
 Copyright © 2022 Peter Cinibulk
@@ -3033,7 +3023,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('envied'), PackageRef('build'), PackageRef('code_builder'), PackageRef('dart_style'), PackageRef('source_gen'), PackageRef('analyzer'), PackageRef('recase'), PackageRef('equatable')]
+    dependencies: [PackageRef('envied'), PackageRef('build'), PackageRef('code_builder'), PackageRef('source_gen'), PackageRef('analyzer'), PackageRef('recase'), PackageRef('equatable')]
   );
 
 /// equatable 2.0.7
@@ -3070,13 +3060,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('collection'), PackageRef('meta')]
   );
 
-/// fake_async 1.3.1
+/// fake_async 1.3.2
 const _fake_async = Package(
     name: 'fake_async',
     description: 'Fake asynchronous events such as timers and microtasks for deterministic testing.',
-    repository: 'https://github.com/dart-lang/fake_async',
+    repository: 'https://github.com/dart-lang/test/tree/master/pkgs/fake_async',
     authors: [],
-    version: '1.3.1',
+    version: '1.3.2',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -3439,14 +3429,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// fluent_ui 4.9.2
+/// fluent_ui 4.11.1
 const _fluent_ui = Package(
     name: 'fluent_ui',
-    description: 'Implements Windows UI in Flutter. Based on the official documentation',
+    description: 'Implements Windows UI in Flutter.',
     homepage: 'https://bdlukaa.github.io/fluent_ui/#/',
     repository: 'https://github.com/bdlukaa/fluent_ui',
     authors: [],
-    version: '4.9.2',
+    version: '4.11.1',
     license: '''Copyright 2020 Bruno D'Luka
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -3463,13 +3453,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     dependencies: [PackageRef('flutter'), PackageRef('intl'), PackageRef('scroll_pos'), PackageRef('recase'), PackageRef('math_expressions')]
   );
 
-/// flutter 3.27.1
+/// flutter 3.29.0
 const _flutter = Package(
     name: 'flutter',
     description: 'A framework for writing Flutter applications',
     homepage: 'https://flutter.dev',
     authors: [],
-    version: '3.27.1',
+    version: '3.29.0',
     license: '''Copyright 2014 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3531,27 +3521,6 @@ SOFTWARE.''',
     isMarkdown: false,
     isSdk: false,
     dependencies: [PackageRef('clock'), PackageRef('collection'), PackageRef('file'), PackageRef('flutter'), PackageRef('http'), PackageRef('path'), PackageRef('path_provider'), PackageRef('rxdart'), PackageRef('sqflite'), PackageRef('uuid')]
-  );
-
-/// flutter_colorpicker 1.1.0
-const _flutter_colorpicker = Package(
-    name: 'flutter_colorpicker',
-    description: 'HSV(HSB)/HSL/RGB/Material color picker inspired by all the good design for your amazing flutter apps.',
-    homepage: 'https://github.com/mchome/flutter_colorpicker',
-    authors: [],
-    version: '1.1.0',
-    license: '''MIT License
-
-Copyright (c) 2021 fuyumi
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter')]
   );
 
 /// flutter_hooks 0.20.5
@@ -3760,14 +3729,14 @@ SOFTWARE.''',
     dependencies: [PackageRef('flutter')]
   );
 
-/// freezed 2.5.7
+/// freezed 2.5.8
 const _freezed = Package(
     name: 'freezed',
     description: '''Code generation for immutable classes that has a simple syntax/API without compromising on the features.
 ''',
     repository: 'https://github.com/rrousselGit/freezed',
     authors: [],
-    version: '2.5.7',
+    version: '2.5.8',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -3867,13 +3836,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('async'), PackageRef('path')]
   );
 
-/// glob 2.1.2
+/// glob 2.1.3
 const _glob = Package(
     name: 'glob',
     description: 'A library to perform Bash-style file and directory globbing.',
-    repository: 'https://github.com/dart-lang/glob',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/glob',
     authors: [],
-    version: '2.1.2',
+    version: '2.1.3',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -3906,13 +3875,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('file'), PackageRef('path'), PackageRef('string_scanner')]
   );
 
-/// go_router 14.6.2
+/// go_router 14.8.0
 const _go_router = Package(
     name: 'go_router',
     description: 'A declarative router for Flutter based on Navigation 2 supporting deep linking, data-driven routes and more',
     repository: 'https://github.com/flutter/packages/tree/main/packages/go_router',
     authors: [],
-    version: '14.6.2',
+    version: '14.8.0',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3982,47 +3951,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('collection')]
   );
 
-/// hashcodes 2.0.0
-const _hashcodes = Package(
-    name: 'hashcodes',
-    description: 'A starting point for Dart libraries or applications.',
-    homepage: 'https://github.com/CaiJingLong/dart_hashcodes',
-    authors: [],
-    version: '2.0.0',
-    license: '''BSD 3-Clause License
-
-Copyright (c) 2020, Caijinglong
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: []
-  );
-
 /// hooks_riverpod 2.6.1
 const _hooks_riverpod = Package(
     name: 'hooks_riverpod',
@@ -4058,7 +3986,7 @@ SOFTWARE.''',
     dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('flutter_hooks'), PackageRef('flutter_riverpod'), PackageRef('riverpod'), PackageRef('state_notifier')]
   );
 
-/// hotreloader 4.2.0
+/// hotreloader 4.3.0
 const _hotreloader = Package(
     name: 'hotreloader',
     description: '''Automatic hot code reloader for Dart projects that monitors the source files of a Dart project for changes and automatically applies them to the running Dart process.
@@ -4066,7 +3994,7 @@ const _hotreloader = Package(
     homepage: 'https://github.com/vegardit/dart-hotreloader',
     repository: 'https://github.com/vegardit/dart-hotreloader.git',
     authors: [],
-    version: '4.2.0',
+    version: '4.3.0',
     license: '''Apache License
                         Version 2.0, January 2004
                      http://www.apache.org/licenses/
@@ -4273,13 +4201,13 @@ limitations under the License.''',
     dependencies: [PackageRef('collection'), PackageRef('logging'), PackageRef('path'), PackageRef('stream_transform'), PackageRef('vm_service'), PackageRef('watcher')]
   );
 
-/// http 1.2.2
+/// http 1.3.0
 const _http = Package(
     name: 'http',
     description: 'A composable, multi-platform, Future-based API for HTTP requests.',
     repository: 'https://github.com/dart-lang/http/tree/master/pkgs/http',
     authors: [],
-    version: '1.2.2',
+    version: '1.3.0',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -4312,13 +4240,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('async'), PackageRef('http_parser'), PackageRef('meta'), PackageRef('web')]
   );
 
-/// http_multi_server 3.2.1
+/// http_multi_server 3.2.2
 const _http_multi_server = Package(
     name: 'http_multi_server',
     description: 'A dart:io HttpServer wrapper that handles requests from multiple servers.',
-    repository: 'https://github.com/dart-lang/http_multi_server',
+    repository: 'https://github.com/dart-lang/http/tree/master/pkgs/http_multi_server',
     authors: [],
-    version: '3.2.1',
+    version: '3.2.2',
     license: '''Copyright 2014, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -4351,13 +4279,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('async')]
   );
 
-/// http_parser 4.0.2
+/// http_parser 4.1.2
 const _http_parser = Package(
     name: 'http_parser',
     description: 'A platform-independent package for parsing and serializing HTTP formats.',
-    repository: 'https://github.com/dart-lang/http_parser',
+    repository: 'https://github.com/dart-lang/http/tree/master/pkgs/http_parser',
     authors: [],
-    version: '4.0.2',
+    version: '4.1.2',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -4390,13 +4318,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('collection'), PackageRef('source_span'), PackageRef('string_scanner'), PackageRef('typed_data')]
   );
 
-/// image 4.4.0
+/// image 4.5.2
 const _image = Package(
     name: 'image',
     description: 'Dart Image Library provides server and web apps the ability to load, manipulate, and save images with various image file formats.',
     homepage: 'https://github.com/brendan-duncan/image',
     authors: [],
-    version: '4.4.0',
+    version: '4.5.2',
     license: '''The MIT License
 
 Copyright (c) 2013-2022 Brendan Duncan.
@@ -4422,219 +4350,6 @@ THE SOFTWARE.''',
     isMarkdown: false,
     isSdk: false,
     dependencies: [PackageRef('archive'), PackageRef('meta'), PackageRef('xml')]
-  );
-
-/// image_size_getter 2.2.0
-const _image_size_getter = Package(
-    name: 'image_size_getter',
-    description: 'Get image width and height, the library does not completely decode the image file, just read the metadata to get the image width and height.',
-    homepage: 'https://github.com/CaiJingLong/dart_image_size_getter',
-    authors: [],
-    version: '2.2.0',
-    license: '''Apache License
-                       Version 2.0, January 2004
-                    http://www.apache.org/licenses/
-
-TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-1. Definitions.
-
-  "License" shall mean the terms and conditions for use, reproduction,
-  and distribution as defined by Sections 1 through 9 of this document.
-
-  "Licensor" shall mean the copyright owner or entity authorized by
-  the copyright owner that is granting the License.
-
-  "Legal Entity" shall mean the union of the acting entity and all
-  other entities that control, are controlled by, or are under common
-  control with that entity. For the purposes of this definition,
-  "control" means (i) the power, direct or indirect, to cause the
-  direction or management of such entity, whether by contract or
-  otherwise, or (ii) ownership of fifty percent (50%) or more of the
-  outstanding shares, or (iii) beneficial ownership of such entity.
-
-  "You" (or "Your") shall mean an individual or Legal Entity
-  exercising permissions granted by this License.
-
-  "Source" form shall mean the preferred form for making modifications,
-  including but not limited to software source code, documentation
-  source, and configuration files.
-
-  "Object" form shall mean any form resulting from mechanical
-  transformation or translation of a Source form, including but
-  not limited to compiled object code, generated documentation,
-  and conversions to other media types.
-
-  "Work" shall mean the work of authorship, whether in Source or
-  Object form, made available under the License, as indicated by a
-  copyright notice that is included in or attached to the work
-  (an example is provided in the Appendix below).
-
-  "Derivative Works" shall mean any work, whether in Source or Object
-  form, that is based on (or derived from) the Work and for which the
-  editorial revisions, annotations, elaborations, or other modifications
-  represent, as a whole, an original work of authorship. For the purposes
-  of this License, Derivative Works shall not include works that remain
-  separable from, or merely link (or bind by name) to the interfaces of,
-  the Work and Derivative Works thereof.
-
-  "Contribution" shall mean any work of authorship, including
-  the original version of the Work and any modifications or additions
-  to that Work or Derivative Works thereof, that is intentionally
-  submitted to Licensor for inclusion in the Work by the copyright owner
-  or by an individual or Legal Entity authorized to submit on behalf of
-  the copyright owner. For the purposes of this definition, "submitted"
-  means any form of electronic, verbal, or written communication sent
-  to the Licensor or its representatives, including but not limited to
-  communication on electronic mailing lists, source code control systems,
-  and issue tracking systems that are managed by, or on behalf of, the
-  Licensor for the purpose of discussing and improving the Work, but
-  excluding communication that is conspicuously marked or otherwise
-  designated in writing by the copyright owner as "Not a Contribution."
-
-  "Contributor" shall mean Licensor and any individual or Legal Entity
-  on behalf of whom a Contribution has been received by Licensor and
-  subsequently incorporated within the Work.
-
-2. Grant of Copyright License. Subject to the terms and conditions of
-  this License, each Contributor hereby grants to You a perpetual,
-  worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-  copyright license to reproduce, prepare Derivative Works of,
-  publicly display, publicly perform, sublicense, and distribute the
-  Work and such Derivative Works in Source or Object form.
-
-3. Grant of Patent License. Subject to the terms and conditions of
-  this License, each Contributor hereby grants to You a perpetual,
-  worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-  (except as stated in this section) patent license to make, have made,
-  use, offer to sell, sell, import, and otherwise transfer the Work,
-  where such license applies only to those patent claims licensable
-  by such Contributor that are necessarily infringed by their
-  Contribution(s) alone or by combination of their Contribution(s)
-  with the Work to which such Contribution(s) was submitted. If You
-  institute patent litigation against any entity (including a
-  cross-claim or counterclaim in a lawsuit) alleging that the Work
-  or a Contribution incorporated within the Work constitutes direct
-  or contributory patent infringement, then any patent licenses
-  granted to You under this License for that Work shall terminate
-  as of the date such litigation is filed.
-
-4. Redistribution. You may reproduce and distribute copies of the
-  Work or Derivative Works thereof in any medium, with or without
-  modifications, and in Source or Object form, provided that You
-  meet the following conditions:
-
-  (a) You must give any other recipients of the Work or
-      Derivative Works a copy of this License; and
-
-  (b) You must cause any modified files to carry prominent notices
-      stating that You changed the files; and
-
-  (c) You must retain, in the Source form of any Derivative Works
-      that You distribute, all copyright, patent, trademark, and
-      attribution notices from the Source form of the Work,
-      excluding those notices that do not pertain to any part of
-      the Derivative Works; and
-
-  (d) If the Work includes a "NOTICE" text file as part of its
-      distribution, then any Derivative Works that You distribute must
-      include a readable copy of the attribution notices contained
-      within such NOTICE file, excluding those notices that do not
-      pertain to any part of the Derivative Works, in at least one
-      of the following places: within a NOTICE text file distributed
-      as part of the Derivative Works; within the Source form or
-      documentation, if provided along with the Derivative Works; or,
-      within a display generated by the Derivative Works, if and
-      wherever such third-party notices normally appear. The contents
-      of the NOTICE file are for informational purposes only and
-      do not modify the License. You may add Your own attribution
-      notices within Derivative Works that You distribute, alongside
-      or as an addendum to the NOTICE text from the Work, provided
-      that such additional attribution notices cannot be construed
-      as modifying the License.
-
-  You may add Your own copyright statement to Your modifications and
-  may provide additional or different license terms and conditions
-  for use, reproduction, or distribution of Your modifications, or
-  for any such Derivative Works as a whole, provided Your use,
-  reproduction, and distribution of the Work otherwise complies with
-  the conditions stated in this License.
-
-5. Submission of Contributions. Unless You explicitly state otherwise,
-  any Contribution intentionally submitted for inclusion in the Work
-  by You to the Licensor shall be under the terms and conditions of
-  this License, without any additional terms or conditions.
-  Notwithstanding the above, nothing herein shall supersede or modify
-  the terms of any separate license agreement you may have executed
-  with Licensor regarding such Contributions.
-
-6. Trademarks. This License does not grant permission to use the trade
-  names, trademarks, service marks, or product names of the Licensor,
-  except as required for reasonable and customary use in describing the
-  origin of the Work and reproducing the content of the NOTICE file.
-
-7. Disclaimer of Warranty. Unless required by applicable law or
-  agreed to in writing, Licensor provides the Work (and each
-  Contributor provides its Contributions) on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-  implied, including, without limitation, any warranties or conditions
-  of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-  PARTICULAR PURPOSE. You are solely responsible for determining the
-  appropriateness of using or redistributing the Work and assume any
-  risks associated with Your exercise of permissions under this License.
-
-8. Limitation of Liability. In no event and under no legal theory,
-  whether in tort (including negligence), contract, or otherwise,
-  unless required by applicable law (such as deliberate and grossly
-  negligent acts) or agreed to in writing, shall any Contributor be
-  liable to You for damages, including any direct, indirect, special,
-  incidental, or consequential damages of any character arising as a
-  result of this License or out of the use or inability to use the
-  Work (including but not limited to damages for loss of goodwill,
-  work stoppage, computer failure or malfunction, or any and all
-  other commercial damages or losses), even if such Contributor
-  has been advised of the possibility of such damages.
-
-9. Accepting Warranty or Additional Liability. While redistributing
-  the Work or Derivative Works thereof, You may choose to offer,
-  and charge a fee for, acceptance of support, warranty, indemnity,
-  or other liability obligations and/or rights consistent with this
-  License. However, in accepting such obligations, You may act only
-  on Your own behalf and on Your sole responsibility, not on behalf
-  of any other Contributor, and only if You agree to indemnify,
-  defend, and hold each Contributor harmless for any liability
-  incurred by, or claims asserted against, such Contributor by reason
-  of your accepting any such warranty or additional liability.
-
-END OF TERMS AND CONDITIONS
-
-APPENDIX: How to apply the Apache License to your work.
-
-  To apply the Apache License to your work, attach the following
-  boilerplate notice, with the fields enclosed by brackets "[]"
-  replaced with your own identifying information. (Don't include
-  the brackets!)  The text should be enclosed in the appropriate
-  comment syntax for the file format. We also recommend that a
-  file or class name and description of purpose be included on the
-  same "printed page" as the copyright notice for easier
-  identification within third-party archives.
-
-Copyright [2019] [Caijinglong]
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('hashcodes')]
   );
 
 /// infinite_scroll_pagination 4.1.0
@@ -4748,13 +4463,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('meta'), PackageRef('path'), PackageRef('string_scanner')]
   );
 
-/// js 0.7.1
+/// js 0.7.2
 const _js = Package(
     name: 'js',
     description: 'Annotations to create static Dart interfaces for JavaScript APIs.',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/js',
     authors: [],
-    version: '0.7.1',
+    version: '0.7.2',
     license: '''Copyright 2012, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -4825,13 +4540,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('meta')]
   );
 
-/// json_serializable 6.9.0
+/// json_serializable 6.9.4
 const _json_serializable = Package(
     name: 'json_serializable',
     description: 'Automatically generate code for converting to and from JSON by annotating Dart classes.',
     repository: 'https://github.com/google/json_serializable.dart/tree/master/json_serializable',
     authors: [],
-    version: '6.9.0',
+    version: '6.9.4',
     license: '''Copyright 2017, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -4860,16 +4575,16 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('build'), PackageRef('build_config'), PackageRef('collection'), PackageRef('json_annotation'), PackageRef('meta'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('source_gen'), PackageRef('source_helper')]
+    dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('build'), PackageRef('build_config'), PackageRef('collection'), PackageRef('dart_style'), PackageRef('json_annotation'), PackageRef('meta'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('source_gen'), PackageRef('source_helper')]
   );
 
-/// leak_tracker 10.0.7
+/// leak_tracker 10.0.8
 const _leak_tracker = Package(
     name: 'leak_tracker',
     description: 'A framework for memory leak tracking for Dart and Flutter applications.',
     repository: 'https://github.com/dart-lang/leak_tracker/tree/main/pkgs/leak_tracker',
     authors: [],
-    version: '10.0.7',
+    version: '10.0.8',
     license: '''Copyright 2022, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -4902,13 +4617,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// leak_tracker_flutter_testing 3.0.8
+/// leak_tracker_flutter_testing 3.0.9
 const _leak_tracker_flutter_testing = Package(
     name: 'leak_tracker_flutter_testing',
     description: 'An internal package to test leak tracking with Flutter.',
     repository: 'https://github.com/dart-lang/leak_tracker/tree/main/pkgs/leak_tracker_flutter_testing',
     authors: [],
-    version: '3.0.8',
+    version: '3.0.9',
     license: '''Copyright 2022, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -4980,14 +4695,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// lints 5.0.0
+/// lints 5.1.1
 const _lints = Package(
     name: 'lints',
     description: """Official Dart lint rules. Defines the 'core' and 'recommended' set of lints suggested by the Dart team.
 """,
-    repository: 'https://github.com/dart-lang/lints',
+    repository: 'https://github.com/dart-lang/core/tree/main/pkgs/lints',
     authors: [],
-    version: '5.0.0',
+    version: '5.1.1',
     license: '''Copyright 2021, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -5015,41 +4730,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: []
-  );
-
-/// logger 2.5.0
-const _logger = Package(
-    name: 'logger',
-    description: 'Small, easy to use and extensible logger which prints beautiful logs.',
-    repository: 'https://github.com/SourceHorizon/logger',
-    authors: [],
-    version: '2.5.0',
-    license: '''MIT License
-
-Copyright (c) 2019 Simon Leier
-Copyright (c) 2019 Harm Aarts
-Copyright (c) 2023 Severin Hamader
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
     isMarkdown: false,
     isSdk: false,
     dependencies: []
@@ -5094,52 +4774,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// macros 0.1.3-main.0
-const _macros = Package(
-    name: 'macros',
-    description: 'This package is for macro authors, and exposes the APIs necessary to write a macro. It exports the APIs from the private `_macros` SDK vendored package.',
-    repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/macros',
-    authors: [],
-    version: '0.1.3-main.0',
-    license: '''Copyright 2024, the Dart project authors.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google LLC nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: []
-  );
-
-/// matcher 0.12.16+1
+/// matcher 0.12.17
 const _matcher = Package(
     name: 'matcher',
     description: 'Support for specifying test expectations via an extensible Matcher class. Also includes a number of built-in Matcher implementations for common cases.',
-    repository: 'https://github.com/dart-lang/matcher',
+    repository: 'https://github.com/dart-lang/test/tree/master/pkgs/matcher',
     authors: [],
-    version: '0.12.16+1',
+    version: '0.12.17',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -5385,13 +5026,13 @@ const _material_color_utilities = Package(
     dependencies: [PackageRef('collection')]
   );
 
-/// math_expressions 2.6.0
+/// math_expressions 2.7.0
 const _math_expressions = Package(
     name: 'math_expressions',
     description: 'A library for parsing and evaluating mathematical expressions, supporting real numbers, vectors, and basic interval arithmetic.',
     homepage: 'https://github.com/fkleon/math-expressions',
     authors: [],
-    version: '2.6.0',
+    version: '2.7.0',
     license: '''MIT License
 
 Copyright (c) 2013 Frederik Leonhardt, Michael Frey
@@ -5415,16 +5056,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('vector_math')]
+    dependencies: [PackageRef('petitparser'), PackageRef('vector_math')]
   );
 
-/// meta 1.15.0
+/// meta 1.16.0
 const _meta = Package(
     name: 'meta',
     description: "Annotations used to express developer intentions that can't otherwise be deduced by statically analyzing source code.",
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/meta',
     authors: [],
-    version: '1.15.0',
+    version: '1.16.0',
     license: '''Copyright 2016, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -5562,13 +5203,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('flutter')]
   );
 
-/// package_config 2.1.0
+/// package_config 2.1.1
 const _package_config = Package(
     name: 'package_config',
     description: 'Support for reading and writing Dart Package Configuration files.',
-    repository: 'https://github.com/dart-lang/package_config',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/package_config',
     authors: [],
-    version: '2.1.0',
+    version: '2.1.1',
     license: '''Copyright 2019, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -5601,14 +5242,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('path')]
   );
 
-/// package_info_plus 8.1.2
+/// package_info_plus 8.2.1
 const _package_info_plus = Package(
     name: 'package_info_plus',
     description: 'Flutter plugin for querying information about the application package, such as CFBundleVersion on iOS or versionCode on Android.',
     homepage: 'https://github.com/fluttercommunity/plus_plugins',
     repository: 'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/package_info_plus/package_info_plus',
     authors: [],
-    version: '8.1.2',
+    version: '8.2.1',
     license: '''Copyright 2017 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -5641,14 +5282,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('http'), PackageRef('meta'), PackageRef('path'), PackageRef('package_info_plus_platform_interface'), PackageRef('web'), PackageRef('win32'), PackageRef('clock')]
   );
 
-/// package_info_plus_platform_interface 3.0.2
+/// package_info_plus_platform_interface 3.1.0
 const _package_info_plus_platform_interface = Package(
     name: 'package_info_plus_platform_interface',
     description: 'A common platform interface for the package_info_plus plugin.',
     homepage: 'https://github.com/fluttercommunity/plus_plugins',
     repository: 'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/',
     authors: [],
-    version: '3.0.2',
+    version: '3.1.0',
     license: '''Copyright 2017 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -5894,13 +5535,13 @@ const _pasteboard = Package(
     dependencies: [PackageRef('flutter'), PackageRef('web'), PackageRef('uuid'), PackageRef('path')]
   );
 
-/// path 1.9.0
+/// path 1.9.1
 const _path = Package(
     name: 'path',
     description: 'A string-based path manipulation library. All of the path operations you know and love, with solid support for Windows, POSIX (Linux and Mac OS X), and the web.',
-    repository: 'https://github.com/dart-lang/path',
+    repository: 'https://github.com/dart-lang/core/tree/main/pkgs/path',
     authors: [],
-    version: '1.9.0',
+    version: '1.9.1',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -6155,17 +5796,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('path'), PackageRef('path_provider_platform_interface')]
   );
 
-/// petitparser 6.0.2
+/// petitparser 6.1.0
 const _petitparser = Package(
     name: 'petitparser',
     description: 'A dynamic parser framework to build efficient grammars and parsers quickly.',
     homepage: 'https://petitparser.github.io',
     repository: 'https://github.com/petitparser/dart-petitparser',
     authors: [],
-    version: '6.0.2',
+    version: '6.1.0',
     license: '''The MIT License
 
-Copyright (c) 2006-2023 Lukas Renggli.
+Copyright (c) 2006-2025 Lukas Renggli.
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -6187,7 +5828,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('meta')]
+    dependencies: [PackageRef('meta'), PackageRef('collection')]
   );
 
 /// platform 3.1.6
@@ -6607,13 +6248,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('nested')]
   );
 
-/// pub_semver 2.1.4
+/// pub_semver 2.1.5
 const _pub_semver = Package(
     name: 'pub_semver',
     description: "Versions and version constraints implementing pub's versioning policy. This is very similar to vanilla semver, with a few corner cases.",
-    repository: 'https://github.com/dart-lang/pub_semver',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/pub_semver',
     authors: [],
-    version: '2.1.4',
+    version: '2.1.5',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -6646,13 +6287,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('collection'), PackageRef('meta')]
   );
 
-/// pubspec_parse 1.3.0
+/// pubspec_parse 1.5.0
 const _pubspec_parse = Package(
     name: 'pubspec_parse',
     description: 'Simple package for parsing pubspec.yaml files with a type-safe API and rich error reporting.',
-    repository: 'https://github.com/dart-lang/pubspec_parse',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/pubspec_parse',
     authors: [],
-    version: '1.3.0',
+    version: '1.5.0',
     license: '''Copyright 2018, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -6706,14 +6347,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     dependencies: []
   );
 
-/// retrofit 4.4.1
+/// retrofit 4.4.2
 const _retrofit = Package(
     name: 'retrofit',
     description: 'retrofit.dart is an dio client generator using source_gen and inspired by Chopper and Retrofit.',
     homepage: 'https://mings.in/retrofit.dart/',
     repository: 'https://github.com/trevorwang/retrofit.dart/',
     authors: [],
-    version: '4.4.1',
+    version: '4.4.2',
     license: '''MIT License
 
 Copyright (c) 2019 Trevor Wang
@@ -6740,14 +6381,14 @@ SOFTWARE.''',
     dependencies: [PackageRef('dio'), PackageRef('meta')]
   );
 
-/// retrofit_generator 9.1.5
+/// retrofit_generator 9.1.9
 const _retrofit_generator = Package(
     name: 'retrofit_generator',
     description: 'retrofit generator is an dio client generator using source_gen and inspired by Chopper and Retrofit.',
     homepage: 'https://mings.in/retrofit.dart/',
     repository: 'https://github.com/trevorwang/retrofit.dart/',
     authors: [],
-    version: '9.1.5',
+    version: '9.1.9',
     license: '''MIT License
 
 Copyright (c) 2019 Trevor Wang
@@ -6771,7 +6412,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('build'), PackageRef('built_collection'), PackageRef('code_builder'), PackageRef('dart_style'), PackageRef('dio'), PackageRef('protobuf'), PackageRef('retrofit'), PackageRef('source_gen')]
+    dependencies: [PackageRef('analyzer'), PackageRef('build'), PackageRef('built_collection'), PackageRef('code_builder'), PackageRef('dart_style'), PackageRef('dio'), PackageRef('protobuf'), PackageRef('source_gen'), PackageRef('retrofit')]
   );
 
 /// riverpod 2.6.1
@@ -6809,13 +6450,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('collection'), PackageRef('meta'), PackageRef('stack_trace'), PackageRef('state_notifier')]
   );
 
-/// riverpod_analyzer_utils 0.5.8
+/// riverpod_analyzer_utils 0.5.9
 const _riverpod_analyzer_utils = Package(
     name: 'riverpod_analyzer_utils',
     description: 'A project for analyzing Riverpod code. This is internally used by riverpod_lint and riverpod_generator',
     repository: 'https://github.com/rrousselGit/river_pod',
     authors: [],
-    version: '0.5.8',
+    version: '0.5.9',
     license: '''MIT License
 
 Copyright (c) 2023 Remi Rousselet
@@ -6875,13 +6516,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('meta'), PackageRef('riverpod')]
   );
 
-/// riverpod_generator 2.6.3
+/// riverpod_generator 2.6.4
 const _riverpod_generator = Package(
     name: 'riverpod_generator',
     description: 'A code generator for Riverpod. This both simplifies the syntax empowers it, such as allowing stateful hot-reload.',
     repository: 'https://github.com/rrousselGit/riverpod',
     authors: [],
-    version: '2.6.3',
+    version: '2.6.4',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -6908,14 +6549,14 @@ SOFTWARE.''',
     dependencies: [PackageRef('analyzer'), PackageRef('build'), PackageRef('build_config'), PackageRef('collection'), PackageRef('crypto'), PackageRef('meta'), PackageRef('path'), PackageRef('riverpod_analyzer_utils'), PackageRef('riverpod_annotation'), PackageRef('source_gen')]
   );
 
-/// riverpod_lint 2.6.3
+/// riverpod_lint 2.6.4
 const _riverpod_lint = Package(
     name: 'riverpod_lint',
     description: 'Riverpod_lint is a developer tool for users of Riverpod, designed to help stop common issues and simplify repetitive tasks.',
     homepage: 'https://riverpod.dev',
     repository: 'https://github.com/rrousselGit/river_pod',
     authors: [],
-    version: '2.6.3',
+    version: '2.6.4',
     license: '''MIT License
 
 Copyright (c) 2023 Remi Rousselet
@@ -7354,13 +6995,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('flutter')]
   );
 
-/// shared_preferences 2.3.4
+/// shared_preferences 2.5.2
 const _shared_preferences = Package(
     name: 'shared_preferences',
     description: 'Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences',
     authors: [],
-    version: '2.3.4',
+    version: '2.5.2',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -7391,13 +7032,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter'), PackageRef('shared_preferences_android'), PackageRef('shared_preferences_foundation'), PackageRef('shared_preferences_linux'), PackageRef('shared_preferences_platform_interface'), PackageRef('shared_preferences_web'), PackageRef('shared_preferences_windows')]
   );
 
-/// shared_preferences_android 2.3.4
+/// shared_preferences_android 2.4.5
 const _shared_preferences_android = Package(
     name: 'shared_preferences_android',
     description: 'Android implementation of the shared_preferences plugin',
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_android',
     authors: [],
-    version: '2.3.4',
+    version: '2.4.5',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -7428,13 +7069,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter'), PackageRef('shared_preferences_platform_interface')]
   );
 
-/// shared_preferences_foundation 2.5.3
+/// shared_preferences_foundation 2.5.4
 const _shared_preferences_foundation = Package(
     name: 'shared_preferences_foundation',
     description: 'iOS and macOS implementation of the shared_preferences plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_foundation',
     authors: [],
-    version: '2.5.3',
+    version: '2.5.4',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -7613,14 +7254,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('file'), PackageRef('flutter'), PackageRef('path'), PackageRef('path_provider_platform_interface'), PackageRef('path_provider_windows'), PackageRef('shared_preferences_platform_interface')]
   );
 
-/// shelf 1.4.1
+/// shelf 1.4.2
 const _shelf = Package(
     name: 'shelf',
     description: '''A model for web server middleware that encourages composition and easy reuse.
 ''',
     repository: 'https://github.com/dart-lang/shelf/tree/master/pkgs/shelf',
     authors: [],
-    version: '1.4.1',
+    version: '1.4.2',
     license: '''Copyright 2014, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -7653,13 +7294,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('http_parser'), PackageRef('path'), PackageRef('stack_trace'), PackageRef('stream_channel')]
   );
 
-/// shelf_web_socket 2.0.1
+/// shelf_web_socket 3.0.0
 const _shelf_web_socket = Package(
     name: 'shelf_web_socket',
     description: 'A shelf handler that wires up a listener for every connection.',
     repository: 'https://github.com/dart-lang/shelf/tree/master/pkgs/shelf_web_socket',
     authors: [],
-    version: '2.0.1',
+    version: '3.0.0',
     license: '''Copyright 2014, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -7759,13 +7400,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('flutter'), PackageRef('provider')]
   );
 
-/// source_gen 1.5.0
+/// source_gen 2.0.0
 const _source_gen = Package(
     name: 'source_gen',
     description: 'Source code generation builders and utilities for the Dart build system',
     repository: 'https://github.com/dart-lang/source_gen/tree/master/source_gen',
     authors: [],
-    version: '1.5.0',
+    version: '2.0.0',
     license: '''Copyright 2015, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -7795,16 +7436,16 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('build'), PackageRef('dart_style'), PackageRef('glob'), PackageRef('path'), PackageRef('source_span'), PackageRef('yaml')]
+    dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('build'), PackageRef('dart_style'), PackageRef('glob'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span'), PackageRef('yaml')]
   );
 
-/// source_helper 1.3.4
+/// source_helper 1.3.5
 const _source_helper = Package(
     name: 'source_helper',
     description: 'Utilities to help with Dart source code generation. Includes utilities for properly generating String literals from any String value.',
     repository: 'https://github.com/google/source_helper.dart',
     authors: [],
-    version: '1.3.4',
+    version: '1.3.5',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -8011,13 +7652,13 @@ const _source_helper = Package(
     dependencies: [PackageRef('analyzer'), PackageRef('collection'), PackageRef('source_gen')]
   );
 
-/// source_span 1.10.0
+/// source_span 1.10.1
 const _source_span = Package(
     name: 'source_span',
     description: 'Provides a standard representation for source code locations and spans.',
-    repository: 'https://github.com/dart-lang/source_span',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/source_span',
     authors: [],
-    version: '1.10.0',
+    version: '1.10.1',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -8084,13 +7725,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// sqflite 2.4.1
+/// sqflite 2.4.2
 const _sqflite = Package(
     name: 'sqflite',
     description: 'Flutter plugin for SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     repository: 'https://github.com/tekartik/sqflite/tree/master/sqflite',
     authors: [],
-    version: '2.4.1',
+    version: '2.4.2',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -8121,13 +7762,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter'), PackageRef('sqflite_android'), PackageRef('sqflite_darwin'), PackageRef('sqflite_platform_interface'), PackageRef('sqflite_common'), PackageRef('path')]
   );
 
-/// sqflite_android 2.4.0
+/// sqflite_android 2.4.1
 const _sqflite_android = Package(
     name: 'sqflite_android',
     description: 'Android flutter plugin for SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     repository: 'https://github.com/tekartik/sqflite/tree/master/sqflite_android',
     authors: [],
-    version: '2.4.0',
+    version: '2.4.1',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -8158,13 +7799,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter'), PackageRef('sqflite_common'), PackageRef('path'), PackageRef('sqflite_platform_interface')]
   );
 
-/// sqflite_common 2.5.4+6
+/// sqflite_common 2.5.5
 const _sqflite_common = Package(
     name: 'sqflite_common',
     description: 'Dart wrapper on SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     homepage: 'https://github.com/tekartik/sqflite/tree/master/sqflite_common',
     authors: [],
-    version: '2.5.4+6',
+    version: '2.5.5',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -8195,13 +7836,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('synchronized'), PackageRef('path'), PackageRef('meta')]
   );
 
-/// sqflite_darwin 2.4.1
+/// sqflite_darwin 2.4.2
 const _sqflite_darwin = Package(
     name: 'sqflite_darwin',
     description: 'iOS/MacOS flutter plugin for SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     repository: 'https://github.com/tekartik/sqflite/tree/master/sqflite_darwin',
     authors: [],
-    version: '2.4.1',
+    version: '2.4.2',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -8269,13 +7910,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter'), PackageRef('platform'), PackageRef('sqflite_common'), PackageRef('plugin_platform_interface'), PackageRef('meta')]
   );
 
-/// stack_trace 1.12.0
+/// stack_trace 1.12.1
 const _stack_trace = Package(
     name: 'stack_trace',
     description: 'A package for manipulating stack traces and printing them readably.',
-    repository: 'https://github.com/dart-lang/stack_trace',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/stack_trace',
     authors: [],
-    version: '1.12.0',
+    version: '1.12.1',
     license: '''Copyright 2014, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -8341,13 +7982,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('meta')]
   );
 
-/// stream_channel 2.1.2
+/// stream_channel 2.1.4
 const _stream_channel = Package(
     name: 'stream_channel',
     description: 'An abstraction for two-way communication channels based on the Dart Stream class.',
-    repository: 'https://github.com/dart-lang/stream_channel',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/stream_channel',
     authors: [],
-    version: '2.1.2',
+    version: '2.1.4',
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -8380,13 +8021,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('async')]
   );
 
-/// stream_transform 2.1.0
+/// stream_transform 2.1.1
 const _stream_transform = Package(
     name: 'stream_transform',
     description: 'A collection of utilities to transform and manipulate streams.',
-    repository: 'https://github.com/dart-lang/stream_transform',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/stream_transform',
     authors: [],
-    version: '2.1.0',
+    version: '2.1.1',
     license: '''Copyright 2017, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -8419,13 +8060,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// string_scanner 1.3.0
+/// string_scanner 1.4.1
 const _string_scanner = Package(
     name: 'string_scanner',
     description: 'A class for parsing strings using a sequence of patterns.',
-    repository: 'https://github.com/dart-lang/string_scanner',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/string_scanner',
     authors: [],
-    version: '1.3.0',
+    version: '1.4.1',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -8458,13 +8099,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('source_span')]
   );
 
-/// synchronized 3.3.0+3
+/// synchronized 3.3.1
 const _synchronized = Package(
     name: 'synchronized',
     description: 'Lock mechanism to prevent concurrent access to asynchronous code.',
     homepage: 'https://github.com/tekartik/synchronized.dart/tree/master/synchronized',
     authors: [],
-    version: '3.3.0+3',
+    version: '3.3.1',
     license: '''MIT License
 
 Copyright (c) 2016, Alexandre Roux Tekartik.
@@ -8491,13 +8132,13 @@ SOFTWARE.''',
     dependencies: []
   );
 
-/// term_glyph 1.2.1
+/// term_glyph 1.2.2
 const _term_glyph = Package(
     name: 'term_glyph',
     description: 'Useful Unicode glyphs and ASCII substitutes.',
-    repository: 'https://github.com/dart-lang/term_glyph',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/term_glyph',
     authors: [],
-    version: '1.2.1',
+    version: '1.2.2',
     license: '''Copyright 2017, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -8530,13 +8171,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// test_api 0.7.3
+/// test_api 0.7.4
 const _test_api = Package(
     name: 'test_api',
     description: 'The user facing API for structuring Dart tests and checking expectations.',
     repository: 'https://github.com/dart-lang/test/tree/master/pkgs/test_api',
     authors: [],
-    version: '0.7.3',
+    version: '0.7.4',
     license: '''Copyright 2018, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -8569,13 +8210,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('async'), PackageRef('boolean_selector'), PackageRef('collection'), PackageRef('meta'), PackageRef('source_span'), PackageRef('stack_trace'), PackageRef('stream_channel'), PackageRef('string_scanner'), PackageRef('term_glyph')]
   );
 
-/// timing 1.0.1
+/// timing 1.0.2
 const _timing = Package(
     name: 'timing',
     description: 'A simple package for tracking the performance of synchronous and asynchronous actions.',
-    repository: 'https://github.com/dart-lang/timing',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/timing',
     authors: [],
-    version: '1.0.1',
+    version: '1.0.2',
     license: '''Copyright 2018, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -8869,13 +8510,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')]
   );
 
-/// url_launcher_web 2.3.3
+/// url_launcher_web 2.4.0
 const _url_launcher_web = Package(
     name: 'url_launcher_web',
     description: 'Web platform implementation of url_launcher',
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_web',
     authors: [],
-    version: '2.3.3',
+    version: '2.4.0',
     license: '''url_launcher_web
 
 Copyright 2013 The Flutter Authors. All rights reserved.
@@ -9112,13 +8753,13 @@ platform_detect
     dependencies: [PackageRef('flutter'), PackageRef('url_launcher_platform_interface'), PackageRef('web')]
   );
 
-/// url_launcher_windows 3.1.3
+/// url_launcher_windows 3.1.4
 const _url_launcher_windows = Package(
     name: 'url_launcher_windows',
     description: 'Windows implementation of the url_launcher plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_windows',
     authors: [],
-    version: '3.1.3',
+    version: '3.1.4',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -9227,13 +8868,13 @@ freely, subject to the following restrictions:
     dependencies: []
   );
 
-/// vm_service 14.3.0
+/// vm_service 14.3.1
 const _vm_service = Package(
     name: 'vm_service',
     description: 'A library to communicate with a service implementing the Dart VM service protocol.',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/vm_service',
     authors: [],
-    version: '14.3.0',
+    version: '14.3.1',
     license: '''Copyright 2015, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -9266,13 +8907,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// watcher 1.1.0
+/// watcher 1.1.1
 const _watcher = Package(
     name: 'watcher',
     description: 'A file system watcher. It monitors changes to contents of directories and sends notifications when files have been added, removed, or modified.',
-    repository: 'https://github.com/dart-lang/watcher',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/watcher',
     authors: [],
-    version: '1.1.0',
+    version: '1.1.1',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -9382,13 +9023,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('web')]
   );
 
-/// web_socket_channel 3.0.1
+/// web_socket_channel 3.0.2
 const _web_socket_channel = Package(
     name: 'web_socket_channel',
     description: 'StreamChannel wrappers for WebSockets. Provides a cross-platform WebSocketChannel API, a cross-platform implementation of that API that communicates over an underlying StreamChannel.',
-    repository: 'https://github.com/dart-lang/web_socket_channel',
+    repository: 'https://github.com/dart-lang/http/tree/master/pkgs/web_socket_channel',
     authors: [],
-    version: '3.0.1',
+    version: '3.0.2',
     license: '''Copyright 2016, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -9463,7 +9104,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter')]
   );
 
-/// win32 5.9.0
+/// win32 5.10.1
 const _win32 = Package(
     name: 'win32',
     description: '''Access common Win32 APIs directly from Dart using FFI — no C required!
@@ -9471,7 +9112,7 @@ const _win32 = Package(
     homepage: 'https://win32.pub',
     repository: 'https://github.com/halildurmus/win32',
     authors: [],
-    version: '5.9.0',
+    version: '5.10.1',
     license: '''BSD 3-Clause License
 
 Copyright (c) 2024, Halil Durmus
@@ -9649,13 +9290,13 @@ THE SOFTWARE.''',
     dependencies: [PackageRef('collection'), PackageRef('meta'), PackageRef('petitparser')]
   );
 
-/// yaml 3.1.2
+/// yaml 3.1.3
 const _yaml = Package(
     name: 'yaml',
     description: 'A parser for YAML, a human-friendly data serialization standard',
-    repository: 'https://github.com/dart-lang/yaml',
+    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/yaml',
     authors: [],
-    version: '3.1.2',
+    version: '3.1.3',
     license: '''Copyright (c) 2014, the Dart project authors.
 Copyright (c) 2006, Kirill Simonov.
 

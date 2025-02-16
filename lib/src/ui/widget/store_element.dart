@@ -8,11 +8,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../filesystem/l0/entity/mod_category.dart';
 import '../../l10n/app_localizations.dart';
-import '../../nahida/di/nahida_download_queue.dart';
-import '../../nahida/domain/entity/nahida_element.dart';
-import '../../structure/entity/mod_category.dart';
+import '../../nahida/l0/di/nahida_download_queue.dart';
+import '../../nahida/l0/entity/nahida_element.dart';
+import '../../nahida/l0/usecase/download_url.dart';
+import '../../nahida/l1/di/nahida_repo.dart';
 import '../util/open_url.dart';
+import 'auto_resize_image.dart';
 import 'intrinsic_command_bar.dart';
 import 'turnstile_dialog.dart';
 
@@ -143,10 +146,8 @@ class StoreElement extends ConsumerWidget {
                     expiresAtDateTime.difference(DateTime.now()).inDays < 7,
                 child: Text(
                   'Expires soon!',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style:
+                      TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -221,7 +222,10 @@ class StoreElement extends ConsumerWidget {
                     Colors.black.withValues(alpha: 0.6),
                     BlendMode.darken,
                   ),
-                  child: Image(image: imageProvider, fit: BoxFit.cover),
+                  child: AutoResizeImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
@@ -229,7 +233,7 @@ class StoreElement extends ConsumerWidget {
           Center(
             child: GestureDetector(
               onTap: () async => _showImageDialog(context, imageProvider),
-              child: Image(image: imageProvider, fit: BoxFit.contain),
+              child: AutoResizeImage(image: imageProvider, fit: BoxFit.contain),
             ),
           ),
         ],
@@ -256,10 +260,7 @@ class StoreElement extends ConsumerWidget {
                 color = Colors.red;
               }
               return Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 1,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 margin: const EdgeInsets.symmetric(horizontal: 2),
                 decoration: BoxDecoration(
                   border: Border.all(color: color),
@@ -267,10 +268,7 @@ class StoreElement extends ConsumerWidget {
                 ),
                 child: Text(
                   e,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: color),
                 ),
               );
             }),
@@ -341,12 +339,14 @@ class StoreElement extends ConsumerWidget {
                 password = null;
               }
               unawaited(
-                ref.read(nahidaDownloadQueueProvider.notifier).addDownload(
-                      element: element,
-                      category: category,
-                      turnstile: turnstile,
-                      pw: password,
-                    ),
+                downloadUrlUseCase(
+                  repo: ref.read(nahidaRepositoryProvider),
+                  downloadQueue: ref.read(nahidaDownloadQueueProvider.notifier),
+                  element: element,
+                  category: category,
+                  turnstile: turnstile,
+                  pw: password,
+                ),
               );
             },
             child: const Text('Download'),

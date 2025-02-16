@@ -8,10 +8,8 @@ on:
       - reopened
       - labeled
       - unlabeled
-
-concurrency:
-  group: pr-version-increment-check-${{ github.sha }}
-  cancel-in-progress: true
+    paths: 
+      - pubspec.yaml
 
 jobs:
   check_version_increment:
@@ -19,30 +17,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get the latest tag
+      - uses: joutvhu/get-release@v1
         id: get_latest_tag
-        run: |
-          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
+        with:
+          latest: true
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: subosito/flutter-action@v2
-
-      - name: Install cider
-        run: flutter pub global activate cider
+      - uses: actions/checkout@v4
 
       - name: Get the head version
         id: get_head_version
-        run: |
-          HEAD_OUTPUT=$(cider version)
-          echo "HEAD_OUTPUT=v$HEAD_OUTPUT" >> $GITHUB_OUTPUT
+        run: "echo \"head_output=v$(grep -E '^version:' pubspec.yaml | sed -E 's/version: *//')\" >> \"$GITHUB_OUTPUT\""
 
       - name: Check version increment
         run: |
-          if [ ${{ steps.get_head_version.outputs.HEAD_OUTPUT }} == ${{ steps.get_latest_tag.outputs.LATEST_TAG }} ]; then
+          if [ ${{ steps.get_head_version.outputs.head_output }} == ${{ steps.get_latest_tag.outputs.tag_name }} ]; then
             echo "Version number has not changed in the PR."
             exit 1
           fi

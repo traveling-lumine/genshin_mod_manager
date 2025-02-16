@@ -1,21 +1,28 @@
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 class RunAndExitPaneAction extends PaneItemAction {
   RunAndExitPaneAction({
     required super.icon,
     required Widget super.title,
     required Future<void> Function() super.onTap,
-    required final FlyoutController flyoutController,
     super.key,
   }) : super(
-          trailing: FlyoutTarget(
-            controller: flyoutController,
-            child: IconButton(
-              icon: const Icon(FluentIcons.more),
-              onPressed: () => _showRunAndExitFlyout(flyoutController, onTap),
-            ),
+          trailing: HookBuilder(
+            builder: (final context) {
+              final flyoutController = useFlyoutController();
+              return FlyoutTarget(
+                controller: flyoutController,
+                child: IconButton(
+                  icon: const Icon(FluentIcons.more),
+                  onPressed: () =>
+                      _showRunAndExitFlyout(flyoutController, onTap),
+                ),
+              );
+            },
           ),
         );
 
@@ -42,4 +49,40 @@ class RunAndExitPaneAction extends PaneItemAction {
           ),
         ),
       );
+}
+
+FlyoutController useFlyoutController({final List<Object?>? keys}) =>
+    use(_FlyoutControllerHook(keys: keys));
+
+class _FlyoutControllerHook extends Hook<FlyoutController> {
+  const _FlyoutControllerHook({super.keys});
+  @override
+  HookState<FlyoutController, Hook<FlyoutController>> createState() =>
+      _FlyoutControllerHookState();
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+  }
+}
+
+class _FlyoutControllerHookState
+    extends HookState<FlyoutController, _FlyoutControllerHook> {
+  late final controller = FlyoutController();
+
+  @override
+  String get debugLabel => 'useFlyoutController';
+
+  @override
+  FlyoutController build(final BuildContext context) => controller;
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+        .add(DiagnosticsProperty<FlyoutController>('controller', controller));
+  }
+
+  @override
+  void dispose() => controller.dispose();
 }

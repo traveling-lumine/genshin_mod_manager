@@ -5,15 +5,18 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../fs_interface/di/fs_watcher.dart';
-import '../../storage/di/folder_icon.dart';
-import '../../storage/di/use_paimon.dart';
-import '../../structure/entity/mod.dart';
-import '../../structure/entity/mod_category.dart';
-import '../../structure/usecase/move_mod.dart';
+import '../../app_config/l0/entity/entries.dart';
+import '../../app_config/l1/di/app_config_facade.dart';
+import '../../filesystem/l0/entity/mod.dart';
+import '../../filesystem/l0/entity/mod_category.dart';
+import '../../filesystem/l0/usecase/move_dir.dart';
+import '../../filesystem/l1/di/fs_watcher.dart';
+import '../../filesystem/l1/di/mods_in_category.dart';
+import '../../filesystem/l1/impl/path_op_string.dart';
 import '../util/display_infobar.dart';
 import 'category_drop_target.dart';
 import 'fade_in.dart';
+import 'latest_image.dart';
 
 class FolderPaneItem extends PaneItem {
   FolderPaneItem({
@@ -25,12 +28,12 @@ class FolderPaneItem extends PaneItem {
             category.name,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          icon: _buildIcon(category.name),
+          icon: _buildIcon(category),
           body: const SizedBox.shrink(),
+          infoBadge: _buildInfoBadge(category),
         );
   static const maxIconWidth = 80.0;
   ModCategory category;
-
   @override
   Widget build(
     final BuildContext context,
@@ -94,7 +97,10 @@ class FolderPaneItem extends PaneItem {
     final DragTargetDetails<Mod> details,
   ) {
     try {
-      moveModUseCase(category: category, mod: details.data);
+      moveDirUseCase(
+        Directory(details.data.path),
+        category.path.pJoin(details.data.path.pBasename),
+      );
     } on Exception catch (e) {
       _showMoveErrorInfoBar(context, e);
       return;
@@ -127,32 +133,75 @@ class FolderPaneItem extends PaneItem {
     );
   }
 
-  static Widget _buildIcon(final String name) => Consumer(
-        builder: (final context, final ref, final child) =>
-            ref.watch(folderIconProvider)
-                ? _buildImage(name)
-                : const Icon(FluentIcons.folder_open),
+  static Widget _buildIcon(final ModCategory category) => Consumer(
+        builder: (final context, final ref, final child) => ref.watch(
+          appConfigFacadeProvider
+              .select((final value) => value.obtainValue(showFolderIcon)),
+        )
+            ? _buildImage(category)
+            : const Icon(FluentIcons.folder_open),
       );
 
-  static Widget _buildImage(final String name) => ConstrainedBox(
+  static Widget _buildImage(final ModCategory category) => ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: maxIconWidth),
-        child: Consumer(
-          builder: (final context, final ref, final child) {
-            final imageFile = ref.watch(folderIconPathProvider(name));
-            return AspectRatio(
-              aspectRatio: 1,
-              child: imageFile == null
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: Consumer(
+            builder: (final context, final ref, final child) {
+              final imagePath = ref
+                  .watch(folderIconPathStreamProvider(category))
+                  .whenOrNull(data: (final path) => path);
+              return imagePath == null
                   ? Consumer(
                       builder: (final context, final ref, final child) =>
                           Image.asset(
-                        ref.watch(paimonIconProvider)
+                        ref.watch(
+                          appConfigFacadeProvider.select(
+                            (final value) => value.obtainValue(
+                              showPaimonAsEmptyIconFolderIcon,
+                            ),
+                          ),
+                        )
                             ? 'images/app_icon.ico'
                             : 'images/idk_icon.png',
                       ),
                     )
-                  : Image.file(File(imageFile), fit: BoxFit.contain),
-            );
-          },
+                  : LatestImage(path: imagePath);
+            },
+          ),
         ),
+      );
+
+  static Widget _buildInfoBadge(final ModCategory category) => Consumer(
+        builder: (final context, final ref, final child) {
+          final mods = ref.watch(modsInCategoryProvider(category));
+          return mods.when(
+            data: (final data) {
+              final totalCount = data.length;
+              if (totalCount == 0) {
+                return const SizedBox.shrink();
+              }
+              final activeCount = data.where((final e) => e.isEnabled).length;
+              final color = switch (activeCount) {
+                <= 1 => null,
+                <= 2 => Colors.yellow,
+                <= 5 => Colors.orange,
+                _ => Colors.red,
+              };
+              return Text(
+                '$activeCount',
+                style: TextStyle(color: color, fontWeight: FontWeight.bold),
+              );
+            },
+            error: (final error, final stackTrace) =>
+                const Icon(FluentIcons.error_badge),
+            loading: () => const Center(
+              child: SizedBox.square(
+                dimension: 20,
+                child: ProgressRing(strokeWidth: 2),
+              ),
+            ),
+          );
+        },
       );
 }
