@@ -20,6 +20,8 @@ jobs:
         with:
           latest: true
           prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/checkout@v4
 
