@@ -61,7 +61,7 @@ class ModFlyoutImage extends HookWidget {
   Future<void> _onImageLongPress(
     final BuildContext context,
     final String image,
-  ) async =>
+  )  =>
       context.pushNamed(
         RouteNames.categoryHero.name,
         pathParameters: {RouteParams.categoryHeroTag.name: image},
@@ -105,7 +105,7 @@ class ModFlyoutImage extends HookWidget {
     final BuildContext context,
     final TapUpDetails details,
     final FlyoutController flyoutController,
-  ) async {
+  )  {
     final box = context.findRenderObject()! as RenderBox;
     final position = box.localToGlobal(
       details.localPosition,
@@ -122,7 +122,7 @@ class ModFlyoutImage extends HookWidget {
               CommandBarButton(
                 icon: const Icon(FluentIcons.delete),
                 label: const Text('Delete'),
-                onPressed: () async =>
+                onPressed: ()  =>
                     _onImageFlyoutDeletePressed(context, fCtx),
               ),
             ],

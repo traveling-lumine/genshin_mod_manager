@@ -73,7 +73,7 @@ class AutoSuggestBoxItem<T> {
   /// If not provided, [label] is used
   final String? semanticLabel;
 
-  bool _selected = false;
+  var _selected = false;
 
   @override
   bool operator ==(final Object other) {
@@ -520,12 +520,12 @@ class AutoSuggestBox<T> extends StatefulWidget {
 class AutoSuggestBoxState<T> extends State<AutoSuggestBox<T>> {
   late FocusNode _focusNode = widget.focusNode ?? FocusNode();
   OverlayEntry? _entry;
-  final LayerLink _layerLink = LayerLink();
+  final _layerLink = LayerLink();
   final GlobalKey _textBoxKey =
       GlobalKey(debugLabel: "AutoSuggestBox's TextBox Key");
 
   late TextEditingController _controller;
-  final FocusScopeNode _overlayNode = FocusScopeNode();
+  final _overlayNode = FocusScopeNode();
   final _focusStreamController = StreamController<int>.broadcast();
   final _dynamicItemsController =
       StreamController<List<AutoSuggestBoxItem<T>>>.broadcast();
@@ -1032,10 +1032,10 @@ class _AutoSuggestBoxOverlay<T> extends StatefulWidget {
 class _AutoSuggestBoxOverlayState<T> extends State<_AutoSuggestBoxOverlay<T>> {
   late final StreamSubscription<dynamic> focusSubscription;
   late final StreamSubscription<dynamic> itemsSubscription;
-  final ScrollController scrollController = ScrollController();
+  final scrollController = ScrollController();
 
   /// Tile height + padding
-  static const tileHeight = kOneLineTileHeight + 2.0;
+  static const double tileHeight = kOneLineTileHeight + 2.0;
 
   late List<AutoSuggestBoxItem<T>> items = widget.items;
 

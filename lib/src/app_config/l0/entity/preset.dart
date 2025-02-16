@@ -31,18 +31,20 @@ class PresetData with _$PresetData {
 
   const PresetData._();
 
-  Map<String, dynamic> toJson() => {
-        if (global.isNotEmpty)
-          'global': {
-            for (final MapEntry(:key, :value) in global.entries)
-              if (value.bundledPresets.isNotEmpty) key: value.toJson(),
-          },
-        if (local.isNotEmpty)
-          'local': {
-            for (final MapEntry(:key, :value) in local.entries)
-              if (value.bundledPresets.isNotEmpty) key: value.toJson(),
-          },
-      };
+  Map<String, Map<String, Map<String, List<String>>>> toJson() {
+    final globalMap = {
+      for (final MapEntry(:key, :value) in global.entries)
+        if (value.bundledPresets.isNotEmpty) key: value.toJson(),
+    };
+    final localMap = {
+      for (final MapEntry(:key, :value) in local.entries)
+        if (value.bundledPresets.isNotEmpty) key: value.toJson(),
+    };
+    return {
+      if (globalMap.isNotEmpty) 'global': globalMap,
+      if (localMap.isNotEmpty) 'local': localMap,
+    };
+  }
 }
 
 @freezed

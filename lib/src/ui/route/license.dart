@@ -49,7 +49,7 @@ class OssLicensesRoute extends StatelessWidget {
     return licenses..sort((final a, final b) => a.name.compareTo(b.name));
   }
 
-  static final _licenses = _loadLicenses();
+  static final Future<List<Package>> _licenses = _loadLicenses();
 
   @override
   Widget build(final BuildContext context) => NavigationView(

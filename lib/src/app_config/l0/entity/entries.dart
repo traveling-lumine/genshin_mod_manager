@@ -5,38 +5,42 @@ import 'column_strategy.dart';
 import 'entry_helpers.dart';
 import 'game_config.dart';
 
-final cardColorBrightEnabled = colorEntry(
+final AppConfigEntry<Color> cardColorBrightEnabled = colorEntry(
   key: 'cardColorBrightEnabled',
   defaultValue: Colors.green.lightest,
 );
-final cardColorBrightDisabled = colorEntry(
+final AppConfigEntry<Color> cardColorBrightDisabled = colorEntry(
   key: 'cardColorBrightDisabled',
   defaultValue: Colors.red.lightest.withValues(alpha: 0.5),
 );
-final cardColorDarkEnabled = colorEntry(
+final AppConfigEntry<Color> cardColorDarkEnabled = colorEntry(
   key: 'cardColorDarkEnabled',
   defaultValue: Colors.green.darkest.withValues(alpha: 0.8),
 );
-final cardColorDarkDisabled = colorEntry(
+final AppConfigEntry<Color> cardColorDarkDisabled = colorEntry(
   key: 'cardColorDarkDisabled',
   defaultValue: Colors.red.darkest.withValues(alpha: 0.5),
 );
 
-final runTogether = boolEntry(key: 'runTogether', defaultValue: false);
+final AppConfigEntry<bool> runTogether =
+    boolEntry(key: 'runTogether', defaultValue: false);
 
-final moveOnDrag = boolEntry(key: 'moveOnDrag', defaultValue: true);
+final AppConfigEntry<bool> moveOnDrag =
+    boolEntry(key: 'moveOnDrag', defaultValue: true);
 
-final iniEditorArg =
+final AppConfigEntry<String?> iniEditorArg =
     nullableStringEntry(key: 'iniEditorArg', defaultValue: null);
 
-final showFolderIcon = boolEntry(key: 'showFolderIcon', defaultValue: true);
+final AppConfigEntry<bool> showFolderIcon =
+    boolEntry(key: 'showFolderIcon', defaultValue: true);
 
-final showEnabledModsFirst =
+final AppConfigEntry<bool> showEnabledModsFirst =
     boolEntry(key: 'showEnabledModsFirst', defaultValue: true);
 
-final darkMode = boolEntry(key: 'darkMode', defaultValue: true);
+final AppConfigEntry<bool> darkMode =
+    boolEntry(key: 'darkMode', defaultValue: true);
 
-final showPaimonAsEmptyIconFolderIcon =
+final AppConfigEntry<bool> showPaimonAsEmptyIconFolderIcon =
     boolEntry(key: 'showPaimonAsEmptyIconFolderIcon', defaultValue: false);
 
 final windowSize = AppConfigEntry<Size?>(

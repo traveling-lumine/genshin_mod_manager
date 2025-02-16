@@ -27,7 +27,6 @@ class PersistentWindowSizeWidget extends HookConsumerWidget
           unawaited(WindowManager.instance.setSize(read));
         }
         return () {
-          print('Removing listener');
           WindowManager.instance.removeListener(listener);
         };
       },

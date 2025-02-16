@@ -8,7 +8,7 @@ import 'change_app_config.dart';
 AppConfig changePresetUseCase({
   required final AppConfigFacade appConfigFacade,
   required final AppConfigPersistentRepo appConfigPersistentRepo,
-  required final PresetData? value,
+  required final PresetData value,
 }) {
   final currentConfig = appConfigFacade.obtainValue(games);
   final newMap = {

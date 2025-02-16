@@ -10,7 +10,7 @@ import '../app_config/l0/entity/preset.dart';
 import '../filesystem/l1/impl/path_op_string.dart';
 import 'sharedpreference_storage.dart';
 
-final configVersionKey = StorageAccessKey.configVersion.name;
+final String configVersionKey = StorageAccessKey.configVersion.name;
 
 enum StorageAccessKey {
   cardColorBrightEnabled,
@@ -235,7 +235,9 @@ Future<AppConfig?> migrateUseCase({
     final gameMap = <String, GameConfig>{};
     for (final game in gameList) {
       final map = storage.getMap('$game.presetData');
-      final preset = map == null ? null : PresetData.fromJson(map);
+      final preset = map == null
+          ? const PresetData(global: {}, local: {})
+          : PresetData.fromJson(map);
       final gameConfig = GameConfig(
         launcherFile: storage.getString('$game.launcherDir'),
         modExecFile: storage.getString('$game.modExecFile'),

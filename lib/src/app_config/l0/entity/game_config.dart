@@ -15,7 +15,7 @@ class GameConfig with _$GameConfig {
     final String? modRoot,
     final String? modExecFile,
     final String? launcherFile,
-    final PresetData? presetData,
+    @Default(PresetData(global: {}, local: {})) final PresetData presetData,
     final bool? separateRunOverride,
   }) = _GameConfig;
 

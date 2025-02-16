@@ -8,7 +8,7 @@ import '../../l0/api/watcher.dart';
 import 'watcher.dart';
 
 class FilesystemImpl implements Filesystem {
-  bool _isPaused = false;
+  var _isPaused = false;
   final Map<
       String,
       (
@@ -59,7 +59,7 @@ class FilesystemImpl implements Filesystem {
     _isPaused = true;
 
     await Future.wait(
-      _watchStream.values.map((final stream) async => stream.$2.cancel()),
+      _watchStream.values.map((final stream)  => stream.$2.cancel()),
     );
   }
 
@@ -111,7 +111,7 @@ class FilesystemImpl implements Filesystem {
 
     return FSSubscription(
       stream: controller.stream,
-      onCancel: () async => Future.wait([
+      onCancel: ()  async => Future.wait([
         subscription.cancel(),
         controller.close(),
         _releaseSwitchStream(path),

@@ -144,14 +144,14 @@ class FolderPaneItem extends PaneItem {
 
   static Widget _buildImage(final ModCategory category) => ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: maxIconWidth),
-        child: Consumer(
-          builder: (final context, final ref, final child) {
-            final imagePath = ref
-                .watch(folderIconPathStreamProvider(category))
-                .whenOrNull(data: (final path) => path);
-            return AspectRatio(
-              aspectRatio: 1,
-              child: imagePath == null
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: Consumer(
+            builder: (final context, final ref, final child) {
+              final imagePath = ref
+                  .watch(folderIconPathStreamProvider(category))
+                  .whenOrNull(data: (final path) => path);
+              return imagePath == null
                   ? Consumer(
                       builder: (final context, final ref, final child) =>
                           Image.asset(
@@ -166,9 +166,9 @@ class FolderPaneItem extends PaneItem {
                             : 'images/idk_icon.png',
                       ),
                     )
-                  : LatestImage(path: imagePath),
-            );
-          },
+                  : LatestImage(path: imagePath);
+            },
+          ),
         ),
       );
 
@@ -189,7 +189,7 @@ class FolderPaneItem extends PaneItem {
                 _ => Colors.red,
               };
               return Text(
-                '$activeCount/$totalCount',
+                '$activeCount',
                 style: TextStyle(color: color, fontWeight: FontWeight.bold),
               );
             },

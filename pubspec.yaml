@@ -11,7 +11,7 @@ environment:
 dependencies:
   archive: ^4.0.2
   cached_network_image: ^3.4.1
-  collection: ^1.19.0
+  collection: ^1.19.1
   cp949_codec: ^1.0.2
   desktop_drop: ^0.5.0
   dio: ^5.8.0+1
@@ -33,7 +33,7 @@ dependencies:
   json_annotation: ^4.9.0
   package_info_plus: ^8.2.1
   pasteboard: ^0.3.0
-  path: ^1.9.0
+  path: ^1.9.1
   protocol_handler: ^0.2.0
   retrofit: ^4.4.2
   riverpod_annotation: ^2.6.1

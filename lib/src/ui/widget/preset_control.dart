@@ -5,6 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../app_config/l0/usecase/add_global_preset.dart';
+import '../../app_config/l0/usecase/add_local_preset.dart';
+import '../../app_config/l0/usecase/remove_global_preset.dart';
+import '../../app_config/l0/usecase/remove_local_preset.dart';
+import '../../app_config/l1/di/app_config.dart';
+import '../../app_config/l1/di/app_config_facade.dart';
+import '../../app_config/l1/di/app_config_persistent_repo.dart';
 import '../../app_config/l1/di/preset.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 
@@ -40,23 +47,6 @@ class PresetControlWidget extends HookWidget {
         ],
       );
 
-  Widget _buildButton() {
-    final controller = useTextEditingController();
-    return RepaintBoundary(
-      child: Consumer(
-        builder: (final context, final ref, final child) => IconButton(
-          icon: const Icon(FluentIcons.add),
-          onPressed: () {
-            _onPresetAdd(context, controller, ref);
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBox() =>
-      _PresetComboBox(isLocal: isLocal, category: category, prefix: prefix);
-
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -66,12 +56,26 @@ class PresetControlWidget extends HookWidget {
       ..add(DiagnosticsProperty<bool>('isLocal', isLocal));
   }
 
-  void _onPresetAdd(
+  Widget _buildBox() =>
+      _PresetComboBox(isLocal: isLocal, category: category, prefix: prefix);
+
+  Widget _buildButton() {
+    final controller = useTextEditingController();
+    return RepaintBoundary(
+      child: Consumer(
+        builder: (final context, final ref, final child) => IconButton(
+          icon: const Icon(FluentIcons.add),
+          onPressed: () async => _onPresetAdd(context, controller, ref),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onPresetAdd(
     final BuildContext context,
     final TextEditingController controller,
     final WidgetRef ref,
-  ) {
-    unawaited(
+  ) async =>
       showDialog(
         barrierDismissible: true,
         context: context,
@@ -90,28 +94,35 @@ class PresetControlWidget extends HookWidget {
             ),
             FilledButton(
               onPressed: () {
-                Navigator.of(dCtx).pop();
                 final text = controller.text;
                 controller.clear();
-                _getNotifier(ref).addPreset(text);
+                final appConfigFacade = ref.read(appConfigFacadeProvider);
+                final appConfigRepo = ref.read(appConfigPersistentRepoProvider);
+                if (isLocal) {
+                  final newState = addLocalPresetUseCase(
+                    facade: appConfigFacade,
+                    category: category!,
+                    name: text,
+                    appConfigRepo: appConfigRepo,
+                  );
+                  ref.read(appConfigCProvider.notifier).setData(newState);
+                } else {
+                  final newState = addGlobalPresetUseCase(
+                    appConfigFacade: appConfigFacade,
+                    appConfigRepo: appConfigRepo,
+                    name: text,
+                  );
+                  if (newState != null) {
+                    ref.read(appConfigCProvider.notifier).setData(newState);
+                  }
+                }
+                Navigator.of(dCtx).pop();
               },
               child: const Text('Add'),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  PresetNotifier _getNotifier(final WidgetRef ref) {
-    final PresetNotifier notifier;
-    if (isLocal) {
-      notifier = ref.read(localPresetNotifierProvider(category!).notifier);
-    } else {
-      notifier = ref.read(globalPresetNotifierProvider.notifier);
-    }
-    return notifier;
-  }
+      );
 }
 
 class _PresetComboBox extends ConsumerWidget {
@@ -138,6 +149,63 @@ class _PresetComboBox extends ConsumerWidget {
             _showPresetActionDialog(context, value!, ref),
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty<bool>('isLocal', isLocal))
+      ..add(DiagnosticsProperty<ModCategory?>('category', category))
+      ..add(StringProperty('prefix', prefix));
+  }
+
+  PresetNotifier _getNotifier(final WidgetRef ref) {
+    final PresetNotifier notifier;
+    if (isLocal) {
+      notifier = ref.read(localPresetNotifierProvider(category!).notifier);
+    } else {
+      notifier = ref.read(globalPresetNotifierProvider.notifier);
+    }
+    return notifier;
+  }
+
+  List<String> _getPresets(final WidgetRef ref) {
+    final List<String> value;
+    if (isLocal) {
+      value = ref.watch(localPresetNotifierProvider(category!));
+    } else {
+      value = ref.watch(globalPresetNotifierProvider);
+    }
+    return value;
+  }
+
+  void _onPresetDelete(
+    final WidgetRef ref,
+    final String value,
+    final BuildContext dCtx,
+  ) {
+    final read = ref.read(appConfigFacadeProvider);
+    final read2 = ref.read(appConfigPersistentRepoProvider);
+    if (isLocal) {
+      final newState = removeLocalPresetUseCase(
+        read: read,
+        category2: category!,
+        name: value,
+        read2: read2,
+      );
+      if (newState != null) {
+        ref.read(appConfigCProvider.notifier).setData(newState);
+      }
+    } else {
+      final newState = removeGlobalPresetUseCase(
+        read: read,
+        name: value,
+        read2: read2,
+      );
+      ref.read(appConfigCProvider.notifier).setData(newState);
+    }
+    Navigator.of(dCtx).pop();
   }
 
   void _showPresetActionDialog(
@@ -168,10 +236,7 @@ class _PresetComboBox extends ConsumerWidget {
               FluentTheme(
                 data: FluentTheme.of(context).copyWith(accentColor: Colors.red),
                 child: FilledButton(
-                  onPressed: () {
-                    Navigator.of(dCtx).pop();
-                    _getNotifier(ref).removePreset(value);
-                  },
+                  onPressed: () => _onPresetDelete(ref, value, dCtx),
                   child: const Text('Delete'),
                 ),
               ),
@@ -190,35 +255,6 @@ class _PresetComboBox extends ConsumerWidget {
           ),
         ),
       );
-
-  List<String> _getPresets(final WidgetRef ref) {
-    final List<String> value;
-    if (isLocal) {
-      value = ref.watch(localPresetNotifierProvider(category!));
-    } else {
-      value = ref.watch(globalPresetNotifierProvider);
-    }
-    return value;
-  }
-
-  PresetNotifier _getNotifier(final WidgetRef ref) {
-    final PresetNotifier notifier;
-    if (isLocal) {
-      notifier = ref.read(localPresetNotifierProvider(category!).notifier);
-    } else {
-      notifier = ref.read(globalPresetNotifierProvider.notifier);
-    }
-    return notifier;
-  }
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(DiagnosticsProperty<bool>('isLocal', isLocal))
-      ..add(DiagnosticsProperty<ModCategory?>('category', category))
-      ..add(StringProperty('prefix', prefix));
-  }
 
   void _showPresetRenameDialog(
     final BuildContext context,

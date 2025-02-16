@@ -1,7 +1,7 @@
 import 'package:path/path.dart' as p;
 
 const _disabledHeader = 'DISABLED';
-const _disabledHeaderLength = _disabledHeader.length;
+const int _disabledHeaderLength = _disabledHeader.length;
 
 /// Extension on [String] to provide path operations.
 extension PathOpString on String {
