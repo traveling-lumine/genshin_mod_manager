@@ -1,4 +1,4 @@
-import '../../l0/entity/download_element.dart';
+import '../entity/download_element.dart';
 import '../entity/nahida_page_result.dart';
 import '../entity/nahida_single_fetch_result.dart';
 

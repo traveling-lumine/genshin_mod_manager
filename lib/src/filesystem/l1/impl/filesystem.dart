@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
+import 'package:rxdart/transformers.dart';
 
 import '../../l0/api/filesystem.dart';
 import '../../l0/api/watcher.dart';
+import 'path_op_string.dart';
 import 'watcher.dart';
 
 class FilesystemImpl implements Filesystem {
@@ -59,7 +61,7 @@ class FilesystemImpl implements Filesystem {
     _isPaused = true;
 
     await Future.wait(
-      _watchStream.values.map((final stream)  => stream.$2.cancel()),
+      _watchStream.values.map((final stream) => stream.$2.cancel()),
     );
   }
 
@@ -111,11 +113,13 @@ class FilesystemImpl implements Filesystem {
 
     return FSSubscription(
       stream: controller.stream,
-      onCancel: ()  async => Future.wait([
-        subscription.cancel(),
-        controller.close(),
-        _releaseSwitchStream(path),
-      ]),
+      onCancel: () async {
+        await Future.wait([
+          subscription.cancel(),
+          controller.close(),
+          _releaseSwitchStream(path),
+        ]);
+      },
     );
   }
 
@@ -142,11 +146,30 @@ class FilesystemImpl implements Filesystem {
 
     return FSSubscription(
       stream: controller.stream,
-      onCancel: () async => Future.wait([
-        subscription.cancel(),
-        controller.close(),
-        _releaseSwitchStream(dirPath),
-      ]),
+      onCancel: () async {
+        await Future.wait([
+          subscription.cancel(),
+          controller.close(),
+          _releaseSwitchStream(dirPath),
+        ]);
+      },
     );
+  }
+
+  @override
+  Future<List<String>> getSubDirNames({
+    required final String path,
+    final bool onlyEnabled = false,
+  }) async {
+    final dir = Directory(path);
+    if (!dir.existsSync()) {
+      return const [];
+    }
+    final map =
+        dir.list().whereType<Directory>().map((final e) => e.path.pBasename);
+    if (onlyEnabled) {
+      return map.where((final e) => e.pIsEnabled).toList();
+    }
+    return map.toList();
   }
 }

@@ -14,6 +14,7 @@ import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_config/l1/di/app_config_persistent_repo.dart';
 import '../../app_config/l1/di/preset.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
+import '../../filesystem/l1/di/filesystem.dart';
 
 /// A widget that provides a control for presets.
 class PresetControlWidget extends HookWidget {
@@ -93,7 +94,8 @@ class PresetControlWidget extends HookWidget {
               child: const Text('Cancel'),
             ),
             FilledButton(
-              onPressed: () {
+              onPressed: () async {
+                Navigator.of(dCtx).pop();
                 final text = controller.text;
                 controller.clear();
                 final appConfigFacade = ref.read(appConfigFacadeProvider);
@@ -107,8 +109,9 @@ class PresetControlWidget extends HookWidget {
                   );
                   ref.read(appConfigCProvider.notifier).setData(newState);
                 } else {
-                  final newState = addGlobalPresetUseCase(
+                  final newState = await addGlobalPresetUseCase(
                     appConfigFacade: appConfigFacade,
+                    fs: ref.read(filesystemProvider),
                     appConfigRepo: appConfigRepo,
                     name: text,
                   );
@@ -116,7 +119,6 @@ class PresetControlWidget extends HookWidget {
                     ref.read(appConfigCProvider.notifier).setData(newState);
                   }
                 }
-                Navigator.of(dCtx).pop();
               },
               child: const Text('Add'),
             ),

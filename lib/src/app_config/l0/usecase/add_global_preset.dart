@@ -1,6 +1,4 @@
-import 'dart:io';
-import '../../../filesystem/l1/impl/fsops.dart';
-import '../../../filesystem/l1/impl/path_op_string.dart';
+import '../../../filesystem/l0/api/filesystem.dart';
 import '../api/app_config_facade.dart';
 import '../api/app_config_persistent_repo.dart';
 import '../entity/app_config.dart';
@@ -8,12 +6,13 @@ import '../entity/entries.dart';
 import '../entity/preset.dart';
 import 'change_preset.dart';
 
-AppConfig? addGlobalPresetUseCase({
+Future<AppConfig?> addGlobalPresetUseCase({
   required final AppConfigFacade appConfigFacade,
+  required final Filesystem fs,
   required final String name,
   required final AppConfigPersistentRepo appConfigRepo,
   final bool force = false,
-}) {
+}) async {
   final currentGameConfig =
       appConfigFacade.obtainValue(games).currentGameConfig;
   final rootPath = currentGameConfig.modRoot;
@@ -25,12 +24,9 @@ AppConfig? addGlobalPresetUseCase({
   }
   final bpd = PresetListMap(
     bundledPresets: {
-      for (final categoryDir in getUnderSync<Directory>(rootPath))
-        categoryDir.pBasename: PresetList(
-          mods: getUnderSync<Directory>(categoryDir)
-              .map((final e) => e.pBasename)
-              .where((final e) => e.pIsEnabled)
-              .toList(),
+      for (final categoryDir in await fs.getSubDirNames(path: rootPath))
+        categoryDir: PresetList(
+          mods: await fs.getSubDirNames(path: categoryDir, onlyEnabled: true),
         ),
     },
   );

@@ -16,4 +16,9 @@ abstract interface class Filesystem {
   void resumeAllWatchers();
 
   Future<void> dispose();
+
+  Future<List<String>> getSubDirNames({
+    required final String path,
+    final bool onlyEnabled,
+  });
 }

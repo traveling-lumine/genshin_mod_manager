@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
-import '../../l0/entity/download_element.dart';
 import '../../l1/api/nahida_api.dart';
+import '../../l1/entity/download_element.dart';
 import '../../l1/entity/nahida_page_result.dart';
 import '../../l1/entity/nahida_single_fetch_result.dart';
 
