@@ -1,8 +1,5 @@
-import 'dart:io';
-
+import '../../../filesystem/l0/api/filesystem.dart';
 import '../../../filesystem/l0/entity/mod_category.dart';
-import '../../../filesystem/l1/impl/fsops.dart';
-import '../../../filesystem/l1/impl/path_op_string.dart';
 import '../api/app_config_facade.dart';
 import '../api/app_config_persistent_repo.dart';
 import '../entity/app_config.dart';
@@ -10,21 +7,19 @@ import '../entity/entries.dart';
 import '../entity/preset.dart';
 import 'change_preset.dart';
 
-AppConfig addLocalPresetUseCase({
+Future<AppConfig> addLocalPresetUseCase({
   required final AppConfigFacade facade,
+  required final Filesystem fs,
   required final ModCategory category,
   required final String name,
   required final AppConfigPersistentRepo appConfigRepo,
-}) {
+}) async {
   final presetData = facade.obtainValue(games).currentGameConfig.presetData;
   final localPresets = presetData.local;
   final categoryPresets = localPresets[category.name];
   final Map<String, PresetList> modString;
   final presetTargetData = PresetList(
-    mods: getUnderSync<Directory>(category.path)
-        .where((final e) => e.pIsEnabled)
-        .map((final e) => e.pBasename)
-        .toList(),
+    mods: await fs.getSubDirNames(path: category.path, onlyEnabled: true),
   );
   if (categoryPresets != null) {
     modString = {...categoryPresets.bundledPresets}..[name] = presetTargetData;

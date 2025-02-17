@@ -66,7 +66,9 @@ class PresetControlWidget extends HookWidget {
       child: Consumer(
         builder: (final context, final ref, final child) => IconButton(
           icon: const Icon(FluentIcons.add),
-          onPressed: () async => _onPresetAdd(context, controller, ref),
+          onPressed: () async {
+            await _onPresetAdd(context, controller, ref);
+          },
         ),
       ),
     );
@@ -76,7 +78,7 @@ class PresetControlWidget extends HookWidget {
     final BuildContext context,
     final TextEditingController controller,
     final WidgetRef ref,
-  ) async =>
+  ) =>
       showDialog(
         barrierDismissible: true,
         context: context,
@@ -100,9 +102,11 @@ class PresetControlWidget extends HookWidget {
                 controller.clear();
                 final appConfigFacade = ref.read(appConfigFacadeProvider);
                 final appConfigRepo = ref.read(appConfigPersistentRepoProvider);
+                final fs = ref.read(filesystemProvider);
                 if (isLocal) {
-                  final newState = addLocalPresetUseCase(
+                  final newState = await addLocalPresetUseCase(
                     facade: appConfigFacade,
+                    fs: fs,
                     category: category!,
                     name: text,
                     appConfigRepo: appConfigRepo,
@@ -111,7 +115,7 @@ class PresetControlWidget extends HookWidget {
                 } else {
                   final newState = await addGlobalPresetUseCase(
                     appConfigFacade: appConfigFacade,
-                    fs: ref.read(filesystemProvider),
+                    fs: fs,
                     appConfigRepo: appConfigRepo,
                     name: text,
                   );
