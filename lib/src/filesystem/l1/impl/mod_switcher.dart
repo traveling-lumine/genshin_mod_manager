@@ -1,84 +1,97 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../../l0/entity/mod_toggle_exceptions.dart';
+import '../../l0/entity/mod_toggle_result.dart';
 import 'fsops.dart';
 import 'path_op_string.dart';
 
 const kShaderFixes = 'ShaderFixes';
 
-Future<void> enable({
-  required final String shaderFixesPath,
+Future<ModToggleResult> disable({
+  required final String? shaderFixesPath,
   required final String modPath,
 }) async {
   if (!Directory(modPath).existsSync()) {
-    return;
+    return const ModToggleResult.modNotFound();
+  }
+  if (!modPath.pIsEnabled) {
+    return const ModToggleResult.alreadyDisabled();
   }
 
-  final shaderFilenames = await _getModShaders(modPath);
-  final renameTarget = modPath.pEnabledForm;
-  if (Directory(renameTarget).existsSync()) {
-    throw ModRenameClashException(renameTarget.pBasename);
-  }
-  try {
-    await _copyShaders(shaderFixesPath, shaderFilenames);
-  } on FileSystemException catch (e) {
-    throw ShaderExistsException(e.path);
-  }
-  var success = false;
-  try {
-    Directory(modPath).renameSync(renameTarget);
-    success = true;
-  } on PathAccessException {
-    throw const ModRenameFailedException();
-  } finally {
-    if (!success) {
-      await _deleteShaders(shaderFixesPath, shaderFilenames);
-    }
-  }
-}
-
-Future<void> disable({
-  required final String shaderFixesPath,
-  required final String modPath,
-}) async {
-  if (!Directory(modPath).existsSync()) {
-    return;
-  }
-
-  final shaderFilenames = await _getModShaders(modPath);
   final renameTarget = modPath.pDisabledForm;
   if (Directory(renameTarget).existsSync()) {
-    throw ModRenameClashException(renameTarget.pBasename);
+    return ModToggleResult.modRenameClash(renameTarget.pBasename);
+  }
+  try {
+    await Directory(modPath).rename(renameTarget);
+  } on PathAccessException {
+    return const ModToggleResult.modRenameFailed();
+  }
+
+  final modShaderPath = renameTarget.pJoin(kShaderFixes);
+  final List<String> shaderFilenames;
+  try {
+    shaderFilenames = await getUnder<File>(modShaderPath);
+  } on PathNotFoundException {
+    return const ModToggleResult.modHasNoShaders();
+  }
+  if (shaderFixesPath == null) {
+    return const ModToggleResult.done();
   }
   try {
     await _deleteShaders(shaderFixesPath, shaderFilenames);
-  } on FileSystemException catch (e) {
-    throw ShaderDeleteFailedException(e.path);
-  }
-  var success = false;
-  try {
-    Directory(modPath).renameSync(renameTarget);
-    success = true;
-  } on PathAccessException {
-    throw const ModRenameFailedException();
-  } finally {
-    if (!success) {
+  } on FileSystemException {
+    try {
       await _copyShaders(shaderFixesPath, shaderFilenames);
+    } on FileSystemException {
+      return const ModToggleResult.shaderCleanupFailed();
     }
+    return const ModToggleResult.shaderDeleteFailed();
   }
+  return const ModToggleResult.done();
 }
 
-Future<List<String>> _getModShaders(final String modPath) async {
-  final shaderPaths = <String>[];
-  final modShaderPath = modPath.pJoin(kShaderFixes);
-  try {
-    final fseUnder = getUnderSync<File>(modShaderPath);
-    shaderPaths.addAll(fseUnder);
-  } on PathNotFoundException {
-    // pass
+Future<ModToggleResult> enable({
+  required final String? shaderFixesPath,
+  required final String modPath,
+}) async {
+  if (!Directory(modPath).existsSync()) {
+    return const ModToggleResult.modNotFound();
   }
-  return shaderPaths;
+  if (modPath.pIsEnabled) {
+    return const ModToggleResult.alreadyEnabled();
+  }
+  final renameTarget = modPath.pEnabledForm;
+  if (Directory(renameTarget).existsSync()) {
+    return ModToggleResult.modRenameClash(renameTarget.pBasename);
+  }
+  try {
+    await Directory(modPath).rename(renameTarget);
+  } on PathAccessException {
+    return const ModToggleResult.modRenameFailed();
+  }
+
+  final modShaderPath = renameTarget.pJoin(kShaderFixes);
+  final List<String> shaderFilenames;
+  try {
+    shaderFilenames = await getUnder<File>(modShaderPath);
+  } on PathNotFoundException {
+    return const ModToggleResult.modHasNoShaders();
+  }
+  if (shaderFixesPath == null) {
+    return const ModToggleResult.done();
+  }
+  try {
+    await _copyShaders(shaderFixesPath, shaderFilenames);
+  } on FileSystemException {
+    try {
+      await _deleteShaders(shaderFixesPath, shaderFilenames);
+    } on FileSystemException {
+      return const ModToggleResult.shaderCleanupFailed();
+    }
+    return const ModToggleResult.shaderCopyFailed();
+  }
+  return const ModToggleResult.done();
 }
 
 Future<void> _copyShaders(
@@ -125,10 +138,6 @@ Future<void> _shaderFinder(
   );
   final shaderSets = shaderPaths.map((final e) => e.pBasename).toSet();
   final inter = programShadersMap.keys.toSet().intersection(shaderSets);
-  final futures = <Future<void>>[];
-  for (final elem in inter) {
-    final found = programShadersMap[elem]!;
-    futures.add(onFound(found));
-  }
+  final futures = inter.map((final elem) => onFound(programShadersMap[elem]!));
   await Future.wait(futures);
 }

@@ -7,9 +7,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../filesystem/l0/entity/mod.dart';
-import '../../filesystem/l0/entity/mod_toggle_exceptions.dart';
+import '../../filesystem/l0/entity/mod_toggle_result.dart';
 import '../../filesystem/l1/impl/mod_switcher.dart';
 import '../../filesystem/l1/impl/path_op_string.dart';
+import '../util/display_infobar.dart';
 
 class ModToggler extends ConsumerWidget {
   const ModToggler({
@@ -22,7 +23,12 @@ class ModToggler extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) =>
-      GestureDetector(onTap: () async => _onToggle(context, ref), child: child);
+      GestureDetector(
+        onTap: () async {
+          await _onToggle(context, ref);
+        },
+        child: child,
+      );
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
@@ -42,61 +48,71 @@ class ModToggler extends ConsumerWidget {
         ?.pDirname
         .pJoin(kShaderFixes);
     if (shaderFixesPath == null) {
-      _showErrorDialog(context, 'ShaderFixes path not found');
-      return;
+      await _showErrorInfoBar(context, 'ShaderFixes path not found');
     }
+    ModToggleResult? toggleResult;
     try {
-      await (mod.isEnabled ? disable : enable)(
+      toggleResult = await (mod.isEnabled ? disable : enable)(
         shaderFixesPath: shaderFixesPath,
         modPath: mod.path,
       );
-    } on ModRenameClashException catch (e) {
+    } on Exception catch (e) {
       if (context.mounted) {
-        _showDirectoryExistsDialog(context, e.renameTarget);
+        await _showErrorInfoBar(context, 'An unknown error occurred: $e');
       }
-    } on ModRenameFailedException {
-      if (context.mounted) {
-        _showRenameErrorDialog(context);
-      }
-    } on ShaderDeleteFailedException catch (e) {
-      if (context.mounted) {
-        _showErrorDialog(context, 'Cannot delete ${e.path}');
-      }
-    } on ShaderExistsException catch (e) {
-      if (context.mounted) {
-        _showErrorDialog(context, '${e.path} already exists!');
+      return;
+    }
+    if (context.mounted) {
+      switch (toggleResult) {
+        case ModToggleResultModNotFound():
+          await _showErrorInfoBar(context, 'Mod not found');
+        case ModToggleResultAlreadyEnabled():
+          await _showErrorInfoBar(context, 'Mod already enabled');
+        case ModToggleResultAlreadyDisabled():
+          await _showErrorInfoBar(context, 'Mod already disabled');
+        case ModToggleResultModRenameClash(name: final renameTarget):
+          await _showDirectoryExistsInfoBar(context, renameTarget);
+        case ModToggleResultModRenameFailed():
+          await _showRenameErrorInfoBar(context);
+        case ModToggleResultModHasNoShaders():
+          await _showErrorInfoBar(context, 'Mod has no shaders');
+        case ModToggleResultShaderExists():
+          await _showErrorInfoBar(context, 'Some shaders already exist');
+        case ModToggleResultShaderCopyFailed():
+          await _showErrorInfoBar(context, 'Failed to copy shaders');
+        case ModToggleResultShaderDeleteFailed():
+          await _showErrorInfoBar(context, 'Cannot delete shaders');
+        case ModToggleResultShaderCleanupFailed():
+          await _showErrorInfoBar(context, 'Failed to cleanup shaders');
+        case ModToggleResultDone():
       }
     }
   }
 
-  void _showDirectoryExistsDialog(
+  Future<void> _showDirectoryExistsInfoBar(
     final BuildContext context,
     final String renameTarget,
-  ) {
-    _showErrorDialog(context, '$renameTarget directory already exists!');
-  }
+  ) =>
+      _showErrorInfoBar(context, '$renameTarget directory already exists!');
 
-  void _showErrorDialog(final BuildContext context, final String text) {
-    unawaited(
-      showDialog(
-        context: context,
-        builder: (final dCtx) => ContentDialog(
-          title: const Text('Error'),
-          content: Text(text),
-          actions: [
-            FilledButton(
-              onPressed: Navigator.of(dCtx).pop,
-              child: const Text('Ok'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Future<void> _showErrorInfoBar(
+    final BuildContext context,
+    final String text,
+  ) =>
+      displayInfoBarInContext(
+        context,
+        title: const Text('Error'),
+        content: Text(text),
+        severity: InfoBarSeverity.error,
+      );
 
-  void _showRenameErrorDialog(final BuildContext context) => _showErrorDialog(
-      context,
-      'Failed to rename folder.'
-      ' Check if the ShaderFixes folder is open in explorer,'
-      ' and close it if it is.');
+  Future<void> _showRenameErrorInfoBar(final BuildContext context) =>
+      displayInfoBarInContext(
+        context,
+        title: const Text('Error'),
+        content: const Text('Failed to rename folder.'
+            ' Check if the ShaderFixes folder is open in explorer,'
+            ' and close it if it is.'),
+        severity: InfoBarSeverity.error,
+      );
 }

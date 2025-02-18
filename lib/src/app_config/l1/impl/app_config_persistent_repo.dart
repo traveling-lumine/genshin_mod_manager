@@ -17,7 +17,7 @@ class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
 
     final mergeStream = MergeStream([
       Stream.value(null),
-      Directory.current.watch().where((final event) {
+      File(Platform.resolvedExecutable).parent.watch().where((final event) {
         if (p.equals(event.path, settingsFile.path)) {
           return true;
         }
@@ -46,7 +46,8 @@ class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
   }
   AppConfigPersistentRepoImpl._(this._subscription, this._controller);
   static final settingsFile = File(
-      p.join(File(Platform.resolvedExecutable).parent.path, 'settings.json'),);
+    p.join(File(Platform.resolvedExecutable).parent.path, 'settings.json'),
+  );
   static const _encoder = JsonEncoder.withIndent('  ');
   final StreamSubscription<Map<String, dynamic>> _subscription;
   final BehaviorSubject<Map<String, dynamic>> _controller;

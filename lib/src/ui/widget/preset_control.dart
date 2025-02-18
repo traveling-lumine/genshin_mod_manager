@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../app_config/l0/usecase/remove_global_preset.dart';
+import '../../app_config/l0/usecase/remove_local_preset.dart';
 import '../../app_config/l1/di/app_config.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_config/l1/di/app_config_persistent_repo.dart';
@@ -13,7 +14,6 @@ import '../../app_config/l1/di/preset.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 import '../../filesystem/l0/usecase/add_global_preset.dart';
 import '../../filesystem/l0/usecase/add_local_preset.dart';
-import '../../app_config/l0/usecase/remove_local_preset.dart';
 import '../../filesystem/l1/di/filesystem.dart';
 
 /// A widget that provides a control for presets.
