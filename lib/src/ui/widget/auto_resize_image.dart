@@ -25,7 +25,17 @@ class AutoResizeImage extends StatelessWidget {
               policy: ResizeImagePolicy.fit,
             );
 
-            return Image(image: resizeIfNeeded, fit: fit);
+            return Image(
+              image: resizeIfNeeded,
+              fit: fit,
+              frameBuilder: (
+                final context,
+                final child,
+                final frame,
+                final wasSynchronouslyLoaded,
+              ) =>
+                  SizedBox.expand(child: child),
+            );
           },
         ),
       );
