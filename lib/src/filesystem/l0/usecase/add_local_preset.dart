@@ -1,11 +1,11 @@
-import '../../../filesystem/l0/api/filesystem.dart';
-import '../../../filesystem/l0/entity/mod_category.dart';
-import '../api/app_config_facade.dart';
-import '../api/app_config_persistent_repo.dart';
-import '../entity/app_config.dart';
-import '../entity/entries.dart';
-import '../entity/preset.dart';
-import 'change_preset.dart';
+import '../../../app_config/l0/api/app_config_facade.dart';
+import '../../../app_config/l0/api/app_config_persistent_repo.dart';
+import '../../../app_config/l0/entity/app_config.dart';
+import '../../../app_config/l0/entity/entries.dart';
+import '../../../app_config/l0/entity/preset.dart';
+import '../../../app_config/l0/usecase/change_preset.dart';
+import '../api/filesystem.dart';
+import '../entity/mod_category.dart';
 
 Future<AppConfig> addLocalPresetUseCase({
   required final AppConfigFacade facade,

@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'package:archive/archive_io.dart';
 import 'package:cp949_codec/cp949_codec.dart';
 
-import '../../filesystem/l1/impl/fsops.dart';
-import '../../filesystem/l1/impl/path_op_string.dart';
+import '../impl/fsops.dart';
+import '../impl/path_op_string.dart';
 
 Archive collapseArchiveFolder(final Archive archive) {
   final longestCommonPrefix1 =
