@@ -5,16 +5,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l0/usecase/remove_global_preset.dart';
 import '../../app_config/l0/usecase/remove_local_preset.dart';
+import '../../app_config/l0/usecase/rename_global_preset.dart';
+import '../../app_config/l0/usecase/rename_local_preset.dart';
 import '../../app_config/l1/di/app_config.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_config/l1/di/app_config_persistent_repo.dart';
-import '../../app_config/l1/di/preset.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 import '../../filesystem/l0/usecase/add_global_preset.dart';
 import '../../filesystem/l0/usecase/add_local_preset.dart';
+import '../../filesystem/l0/usecase/set_global_preset.dart';
+import '../../filesystem/l0/usecase/set_local_preset.dart';
 import '../../filesystem/l1/di/filesystem.dart';
+import '../../filesystem/l1/di/preset.dart';
 
 /// A widget that provides a control for presets.
 class PresetControlWidget extends HookWidget {
@@ -144,10 +149,15 @@ class _PresetComboBox extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final value = _getPresets(ref);
+    final List<String> presetNames;
+    if (isLocal) {
+      presetNames = ref.watch(localPresetProvider(category!));
+    } else {
+      presetNames = ref.watch(globalPresetProvider);
+    }
     return RepaintBoundary(
       child: ComboBox(
-        items: value
+        items: presetNames
             .map((final e) => ComboBoxItem(value: e, child: Text(e)))
             .toList(),
         placeholder: Text('$prefix Preset...'),
@@ -164,26 +174,6 @@ class _PresetComboBox extends ConsumerWidget {
       ..add(DiagnosticsProperty<bool>('isLocal', isLocal))
       ..add(DiagnosticsProperty<ModCategory?>('category', category))
       ..add(StringProperty('prefix', prefix));
-  }
-
-  PresetNotifier _getNotifier(final WidgetRef ref) {
-    final PresetNotifier notifier;
-    if (isLocal) {
-      notifier = ref.read(localPresetNotifierProvider(category!).notifier);
-    } else {
-      notifier = ref.read(globalPresetNotifierProvider.notifier);
-    }
-    return notifier;
-  }
-
-  List<String> _getPresets(final WidgetRef ref) {
-    final List<String> value;
-    if (isLocal) {
-      value = ref.watch(localPresetNotifierProvider(category!));
-    } else {
-      value = ref.watch(globalPresetNotifierProvider);
-    }
-    return value;
   }
 
   void _onPresetDelete(
@@ -251,9 +241,27 @@ class _PresetComboBox extends ConsumerWidget {
                 child: const Text('Cancel'),
               ),
               FilledButton(
-                onPressed: () {
+                onPressed: () async {
                   Navigator.of(dCtx).pop();
-                  _getNotifier(ref).setPreset(value);
+                  final currentGameConfig2 = ref
+                      .read(appConfigFacadeProvider)
+                      .obtainValue(games)
+                      .currentGameConfig;
+                  final read = ref.read(filesystemProvider);
+                  if (isLocal) {
+                    await setLocalPresetUseCase(
+                      currentGameConfig2: currentGameConfig2,
+                      category2: category!,
+                      name: value,
+                      fs: read,
+                    );
+                  } else {
+                    await setGlobalPresetUseCase(
+                      currentGameConfig2: currentGameConfig2,
+                      name: value,
+                      fs: read,
+                    );
+                  }
                 },
                 child: const Text('Apply'),
               ),
@@ -262,12 +270,11 @@ class _PresetComboBox extends ConsumerWidget {
         ),
       );
 
-  void _showPresetRenameDialog(
+  Future<Object?> _showPresetRenameDialog(
     final BuildContext context,
-    final String value,
+    final String oldName,
     final WidgetRef ref,
-  ) {
-    unawaited(
+  ) =>
       showDialog(
         context: context,
         builder: (final dCtx) => HookBuilder(
@@ -284,7 +291,13 @@ class _PresetComboBox extends ConsumerWidget {
                       if (value == null || value.isEmpty) {
                         return 'Preset name cannot be empty';
                       }
-                      final allPresetNames = _getPresets(ref);
+                      final List<String> allPresetNames;
+                      if (isLocal) {
+                        allPresetNames =
+                            ref.read(localPresetProvider(category!));
+                      } else {
+                        allPresetNames = ref.read(globalPresetProvider);
+                      }
                       if (allPresetNames.contains(value)) {
                         return 'Preset name already exists';
                       }
@@ -303,10 +316,36 @@ class _PresetComboBox extends ConsumerWidget {
                         if (!Form.of(bCtx).validate()) {
                           return;
                         }
-                        final text = textController.text;
-                        _getNotifier(ref)
-                            .renamePreset(oldName: value, newName: text);
                         Navigator.of(dCtx).pop();
+                        final newName = textController.text;
+                        final presetData = ref
+                            .read(appConfigFacadeProvider)
+                            .obtainValue(games)
+                            .currentGameConfig
+                            .presetData;
+                        final read = ref.read(appConfigFacadeProvider);
+                        final read2 = ref.read(appConfigPersistentRepoProvider);
+                        final newState = isLocal
+                            ? renameLocalPresetUseCase(
+                                presetData: presetData,
+                                category2: category!.name,
+                                oldName: oldName,
+                                newName: newName,
+                                read: read,
+                                read2: read2,
+                              )
+                            : renameGlobalPresetUseCase(
+                                presetData: presetData,
+                                oldName: oldName,
+                                newName: newName,
+                                read: read,
+                                read2: read2,
+                              );
+                        if (newState != null) {
+                          ref
+                              .read(appConfigCProvider.notifier)
+                              .setData(newState);
+                        }
                       },
                       child: const Text('Rename'),
                     ),
@@ -316,7 +355,5 @@ class _PresetComboBox extends ConsumerWidget {
             );
           },
         ),
-      ),
-    );
-  }
+      );
 }
