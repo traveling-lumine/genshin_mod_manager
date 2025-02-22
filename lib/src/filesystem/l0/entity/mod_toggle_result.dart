@@ -16,8 +16,7 @@ sealed class ModToggleResult with _$ModToggleResult {
 
   const factory ModToggleResult.modHasNoShaders() =
       ModToggleResultModHasNoShaders;
-  const factory ModToggleResult.shaderExists() =
-      ModToggleResultShaderExists;
+  const factory ModToggleResult.shaderExists() = ModToggleResultShaderExists;
   const factory ModToggleResult.shaderCopyFailed() =
       ModToggleResultShaderCopyFailed;
 
@@ -26,7 +25,6 @@ sealed class ModToggleResult with _$ModToggleResult {
 
   const factory ModToggleResult.shaderCleanupFailed() =
       ModToggleResultShaderCleanupFailed;
-
 
   const factory ModToggleResult.done() = ModToggleResultDone;
 }

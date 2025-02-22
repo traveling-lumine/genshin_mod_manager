@@ -250,8 +250,8 @@ class _PresetComboBox extends ConsumerWidget {
                   final read = ref.read(filesystemProvider);
                   if (isLocal) {
                     await setLocalPresetUseCase(
-                      currentGameConfig2: currentGameConfig2,
-                      category2: category!,
+                      gameConfig: currentGameConfig2,
+                      category: category!,
                       name: value,
                       fs: read,
                     );
