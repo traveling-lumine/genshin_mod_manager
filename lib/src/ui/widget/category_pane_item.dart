@@ -7,12 +7,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
+import '../../filesystem/l0/api/filesystem.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
-import '../../filesystem/l0/usecase/move_dir.dart';
+import '../../filesystem/l1/di/filesystem.dart';
 import '../../filesystem/l1/di/fs_watcher.dart';
 import '../../filesystem/l1/di/mods_in_category.dart';
-import '../../filesystem/l1/impl/path_op_string.dart';
 import '../util/display_infobar.dart';
 import 'category_drop_target.dart';
 import 'fade_in.dart';
@@ -44,46 +44,49 @@ class FolderPaneItem extends PaneItem {
     final int? itemIndex,
     final bool? autofocus,
   }) =>
-      DragTarget<Mod>(
-        onAcceptWithDetails: (final details) =>
-            _onModDragAccept(context, details),
-        builder: (final context, final candidateData, final rejectedData) {
-          final typography = FluentTheme.of(context).typography;
-          final body = typography.body;
-          final bodyStrong = typography.bodyStrong;
-          return FadeInWidget(
-            visible: candidateData.isNotEmpty,
-            fadeTarget: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                text: 'Drop to move\n',
-                style: body,
-                children: [
-                  ...candidateData.map(
-                    (final e) => TextSpan(
-                      text: '${e!.displayName}\n',
-                      style: bodyStrong,
+      Consumer(
+        builder: (final context, final ref, final child) => DragTarget<Mod>(
+          onAcceptWithDetails: (final details) =>
+              _onModDragAccept(context, ref.read(filesystemProvider), details),
+          builder: (final context, final candidateData, final rejectedData) {
+            final typography = FluentTheme.of(context).typography;
+            final body = typography.body;
+            final bodyStrong = typography.bodyStrong;
+            return FadeInWidget(
+              visible: candidateData.isNotEmpty,
+              fadeTarget: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  text: 'Drop to move\n',
+                  style: body,
+                  children: [
+                    ...candidateData.map(
+                      (final e) => TextSpan(
+                        text: '${e!.displayName}\n',
+                        style: bodyStrong,
+                      ),
                     ),
-                  ),
-                  TextSpan(text: 'to ', style: body),
-                  TextSpan(text: category.name, style: bodyStrong),
-                ],
+                    TextSpan(text: 'to ', style: body),
+                    TextSpan(text: category.name, style: bodyStrong),
+                  ],
+                ),
               ),
-            ),
-            child: CategoryDropTarget(
-              category: category,
-              child: super.build(
-                context,
-                selected,
-                onPressed,
-                displayMode: displayMode,
-                showTextOnTop: showTextOnTop,
-                itemIndex: itemIndex,
-                autofocus: autofocus,
-              ),
-            ),
-          );
-        },
+              child: child!,
+            );
+          },
+        ),
+        child: CategoryDropTarget(
+          category: category,
+          child: super.build(
+            context,
+            selected,
+            onPressed,
+            displayMode: displayMode,
+            showTextOnTop: showTextOnTop,
+            itemIndex: itemIndex,
+            autofocus: autofocus,
+          ),
+        ),
       );
 
   @override
@@ -94,12 +97,14 @@ class FolderPaneItem extends PaneItem {
 
   void _onModDragAccept(
     final BuildContext context,
+    final Filesystem fs,
     final DragTargetDetails<Mod> details,
   ) {
     try {
-      moveDirUseCase(
-        Directory(details.data.path),
-        category.path.pJoin(details.data.path.pBasename),
+      fs.moveDirOf(
+        sourceDir: Directory(details.data.path),
+        category: category,
+        mod: details.data,
       );
     } on Exception catch (e) {
       _showMoveErrorInfoBar(context, e);

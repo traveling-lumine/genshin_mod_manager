@@ -30,3 +30,10 @@ class FolderMoveExistEntry with _$FolderMoveExistEntry {
     required final String destination,
   }) = _FolderMoveExistEntry;
 }
+
+@freezed
+sealed class ImportResult with _$ImportResult {
+  const factory ImportResult.done() = ImportDone;
+  const factory ImportResult.unknownType() = ImportUnknownType;
+  const factory ImportResult.destinationExists() = ImportDestinationExists;
+}

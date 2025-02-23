@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart'
@@ -12,7 +11,7 @@ import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_version/di/is_outdated.dart';
 import '../../filesystem/l1/di/categories.dart';
-import '../../filesystem/l1/impl/path_op_string.dart';
+import '../../filesystem/l1/di/filesystem.dart';
 import '../../l10n/app_localizations.dart';
 import '../constants.dart';
 import '../util/display_infobar.dart';
@@ -244,9 +243,7 @@ class _HomeShellState<T extends StatefulWidget>
   }
 
   Future<void> _runProgram(final String path) async {
-    final file = File(path);
-    final pwd = file.parent.path;
-    final pName = file.path.pBasename;
-    await Process.run('start', ['/b', '/d', pwd, '', pName], runInShell: true);
+    final fs = ref.read(filesystemProvider);
+    await fs.newMethod2(path, null);
   }
 }

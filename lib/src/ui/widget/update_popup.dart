@@ -13,7 +13,7 @@ import '../../app_version/data/github.dart';
 import '../../app_version/di/is_outdated.dart';
 import '../../app_version/di/remote_version.dart';
 import '../../app_version/domain/entity/version.dart';
-import '../../filesystem/l1/impl/path_op_string.dart';
+import '../../filesystem/l1/di/filesystem.dart';
 import '../util/display_infobar.dart';
 import '../util/open_url.dart';
 
@@ -76,22 +76,8 @@ class UpdatePopup extends ConsumerWidget {
   List<String> _findUpdateUnableReason(final WidgetRef ref) {
     final appState =
         ref.read(appConfigFacadeProvider).obtainValue(games).currentGameConfig;
-    final modRoot = appState.modRoot;
-    final migotoRoot = appState.modExecFile;
-    final launcherRoot = appState.launcherFile;
-    final execRoot = File(Platform.resolvedExecutable).parent.path;
-
-    final reason = <String>[];
-    if (modRoot?.pIsWithin(execRoot) ?? false) {
-      reason.add('mods');
-    }
-    if (migotoRoot?.pIsWithin(execRoot) ?? false) {
-      reason.add('3d migoto');
-    }
-    if (launcherRoot?.pIsWithin(execRoot) ?? false) {
-      reason.add('launcher');
-    }
-    return reason;
+    final fs = ref.read(filesystemProvider);
+    return fs.getUnavailableReasons(appState);
   }
 
   Future<bool?> _showUpdateConfirmDialog(

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:fluent_ui/fluent_ui.dart';
@@ -11,7 +10,7 @@ import 'package:pasteboard/pasteboard.dart';
 
 import '../../filesystem/di/mod_card.dart';
 import '../../filesystem/l0/entity/mod.dart';
-import '../../filesystem/l1/impl/path_op_string.dart';
+import '../../filesystem/l1/di/filesystem.dart';
 import 'latest_image.dart';
 import 'mod_flyout_image.dart';
 
@@ -36,7 +35,7 @@ class ModImageDisplay extends ConsumerWidget {
                   const SizedBox(height: 4),
                   RepaintBoundary(
                     child: Button(
-                      onPressed: () async => _onPaste(context),
+                      onPressed: () async => _onPaste(context, ref),
                       child: const Text('Paste'),
                     ),
                   ),
@@ -76,7 +75,7 @@ class ModImageDisplay extends ConsumerWidget {
         ],
       );
 
-  Future<void> _onPaste(final BuildContext context) async {
+  Future<void> _onPaste(final BuildContext context, final WidgetRef ref) async {
     final Uint8List? image;
     try {
       image = await Pasteboard.image;
@@ -99,9 +98,9 @@ class ModImageDisplay extends ConsumerWidget {
     if (image == null) {
       return;
     }
-    final filePath = mod.path.pJoin('preview.png');
     final bytes = await image.pngUint8List;
-    await File(filePath).writeAsBytes(bytes);
+    final fs = ref.read(filesystemProvider);
+    await fs.newMethod(mod, bytes);
     if (context.mounted) {
       unawaited(
         displayInfoBar(

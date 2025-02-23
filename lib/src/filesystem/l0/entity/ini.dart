@@ -9,6 +9,7 @@ part 'ini.freezed.dart';
 class IniFile with _$IniFile {
   const factory IniFile({
     required final String path,
+    required final String name,
     required final Mod mod,
   }) = _IniFile;
 }

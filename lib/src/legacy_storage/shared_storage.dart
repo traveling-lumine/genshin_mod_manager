@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:path/path.dart' as p;
+
 import '../app_config/l0/api/app_config_facade.dart';
 import '../app_config/l0/api/app_config_persistent_repo.dart';
 import '../app_config/l0/entity/app_config.dart';
@@ -7,7 +9,6 @@ import '../app_config/l0/entity/column_strategy.dart';
 import '../app_config/l0/entity/entries.dart';
 import '../app_config/l0/entity/game_config.dart';
 import '../app_config/l0/entity/preset.dart';
-import '../filesystem/l1/impl/path_op_string.dart';
 import 'sharedpreference_storage.dart';
 
 final String configVersionKey = StorageAccessKey.configVersion.name;
@@ -285,12 +286,12 @@ void _convertToVersion1(final SharedPreferenceStorage storage2) {
 
   var modRoot = _getModRootUseCase(storage2, targetDir);
   if (modRoot == null && targetDir != dotString) {
-    modRoot = targetDir.pJoin('Mods');
+    modRoot = p.join(targetDir, 'Mods');
   }
 
   var modExecFile = _getModExecFileUseCase(storage2, targetDir);
   if (modExecFile == null && targetDir != dotString) {
-    modExecFile = targetDir.pJoin('3DMigoto Loader.exe');
+    modExecFile = p.join(targetDir, '3DMigoto Loader.exe');
   }
 
   storage2

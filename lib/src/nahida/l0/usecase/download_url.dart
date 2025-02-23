@@ -1,11 +1,7 @@
-import 'dart:io';
-
-import 'package:archive/archive_io.dart';
 import 'package:dio/dio.dart';
 
+import '../../../filesystem/l0/api/filesystem.dart';
 import '../../../filesystem/l0/entity/mod_category.dart';
-import '../../../filesystem/l1/helper/mod_writer.dart';
-import '../../../filesystem/l1/impl/path_op_string.dart';
 import '../api/nahida_repo.dart';
 import '../api/stream.dart';
 import '../entity/download_state.dart';
@@ -18,6 +14,7 @@ Future<void> downloadUrlUseCase({
   required final NahidaliveElement element,
   required final ModCategory category,
   required final String turnstile,
+  required final Filesystem fs,
   final String? pw,
 }) async {
   if (element.password && pw == null) {
@@ -30,16 +27,7 @@ Future<void> downloadUrlUseCase({
     final responseData =
         await repo.addDownload(element: element, turnstile: turnstile, pw: pw);
 
-    final destDirName =
-        await getNonCollidingModName(category.path, element.title);
-    final destDirPath = category.path.pJoin(destDirName);
-    try {
-      final archive =
-          collapseArchiveFolder(ZipDecoder().decodeBytes(responseData));
-      await extractArchiveToDisk(archive, destDirPath);
-    } on Exception {
-      throw ModZipExtractionException(data: responseData);
-    }
+    await fs.importZipFile(category.path, element.title, responseData);
   } on DioException catch (e) {
     switch (e.error) {
       case WrongPasswordException _:
@@ -48,25 +36,6 @@ Future<void> downloadUrlUseCase({
         );
         return;
     }
-  } on ModZipExtractionException catch (e) {
-    var writeSuccess = false;
-    Exception? exception;
-    final fileName = sanitizeString('${element.title}.zip');
-    try {
-      await File(category.path.pJoin(fileName)).writeAsBytes(e.data);
-      writeSuccess = true;
-    } on Exception catch (e) {
-      writeSuccess = false;
-      exception = e;
-    }
-    downloadQueue.add(
-      NahidaDownloadState.modZipExtractionException(
-        writeSuccess: writeSuccess,
-        fileName: fileName,
-        exception: exception,
-      ),
-    );
-    return;
   }
   downloadQueue.add(NahidaDownloadState.completed(element: element));
 }

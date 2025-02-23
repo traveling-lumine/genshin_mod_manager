@@ -8,8 +8,7 @@ import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_toggle_result.dart';
-import '../../filesystem/l1/impl/mod_switcher.dart';
-import '../../filesystem/l1/impl/path_op_string.dart';
+import '../../filesystem/l1/di/filesystem.dart';
 import '../util/display_infobar.dart';
 
 class ModToggler extends ConsumerWidget {
@@ -40,20 +39,16 @@ class ModToggler extends ConsumerWidget {
     final BuildContext context,
     final WidgetRef ref,
   ) async {
-    final shaderFixesPath = ref
-        .read(appConfigFacadeProvider)
-        .obtainValue(games)
-        .currentGameConfig
-        .modExecFile
-        ?.pDirname
-        .pJoin(kShaderFixes);
-    if (shaderFixesPath == null) {
+    final currentGameConfig2 =
+        ref.read(appConfigFacadeProvider).obtainValue(games).currentGameConfig;
+    if (currentGameConfig2.modExecFile == null) {
       await _showErrorInfoBar(context, 'ShaderFixes path not found');
     }
+    final fs = ref.read(filesystemProvider);
     ModToggleResult? toggleResult;
     try {
-      toggleResult = await (mod.isEnabled ? disable : enable)(
-        shaderFixesPath: shaderFixesPath,
+      toggleResult = await (mod.isEnabled ? fs.disable : fs.enable)(
+        currentGameConfig2: currentGameConfig2,
         modPath: mod.path,
       );
     } on Exception catch (e) {

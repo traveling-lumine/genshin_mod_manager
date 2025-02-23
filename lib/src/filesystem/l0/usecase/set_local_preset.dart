@@ -1,7 +1,5 @@
 import 'dart:async';
 import '../../../app_config/l0/entity/game_config.dart';
-import '../../l1/impl/mod_switcher.dart';
-import '../../l1/impl/path_op_string.dart';
 import '../api/filesystem.dart';
 import '../entity/mod_category.dart';
 
@@ -16,7 +14,6 @@ Future<void> setLocalPresetUseCase({
   if (directives == null) {
     return;
   }
-  final shaderFixes = gameConfig.modExecFile?.pDirname.pJoin(kShaderFixes);
   final currentEnabled = await fs.getSubDirNames(
     path: category.path,
     onlyEnabled: true,
@@ -25,14 +22,20 @@ Future<void> setLocalPresetUseCase({
       currentEnabled.where((final e) => !directives.contains(e));
   final futures = <Future<void>>[];
   for (final mod in shouldBeOff) {
-    final modDir = category.path.pJoin(mod);
-    final future = disable(shaderFixesPath: shaderFixes, modPath: modDir);
+    final future = fs.disableOf(
+      currentGameConfig2: gameConfig,
+      modName: mod,
+      category: category,
+    );
     futures.add(future);
   }
   final shouldBeOn = directives.where((final e) => !currentEnabled.contains(e));
   for (final mod in shouldBeOn) {
-    final modDir = category.path.pJoin(mod.pDisabledForm);
-    final future = enable(shaderFixesPath: shaderFixes, modPath: modDir);
+    final future = fs.enableOf(
+      currentGameConfig2: gameConfig,
+      category: category,
+      modName: mod,
+    );
     futures.add(future);
   }
   await Future.wait(futures);

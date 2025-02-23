@@ -10,6 +10,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../app_config/l1/di/exe_arg.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 import '../../filesystem/l1/di/categories.dart';
+import '../../filesystem/l1/di/filesystem.dart';
 import '../../nahida/l0/di/nahida_download_queue.dart';
 import '../../nahida/l0/entity/nahida_element.dart';
 import '../../nahida/l0/usecase/download_url.dart';
@@ -313,6 +314,7 @@ class _ProtocolDialog extends HookConsumerWidget {
         repo: ref.read(nahidaRepositoryProvider),
         downloadQueue: ref.read(nahidaDownloadQueueProvider.notifier),
         element: elem,
+        fs: ref.read(filesystemProvider),
         category: currentSelected,
         pw: password,
         turnstile: turnstile,

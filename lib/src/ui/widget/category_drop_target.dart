@@ -8,24 +8,22 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
+import '../../filesystem/l0/entity/folder_move_result.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 import '../../filesystem/l0/usecase/folder_drop.dart';
+import '../../filesystem/l1/di/filesystem.dart';
 import '../util/display_infobar.dart';
 import 'fade_in.dart';
 
-/// A widget that acts as a drop target for files and directories.
 class CategoryDropTarget extends HookConsumerWidget {
-  /// Creates a [CategoryDropTarget].
   const CategoryDropTarget({
     required this.child,
     required this.category,
     super.key,
   });
 
-  /// The child widget.
   final Widget child;
 
-  /// The category to drop the files into.
   final ModCategory category;
 
   @override
@@ -46,6 +44,12 @@ class CategoryDropTarget extends HookConsumerWidget {
         child: child,
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
 
   Widget _buildDropHint(final WidgetRef ref, final ValueNotifier<bool> state) {
@@ -69,12 +73,6 @@ class CategoryDropTarget extends HookConsumerWidget {
     );
   }
 
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ModCategory>('category', category));
-  }
-
   Future<void> _onDragDone(
     final DropDoneDetails details,
     final BuildContext context,
@@ -82,34 +80,25 @@ class CategoryDropTarget extends HookConsumerWidget {
   ) async {
     final moveInsteadOfCopy =
         ref.read(appConfigFacadeProvider).obtainValue(moveOnDrag);
+
     final result = await dragToImportUseCase(
-      details.files.map((final e) => e.path),
-      category.path,
-      moveInsteadOfCopy,
+      dropPaths: details.files.map((final e) => e.path),
+      categoryPath: category.path,
+      type: moveInsteadOfCopy,
+      fs: ref.read(filesystemProvider),
     );
-    if (result.errors.isNotEmpty && context.mounted) {
-      unawaited(
-        displayInfoBarInContext(
-          context,
-          title: const Text('Error moving folder'),
-          content: Text(result.errors.map((final e) => e.message).join('\n')),
-          severity: InfoBarSeverity.error,
-        ),
-      );
-    }
-    if (result.exists.isNotEmpty) {
-      final join = result.exists
-          .map((final e) => "'${e.source}' -> '${e.destination}'")
-          .join('\n');
+
+    final exists = result.whereType<ImportDestinationExists>();
+
+    if (exists.isNotEmpty) {
       final dragImportType = moveInsteadOfCopy ? 'moved' : 'copied';
       if (context.mounted) {
         unawaited(
           displayInfoBarInContext(
             context,
             title: const Text('Folder already exists'),
-            content: Text('The following folders already exist'
-                ' and were not $dragImportType: \n'
-                '$join'),
+            content: Text('Some folders already exist'
+                ' and were not $dragImportType'),
             severity: InfoBarSeverity.warning,
           ),
         );

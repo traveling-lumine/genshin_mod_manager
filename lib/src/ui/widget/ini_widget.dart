@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -10,7 +8,7 @@ import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../filesystem/di/ini_widget.dart';
 import '../../filesystem/l0/entity/ini.dart';
-import '../../filesystem/l1/impl/path_op_string.dart';
+import '../../filesystem/l1/di/filesystem.dart';
 
 class IniWidget extends ConsumerStatefulWidget {
   const IniWidget({required this.iniFile, super.key});
@@ -88,7 +86,7 @@ class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildIniHeader(widget.iniFile.path, ref),
+        _buildIniHeader(),
         ...iniSections.when(
           data: (final data) => data
               .where(
@@ -188,54 +186,31 @@ class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
         ],
       );
 
-  Widget _buildIniHeader(final String iniPath, final WidgetRef ref) {
-    final basenameString = iniPath.pBasename;
-    return Row(
-      children: [
-        Expanded(
-          child: Tooltip(
-            message: basenameString,
-            child: Text(
-              basenameString,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-              overflow: TextOverflow.ellipsis,
+  Widget _buildIniHeader() => Row(
+        children: [
+          Expanded(
+            child: Tooltip(
+              message: widget.iniFile.name,
+              child: Text(
+                widget.iniFile.name,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
-        ),
-        RepaintBoundary(
-          child: IconButton(
-            icon: const Icon(FluentIcons.document_management),
-            onPressed: () async => _onIniOpen(ref, iniPath),
+          RepaintBoundary(
+            child: IconButton(
+              icon: const Icon(FluentIcons.document_management),
+              onPressed: _onIniOpen,
+            ),
           ),
-        ),
-      ],
-    );
-  }
+        ],
+      );
 
-  Future<void> _onIniOpen(final WidgetRef ref, final String iniPath) async {
-    final program = File(iniPath);
-    final pwd = program.parent.path;
-    final pName = program.path.pBasename;
+  Future<void> _onIniOpen() async {
     final obtainValue =
         ref.read(appConfigFacadeProvider).obtainValue(iniEditorArg);
-    if (obtainValue == null || obtainValue.isEmpty) {
-      await Process.run(
-        'start',
-        [pName],
-        runInShell: true,
-        workingDirectory: pwd,
-      );
-      return;
-    }
-    final iniEditorArgument =
-        obtainValue.split(' ').map((final e) => e == '%0' ? null : e).toList();
-    final List<String> arg;
-    arg = iniEditorArgument.map((final e) => e ?? pName).toList();
-    await Process.run(
-      'start',
-      ['/b', '', ...arg],
-      runInShell: true,
-      workingDirectory: pwd,
-    );
+    final fs = ref.read(filesystemProvider);
+    await fs.newMethod2(widget.iniFile.path, obtainValue);
   }
 }

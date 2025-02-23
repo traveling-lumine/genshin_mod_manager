@@ -128,7 +128,7 @@ class ModCard extends StatelessWidget {
         child: IconButton(icon: Icon(icon), onPressed: onPressed),
       );
 
-  Widget _buildIni(final List<String> iniPaths) => Row(
+  Widget _buildIni(final List<IniFile> iniPaths) => Row(
         children: [
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 8),
@@ -140,9 +140,8 @@ class ModCard extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: _minIniSectionWidth),
               child: ListView.builder(
-                itemBuilder: (final context, final index) => IniWidget(
-                  iniFile: IniFile(path: iniPaths[index], mod: mod),
-                ),
+                itemBuilder: (final context, final index) =>
+                    IniWidget(iniFile: iniPaths[index]),
                 itemCount: iniPaths.length,
               ),
             ),

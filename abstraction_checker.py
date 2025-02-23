@@ -188,21 +188,21 @@ def check_violations(lakos_data: LakosData):
             print(violation[1])
 
 
-def print_nodes_by_out_degree(lakos_data: LakosData):
+def print_nodes_by_out_degree(lakos_data: LakosData, reverse=True):
     limit = 5
     print(f"\n== Top {limit} nodes by out degree:")
     sorted_nodes = sorted(
-        lakos_data.nodes.values(), key=lambda node: node.out_degree, reverse=True
+        lakos_data.nodes.values(), key=lambda node: node.out_degree, reverse=reverse
     )
     for node in sorted_nodes[:limit]:
         print(f"{node.id}: {node.out_degree}")
 
 
-def print_nodes_by_in_degree(lakos_data: LakosData):
+def print_nodes_by_in_degree(lakos_data: LakosData, reverse=True):
     limit = 5
     print(f"\n== Top {limit} nodes by in degree:")
     sorted_nodes = sorted(
-        lakos_data.nodes.values(), key=lambda node: node.in_degree, reverse=True
+        lakos_data.nodes.values(), key=lambda node: node.in_degree, reverse=reverse
     )
     for node in sorted_nodes[:limit]:
         print(f"{node.id}: {node.in_degree}")
@@ -240,7 +240,9 @@ if __name__ == "__main__":
     json_data = json.load(sys.stdin)
     lakos_data = parse_lakos_data(json_data)
     check_violations(lakos_data)
+    print_nodes_by_out_degree(lakos_data, False)
     print_nodes_by_out_degree(lakos_data)
+    print_nodes_by_in_degree(lakos_data, False)
     print_nodes_by_in_degree(lakos_data)
     print_nodes_by_instability(lakos_data)
     print_nodes_by_cd(lakos_data)

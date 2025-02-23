@@ -9,6 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../filesystem/l0/entity/mod_category.dart';
+import '../../filesystem/l1/di/filesystem.dart';
 import '../../l10n/app_localizations.dart';
 import '../../nahida/l0/di/nahida_download_queue.dart';
 import '../../nahida/l0/entity/nahida_element.dart';
@@ -343,6 +344,7 @@ class StoreElement extends ConsumerWidget {
                   repo: ref.read(nahidaRepositoryProvider),
                   downloadQueue: ref.read(nahidaDownloadQueueProvider.notifier),
                   element: element,
+                  fs: ref.read(filesystemProvider),
                   category: category,
                   turnstile: turnstile,
                   pw: password,
