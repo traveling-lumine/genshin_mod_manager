@@ -8,42 +8,38 @@ import '../entity/ini.dart';
 import '../entity/mod.dart';
 import '../entity/mod_category.dart';
 import '../entity/mod_toggle_result.dart';
+import 'disposable.dart';
 import 'watcher.dart';
 
-abstract interface class Filesystem {
-  Future<ModToggleResult> disable({
-    required final GameConfig currentGameConfig2,
-    required final String modPath,
-  });
+abstract interface class Filesystem implements Disposable {
   Future<ModToggleResult> disableDirect({
-    required final GameConfig currentGameConfig2,
-    required final String modRootPath,
+    required final GameConfig gameConfig,
     required final String categoryName,
     required final String modName,
   });
-
+  Future<ModToggleResult> disableMod({
+    required final GameConfig gameConfig,
+    required final Mod mod,
+  });
   Future<ModToggleResult> disableOf({
-    required final GameConfig currentGameConfig2,
+    required final GameConfig gameConfig,
     required final ModCategory category,
     required final String modName,
   });
 
-  Future<void> dispose();
-
-  Future<ModToggleResult> enable({
-    required final GameConfig currentGameConfig2,
-    required final String modPath,
-  });
-
   Future<ModToggleResult> enableDirect({
-    required final GameConfig currentGameConfig2,
-    required final String modRootPath,
+    required final GameConfig gameConfig,
     required final String categoryName,
     required final String modName,
   });
 
+  Future<ModToggleResult> enableMod({
+    required final GameConfig gameConfig,
+    required final Mod mod,
+  });
+
   Future<ModToggleResult> enableOf({
-    required final GameConfig currentGameConfig2,
+    required final GameConfig gameConfig,
     required final ModCategory category,
     required final String modName,
   });
@@ -78,13 +74,13 @@ abstract interface class Filesystem {
   List<String> getUnavailableReasons(final GameConfig appState);
 
   Future<ImportResult> importPath({
-    required final String dropPath,
-    required final String categoryPath,
+    required final String targetPath,
+    required final ModCategory category,
     required final bool moveDir,
   });
 
   Future<ImportResult> importZipFile(
-    final String categoryPath,
+    final ModCategory categoryPath,
     final String dropPath,
     final Uint8List content,
   );
@@ -99,24 +95,19 @@ abstract interface class Filesystem {
     final Mod mod,
   );
 
-  void moveDir(final Directory sourceDir, final String newPath);
-
-  void moveDirOf({
-    required final Directory sourceDir,
+  Future<void> moveModInto({
     required final ModCategory category,
     required final Mod mod,
   });
 
-  Future<void> newMethod(final Mod mod, final Uint8List bytes);
-
-  Future<ProcessResult> newMethod2(
-    final String iniPath,
-    final String? obtainValue,
-  );
-
   Future<void> pauseAllWatchers();
 
   void resumeAllWatchers();
+
+  Future<ProcessResult> runProcess(
+    final String iniPath,
+    final String? obtainValue,
+  );
 
   Watcher watchDirectory({
     required final String path,
@@ -125,4 +116,6 @@ abstract interface class Filesystem {
   Watcher watchFile({
     required final String path,
   });
+
+  Future<void> writeImage(final Mod mod, final Uint8List bytes);
 }

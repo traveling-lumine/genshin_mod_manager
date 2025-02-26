@@ -244,6 +244,6 @@ class _HomeShellState<T extends StatefulWidget>
 
   Future<void> _runProgram(final String path) async {
     final fs = ref.read(filesystemProvider);
-    await fs.newMethod2(path, null);
+    await fs.runProcess(path, null);
   }
 }

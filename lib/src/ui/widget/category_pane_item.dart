@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
@@ -46,8 +45,13 @@ class FolderPaneItem extends PaneItem {
   }) =>
       Consumer(
         builder: (final context, final ref, final child) => DragTarget<Mod>(
-          onAcceptWithDetails: (final details) =>
-              _onModDragAccept(context, ref.read(filesystemProvider), details),
+          onAcceptWithDetails: (final details) async {
+            await _onModDragAccept(
+              context,
+              ref.read(filesystemProvider),
+              details,
+            );
+          },
           builder: (final context, final candidateData, final rejectedData) {
             final typography = FluentTheme.of(context).typography;
             final body = typography.body;
@@ -95,22 +99,25 @@ class FolderPaneItem extends PaneItem {
     properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
 
-  void _onModDragAccept(
+  Future<void> _onModDragAccept(
     final BuildContext context,
     final Filesystem fs,
     final DragTargetDetails<Mod> details,
-  ) {
+  ) async {
     try {
-      fs.moveDirOf(
-        sourceDir: Directory(details.data.path),
+      await fs.moveModInto(
         category: category,
         mod: details.data,
       );
     } on Exception catch (e) {
-      _showMoveErrorInfoBar(context, e);
+      if (context.mounted) {
+        _showMoveErrorInfoBar(context, e);
+      }
       return;
     }
-    _showMoveDoneInfoBar(context, details);
+    if (context.mounted) {
+      _showMoveDoneInfoBar(context, details);
+    }
   }
 
   void _showMoveDoneInfoBar(

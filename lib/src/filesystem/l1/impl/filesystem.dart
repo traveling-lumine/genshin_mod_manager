@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
@@ -19,9 +20,8 @@ import '../../l0/entity/mod_category.dart';
 import '../../l0/entity/mod_toggle_result.dart';
 import 'watcher.dart';
 
-const kShaderFixes = 'ShaderFixes';
 const _disabledHeader = 'DISABLED';
-const int _disabledHeaderLength = _disabledHeader.length;
+const _kShaderFixes = 'ShaderFixes';
 const _previewExtensions = [
   '.png',
   '.jpg',
@@ -32,16 +32,10 @@ const _previewExtensions = [
   '.avif',
   '.wbmp',
 ];
-Archive collapseArchiveFolder(final Archive archive) {
-  final longestCommonPrefix1 =
-      longestCommonPrefix(archive.files.map((final e) => e.name).toList());
-  final int longestCommonLen;
-  if (longestCommonPrefix1.endsWith('/') ||
-      longestCommonPrefix1.endsWith(r'\')) {
-    longestCommonLen = longestCommonPrefix1.length;
-  } else {
-    longestCommonLen = 0;
-  }
+Archive _collapseArchiveFolder(final Archive archive) {
+  final longestCommonPrefix1 = _longestCommonPrefix(archive);
+  final longestCommonLen =
+      longestCommonPrefix1.lastIndexOf(RegExp(r'[/\\]')) + 1;
   if (longestCommonLen == 0) {
     return archive;
   }
@@ -65,112 +59,25 @@ Archive collapseArchiveFolder(final Archive archive) {
   return newArchive;
 }
 
-/// In the [paths] list, find a file path that has a [name],
-/// ignoring extensions.
-String? findPreviewFileInString(
-  final List<String> paths, {
-  final String name = 'preview',
-}) {
-  for (final element in paths) {
-    final filename = element.pBNameWoExt;
-    if (!filename.pEquals(name)) {
-      continue;
-    }
-    final ext = element.pExtension;
-    for (final previewExt in _previewExtensions) {
-      if (ext.pEquals(previewExt)) {
-        return element;
-      }
-    }
-  }
-  return null;
-}
-
-Future<String> getNonCollidingModName(
-  final String categoryPath,
-  final String name,
-) {
-  final sanitizedName = sanitizeString(name);
-  return getNonCollidingName(categoryPath, sanitizedName.pEnabledForm);
-}
-
-Future<String> getNonCollidingName(
-  final String categoryPath,
-  final String destDirName,
+Future<Directory> _copyDirectory(
+  final Directory dir,
+  final String destPath,
 ) async {
-  final enabledFormDirNames = getUnderSync<Directory>(categoryPath)
-      .map((final e) => e.pEnabledForm.pBasename)
-      .toSet();
-  var counter = 0;
-  var noCollisionDestDirName = destDirName;
-  while (enabledFormDirNames.contains(noCollisionDestDirName)) {
-    counter++;
-    noCollisionDestDirName = '$destDirName ($counter)';
-  }
-  return noCollisionDestDirName;
-}
-
-Future<List<String>> getUnder<T extends FileSystemEntity>(
-  final String path,
-) async {
-  final dir = Directory(path);
-  if (!dir.existsSync()) {
-    return [];
-  }
-  final res =
-      dir.list().whereType<T>().map((final event) => event.path).toList();
-  return res;
-}
-
-List<String> getUnderSync<T extends FileSystemEntity>(final String path) {
-  final dir = Directory(path);
-  if (!dir.existsSync()) {
-    return [];
-  }
-  final res =
-      dir.listSync().whereType<T>().map((final event) => event.path).toList();
-  return res;
-}
-
-String longestCommonPrefix(final List<String> strings) {
-  if (strings.isEmpty) {
-    return '';
-  }
-  var s1 = strings.first;
-  var s2 = strings.first;
-  for (final s in strings) {
-    if (s.compareTo(s1) < 0) {
-      s1 = s;
-    } else if (s.compareTo(s2) > 0) {
-      s2 = s;
+  final listFuture = dir.list().toList();
+  final newDir = Directory(destPath);
+  await newDir.create(recursive: true);
+  final list = await listFuture;
+  final copyFutures = <Future<FileSystemEntity>>[];
+  for (final entity in list) {
+    final entityDestPath = p.join(destPath, p.basename(entity.path));
+    if (entity is File) {
+      copyFutures.add(entity.copy(entityDestPath));
+    } else if (entity is Directory) {
+      copyFutures.add(_copyDirectory(entity, entityDestPath));
     }
   }
-  final length = s1.length;
-  var i = 0;
-  for (; i < length; i++) {
-    if (s1.codeUnitAt(i) != s2.codeUnitAt(i)) {
-      break;
-    }
-  }
-  return s1.substring(0, i);
-}
-
-String sanitizeString(final String name) {
-  final sanitizedName = name.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
-  return sanitizedName.trim();
-}
-
-void _copyDirectorySync(final Directory dir, final String dest) {
-  final listSync = dir.listSync();
-  final newDir = Directory(dest)..createSync(recursive: true);
-  for (final element in listSync) {
-    final newName = newDir.path.pJoin(element.path.pBasename);
-    if (element is File) {
-      element.copySync(newName);
-    } else if (element is Directory) {
-      _copyDirectorySync(element, newName);
-    }
-  }
+  await Future.wait(copyFutures);
+  return newDir;
 }
 
 Future<void> _copyShaders(
@@ -183,13 +90,16 @@ Future<void> _copyShaders(
     shaderPaths,
     (final found) => throw FileSystemException(
       'Target directory is not empty',
-      found.pBasename,
+      p.basename(found),
     ),
   );
   final futures = <Future<File>>[];
   for (final elem in shaderPaths) {
-    final modFilename = elem.pBasename;
-    final moveName = targetPath.pJoin(modFilename);
+    final modFilename = p.basename(elem);
+    final moveName = p.join(
+      targetPath,
+      modFilename,
+    );
     futures.add(File(elem).copy(moveName));
   }
   await Future.wait(futures);
@@ -206,45 +116,237 @@ Future<void> _deleteShaders(
   );
 }
 
-Future<ImportResult> _importDir(
+Future<ModToggleResult> _disable({
+  required final GameConfig gameConfig,
+  required final String modPath,
+}) async {
+  if (!Directory(modPath).existsSync()) {
+    return const ModToggleResult.modNotFound();
+  }
+  if (!modPath.pIsEnabled) {
+    return const ModToggleResult.alreadyDisabled();
+  }
+  final renameTarget = modPath.pDisabledForm;
+  if (Directory(renameTarget).existsSync()) {
+    return ModToggleResult.modRenameClash(p.basename(renameTarget));
+  }
+  try {
+    await Directory(modPath).rename(renameTarget);
+  } on PathAccessException {
+    return const ModToggleResult.modRenameFailed();
+  }
+  final modShaderPath = p.join(
+    renameTarget,
+    _kShaderFixes,
+  );
+  final List<String> shaderFilenames;
+  try {
+    shaderFilenames = await _pathsUnder<File>(modShaderPath);
+  } on PathNotFoundException {
+    return const ModToggleResult.modHasNoShaders();
+  }
+  final modExecFile = gameConfig.modExecFile;
+  final shaderFixesPath = modExecFile != null
+      ? p.join(
+          p.dirname(modExecFile),
+          _kShaderFixes,
+        )
+      : null;
+  if (shaderFixesPath == null) {
+    return const ModToggleResult.done();
+  }
+  try {
+    await _deleteShaders(shaderFixesPath, shaderFilenames);
+  } on FileSystemException {
+    try {
+      await _copyShaders(shaderFixesPath, shaderFilenames);
+    } on FileSystemException {
+      return const ModToggleResult.shaderCleanupFailed();
+    }
+    return const ModToggleResult.shaderDeleteFailed();
+  }
+  return const ModToggleResult.done();
+}
+
+Future<ModToggleResult> _enable({
+  required final GameConfig gameConfig,
+  required final String modPath,
+}) async {
+  if (!Directory(modPath).existsSync()) {
+    return const ModToggleResult.modNotFound();
+  }
+  if (modPath.pIsEnabled) {
+    return const ModToggleResult.alreadyEnabled();
+  }
+  final renameTarget = modPath.pEnabledForm;
+  if (Directory(renameTarget).existsSync()) {
+    return ModToggleResult.modRenameClash(p.basename(renameTarget));
+  }
+  try {
+    await Directory(modPath).rename(renameTarget);
+  } on PathAccessException {
+    return const ModToggleResult.modRenameFailed();
+  }
+  final modShaderPath = p.join(
+    renameTarget,
+    _kShaderFixes,
+  );
+  final List<String> shaderFilenames;
+  try {
+    shaderFilenames = await _pathsUnder<File>(modShaderPath);
+  } on PathNotFoundException {
+    return const ModToggleResult.modHasNoShaders();
+  }
+  final modExecFile = gameConfig.modExecFile;
+  final shaderFixesPath = modExecFile != null
+      ? p.join(
+          p.dirname(modExecFile),
+          _kShaderFixes,
+        )
+      : null;
+  if (shaderFixesPath == null) {
+    return const ModToggleResult.done();
+  }
+  try {
+    await _copyShaders(shaderFixesPath, shaderFilenames);
+  } on FileSystemException {
+    try {
+      await _deleteShaders(shaderFixesPath, shaderFilenames);
+    } on FileSystemException {
+      return const ModToggleResult.shaderCleanupFailed();
+    }
+    return const ModToggleResult.shaderCopyFailed();
+  }
+  return const ModToggleResult.done();
+}
+
+Future<String?> _findPreviewPath(
+  final String path, {
+  final String name = 'preview',
+}) async {
+  final paths = await _pathsUnder<File>(path);
+  for (final entityPath in paths) {
+    final basename = p.basenameWithoutExtension(entityPath);
+    if (!p.equals(basename, name)) {
+      continue;
+    }
+    final ext = p.extension(entityPath);
+    for (final previewExt in _previewExtensions) {
+      if (p.equals(ext, previewExt)) {
+        return entityPath;
+      }
+    }
+  }
+  return null;
+}
+
+Future<String> _getNonCollidingModName(
   final String categoryPath,
+  final String name,
+) async {
+  final sanitizedName = _sanitizeString(name);
+  final enabledFormDirNames = (await _pathsUnder<Directory>(categoryPath))
+      .map((final e) => p.basename(e.pEnabledForm))
+      .toSet();
+  var counter = 0;
+  var noCollisionDestDirName = sanitizedName.pEnabledForm;
+  while (enabledFormDirNames.contains(noCollisionDestDirName)) {
+    counter++;
+    noCollisionDestDirName = '${sanitizedName.pEnabledForm} ($counter)';
+  }
+  return noCollisionDestDirName;
+}
+
+Future<ImportResult> _importDir(
+  final ModCategory categoryPath,
   final String dropPath,
   final bool type,
 ) async {
-  final newPath = categoryPath.pJoin(dropPath.pBasename);
+  final newPath = p.join(
+    categoryPath.path,
+    p.basename(dropPath),
+  );
   if (FileSystemEntity.isDirectorySync(newPath)) {
     return const ImportResult.destinationExists();
   }
   final sourceDir = Directory(dropPath);
   if (type) {
-    try {
-      await sourceDir.rename(newPath);
-    } on FileSystemException catch (e) {
-      if (e.osError?.errorCode == ERROR_NOT_SAME_DEVICE) {
-        sourceDir.copyToPath(newPath);
-        await sourceDir.delete(recursive: true);
-      } else {
-        rethrow;
-      }
-    }
+    await _moveDir(src: sourceDir, newPath: newPath);
   } else {
-    sourceDir.copyToPath(newPath);
+    await sourceDir.copyToPath(newPath);
   }
   return const ImportResult.done();
 }
 
 bool _isZip(final String dropPath) =>
     FileSystemEntity.isFileSync(dropPath) &&
-    dropPath.pExtension.pEquals('.zip');
+    p.equals(p.extension(dropPath), '.zip');
+
+String _longestCommonPrefix(final Archive archive) {
+  final files = archive.files;
+  if (files.isEmpty) {
+    return '';
+  }
+  var s1 = files.first.name;
+  var s2 = files.first.name;
+  for (final ArchiveFile(name: fileName) in files) {
+    if (fileName.compareTo(s1) < 0) {
+      s1 = fileName;
+    } else if (fileName.compareTo(s2) > 0) {
+      s2 = fileName;
+    }
+  }
+  final length = min(s1.length, s2.length);
+  var i = 0;
+  for (; i < length; i++) {
+    if (s1.codeUnitAt(i) != s2.codeUnitAt(i)) {
+      break;
+    }
+  }
+  return s1.substring(0, i);
+}
+
+Future<void> _moveDir({
+  required final Directory src,
+  required final String newPath,
+}) async {
+  try {
+    await src.rename(newPath);
+  } on FileSystemException catch (e) {
+    if (e.osError?.errorCode == ERROR_NOT_SAME_DEVICE) {
+      await src.copyToPath(newPath);
+      await src.delete(recursive: true);
+    } else {
+      rethrow;
+    }
+  }
+}
+
+Future<List<String>> _pathsUnder<T extends FileSystemEntity>(
+  final String path,
+) async {
+  final dir = Directory(path);
+  if (!dir.existsSync()) {
+    return [];
+  }
+  final res =
+      dir.list().whereType<T>().map((final event) => event.path).toList();
+  return res;
+}
+
+String _sanitizeString(final String name) {
+  final sanitizedName = name.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
+  return sanitizedName.trim();
+}
+
 Future<void> _shaderFinder(
   final String targetPath,
   final List<String> shaderPaths,
   final Future<void> Function(String foundPath) onFound,
 ) async {
-  final programShadersMap = Map<String, String>.fromEntries(
-    getUnderSync<File>(targetPath).map((final e) => MapEntry(e.pBasename, e)),
-  );
-  final shaderSets = shaderPaths.map((final e) => e.pBasename).toSet();
+  final list = await _pathsUnder<File>(targetPath);
+  final programShadersMap = {for (final e in list) p.basename(e): e};
+  final shaderSets = shaderPaths.map(p.basename).toSet();
   final inter = programShadersMap.keys.toSet().intersection(shaderSets);
   final futures = inter.map((final elem) => onFound(programShadersMap[elem]!));
   await Future.wait(futures);
@@ -259,75 +361,39 @@ class FilesystemImpl implements Filesystem {
         StreamSubscription<FileSystemEvent>,
         int
       )> _watchStream = {};
-
-  @override
-  Future<ModToggleResult> disable({
-    required final GameConfig currentGameConfig2,
-    required final String modPath,
-  }) async {
-    if (!Directory(modPath).existsSync()) {
-      return const ModToggleResult.modNotFound();
-    }
-    if (!modPath.pIsEnabled) {
-      return const ModToggleResult.alreadyDisabled();
-    }
-    final renameTarget = modPath.pDisabledForm;
-    if (Directory(renameTarget).existsSync()) {
-      return ModToggleResult.modRenameClash(renameTarget.pBasename);
-    }
-    try {
-      await Directory(modPath).rename(renameTarget);
-    } on PathAccessException {
-      return const ModToggleResult.modRenameFailed();
-    }
-    final modShaderPath = renameTarget.pJoin(kShaderFixes);
-    final List<String> shaderFilenames;
-    try {
-      shaderFilenames = await getUnder<File>(modShaderPath);
-    } on PathNotFoundException {
-      return const ModToggleResult.modHasNoShaders();
-    }
-    final shaderFixesPath =
-        currentGameConfig2.modExecFile?.pDirname.pJoin(kShaderFixes);
-    if (shaderFixesPath == null) {
-      return const ModToggleResult.done();
-    }
-    try {
-      await _deleteShaders(shaderFixesPath, shaderFilenames);
-    } on FileSystemException {
-      try {
-        await _copyShaders(shaderFixesPath, shaderFilenames);
-      } on FileSystemException {
-        return const ModToggleResult.shaderCleanupFailed();
-      }
-      return const ModToggleResult.shaderDeleteFailed();
-    }
-    return const ModToggleResult.done();
-  }
-
   @override
   Future<ModToggleResult> disableDirect({
-    required final GameConfig currentGameConfig2,
-    required final String modRootPath,
+    required final GameConfig gameConfig,
     required final String categoryName,
     required final String modName,
   }) =>
-      disable(
-        currentGameConfig2: currentGameConfig2,
-        modPath: modRootPath.pJoin(categoryName, modName),
+      _disable(
+        gameConfig: gameConfig,
+        modPath: p.join(
+          gameConfig.modRoot!,
+          categoryName,
+          modName,
+        ),
       );
-
+  @override
+  Future<ModToggleResult> disableMod({
+    required final GameConfig gameConfig,
+    required final Mod mod,
+  }) =>
+      _disable(gameConfig: gameConfig, modPath: mod.path);
   @override
   Future<ModToggleResult> disableOf({
-    required final GameConfig currentGameConfig2,
+    required final GameConfig gameConfig,
     required final ModCategory category,
     required final String modName,
   }) =>
-      disable(
-        currentGameConfig2: currentGameConfig2,
-        modPath: category.path.pJoin(modName),
+      _disable(
+        gameConfig: gameConfig,
+        modPath: p.join(
+          category.path,
+          modName,
+        ),
       );
-
   @override
   Future<void> dispose() async {
     await Future.wait<Object?>(
@@ -337,85 +403,49 @@ class FilesystemImpl implements Filesystem {
   }
 
   @override
-  Future<ModToggleResult> enable({
-    required final GameConfig currentGameConfig2,
-    required final String modPath,
-  }) async {
-    if (!Directory(modPath).existsSync()) {
-      return const ModToggleResult.modNotFound();
-    }
-    if (modPath.pIsEnabled) {
-      return const ModToggleResult.alreadyEnabled();
-    }
-    final renameTarget = modPath.pEnabledForm;
-    if (Directory(renameTarget).existsSync()) {
-      return ModToggleResult.modRenameClash(renameTarget.pBasename);
-    }
-    try {
-      await Directory(modPath).rename(renameTarget);
-    } on PathAccessException {
-      return const ModToggleResult.modRenameFailed();
-    }
-    final modShaderPath = renameTarget.pJoin(kShaderFixes);
-    final List<String> shaderFilenames;
-    try {
-      shaderFilenames = await getUnder<File>(modShaderPath);
-    } on PathNotFoundException {
-      return const ModToggleResult.modHasNoShaders();
-    }
-    final shaderFixesPath =
-        currentGameConfig2.modExecFile?.pDirname.pJoin(kShaderFixes);
-    if (shaderFixesPath == null) {
-      return const ModToggleResult.done();
-    }
-    try {
-      await _copyShaders(shaderFixesPath, shaderFilenames);
-    } on FileSystemException {
-      try {
-        await _deleteShaders(shaderFixesPath, shaderFilenames);
-      } on FileSystemException {
-        return const ModToggleResult.shaderCleanupFailed();
-      }
-      return const ModToggleResult.shaderCopyFailed();
-    }
-    return const ModToggleResult.done();
-  }
-
-  @override
   Future<ModToggleResult> enableDirect({
-    required final GameConfig currentGameConfig2,
-    required final String modRootPath,
+    required final GameConfig gameConfig,
     required final String categoryName,
     required final String modName,
   }) =>
-      enable(
-        currentGameConfig2: currentGameConfig2,
-        modPath: modRootPath.pJoin(categoryName, modName.pDisabledForm),
+      _enable(
+        gameConfig: gameConfig,
+        modPath: p.join(
+          gameConfig.modRoot!,
+          categoryName,
+          modName.pDisabledForm,
+        ),
       );
-
+  @override
+  Future<ModToggleResult> enableMod({
+    required final GameConfig gameConfig,
+    required final Mod mod,
+  }) =>
+      _enable(gameConfig: gameConfig, modPath: mod.path);
   @override
   Future<ModToggleResult> enableOf({
-    required final GameConfig currentGameConfig2,
+    required final GameConfig gameConfig,
     required final ModCategory category,
     required final String modName,
   }) =>
-      enable(
-        currentGameConfig2: currentGameConfig2,
-        modPath: category.path.pJoin(modName.pDisabledForm),
+      _enable(
+        gameConfig: gameConfig,
+        modPath: p.join(
+          category.path,
+          modName.pDisabledForm,
+        ),
       );
-
   @override
   Stream<List<ModCategory>> getCategories(
     final Stream<FileSystemEvent?> stream,
     final String modRoot,
   ) =>
       stream.asyncMap(
-        (final event) async => (await getUnder<Directory>(modRoot))
-            .map((final e) => ModCategory(path: e, name: e.pBasename))
+        (final event) async => (await _pathsUnder<Directory>(modRoot))
+            .map((final e) => ModCategory(path: e, name: p.basename(e)))
             .toList()
-            .sortNatural(by: (final e) => e.name),
+          ..sort((final a, final b) => compareNatural(a.name, b.name)),
       );
-
   @override
   Stream<String?> getFolderIconStream(
     final Stream<FileSystemEvent?> stream,
@@ -423,12 +453,14 @@ class FilesystemImpl implements Filesystem {
     final ModCategory category,
   ) =>
       stream.debounceTime(const Duration(milliseconds: 100)).asyncMap(
-            (final event) async => findPreviewFileInString(
-              await getUnder<File>(path),
-              name: category.name,
-            ),
+        (final event) async {
+          final s = await _findPreviewPath(
+            path,
+            name: category.name,
           );
-
+          return s;
+        },
+      );
   @override
   Stream<List<Mod>> getModsInCategory(
     final Stream<FileSystemEvent?> stream,
@@ -438,18 +470,17 @@ class FilesystemImpl implements Filesystem {
           .where((final event) => event is! FileSystemModifyEvent)
           .debounceTime(const Duration(milliseconds: 100))
           .asyncMap(
-            (final _) async => (await getUnder<Directory>(category.path))
+            (final _) async => (await _pathsUnder<Directory>(category.path))
                 .map(
                   (final e) => Mod(
                     path: e,
-                    displayName: e.pEnabledForm.pBasename,
+                    displayName: p.basename(e.pEnabledForm),
                     isEnabled: e.pIsEnabled,
                     category: category,
                   ),
                 )
                 .toList(),
           );
-
   @override
   Future<List<String>> getSubDirNames({
     required final String path,
@@ -460,7 +491,7 @@ class FilesystemImpl implements Filesystem {
       return const [];
     }
     final map =
-        dir.list().whereType<Directory>().map((final e) => e.path.pBasename);
+        dir.list().whereType<Directory>().map((final e) => p.basename(e.path));
     if (onlyEnabled) {
       return map.where((final e) => e.pIsEnabled).toList();
     }
@@ -474,25 +505,26 @@ class FilesystemImpl implements Filesystem {
     final bool onlyEnabled = false,
   }) =>
       getSubDirNames(
-        path: path.pJoin(pJoin),
+        path: p.join(
+          path,
+          pJoin,
+        ),
         onlyEnabled: onlyEnabled,
       );
-
   @override
   List<String> getUnavailableReasons(final GameConfig appState) {
     final modRoot = appState.modRoot;
     final migotoRoot = appState.modExecFile;
     final launcherRoot = appState.launcherFile;
     final execRoot = File(Platform.resolvedExecutable).parent.path;
-
     final reason = <String>[];
-    if (modRoot?.pIsWithin(execRoot) ?? false) {
+    if (modRoot != null && p.isWithin(execRoot, modRoot)) {
       reason.add('mods');
     }
-    if (migotoRoot?.pIsWithin(execRoot) ?? false) {
+    if (migotoRoot != null && p.isWithin(execRoot, migotoRoot)) {
       reason.add('3d migoto');
     }
-    if (launcherRoot?.pIsWithin(execRoot) ?? false) {
+    if (launcherRoot != null && p.isWithin(execRoot, launcherRoot)) {
       reason.add('launcher');
     }
     return reason;
@@ -500,14 +532,14 @@ class FilesystemImpl implements Filesystem {
 
   @override
   Future<ImportResult> importPath({
-    required final String dropPath,
-    required final String categoryPath,
+    required final String targetPath,
+    required final ModCategory category,
     required final bool moveDir,
   }) async {
-    if (FileSystemEntity.isDirectorySync(dropPath)) {
-      return _importDir(categoryPath, dropPath, moveDir);
-    } else if (_isZip(dropPath)) {
-      return _importZip(dropPath, categoryPath);
+    if (FileSystemEntity.isDirectorySync(targetPath)) {
+      return _importDir(category, targetPath, moveDir);
+    } else if (_isZip(targetPath)) {
+      return _importZip(targetPath, category);
     } else {
       return const ImportResult.unknownType();
     }
@@ -515,13 +547,16 @@ class FilesystemImpl implements Filesystem {
 
   @override
   Future<ImportResult> importZipFile(
-    final String categoryPath,
-    final String dropPath,
+    final ModCategory category,
+    final String filePath,
     final Uint8List content,
   ) async {
-    final destDirName = await getNonCollidingModName(categoryPath, dropPath);
-    final destDirPath = categoryPath.pJoin(destDirName);
-    final archive = collapseArchiveFolder(ZipDecoder().decodeBytes(content));
+    final destDirName = await _getNonCollidingModName(category.path, filePath);
+    final destDirPath = p.join(
+      category.path,
+      destDirName,
+    );
+    final archive = _collapseArchiveFolder(ZipDecoder().decodeBytes(content));
     await extractArchiveToDisk(archive, destDirPath);
     return const ImportResult.done();
   }
@@ -532,90 +567,41 @@ class FilesystemImpl implements Filesystem {
     final Mod mod,
   ) =>
       stream.asyncMap(
-        (final event) async => (await getUnder<File>(mod.path))
-            .where((final e) => e.pExtension.pEquals('.ini') && e.pIsEnabled)
+        (final event) async => (await _pathsUnder<File>(mod.path))
+            .where(
+              (final e) => p.equals(p.extension(e), '.ini') && e.pIsEnabled,
+            )
             .map(
               (final e) => IniFile(
                 path: e,
-                name: e.pBasename,
+                name: p.basename(e),
                 mod: mod,
               ),
             )
             .toList(),
       );
-
   @override
   Stream<String?> modPreviewPathStream(
     final Stream<FileSystemEvent?> stream,
     final Mod mod,
   ) =>
       stream.asyncMap(
-        (final event) async =>
-            findPreviewFileInString(await getUnder<File>(mod.path)),
+        (final event) async {
+          final previewName = await _findPreviewPath(mod.path);
+          return previewName;
+        },
       );
-
   @override
-  void moveDir(final Directory sourceDir, final String newPath) {
-    try {
-      sourceDir.renameSync(newPath);
-    } on FileSystemException catch (e) {
-      if (e.osError?.errorCode == ERROR_NOT_SAME_DEVICE) {
-        // Moving across different drives
-        sourceDir
-          ..copyToPath(newPath)
-          ..deleteSync(recursive: true);
-      } else {
-        rethrow;
-      }
-    }
-  }
-
-  @override
-  void moveDirOf({
-    required final Directory sourceDir,
+  Future<void> moveModInto({
     required final ModCategory category,
     required final Mod mod,
-  }) {
-    final newPath = category.path.pJoin(mod.path.pBasename);
-    try {
-      sourceDir.renameSync(newPath);
-    } on FileSystemException catch (e) {
-      if (e.osError?.errorCode == ERROR_NOT_SAME_DEVICE) {
-        // Moving across different drives
-        sourceDir
-          ..copyToPath(newPath)
-          ..deleteSync(recursive: true);
-      } else {
-        rethrow;
-      }
-    }
-  }
-
-  @override
-  Future<void> newMethod(final Mod mod, final Uint8List bytes) async {
-    final filePath = mod.path.pJoin('preview.png');
-    await File(filePath).writeAsBytes(bytes);
-  }
-
-  @override
-  Future<ProcessResult> newMethod2(
-    final String iniPath,
-    final String? obtainValue,
-  ) {
-    final program = File(iniPath);
-    final pwd = program.parent.path;
-    final pName = program.path.pBasename;
-    final arg = (obtainValue == null || obtainValue.isEmpty)
-        ? [pName]
-        : obtainValue
-            .split(' ')
-            .map((final e) => e == '%0' ? pName : e)
-            .toList();
-    return Process.run(
-      'start',
-      ['/b', '', ...arg],
-      runInShell: true,
-      workingDirectory: pwd,
+  }) async {
+    await _moveDir(
+      src: Directory(mod.path),
+      newPath: p.join(
+        category.path,
+        p.basename(mod.path),
+      ),
     );
   }
 
@@ -646,6 +632,28 @@ class FilesystemImpl implements Filesystem {
         );
       }
     }
+  }
+
+  @override
+  Future<ProcessResult> runProcess(
+    final String iniPath,
+    final String? obtainValue,
+  ) {
+    final program = File(iniPath);
+    final pwd = program.parent.path;
+    final pName = p.basename(program.path);
+    final arg = (obtainValue == null || obtainValue.isEmpty)
+        ? [pName]
+        : obtainValue
+            .split(' ')
+            .map((final e) => e == '%0' ? pName : e)
+            .toList();
+    return Process.run(
+      'start',
+      ['/b', '', ...arg],
+      runInShell: true,
+      workingDirectory: pwd,
+    );
   }
 
   @override
@@ -707,6 +715,15 @@ class FilesystemImpl implements Filesystem {
     );
   }
 
+  @override
+  Future<void> writeImage(final Mod mod, final Uint8List bytes) async {
+    final filePath = p.join(
+      mod.path,
+      'preview.png',
+    );
+    await File(filePath).writeAsBytes(bytes);
+  }
+
   Stream<FileSystemEvent?> _getSwitchStream(final String path) {
     final stream = _watchStream[path];
     if (stream != null) {
@@ -728,10 +745,14 @@ class FilesystemImpl implements Filesystem {
 
   Future<ImportResult> _importZip(
     final String dropPath,
-    final String categoryPath,
-  ) {
-    final content = File(dropPath).readAsBytesSync();
-    return importZipFile(categoryPath, dropPath.pBNameWoExt, content);
+    final ModCategory categoryPath,
+  ) async {
+    final content = await File(dropPath).readAsBytes();
+    return importZipFile(
+      categoryPath,
+      p.basenameWithoutExtension(dropPath),
+      content,
+    );
   }
 
   Future<void> _releaseSwitchStream(final String path) async {
@@ -748,111 +769,43 @@ class FilesystemImpl implements Filesystem {
   }
 }
 
-/// Exception thrown when a mod zip extraction fails.
-class ModZipExtractionException implements Exception {
-  /// Default constructor.
-  const ModZipExtractionException({required this.data});
-
-  /// The data that failed to extract.
-  final Uint8List data;
-}
-
 extension _CopyDirectory on Directory {
-  /// Copy this directory to the given path.
-  void copyToPath(final String dest) {
-    _copyDirectorySync(this, dest);
+  Future<void> copyToPath(final String dest) async {
+    await _copyDirectory(this, dest);
   }
 }
 
-/// Extension on [String] to provide path operations.
 extension _PathOpString on String {
-  /// Returns the last part of the path.
-  String get pBasename => p.basename(this);
-
-  /// Returns the file name without extension.
-  String get pBNameWoExt => p.basenameWithoutExtension(this);
-
-  /// Returns the directory part of the path.
-  String get pDirname => p.dirname(this);
-
-  /// Returns the path in disabled form.
   String get pDisabledForm {
-    var baseName = pBasename;
+    var baseName = p.basename(this);
     if (baseName.pIsEnabled) {
       baseName = '$_disabledHeader ${baseName.trimLeft()}';
     }
     if (p.split(this).length == 1) {
       return baseName;
     } else {
-      return pDirname.pJoin(baseName);
+      return p.join(
+        p.dirname(this),
+        baseName,
+      );
     }
   }
 
-  /// Returns the path in enabled form.
   String get pEnabledForm {
-    var baseName = pBasename;
+    var baseName = p.basename(this);
     while (!baseName.pIsEnabled) {
-      baseName = baseName.substring(_disabledHeaderLength).trimLeft();
+      baseName = baseName.substring(_disabledHeader.length).trimLeft();
     }
     if (p.split(this).length == 1) {
       return baseName;
     } else {
-      return pDirname.pJoin(baseName);
+      return p.join(
+        p.dirname(this),
+        baseName,
+      );
     }
   }
 
-  /// Returns the extension part of the path.
-  String get pExtension => p.extension(this);
-
-  /// Returns whether the path is enabled.
   bool get pIsEnabled =>
-      !pBasename.toLowerCase().startsWith(_disabledHeader.toLowerCase());
-
-  /// Returns whether the paths are equal.
-  bool pEquals(final String other) => p.equals(this, other);
-
-  /// Check whether this path is contained in [other].
-  bool pIsWithin(final String other) => p.isWithin(other, this);
-
-  /// Join the path with the given parts.
-  String pJoin(
-    final String part2, [
-    final String? part3,
-    final String? part4,
-    final String? part5,
-    final String? part6,
-    final String? part7,
-    final String? part8,
-    final String? part9,
-    final String? part10,
-    final String? part11,
-    final String? part12,
-    final String? part13,
-    final String? part14,
-    final String? part15,
-    final String? part16,
-  ]) =>
-      p.join(
-        this,
-        part2,
-        part3,
-        part4,
-        part5,
-        part6,
-        part7,
-        part8,
-        part9,
-        part10,
-        part11,
-        part12,
-        part13,
-        part14,
-        part15,
-        part16,
-      );
-}
-
-extension _SortNatural<T> on List<T> {
-  List<T> sortNatural({required final String Function(T) by}) =>
-      this..sort((final a, final b) => compareNatural(by(a), by(b)));
+      !p.basename(this).toLowerCase().startsWith(_disabledHeader.toLowerCase());
 }

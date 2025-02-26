@@ -5,15 +5,15 @@ import '../../../app_config/l0/entity/preset.dart';
 import '../api/filesystem.dart';
 
 Future<void> setGlobalPresetUseCase({
-  required final GameConfig currentGameConfig2,
+  required final GameConfig gameConfig,
   required final String name,
   required final Filesystem fs,
 }) async {
-  final data = currentGameConfig2.presetData.global[name];
+  final data = gameConfig.presetData.global[name];
   if (data == null) {
     return;
   }
-  final latest2 = currentGameConfig2.modRoot;
+  final latest2 = gameConfig.modRoot;
   if (latest2 == null) {
     return;
   }
@@ -29,8 +29,7 @@ Future<void> setGlobalPresetUseCase({
     final futures = <Future<void>>[];
     for (final mod in shouldBeOff) {
       final future = fs.disableDirect(
-        currentGameConfig2: currentGameConfig2,
-        modRootPath: latest2,
+        gameConfig: gameConfig,
         categoryName: categoryName,
         modName: mod,
       );
@@ -39,11 +38,10 @@ Future<void> setGlobalPresetUseCase({
     final shouldBeOn =
         modsToEnable.where((final e) => !currentEnabled.contains(e));
     for (final mod in shouldBeOn) {
-      final future = fs.disableDirect(
-        currentGameConfig2: currentGameConfig2,
-        modName: mod,
+      final future = fs.enableDirect(
+        gameConfig: gameConfig,
         categoryName: categoryName,
-        modRootPath: latest2,
+        modName: mod,
       );
       futures.add(future);
     }

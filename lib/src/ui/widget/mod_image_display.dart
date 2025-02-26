@@ -8,9 +8,9 @@ import 'package:flutter_image_converter/flutter_image_converter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
 
-import '../../filesystem/di/mod_card.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l1/di/filesystem.dart';
+import '../../filesystem/l1/di/mod_card.dart';
 import 'latest_image.dart';
 import 'mod_flyout_image.dart';
 
@@ -100,7 +100,7 @@ class ModImageDisplay extends ConsumerWidget {
     }
     final bytes = await image.pngUint8List;
     final fs = ref.read(filesystemProvider);
-    await fs.newMethod(mod, bytes);
+    await fs.writeImage(mod, bytes);
     if (context.mounted) {
       unawaited(
         displayInfoBar(

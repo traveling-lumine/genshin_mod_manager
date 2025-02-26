@@ -39,18 +39,25 @@ class ModToggler extends ConsumerWidget {
     final BuildContext context,
     final WidgetRef ref,
   ) async {
-    final currentGameConfig2 =
+    final gameConfig =
         ref.read(appConfigFacadeProvider).obtainValue(games).currentGameConfig;
-    if (currentGameConfig2.modExecFile == null) {
-      await _showErrorInfoBar(context, 'ShaderFixes path not found');
+    if (gameConfig.modExecFile == null) {
+      unawaited(_showErrorInfoBar(context, 'ShaderFixes path not found'));
     }
     final fs = ref.read(filesystemProvider);
     ModToggleResult? toggleResult;
     try {
-      toggleResult = await (mod.isEnabled ? fs.disable : fs.enable)(
-        currentGameConfig2: currentGameConfig2,
-        modPath: mod.path,
-      );
+      if (mod.isEnabled) {
+        toggleResult = await fs.disableMod(
+          gameConfig: gameConfig,
+          mod: mod,
+        );
+      } else {
+        toggleResult = await fs.disableMod(
+          gameConfig: gameConfig,
+          mod: mod,
+        );
+      }
     } on Exception catch (e) {
       if (context.mounted) {
         await _showErrorInfoBar(context, 'An unknown error occurred: $e');

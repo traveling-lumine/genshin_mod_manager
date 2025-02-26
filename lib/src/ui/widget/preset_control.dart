@@ -257,7 +257,7 @@ class _PresetComboBox extends ConsumerWidget {
                     );
                   } else {
                     await setGlobalPresetUseCase(
-                      currentGameConfig2: currentGameConfig2,
+                      gameConfig: currentGameConfig2,
                       name: value,
                       fs: read,
                     );

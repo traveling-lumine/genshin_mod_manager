@@ -83,7 +83,7 @@ class CategoryDropTarget extends HookConsumerWidget {
 
     final result = await dragToImportUseCase(
       dropPaths: details.files.map((final e) => e.path),
-      categoryPath: category.path,
+      category: category,
       type: moveInsteadOfCopy,
       fs: ref.read(filesystemProvider),
     );

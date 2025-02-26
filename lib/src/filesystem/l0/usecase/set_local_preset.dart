@@ -23,7 +23,7 @@ Future<void> setLocalPresetUseCase({
   final futures = <Future<void>>[];
   for (final mod in shouldBeOff) {
     final future = fs.disableOf(
-      currentGameConfig2: gameConfig,
+      gameConfig: gameConfig,
       modName: mod,
       category: category,
     );
@@ -32,7 +32,7 @@ Future<void> setLocalPresetUseCase({
   final shouldBeOn = directives.where((final e) => !currentEnabled.contains(e));
   for (final mod in shouldBeOn) {
     final future = fs.enableOf(
-      currentGameConfig2: gameConfig,
+      gameConfig: gameConfig,
       category: category,
       modName: mod,
     );

@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../l0/entity/ini.dart';
-import '../l1/di/filesystem.dart';
+import '../../l0/entity/ini.dart';
+import 'filesystem.dart';
 
 part 'ini_widget.g.dart';
 

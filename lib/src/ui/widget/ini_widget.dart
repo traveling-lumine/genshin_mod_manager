@@ -6,9 +6,9 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
-import '../../filesystem/di/ini_widget.dart';
 import '../../filesystem/l0/entity/ini.dart';
 import '../../filesystem/l1/di/filesystem.dart';
+import '../../filesystem/l1/di/ini_widget.dart';
 
 class IniWidget extends ConsumerStatefulWidget {
   const IniWidget({required this.iniFile, super.key});
@@ -211,6 +211,6 @@ class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
     final obtainValue =
         ref.read(appConfigFacadeProvider).obtainValue(iniEditorArg);
     final fs = ref.read(filesystemProvider);
-    await fs.newMethod2(widget.iniFile.path, obtainValue);
+    await fs.runProcess(widget.iniFile.path, obtainValue);
   }
 }

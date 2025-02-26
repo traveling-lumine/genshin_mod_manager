@@ -27,7 +27,7 @@ Future<void> downloadUrlUseCase({
     final responseData =
         await repo.addDownload(element: element, turnstile: turnstile, pw: pw);
 
-    await fs.importZipFile(category.path, element.title, responseData);
+    await fs.importZipFile(category, element.title, responseData);
   } on DioException catch (e) {
     switch (e.error) {
       case WrongPasswordException _:
