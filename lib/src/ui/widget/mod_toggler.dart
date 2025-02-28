@@ -8,7 +8,7 @@ import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_toggle_result.dart';
-import '../../filesystem/l1/di/filesystem.dart';
+import '../../filesystem/l1/di/mod_toggler.dart';
 import '../util/display_infobar.dart';
 
 class ModToggler extends ConsumerWidget {
@@ -44,7 +44,7 @@ class ModToggler extends ConsumerWidget {
     if (gameConfig.modExecFile == null) {
       unawaited(_showErrorInfoBar(context, 'ShaderFixes path not found'));
     }
-    final fs = ref.read(filesystemProvider);
+    final fs = ref.read(modTogglerProvider);
     ModToggleResult? toggleResult;
     try {
       if (mod.isEnabled) {

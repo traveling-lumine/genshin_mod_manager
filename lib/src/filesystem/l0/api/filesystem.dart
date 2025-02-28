@@ -7,54 +7,10 @@ import '../entity/folder_move_result.dart';
 import '../entity/ini.dart';
 import '../entity/mod.dart';
 import '../entity/mod_category.dart';
-import '../entity/mod_toggle_result.dart';
 import 'disposable.dart';
 import 'watcher.dart';
 
 abstract interface class Filesystem implements Disposable {
-  Future<ModToggleResult> disableDirect({
-    required final GameConfig gameConfig,
-    required final String categoryName,
-    required final String modName,
-  });
-  Future<ModToggleResult> disableMod({
-    required final GameConfig gameConfig,
-    required final Mod mod,
-  });
-  Future<ModToggleResult> disableOf({
-    required final GameConfig gameConfig,
-    required final ModCategory category,
-    required final String modName,
-  });
-
-  Future<ModToggleResult> enableDirect({
-    required final GameConfig gameConfig,
-    required final String categoryName,
-    required final String modName,
-  });
-
-  Future<ModToggleResult> enableMod({
-    required final GameConfig gameConfig,
-    required final Mod mod,
-  });
-
-  Future<ModToggleResult> enableOf({
-    required final GameConfig gameConfig,
-    required final ModCategory category,
-    required final String modName,
-  });
-
-  Stream<List<ModCategory>> getCategories(
-    final Stream<FileSystemEvent?> stream,
-    final String modRoot,
-  );
-
-  Stream<String?> getFolderIconStream(
-    final Stream<FileSystemEvent?> stream,
-    final String path,
-    final ModCategory category,
-  );
-
   Stream<List<Mod>> getModsInCategory(
     final Stream<FileSystemEvent?> stream,
     final ModCategory category,

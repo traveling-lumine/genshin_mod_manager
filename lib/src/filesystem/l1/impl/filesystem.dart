@@ -4,7 +4,6 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
-import 'package:collection/collection.dart';
 import 'package:cp949_codec/cp949_codec.dart';
 import 'package:path/path.dart' as p;
 import 'package:rxdart/transformers.dart';
@@ -17,21 +16,10 @@ import '../../l0/entity/folder_move_result.dart';
 import '../../l0/entity/ini.dart';
 import '../../l0/entity/mod.dart';
 import '../../l0/entity/mod_category.dart';
-import '../../l0/entity/mod_toggle_result.dart';
+import '../helper.dart';
 import 'watcher.dart';
 
 const _disabledHeader = 'DISABLED';
-const _kShaderFixes = 'ShaderFixes';
-const _previewExtensions = [
-  '.png',
-  '.jpg',
-  '.jpeg',
-  '.gif',
-  '.webp',
-  '.bmp',
-  '.avif',
-  '.wbmp',
-];
 Archive _collapseArchiveFolder(final Archive archive) {
   final longestCommonPrefix1 = _longestCommonPrefix(archive);
   final longestCommonLen =
@@ -80,172 +68,12 @@ Future<Directory> _copyDirectory(
   return newDir;
 }
 
-Future<void> _copyShaders(
-  final String targetPath,
-  final List<String> shaderPaths,
-) async {
-  // check for existence first
-  await _shaderFinder(
-    targetPath,
-    shaderPaths,
-    (final found) => throw FileSystemException(
-      'Target directory is not empty',
-      p.basename(found),
-    ),
-  );
-  final futures = <Future<File>>[];
-  for (final elem in shaderPaths) {
-    final modFilename = p.basename(elem);
-    final moveName = p.join(
-      targetPath,
-      modFilename,
-    );
-    futures.add(File(elem).copy(moveName));
-  }
-  await Future.wait(futures);
-}
-
-Future<void> _deleteShaders(
-  final String targetPath,
-  final List<String> shaderPaths,
-) async {
-  await _shaderFinder(
-    targetPath,
-    shaderPaths,
-    (final found) => Future(() => File(found).deleteSync()),
-  );
-}
-
-Future<ModToggleResult> _disable({
-  required final GameConfig gameConfig,
-  required final String modPath,
-}) async {
-  if (!Directory(modPath).existsSync()) {
-    return const ModToggleResult.modNotFound();
-  }
-  if (!modPath.pIsEnabled) {
-    return const ModToggleResult.alreadyDisabled();
-  }
-  final renameTarget = modPath.pDisabledForm;
-  if (Directory(renameTarget).existsSync()) {
-    return ModToggleResult.modRenameClash(p.basename(renameTarget));
-  }
-  try {
-    await Directory(modPath).rename(renameTarget);
-  } on PathAccessException {
-    return const ModToggleResult.modRenameFailed();
-  }
-  final modShaderPath = p.join(
-    renameTarget,
-    _kShaderFixes,
-  );
-  final List<String> shaderFilenames;
-  try {
-    shaderFilenames = await _pathsUnder<File>(modShaderPath);
-  } on PathNotFoundException {
-    return const ModToggleResult.modHasNoShaders();
-  }
-  final modExecFile = gameConfig.modExecFile;
-  final shaderFixesPath = modExecFile != null
-      ? p.join(
-          p.dirname(modExecFile),
-          _kShaderFixes,
-        )
-      : null;
-  if (shaderFixesPath == null) {
-    return const ModToggleResult.done();
-  }
-  try {
-    await _deleteShaders(shaderFixesPath, shaderFilenames);
-  } on FileSystemException {
-    try {
-      await _copyShaders(shaderFixesPath, shaderFilenames);
-    } on FileSystemException {
-      return const ModToggleResult.shaderCleanupFailed();
-    }
-    return const ModToggleResult.shaderDeleteFailed();
-  }
-  return const ModToggleResult.done();
-}
-
-Future<ModToggleResult> _enable({
-  required final GameConfig gameConfig,
-  required final String modPath,
-}) async {
-  if (!Directory(modPath).existsSync()) {
-    return const ModToggleResult.modNotFound();
-  }
-  if (modPath.pIsEnabled) {
-    return const ModToggleResult.alreadyEnabled();
-  }
-  final renameTarget = modPath.pEnabledForm;
-  if (Directory(renameTarget).existsSync()) {
-    return ModToggleResult.modRenameClash(p.basename(renameTarget));
-  }
-  try {
-    await Directory(modPath).rename(renameTarget);
-  } on PathAccessException {
-    return const ModToggleResult.modRenameFailed();
-  }
-  final modShaderPath = p.join(
-    renameTarget,
-    _kShaderFixes,
-  );
-  final List<String> shaderFilenames;
-  try {
-    shaderFilenames = await _pathsUnder<File>(modShaderPath);
-  } on PathNotFoundException {
-    return const ModToggleResult.modHasNoShaders();
-  }
-  final modExecFile = gameConfig.modExecFile;
-  final shaderFixesPath = modExecFile != null
-      ? p.join(
-          p.dirname(modExecFile),
-          _kShaderFixes,
-        )
-      : null;
-  if (shaderFixesPath == null) {
-    return const ModToggleResult.done();
-  }
-  try {
-    await _copyShaders(shaderFixesPath, shaderFilenames);
-  } on FileSystemException {
-    try {
-      await _deleteShaders(shaderFixesPath, shaderFilenames);
-    } on FileSystemException {
-      return const ModToggleResult.shaderCleanupFailed();
-    }
-    return const ModToggleResult.shaderCopyFailed();
-  }
-  return const ModToggleResult.done();
-}
-
-Future<String?> _findPreviewPath(
-  final String path, {
-  final String name = 'preview',
-}) async {
-  final paths = await _pathsUnder<File>(path);
-  for (final entityPath in paths) {
-    final basename = p.basenameWithoutExtension(entityPath);
-    if (!p.equals(basename, name)) {
-      continue;
-    }
-    final ext = p.extension(entityPath);
-    for (final previewExt in _previewExtensions) {
-      if (p.equals(ext, previewExt)) {
-        return entityPath;
-      }
-    }
-  }
-  return null;
-}
-
 Future<String> _getNonCollidingModName(
   final String categoryPath,
   final String name,
 ) async {
   final sanitizedName = _sanitizeString(name);
-  final enabledFormDirNames = (await _pathsUnder<Directory>(categoryPath))
+  final enabledFormDirNames = (await pathsUnder<Directory>(categoryPath))
       .map((final e) => p.basename(e.pEnabledForm))
       .toSet();
   var counter = 0;
@@ -322,34 +150,9 @@ Future<void> _moveDir({
   }
 }
 
-Future<List<String>> _pathsUnder<T extends FileSystemEntity>(
-  final String path,
-) async {
-  final dir = Directory(path);
-  if (!dir.existsSync()) {
-    return [];
-  }
-  final res =
-      dir.list().whereType<T>().map((final event) => event.path).toList();
-  return res;
-}
-
 String _sanitizeString(final String name) {
   final sanitizedName = name.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
   return sanitizedName.trim();
-}
-
-Future<void> _shaderFinder(
-  final String targetPath,
-  final List<String> shaderPaths,
-  final Future<void> Function(String foundPath) onFound,
-) async {
-  final list = await _pathsUnder<File>(targetPath);
-  final programShadersMap = {for (final e in list) p.basename(e): e};
-  final shaderSets = shaderPaths.map(p.basename).toSet();
-  final inter = programShadersMap.keys.toSet().intersection(shaderSets);
-  final futures = inter.map((final elem) => onFound(programShadersMap[elem]!));
-  await Future.wait(futures);
 }
 
 class FilesystemImpl implements Filesystem {
@@ -362,39 +165,6 @@ class FilesystemImpl implements Filesystem {
         int
       )> _watchStream = {};
   @override
-  Future<ModToggleResult> disableDirect({
-    required final GameConfig gameConfig,
-    required final String categoryName,
-    required final String modName,
-  }) =>
-      _disable(
-        gameConfig: gameConfig,
-        modPath: p.join(
-          gameConfig.modRoot!,
-          categoryName,
-          modName,
-        ),
-      );
-  @override
-  Future<ModToggleResult> disableMod({
-    required final GameConfig gameConfig,
-    required final Mod mod,
-  }) =>
-      _disable(gameConfig: gameConfig, modPath: mod.path);
-  @override
-  Future<ModToggleResult> disableOf({
-    required final GameConfig gameConfig,
-    required final ModCategory category,
-    required final String modName,
-  }) =>
-      _disable(
-        gameConfig: gameConfig,
-        modPath: p.join(
-          category.path,
-          modName,
-        ),
-      );
-  @override
   Future<void> dispose() async {
     await Future.wait<Object?>(
       _watchStream.values
@@ -402,65 +172,6 @@ class FilesystemImpl implements Filesystem {
     );
   }
 
-  @override
-  Future<ModToggleResult> enableDirect({
-    required final GameConfig gameConfig,
-    required final String categoryName,
-    required final String modName,
-  }) =>
-      _enable(
-        gameConfig: gameConfig,
-        modPath: p.join(
-          gameConfig.modRoot!,
-          categoryName,
-          modName.pDisabledForm,
-        ),
-      );
-  @override
-  Future<ModToggleResult> enableMod({
-    required final GameConfig gameConfig,
-    required final Mod mod,
-  }) =>
-      _enable(gameConfig: gameConfig, modPath: mod.path);
-  @override
-  Future<ModToggleResult> enableOf({
-    required final GameConfig gameConfig,
-    required final ModCategory category,
-    required final String modName,
-  }) =>
-      _enable(
-        gameConfig: gameConfig,
-        modPath: p.join(
-          category.path,
-          modName.pDisabledForm,
-        ),
-      );
-  @override
-  Stream<List<ModCategory>> getCategories(
-    final Stream<FileSystemEvent?> stream,
-    final String modRoot,
-  ) =>
-      stream.asyncMap(
-        (final event) async => (await _pathsUnder<Directory>(modRoot))
-            .map((final e) => ModCategory(path: e, name: p.basename(e)))
-            .toList()
-          ..sort((final a, final b) => compareNatural(a.name, b.name)),
-      );
-  @override
-  Stream<String?> getFolderIconStream(
-    final Stream<FileSystemEvent?> stream,
-    final String path,
-    final ModCategory category,
-  ) =>
-      stream.debounceTime(const Duration(milliseconds: 100)).asyncMap(
-        (final event) async {
-          final s = await _findPreviewPath(
-            path,
-            name: category.name,
-          );
-          return s;
-        },
-      );
   @override
   Stream<List<Mod>> getModsInCategory(
     final Stream<FileSystemEvent?> stream,
@@ -470,7 +181,7 @@ class FilesystemImpl implements Filesystem {
           .where((final event) => event is! FileSystemModifyEvent)
           .debounceTime(const Duration(milliseconds: 100))
           .asyncMap(
-            (final _) async => (await _pathsUnder<Directory>(category.path))
+            (final _) async => (await pathsUnder<Directory>(category.path))
                 .map(
                   (final e) => Mod(
                     path: e,
@@ -567,7 +278,7 @@ class FilesystemImpl implements Filesystem {
     final Mod mod,
   ) =>
       stream.asyncMap(
-        (final event) async => (await _pathsUnder<File>(mod.path))
+        (final event) async => (await pathsUnder<File>(mod.path))
             .where(
               (final e) => p.equals(p.extension(e), '.ini') && e.pIsEnabled,
             )
@@ -587,7 +298,7 @@ class FilesystemImpl implements Filesystem {
   ) =>
       stream.asyncMap(
         (final event) async {
-          final previewName = await _findPreviewPath(mod.path);
+          final previewName = await findPreviewPath(mod.path);
           return previewName;
         },
       );
@@ -776,21 +487,6 @@ extension _CopyDirectory on Directory {
 }
 
 extension _PathOpString on String {
-  String get pDisabledForm {
-    var baseName = p.basename(this);
-    if (baseName.pIsEnabled) {
-      baseName = '$_disabledHeader ${baseName.trimLeft()}';
-    }
-    if (p.split(this).length == 1) {
-      return baseName;
-    } else {
-      return p.join(
-        p.dirname(this),
-        baseName,
-      );
-    }
-  }
-
   String get pEnabledForm {
     var baseName = p.basename(this);
     while (!baseName.pIsEnabled) {

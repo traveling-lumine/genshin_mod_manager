@@ -1,6 +1,7 @@
 import 'dart:async';
 import '../../../app_config/l0/entity/game_config.dart';
 import '../api/filesystem.dart';
+import '../api/mod_toggler.dart';
 import '../entity/mod_category.dart';
 
 Future<void> setLocalPresetUseCase({
@@ -8,6 +9,7 @@ Future<void> setLocalPresetUseCase({
   required final ModCategory category,
   required final String name,
   required final Filesystem fs,
+  required final ModToggler tg,
 }) async {
   final directives =
       gameConfig.presetData.local[category.name]?.bundledPresets[name]?.mods;
@@ -22,7 +24,7 @@ Future<void> setLocalPresetUseCase({
       currentEnabled.where((final e) => !directives.contains(e));
   final futures = <Future<void>>[];
   for (final mod in shouldBeOff) {
-    final future = fs.disableOf(
+    final future = tg.disableOf(
       gameConfig: gameConfig,
       modName: mod,
       category: category,
@@ -31,7 +33,7 @@ Future<void> setLocalPresetUseCase({
   }
   final shouldBeOn = directives.where((final e) => !currentEnabled.contains(e));
   for (final mod in shouldBeOn) {
-    final future = fs.enableOf(
+    final future = tg.enableOf(
       gameConfig: gameConfig,
       category: category,
       modName: mod,

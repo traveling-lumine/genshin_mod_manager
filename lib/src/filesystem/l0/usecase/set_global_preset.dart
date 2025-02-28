@@ -3,11 +3,13 @@ import 'dart:async';
 import '../../../app_config/l0/entity/game_config.dart';
 import '../../../app_config/l0/entity/preset.dart';
 import '../api/filesystem.dart';
+import '../api/mod_toggler.dart';
 
 Future<void> setGlobalPresetUseCase({
   required final GameConfig gameConfig,
   required final String name,
   required final Filesystem fs,
+  required final ModToggler tg,
 }) async {
   final data = gameConfig.presetData.global[name];
   if (data == null) {
@@ -28,7 +30,7 @@ Future<void> setGlobalPresetUseCase({
         currentEnabled.where((final e) => !modsToEnable.contains(e));
     final futures = <Future<void>>[];
     for (final mod in shouldBeOff) {
-      final future = fs.disableDirect(
+      final future = tg.disableDirect(
         gameConfig: gameConfig,
         categoryName: categoryName,
         modName: mod,
@@ -38,7 +40,7 @@ Future<void> setGlobalPresetUseCase({
     final shouldBeOn =
         modsToEnable.where((final e) => !currentEnabled.contains(e));
     for (final mod in shouldBeOn) {
-      final future = fs.enableDirect(
+      final future = tg.enableDirect(
         gameConfig: gameConfig,
         categoryName: categoryName,
         modName: mod,

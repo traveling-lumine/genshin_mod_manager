@@ -10,7 +10,7 @@ import '../../filesystem/l0/api/filesystem.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/entity/mod_category.dart';
 import '../../filesystem/l1/di/filesystem.dart';
-import '../../filesystem/l1/di/fs_watcher.dart';
+import '../../filesystem/l1/di/folder_icon_path.dart';
 import '../../filesystem/l1/di/mods_in_category.dart';
 import '../util/display_infobar.dart';
 import 'category_drop_target.dart';

@@ -118,7 +118,11 @@ class _MyAppState extends ConsumerState<MyApp> {
                 builder: (final context, final state) {
                   final categoryName =
                       state.pathParameters[RouteParams.category.name]!;
-                  return NahidaStoreRoute(categoryName: categoryName);
+                  return CategoryProviderWidget(
+                    builder: (final category) =>
+                        NahidaStoreRoute(category: category),
+                    categoryName: categoryName,
+                  );
                 },
               ),
             ],

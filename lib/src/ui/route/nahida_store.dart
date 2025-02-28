@@ -14,7 +14,6 @@ import '../../l10n/app_localizations.dart';
 import '../../nahida/l0/entity/nahida_element.dart';
 import '../../nahida/l0/usecase/get_element_page.dart';
 import '../../nahida/l1/di/nahida_repo.dart';
-import '../constants.dart';
 import '../util/debouncer.dart';
 import '../util/tag_parser.dart';
 import '../widget/intrinsic_command_bar.dart';
@@ -23,40 +22,28 @@ import '../widget/thick_scrollbar.dart';
 import '../widget/third_party/flutter/sliver_grid_delegates/min_extent_delegate.dart';
 
 class NahidaStoreRoute extends HookConsumerWidget {
-  NahidaStoreRoute({required this.categoryName, super.key});
-  final String categoryName;
+  NahidaStoreRoute({required this.category, super.key});
+  final ModCategory category;
   final _debouncer = Debouncer(const Duration(milliseconds: 700));
   final PagingController<int, NahidaliveElement?> _pagingController =
       PagingController(firstPageKey: 1);
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    ref.listen(categoriesProvider, (final previous, final next) {
-      final isIn = next.requireValue.any((final e) => e.name == categoryName);
-      if (!isIn) {
-        context.goNamed(RouteNames.home.name);
-      }
-    });
-
     final notifier = useState<TagParseElement?>(null);
-
     useEffect(
       () {
         _pagingController.addPageRequestListener(
-          (final pageKey) async => _requestPage(ref, pageKey, notifier),
+          (final pageKey) async {
+            await _requestPage(ref, pageKey, notifier);
+          },
         );
 
         return _pagingController.dispose;
       },
       [_pagingController],
     );
-
-    final initCategory = ref
-        .watch(categoriesProvider)
-        .requireValue
-        .firstWhere((final e) => e.name == categoryName);
-
-    final category = useState(initCategory);
+    final category = useState(this.category);
 
     return ScaffoldPage.withPadding(
       header: PageHeader(
@@ -88,44 +75,10 @@ class NahidaStoreRoute extends HookConsumerWidget {
     );
   }
 
-  Future<void> _requestPage(
-    final WidgetRef ref,
-    final int pageKey,
-    final ValueNotifier<TagParseElement?> notifier,
-  ) async {
-    final List<NahidaliveElement> newItems;
-    try {
-      newItems = await getNahidaElementPageUseCase(
-        repository: ref.read(nahidaRepositoryProvider),
-        pageNum: pageKey,
-      );
-    } on Exception catch (error) {
-      _pagingController.error = error;
-      return;
-    }
-
-    final filteredItems = newItems
-        .where((final element) => _dataFilter(notifier.value, element))
-        .toList();
-
-    if (newItems.isEmpty) {
-      _pagingController.appendLastPage(filteredItems);
-      return;
-    }
-
-    final nextPageKey = pageKey + 1;
-    if (pageKey == 1 && filteredItems.isEmpty) {
-      _pagingController.appendPage([null], nextPageKey);
-      return;
-    }
-
-    _pagingController.appendPage(filteredItems, nextPageKey);
-  }
-
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('categoryName', categoryName));
+    properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
 
   Widget _buildCommandBar(final ValueNotifier<TagParseElement?> notifier) =>
@@ -265,5 +218,39 @@ class NahidaStoreRoute extends HookConsumerWidget {
       return e.toString();
     }
     return null;
+  }
+
+  Future<void> _requestPage(
+    final WidgetRef ref,
+    final int pageKey,
+    final ValueNotifier<TagParseElement?> notifier,
+  ) async {
+    final List<NahidaliveElement> newItems;
+    try {
+      newItems = await getNahidaElementPageUseCase(
+        repository: ref.read(nahidaRepositoryProvider),
+        pageNum: pageKey,
+      );
+    } on Exception catch (error) {
+      _pagingController.error = error;
+      return;
+    }
+
+    final filteredItems = newItems
+        .where((final element) => _dataFilter(notifier.value, element))
+        .toList();
+
+    if (newItems.isEmpty) {
+      _pagingController.appendLastPage(filteredItems);
+      return;
+    }
+
+    final nextPageKey = pageKey + 1;
+    if (pageKey == 1 && filteredItems.isEmpty) {
+      _pagingController.appendPage([null], nextPageKey);
+      return;
+    }
+
+    _pagingController.appendPage(filteredItems, nextPageKey);
   }
 }

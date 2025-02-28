@@ -19,6 +19,7 @@ import '../../filesystem/l0/usecase/add_local_preset.dart';
 import '../../filesystem/l0/usecase/set_global_preset.dart';
 import '../../filesystem/l0/usecase/set_local_preset.dart';
 import '../../filesystem/l1/di/filesystem.dart';
+import '../../filesystem/l1/di/mod_toggler.dart';
 import '../../filesystem/l1/di/preset.dart';
 
 /// A widget that provides a control for presets.
@@ -248,11 +249,13 @@ class _PresetComboBox extends ConsumerWidget {
                       .obtainValue(games)
                       .currentGameConfig;
                   final read = ref.read(filesystemProvider);
+                  final tg = ref.read(modTogglerProvider);
                   if (isLocal) {
                     await setLocalPresetUseCase(
                       gameConfig: currentGameConfig2,
                       category: category!,
                       name: value,
+                      tg: tg,
                       fs: read,
                     );
                   } else {
@@ -260,6 +263,7 @@ class _PresetComboBox extends ConsumerWidget {
                       gameConfig: currentGameConfig2,
                       name: value,
                       fs: read,
+                      tg: tg,
                     );
                   }
                 },
