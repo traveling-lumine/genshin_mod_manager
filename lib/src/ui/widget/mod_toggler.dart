@@ -53,7 +53,7 @@ class ModToggler extends ConsumerWidget {
           mod: mod,
         );
       } else {
-        toggleResult = await fs.disableMod(
+        toggleResult = await fs.enableMod(
           gameConfig: gameConfig,
           mod: mod,
         );
