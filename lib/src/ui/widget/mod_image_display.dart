@@ -10,7 +10,7 @@ import 'package:pasteboard/pasteboard.dart';
 
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l1/di/filesystem.dart';
-import '../../filesystem/l1/di/mod_card.dart';
+import '../../filesystem/l1/di/mod_preview_path.dart';
 import 'latest_image.dart';
 import 'mod_flyout_image.dart';
 

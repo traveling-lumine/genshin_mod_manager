@@ -13,13 +13,11 @@ import '../../../app_config/l0/entity/game_config.dart';
 import '../../l0/api/filesystem.dart';
 import '../../l0/api/watcher.dart';
 import '../../l0/entity/folder_move_result.dart';
-import '../../l0/entity/ini.dart';
 import '../../l0/entity/mod.dart';
 import '../../l0/entity/mod_category.dart';
 import '../helper.dart';
 import 'watcher.dart';
 
-const _disabledHeader = 'DISABLED';
 Archive _collapseArchiveFolder(final Archive archive) {
   final longestCommonPrefix1 = _longestCommonPrefix(archive);
   final longestCommonLen =
@@ -173,26 +171,6 @@ class FilesystemImpl implements Filesystem {
   }
 
   @override
-  Stream<List<Mod>> getModsInCategory(
-    final Stream<FileSystemEvent?> stream,
-    final ModCategory category,
-  ) =>
-      stream
-          .where((final event) => event is! FileSystemModifyEvent)
-          .debounceTime(const Duration(milliseconds: 100))
-          .asyncMap(
-            (final _) async => (await pathsUnder<Directory>(category.path))
-                .map(
-                  (final e) => Mod(
-                    path: e,
-                    displayName: p.basename(e.pEnabledForm),
-                    isEnabled: e.pIsEnabled,
-                    category: category,
-                  ),
-                )
-                .toList(),
-          );
-  @override
   Future<List<String>> getSubDirNames({
     required final String path,
     final bool onlyEnabled = false,
@@ -272,36 +250,6 @@ class FilesystemImpl implements Filesystem {
     return const ImportResult.done();
   }
 
-  @override
-  Stream<List<IniFile>> iniPathsStream(
-    final Stream<FileSystemEvent?> stream,
-    final Mod mod,
-  ) =>
-      stream.asyncMap(
-        (final event) async => (await pathsUnder<File>(mod.path))
-            .where(
-              (final e) => p.equals(p.extension(e), '.ini') && e.pIsEnabled,
-            )
-            .map(
-              (final e) => IniFile(
-                path: e,
-                name: p.basename(e),
-                mod: mod,
-              ),
-            )
-            .toList(),
-      );
-  @override
-  Stream<String?> modPreviewPathStream(
-    final Stream<FileSystemEvent?> stream,
-    final Mod mod,
-  ) =>
-      stream.asyncMap(
-        (final event) async {
-          final previewName = await findPreviewPath(mod.path);
-          return previewName;
-        },
-      );
   @override
   Future<void> moveModInto({
     required final ModCategory category,
@@ -484,24 +432,4 @@ extension _CopyDirectory on Directory {
   Future<void> copyToPath(final String dest) async {
     await _copyDirectory(this, dest);
   }
-}
-
-extension _PathOpString on String {
-  String get pEnabledForm {
-    var baseName = p.basename(this);
-    while (!baseName.pIsEnabled) {
-      baseName = baseName.substring(_disabledHeader.length).trimLeft();
-    }
-    if (p.split(this).length == 1) {
-      return baseName;
-    } else {
-      return p.join(
-        p.dirname(this),
-        baseName,
-      );
-    }
-  }
-
-  bool get pIsEnabled =>
-      !p.basename(this).toLowerCase().startsWith(_disabledHeader.toLowerCase());
 }

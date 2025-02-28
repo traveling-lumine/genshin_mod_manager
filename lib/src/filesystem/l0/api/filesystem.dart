@@ -4,18 +4,12 @@ import 'dart:typed_data';
 
 import '../../../app_config/l0/entity/game_config.dart';
 import '../entity/folder_move_result.dart';
-import '../entity/ini.dart';
 import '../entity/mod.dart';
 import '../entity/mod_category.dart';
 import 'disposable.dart';
 import 'watcher.dart';
 
 abstract interface class Filesystem implements Disposable {
-  Stream<List<Mod>> getModsInCategory(
-    final Stream<FileSystemEvent?> stream,
-    final ModCategory category,
-  );
-
   Future<List<String>> getSubDirNames({
     required final String path,
     final bool onlyEnabled,
@@ -39,16 +33,6 @@ abstract interface class Filesystem implements Disposable {
     final ModCategory categoryPath,
     final String dropPath,
     final Uint8List content,
-  );
-
-  Stream<List<IniFile>> iniPathsStream(
-    final Stream<FileSystemEvent?> stream,
-    final Mod mod,
-  );
-
-  Stream<String?> modPreviewPathStream(
-    final Stream<FileSystemEvent?> stream,
-    final Mod mod,
   );
 
   Future<void> moveModInto({

@@ -10,7 +10,7 @@ import '../../app_config/l1/di/app_config_facade.dart';
 import '../../filesystem/l0/entity/ini.dart';
 import '../../filesystem/l0/entity/mod.dart';
 import '../../filesystem/l0/usecase/open_folder.dart';
-import '../../filesystem/l1/di/mod_card.dart';
+import '../../filesystem/l1/di/ini_paths.dart';
 import '../util/display_infobar.dart';
 import '../util/show_prompt_dialog.dart';
 import 'ini_widget.dart';

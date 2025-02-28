@@ -9,7 +9,6 @@ import '../../l0/entity/mod_category.dart';
 import '../../l0/entity/mod_toggle_result.dart';
 import '../helper.dart';
 
-const _disabledHeader = 'DISABLED';
 const _kShaderFixes = 'ShaderFixes';
 
 Future<void> _copyShaders(
@@ -233,39 +232,4 @@ class ModTogglerImpl implements ModToggler {
           modName.pDisabledForm,
         ),
       );
-}
-
-extension _PathOpString on String {
-  String get pDisabledForm {
-    var baseName = p.basename(this);
-    if (baseName.pIsEnabled) {
-      baseName = '$_disabledHeader ${baseName.trimLeft()}';
-    }
-    if (p.split(this).length == 1) {
-      return baseName;
-    } else {
-      return p.join(
-        p.dirname(this),
-        baseName,
-      );
-    }
-  }
-
-  String get pEnabledForm {
-    var baseName = p.basename(this);
-    while (!baseName.pIsEnabled) {
-      baseName = baseName.substring(_disabledHeader.length).trimLeft();
-    }
-    if (p.split(this).length == 1) {
-      return baseName;
-    } else {
-      return p.join(
-        p.dirname(this),
-        baseName,
-      );
-    }
-  }
-
-  bool get pIsEnabled =>
-      !p.basename(this).toLowerCase().startsWith(_disabledHeader.toLowerCase());
 }
