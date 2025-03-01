@@ -26,13 +26,17 @@ class ModFlyoutImage extends HookWidget {
       controller: flyoutController,
       child: Builder(
         builder: (final context) => GestureDetector(
-          onLongPress: () async => _onImageLongPress(context, imagePath),
-          onSecondaryTapUp: (final details) async => _onImageRightClick(
-            context,
-            details,
-            imagePath,
-            flyoutController,
-          ),
+          onLongPress: () async {
+            await _onImageLongPress(context, imagePath);
+          },
+          onSecondaryTapUp: (final details) async {
+            await _onImageRightClick(
+              context,
+              details,
+              imagePath,
+              flyoutController,
+            );
+          },
           child: Hero(
             tag: imagePath,
             child: LatestImage(path: imagePath),

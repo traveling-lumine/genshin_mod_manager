@@ -36,13 +36,6 @@ class TimeAwareImage extends ImageProvider<TimeAwareImageKey> {
   final int mTime;
 
   @override
-  ImageStreamCompleter loadBuffer(
-    final TimeAwareImageKey key,
-    final DecoderBufferCallback decode,
-  ) =>
-      imageProvider.loadBuffer(key._providerCacheKey, decode);
-
-  @override
   ImageStreamCompleter loadImage(
     final TimeAwareImageKey key,
     final ImageDecoderCallback decode,

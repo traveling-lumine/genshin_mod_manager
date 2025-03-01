@@ -10,7 +10,7 @@ class SharedPreferenceStorage {
 
   bool? getBool(final String key) => _sharedPreferences.getBool(key);
 
-  void setBool(final String key, final bool value) {
+  void setBool(final String key, {required final bool value}) {
     unawaited(_sharedPreferences.setBool(key, value));
   }
 

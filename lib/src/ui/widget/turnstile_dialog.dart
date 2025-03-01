@@ -64,23 +64,9 @@ class TurnstileDialog extends StatelessWidget {
       );
 }
 
-class _TurnstileWebview extends StatefulWidget {
-  const _TurnstileWebview();
-
-  @override
-  State<_TurnstileWebview> createState() => __TurnstileWebviewState();
-}
-
 class __TurnstileWebviewState extends State<_TurnstileWebview>
     with ProtocolListener {
   final _controller = WebviewController();
-
-  @override
-  void onProtocolUrlReceived(final String url) {
-    final uri = Uri.parse(url);
-    final token = uri.queryParameters['token'];
-    Navigator.of(context).pop(token);
-  }
 
   @override
   Widget build(final BuildContext context) {
@@ -90,15 +76,24 @@ class __TurnstileWebviewState extends State<_TurnstileWebview>
       return Webview(
         _controller,
         permissionRequested:
-            (final url, final permissionKind, final isUserInitiated) async =>
-                _onPermissionRequested(
-          context,
-          url,
-          permissionKind,
-          isUserInitiated,
-        ),
+            (final url, final permissionKind, final isUserInitiated) async {
+          final webviewPermissionDecision = await _onPermissionRequested(
+            context,
+            url,
+            permissionKind,
+            isUserInitiated,
+          );
+          return webviewPermissionDecision;
+        },
       );
     }
+  }
+
+  @override
+  void dispose() {
+    unawaited(_controller.dispose());
+    protocolHandler.removeListener(this);
+    super.dispose();
   }
 
   Future<void> initPlatformState() async {
@@ -131,6 +126,13 @@ console.log = function(message) {
     unawaited(initPlatformState());
   }
 
+  @override
+  void onProtocolUrlReceived(final String url) {
+    final uri = Uri.parse(url);
+    final token = uri.queryParameters['token'];
+    Navigator.of(context).pop(token);
+  }
+
   Future<WebviewPermissionDecision> _onPermissionRequested(
     final BuildContext context,
     final String url,
@@ -158,11 +160,11 @@ console.log = function(message) {
     );
     return decision ?? WebviewPermissionDecision.none;
   }
+}
+
+class _TurnstileWebview extends StatefulWidget {
+  const _TurnstileWebview();
 
   @override
-  void dispose() {
-    unawaited(_controller.dispose());
-    protocolHandler.removeListener(this);
-    super.dispose();
-  }
+  State<_TurnstileWebview> createState() => __TurnstileWebviewState();
 }

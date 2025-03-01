@@ -10,6 +10,7 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+    - "**/third_party/**/*.dart"
     - "lib/oss_licenses.dart"
 
 linter:

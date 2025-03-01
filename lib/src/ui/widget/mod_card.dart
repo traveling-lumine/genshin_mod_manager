@@ -111,7 +111,9 @@ class ModCard extends StatelessWidget {
           ),
           _buildIconButton(
             icon: FluentIcons.delete,
-            onPressed: () async => _onDeletePressed(context),
+            onPressed: () async {
+              await _onDeletePressed(context);
+            },
           ),
           _buildIconButton(
             icon: FluentIcons.folder_open,

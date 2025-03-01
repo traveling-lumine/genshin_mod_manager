@@ -35,7 +35,9 @@ class ModImageDisplay extends ConsumerWidget {
                   const SizedBox(height: 4),
                   RepaintBoundary(
                     child: Button(
-                      onPressed: () async => _onPaste(context, ref),
+                      onPressed: () async {
+                        await _onPaste(context, ref);
+                      },
                       child: const Text('Paste'),
                     ),
                   ),

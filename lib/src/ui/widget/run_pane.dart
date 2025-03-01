@@ -29,7 +29,7 @@ class RunAndExitPaneAction extends PaneItemAction {
   static Future<void> _showRunAndExitFlyout(
     final FlyoutController flyoutController,
     final Future<void> Function() onTap,
-  ) async =>
+  ) =>
       flyoutController.showFlyout(
         builder: (final context) => FlyoutContent(
           child: IntrinsicWidth(

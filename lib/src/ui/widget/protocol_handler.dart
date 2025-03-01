@@ -40,7 +40,7 @@ String _convertUuid(final String uuid) {
 Future<NahidaliveElement> _getElement(
   final WidgetRef ref,
   final String rawUuid,
-) async =>
+) =>
     getNahidaElementUseCase(
       repository: ref.read(nahidaRepositoryProvider),
       uuid: _convertUuid(rawUuid),
@@ -197,7 +197,7 @@ class _ProtocolDialog extends HookConsumerWidget {
     final memoizedFuture =
         // Using future itself
         // ignore: discarded_futures
-        useMemoized(() => Future(() async => _getElement(ref, rawUuid)));
+        useMemoized(() => _getElement(ref, rawUuid));
     final elemGetState = useFuture(memoizedFuture);
 
     final categories = ref.watch(categoriesProvider);
@@ -227,8 +227,14 @@ class _ProtocolDialog extends HookConsumerWidget {
         ),
         FilledButton(
           onPressed: elemGetState.hasData && value != null
-              ? () async =>
-                  _onConfirm(ref, value, context, elemGetState.requireData)
+              ? () async {
+                  await _onConfirm(
+                    ref,
+                    value,
+                    context,
+                    elemGetState.requireData,
+                  );
+                }
               : null,
           child: Text(
             elemGetState.hasError

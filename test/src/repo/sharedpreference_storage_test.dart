@@ -17,10 +17,10 @@ void main() {
         expect(storage.getBool('key'), isNull);
       });
       test('setBool', () {
-        storage.setBool('key', true);
+        storage.setBool('key', value: true);
       });
       test('setBool and getBool', () {
-        storage.setBool('key', true);
+        storage.setBool('key',  value: true);
         expect(storage.getBool('key'), isTrue);
       });
     },

@@ -11,7 +11,10 @@ part 'mod_preview_path.g.dart';
 
 @riverpod
 Stream<String?> modPreviewPath(final Ref ref, final Mod mod) {
-  final watch = ModPreviewPathImpl(mod: mod, watcher: ref.watch(directoryWatchProvider(mod.path)));
+  final watch = ModPreviewPathImpl(
+    mod: mod,
+    watcher: ref.watch(directoryWatchProvider(mod.path)),
+  );
   ref.onDispose(watch.dispose);
   return watch.previewPath;
 }

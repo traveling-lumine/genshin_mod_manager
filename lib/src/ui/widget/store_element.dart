@@ -233,7 +233,9 @@ class StoreElement extends ConsumerWidget {
           ),
           Center(
             child: GestureDetector(
-              onTap: () async => _showImageDialog(context, imageProvider),
+              onTap: () async {
+                await _showImageDialog(context, imageProvider);
+              },
               child: AutoResizeImage(image: imageProvider, fit: BoxFit.contain),
             ),
           ),
