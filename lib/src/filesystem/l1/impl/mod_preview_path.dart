@@ -21,6 +21,7 @@ class ModPreviewPathImpl implements ModPreviewPath {
         streamController.add(value);
         streamSubscription = watcher.stream
             .asyncMap((final event) => findPreviewPath(mod.path))
+            .distinct()
             .listen(
               streamController.add,
               onError: streamController.addError,

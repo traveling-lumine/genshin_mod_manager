@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as p;
 
 import '../../l0/api/mods_in_category.dart';
@@ -29,6 +30,7 @@ class ModsInCategoryImpl implements ModsInCategory {
               .asyncMap(
                 (final _) => getValue(category),
               )
+              .distinct(const ListEquality<Mod>().equals)
               .listen(
                 streamController.add,
                 onError: streamController.addError,

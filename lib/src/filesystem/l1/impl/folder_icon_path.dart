@@ -48,6 +48,7 @@ class FolderIconPathImpl implements FolderIconPath {
                     name: category.name,
                   ),
                 )
+                .distinct()
                 .listen(
                   streamController.add,
                   onError: streamController.addError,

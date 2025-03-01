@@ -28,6 +28,7 @@ class CategoryRepoImpl implements CategoryRepo {
               .asyncMap(
                 (final event) => readCategories(modRoot),
               )
+              .distinct(const ListEquality<ModCategory>().equals)
               .listen(
                 streamController.add,
                 onError: streamController.addError,

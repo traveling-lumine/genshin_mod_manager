@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
+
 import '../../l0/api/ini_file_repo.dart';
 import '../../l0/api/watcher.dart';
 import '../../l0/entity/ini.dart';
@@ -147,6 +149,7 @@ class IniFileRepoImpl implements IniFileRepo {
           streamController.add(value);
           subscription = watcher.stream
               .asyncMap((final event) => _getValue(iniFile))
+              .distinct(const ListEquality<IniStatement>().equals)
               .listen(
                 streamController.add,
                 onError: streamController.addError,

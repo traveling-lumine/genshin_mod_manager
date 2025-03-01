@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as p;
 
 import '../../l0/api/ini_paths.dart';
@@ -24,12 +25,14 @@ class IniPathsImpl implements IniPaths {
             return;
           }
           streamController.add(value);
-          subscription =
-              watcher.stream.asyncMap((final event) => getValue(mod)).listen(
-                    streamController.add,
-                    onError: streamController.addError,
-                    onDone: streamController.close,
-                  );
+          subscription = watcher.stream
+              .asyncMap((final event) => getValue(mod))
+              .distinct(const ListEquality<IniFile>().equals)
+              .listen(
+                streamController.add,
+                onError: streamController.addError,
+                onDone: streamController.close,
+              );
         },
       ).onError(streamController.addError),
     );
