@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'preset.freezed.dart';
 
 @freezed
-class PresetData with _$PresetData {
+sealed class PresetData with _$PresetData {
   const factory PresetData({
     required final Map<String, PresetListMap> global,
     required final Map<String, PresetListMap> local,
@@ -48,7 +48,7 @@ class PresetData with _$PresetData {
 }
 
 @freezed
-class PresetList with _$PresetList {
+sealed class PresetList with _$PresetList {
   const factory PresetList({
     required final List<String> mods,
   }) = _PresetList;
@@ -65,7 +65,7 @@ class PresetList with _$PresetList {
 }
 
 @freezed
-class PresetListMap with _$PresetListMap {
+sealed class PresetListMap with _$PresetListMap {
   const factory PresetListMap({
     required final Map<String, PresetList> bundledPresets,
   }) = _PresetListMap;

@@ -10,7 +10,7 @@ part 'nahida_page_result.freezed.dart';
 part 'nahida_page_result.g.dart';
 
 @freezed
-class NahidaPageQueryResult with _$NahidaPageQueryResult {
+sealed class NahidaPageQueryResult with _$NahidaPageQueryResult {
   const factory NahidaPageQueryResult({
     required final bool success,
     final NahidaPageResult? data,
@@ -22,7 +22,7 @@ class NahidaPageQueryResult with _$NahidaPageQueryResult {
 }
 
 @freezed
-class NahidaPageResult with _$NahidaPageResult {
+sealed class NahidaPageResult with _$NahidaPageResult {
   const factory NahidaPageResult({
     @JsonKey(name: 'ps') required final int elementsPerPage,
     @JsonKey(name: 'cp') required final int currentPage,

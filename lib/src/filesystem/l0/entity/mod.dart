@@ -6,7 +6,7 @@ import 'mod_category.dart';
 part 'mod.freezed.dart';
 
 @freezed
-class Mod with _$Mod {
+sealed class Mod with _$Mod {
   const factory Mod({
     required final String path,
     required final String displayName,

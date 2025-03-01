@@ -8,7 +8,7 @@ part 'nahida_element.freezed.dart';
 part 'nahida_element.g.dart';
 
 @freezed
-class NahidaliveElement with _$NahidaliveElement {
+sealed class NahidaliveElement with _$NahidaliveElement {
   const factory NahidaliveElement({
     required final String uuid,
     required final String version,

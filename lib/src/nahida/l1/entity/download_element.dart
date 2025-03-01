@@ -8,7 +8,7 @@ part 'download_element.freezed.dart';
 part 'download_element.g.dart';
 
 @freezed
-class NahidaDownloadUrlElement with _$NahidaDownloadUrlElement {
+sealed class NahidaDownloadUrlElement with _$NahidaDownloadUrlElement {
   const factory NahidaDownloadUrlElement({
     @JsonKey(name: 'presigned_url') final String? downloadUrl,
     @JsonKey(name: 'file_name') final String? fileName,
@@ -22,7 +22,7 @@ class NahidaDownloadUrlElement with _$NahidaDownloadUrlElement {
 }
 
 @freezed
-class NahidaDownloadUrlError with _$NahidaDownloadUrlError {
+sealed class NahidaDownloadUrlError with _$NahidaDownloadUrlError {
   const factory NahidaDownloadUrlError({
     required final String code,
     required final String message,

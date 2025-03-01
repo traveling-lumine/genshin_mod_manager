@@ -6,7 +6,7 @@ import 'mod.dart';
 part 'ini.freezed.dart';
 
 @freezed
-class IniFile with _$IniFile {
+sealed class IniFile with _$IniFile {
   const factory IniFile({
     required final String path,
     required final String name,

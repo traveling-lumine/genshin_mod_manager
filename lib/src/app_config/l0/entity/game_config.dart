@@ -7,7 +7,7 @@ part 'game_config.freezed.dart';
 part 'game_config.g.dart';
 
 @freezed
-class GameConfig with _$GameConfig {
+sealed class GameConfig with _$GameConfig {
   // annotation is valid.
   // ignore: invalid_annotation_target
   @JsonSerializable(explicitToJson: true)
@@ -24,7 +24,7 @@ class GameConfig with _$GameConfig {
 }
 
 @freezed
-class GameConfigMediator with _$GameConfigMediator {
+sealed class GameConfigMediator with _$GameConfigMediator {
   // annotation is valid.
   // ignore: invalid_annotation_target
   @JsonSerializable(explicitToJson: true)
@@ -39,4 +39,10 @@ class GameConfigMediator with _$GameConfigMediator {
   const GameConfigMediator._();
 
   GameConfig get currentGameConfig => gameConfig[current] ?? const GameConfig();
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<GameConfig>('currentGameConfig', currentGameConfig));
+  }
 }

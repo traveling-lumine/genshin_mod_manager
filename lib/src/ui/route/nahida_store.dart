@@ -235,15 +235,14 @@ class NahidaStoreRoute extends HookConsumerWidget {
       _pagingController.error = error;
       return;
     }
+    if (newItems.isEmpty) {
+      _pagingController.appendLastPage(newItems);
+      return;
+    }
 
     final filteredItems = newItems
         .where((final element) => _dataFilter(notifier.value, element))
         .toList();
-
-    if (newItems.isEmpty) {
-      _pagingController.appendLastPage(filteredItems);
-      return;
-    }
 
     final nextPageKey = pageKey + 1;
     if (pageKey == 1 && filteredItems.isEmpty) {

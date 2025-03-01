@@ -24,7 +24,7 @@ class FolderMoveResult {
 }
 
 @freezed
-class FolderMoveExistEntry with _$FolderMoveExistEntry {
+sealed class FolderMoveExistEntry with _$FolderMoveExistEntry {
   const factory FolderMoveExistEntry({
     required final String source,
     required final String destination,

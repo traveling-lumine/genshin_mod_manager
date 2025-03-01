@@ -10,7 +10,7 @@ part 'nahida_single_fetch_result.freezed.dart';
 part 'nahida_single_fetch_result.g.dart';
 
 @freezed
-class NahidaSingleFetchResult with _$NahidaSingleFetchResult {
+sealed class NahidaSingleFetchResult with _$NahidaSingleFetchResult {
   const factory NahidaSingleFetchResult({
     required final bool success,
     @JsonKey(name: 'mod') required final NahidaliveElement result,

@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'mod_category.freezed.dart';
 
 @freezed
-class ModCategory with _$ModCategory {
+sealed class ModCategory with _$ModCategory {
   factory ModCategory({
     required final String path,
     required final String name,

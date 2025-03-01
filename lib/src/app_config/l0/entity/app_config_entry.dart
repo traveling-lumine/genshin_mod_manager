@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'app_config_entry.freezed.dart';
 
 @freezed
-class AppConfigEntry<T> with _$AppConfigEntry<T> {
+sealed class AppConfigEntry<T> with _$AppConfigEntry<T> {
   const factory AppConfigEntry({
     required final String key,
     required final T defaultValue,

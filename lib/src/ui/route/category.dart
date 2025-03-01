@@ -13,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
+import '../../app_config/l0/entity/column_strategy.dart';
 import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../filesystem/l0/entity/mod.dart';
@@ -69,33 +70,35 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
 
   @override
   Widget build(final BuildContext context) {
-    final sliverGridDelegate = ref
+    final sliverGridDelegateVal = ref
         .watch(
           appConfigFacadeProvider
               .select((final value) => value.obtainValue(columnStrategy)),
         )
-        .strategy
-        .when(
-          fixedCount: (final numChildren) =>
-              SliverGridDelegateWithFixedCrossAxisCount(
-            mainAxisExtent: CategoryRoute._mainAxisExtent,
-            crossAxisCount: numChildren,
-            crossAxisSpacing: CategoryRoute._mainAxisSpacing,
-            mainAxisSpacing: CategoryRoute._mainAxisSpacing,
-          ),
-          maxExtent: (final extent) => SliverGridDelegateWithMaxCrossAxisExtent(
-            mainAxisExtent: CategoryRoute._mainAxisExtent,
-            maxCrossAxisExtent: extent.toDouble(),
-            crossAxisSpacing: CategoryRoute._mainAxisSpacing,
-            mainAxisSpacing: CategoryRoute._mainAxisSpacing,
-          ),
-          minExtent: (final extent) => SliverGridDelegateWithMinCrossAxisExtent(
-            mainAxisExtent: CategoryRoute._mainAxisExtent,
-            minCrossAxisExtent: extent.toDouble(),
-            crossAxisSpacing: CategoryRoute._mainAxisSpacing,
-            mainAxisSpacing: CategoryRoute._mainAxisSpacing,
-          ),
-        );
+        .strategy;
+    final sliverGridDelegate = switch (sliverGridDelegateVal) {
+      ColumnStrategyFixedCount(:final numChildren) =>
+        SliverGridDelegateWithFixedCrossAxisCount(
+          mainAxisExtent: CategoryRoute._mainAxisExtent,
+          crossAxisCount: numChildren,
+          crossAxisSpacing: CategoryRoute._mainAxisSpacing,
+          mainAxisSpacing: CategoryRoute._mainAxisSpacing,
+        ),
+      ColumnStrategyMaxExtent(:final extent) =>
+        SliverGridDelegateWithMaxCrossAxisExtent(
+          mainAxisExtent: CategoryRoute._mainAxisExtent,
+          maxCrossAxisExtent: extent.toDouble(),
+          crossAxisSpacing: CategoryRoute._mainAxisSpacing,
+          mainAxisSpacing: CategoryRoute._mainAxisSpacing,
+        ),
+      ColumnStrategyMinExtent(:final extent) =>
+        SliverGridDelegateWithMinCrossAxisExtent(
+          mainAxisExtent: CategoryRoute._mainAxisExtent,
+          minCrossAxisExtent: extent.toDouble(),
+          crossAxisSpacing: CategoryRoute._mainAxisSpacing,
+          mainAxisSpacing: CategoryRoute._mainAxisSpacing,
+        ),
+    };
 
     return CategoryDropTarget(
       category: widget.category,

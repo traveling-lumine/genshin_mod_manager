@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'version.freezed.dart';
 
 @freezed
-class Version with _$Version {
+sealed class Version with _$Version {
   factory Version({
     required final int major,
     required final int minor,
@@ -65,5 +65,11 @@ class Version with _$Version {
       return true;
     }
     return thisBuild > otherBuild;
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('formatted', formatted));
   }
 }

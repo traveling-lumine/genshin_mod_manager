@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'app_config.freezed.dart';
 
 @freezed
-class AppConfig with _$AppConfig {
+sealed class AppConfig with _$AppConfig {
   const factory AppConfig(final Map<String, dynamic> entry) = _AppConfig;
   const AppConfig._();
 
