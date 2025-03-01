@@ -6,6 +6,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../l0/api/filesystem.dart';
 import '../../l0/api/folder_icon_path.dart';
+import '../../l0/api/watcher.dart';
 import '../../l0/entity/mod_category.dart';
 import '../helper.dart';
 
@@ -21,35 +22,51 @@ class FolderIconPathImpl implements FolderIconPath {
       currentGame,
     );
 
-    final streamCompleter = Completer<Stream<String?>>();
-    final watcherCompleter = Completer<Future<void> Function()>();
+    final streamController = StreamController<String?>();
+    StreamSubscription<String?>? subscription;
+    Watcher? watcher;
 
     unawaited(
       Directory(iconPath).create(recursive: true).then<void>(
-        (final value) {
-          final watcher = fs.watchDirectory(path: iconPath);
-          final stream = watcher.stream
-              .debounceTime(const Duration(milliseconds: 100))
-              .asyncMap(
-            (final event) async {
-              final s = await findPreviewPath(
-                iconPath,
-                name: category.name,
-              );
-              return s;
-            },
+        (final _) async {
+          final s = await findPreviewPath(
+            iconPath,
+            name: category.name,
           );
+          if (streamController.isClosed) {
+            return;
+          }
+          streamController.add(s);
 
-          streamCompleter.complete(stream);
-          watcherCompleter.complete(watcher.cancel);
+          final lWatcher = watcher = fs.watchDirectory(path: iconPath);
+          try {
+            subscription = lWatcher.stream
+                .debounceTime(const Duration(milliseconds: 100))
+                .asyncMap(
+                  (final _) => findPreviewPath(
+                    iconPath,
+                    name: category.name,
+                  ),
+                )
+                .listen(
+                  streamController.add,
+                  onError: streamController.addError,
+                  onDone: streamController.close,
+                );
+          } on Exception catch (e, st) {
+            await lWatcher.cancel();
+            streamController.addError(e, st);
+          }
         },
-      ).onError(watcherCompleter.completeError),
+      ).onError(streamController.addError),
     );
 
     return FolderIconPathImpl._(
-      path: streamCompleter.future.asStream().asyncExpand((final e) => e),
+      path: streamController.stream,
       onDispose: () async {
-        await (await watcherCompleter.future)();
+        await watcher?.cancel();
+        await subscription?.cancel();
+        await streamController.close();
       },
     );
   }

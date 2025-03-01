@@ -286,7 +286,9 @@ class FilesystemImpl implements Filesystem {
       if (Directory(path).existsSync()) {
         _watchStream[path] = (
           stream.$1,
-          Directory(path).watch().listen(stream.$1.add),
+          Directory(path)
+              .watch()
+              .listen(stream.$1.add, onError: stream.$1.addError),
           stream.$3
         );
       }
@@ -318,58 +320,29 @@ class FilesystemImpl implements Filesystem {
   @override
   Watcher watchDirectory({
     required final String path,
-  }) {
-    if (!Directory(path).existsSync()) {
-      final nullBehaviorSubject = StreamController<FileSystemEvent?>()
-        ..add(null);
-      return FSSubscription(
-        stream: nullBehaviorSubject.stream,
-        onCancel: nullBehaviorSubject.close,
+  }) =>
+      FSSubscription(
+        stream: _getSwitchStream(path),
+        onCancel: () async {
+          await _releaseSwitchStream(path);
+        },
       );
-    }
-    final controller = StreamController<FileSystemEvent?>()..add(null);
-    final stream = _getSwitchStream(path);
-    final subscription = stream.listen(controller.add);
-    return FSSubscription(
-      stream: controller.stream,
-      onCancel: () async {
-        await Future.wait([
-          subscription.cancel(),
-          controller.close(),
-          _releaseSwitchStream(path),
-        ]);
-      },
-    );
-  }
 
   @override
   Watcher watchFile({
     required final String path,
   }) {
     final dirPath = File(path).parent.path;
-    final controller = StreamController<FileSystemEvent?>()..add(null);
-    final stream = _getSwitchStream(dirPath);
-    final subscription = stream.listen((final event) {
-      if (event == null) {
-        controller.add(null);
-        return;
-      }
-      if (event is FileSystemMoveEvent) {
-        if (p.equals(event.destination ?? '', path)) {
-          controller.add(event);
-        }
-      } else if (p.equals(event.path, path)) {
-        controller.add(event);
-      }
-    });
     return FSSubscription(
-      stream: controller.stream,
+      stream: _getSwitchStream(dirPath).where(
+        (final event) =>
+            event == null ||
+            p.equals(event.path, path) ||
+            event is FileSystemMoveEvent &&
+                p.equals(event.destination ?? '', path),
+      ),
       onCancel: () async {
-        await Future.wait([
-          subscription.cancel(),
-          controller.close(),
-          _releaseSwitchStream(dirPath),
-        ]);
+        await _releaseSwitchStream(dirPath);
       },
     );
   }
@@ -397,7 +370,10 @@ class FilesystemImpl implements Filesystem {
         : Directory(path).watch();
     // see above
     // ignore: cancel_subscriptions
-    final subscription = streamForSubscription.listen(controller.add);
+    final subscription = streamForSubscription.listen(
+      controller.add,
+      onError: controller.addError,
+    );
     _watchStream[path] = (controller, subscription, 1);
     return controller.stream;
   }

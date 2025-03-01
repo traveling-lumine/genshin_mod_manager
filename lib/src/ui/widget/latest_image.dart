@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../filesystem/l1/di/file_event.dart';
+import '../../filesystem/l1/di/watcher.dart';
 import '../util/time_aware_image.dart';
 import 'auto_resize_image.dart';
 
@@ -21,8 +21,7 @@ class LatestImage extends HookConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final curMTime = useState(_getMTime());
-    ref.listen(fileEventDebouncedProvider(path: path),
-        (final previous, final next) {
+    ref.listen(fileWatchDebouncedProvider(path), (final previous, final next) {
       if (next.hasValue && File(path).existsSync()) {
         curMTime.value = _getMTime();
       }

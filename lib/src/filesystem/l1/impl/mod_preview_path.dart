@@ -1,23 +1,40 @@
-import '../../l0/api/filesystem.dart';
+import 'dart:async';
+
 import '../../l0/api/mod_preview_path.dart';
+import '../../l0/api/watcher.dart';
 import '../../l0/entity/mod.dart';
 import '../helper.dart';
 
 class ModPreviewPathImpl implements ModPreviewPath {
   factory ModPreviewPathImpl({
     required final Mod mod,
-    required final Filesystem fs,
+    required final Watcher watcher,
   }) {
-    final watcher = fs.watchDirectory(path: mod.path);
+    final streamController = StreamController<String?>();
+    StreamSubscription<String?>? streamSubscription;
+
+    unawaited(
+      findPreviewPath(mod.path).then<void>((final value) {
+        if (streamController.isClosed) {
+          return;
+        }
+        streamController.add(value);
+        streamSubscription = watcher.stream
+            .asyncMap((final event) => findPreviewPath(mod.path))
+            .listen(
+              streamController.add,
+              onError: streamController.addError,
+              onDone: streamController.close,
+            );
+      }).catchError(streamController.addError),
+    );
 
     return ModPreviewPathImpl._(
-      previewPath: watcher.stream.asyncMap(
-        (final event) async {
-          final previewName = await findPreviewPath(mod.path);
-          return previewName;
-        },
-      ),
-      onDispose: watcher.cancel,
+      previewPath: streamController.stream,
+      onDispose: () async {
+        await streamSubscription?.cancel();
+        await streamController.close();
+      },
     );
   }
 

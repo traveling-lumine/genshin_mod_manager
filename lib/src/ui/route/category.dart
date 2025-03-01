@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:fluent_ui/fluent_ui.dart'
     hide
         AutoSuggestBox,
@@ -29,6 +30,23 @@ import '../widget/third_party/flutter/sliver_grid_delegates/cross_axis_aware_del
 import '../widget/third_party/flutter/sliver_grid_delegates/fixed_count_delegate.dart';
 import '../widget/third_party/flutter/sliver_grid_delegates/max_extent_delegate.dart';
 import '../widget/third_party/flutter/sliver_grid_delegates/min_extent_delegate.dart';
+
+List<Mod> modSorter(
+  final List<Mod> value, {
+  required final bool enabledModsFirst,
+}) =>
+    [...value]..sort((final a, final b) {
+        if (enabledModsFirst) {
+          final aEnabled = a.isEnabled;
+          final bEnabled = b.isEnabled;
+          if (aEnabled && !bEnabled) {
+            return -1;
+          } else if (!aEnabled && bEnabled) {
+            return 1;
+          }
+        }
+        return compareNatural(a.displayName, b.displayName);
+      });
 
 class CategoryRoute extends StatefulHookConsumerWidget {
   const CategoryRoute({required this.category, super.key});
@@ -103,12 +121,19 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
       ThickScrollbar(
         child: Consumer(
           builder: (final context, final ref, final child) {
-            final data =
-                ref.watch(modsInCategorySortedProvider(widget.category));
+            final data = ref.watch(modsInCategoryProvider(widget.category));
+            final enabledFirst = ref.watch(
+              appConfigFacadeProvider.select(
+                (final value) => value.obtainValue(showEnabledModsFirst),
+              ),
+            );
             return AnimatedSwitcher(
               duration: const Duration(milliseconds: 100),
               child: data.when(
-                data: (final mods) => _buildGrid(mods, sliverGridDelegate),
+                data: (final mods) => _buildGrid(
+                  modSorter(mods, enabledModsFirst: enabledFirst),
+                  sliverGridDelegate,
+                ),
                 error: (final error, final stacktrace) =>
                     Center(child: Text('Error loading mods: $error')),
                 loading: () => const Center(child: ProgressRing()),
@@ -179,11 +204,16 @@ class _CategoryRouteState extends ConsumerState<CategoryRoute> {
         padding: const EdgeInsets.only(right: 8),
         child: Consumer(
           builder: (final context, final ref, final child) {
-            final data =
-                ref.watch(modsInCategorySortedProvider(widget.category));
+            final data = ref.watch(modsInCategoryProvider(widget.category));
+            final enabledFirst = ref.watch(
+              appConfigFacadeProvider.select(
+                (final value) => value.obtainValue(showEnabledModsFirst),
+              ),
+            );
             final dataList = data.maybeWhen(
               orElse: () => const <Mod>[],
-              data: (final data) => data,
+              data: (final data) =>
+                  modSorter(data, enabledModsFirst: enabledFirst),
             );
             final items = dataList.indexed
                 .map(

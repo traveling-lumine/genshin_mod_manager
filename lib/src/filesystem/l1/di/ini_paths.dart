@@ -6,13 +6,14 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../l0/entity/ini.dart';
 import '../../l0/entity/mod.dart';
 import '../impl/ini_paths.dart';
-import 'filesystem.dart';
+import 'watcher.dart';
 
 part 'ini_paths.g.dart';
 
 @riverpod
 Stream<List<IniFile>> iniPaths(final Ref ref, final Mod mod) {
-  final watcher = IniPathsImpl(mod: mod, fs: ref.watch(filesystemProvider));
+  final dWatch = ref.watch(directoryWatchProvider(mod.path));
+  final watcher = IniPathsImpl(mod: mod, watcher: dWatch);
   ref.onDispose(watcher.dispose);
   return watcher.iniPaths;
 }
