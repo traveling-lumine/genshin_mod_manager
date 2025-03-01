@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import '../../l0/api/nahida_repo.dart';
 import '../../l0/entity/nahida_element.dart';
+import '../../l0/entity/wrong_password.dart';
 import '../api/nahida_api.dart';
 import '../secrets.dart';
 
@@ -26,14 +27,25 @@ class NahidaRepoImpl implements NahidaRepository {
       turnstile: turnstile,
     );
     final url = data.downloadUrl;
+    if (url == null) {
+      throw const WrongPasswordException();
+    }
     final dio = Dio();
 
     final response = await dio.get<List<int>>(
-      url!,
+      url,
       options: Options(responseType: ResponseType.bytes),
     );
 
     return Uint8List.fromList(response.data!);
+  }
+
+  @override
+  Future<NahidaliveElement> getNahidaElement({
+    required final String uuid,
+  }) async {
+    final nahidaElement = await api.getNahidaElement(uuid: uuid);
+    return nahidaElement.result;
   }
 
   @override
@@ -47,13 +59,5 @@ class NahidaRepoImpl implements NahidaRepository {
       pageSize: pageSize,
     );
     return nahidaElementPage.data!.elements;
-  }
-
-  @override
-  Future<NahidaliveElement> getNahidaElement({
-    required final String uuid,
-  }) async {
-    final nahidaElement = await api.getNahidaElement(uuid: uuid);
-    return nahidaElement.result;
   }
 }

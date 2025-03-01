@@ -1,5 +1,3 @@
-import 'package:dio/dio.dart';
-
 import '../../../filesystem/l0/api/filesystem.dart';
 import '../../../filesystem/l0/entity/mod_category.dart';
 import '../api/nahida_repo.dart';
@@ -28,14 +26,11 @@ Future<void> downloadUrlUseCase({
         await repo.addDownload(element: element, turnstile: turnstile, pw: pw);
 
     await fs.importZipFile(category, element.title, responseData);
-  } on DioException catch (e) {
-    switch (e.error) {
-      case WrongPasswordException _:
-        downloadQueue.add(
-          NahidaDownloadState.wrongPassword(element: element, wrongPw: pw),
-        );
-        return;
-    }
+  } on WrongPasswordException {
+    downloadQueue.add(
+      NahidaDownloadState.wrongPassword(element: element, wrongPw: pw),
+    );
+    return;
   }
   downloadQueue.add(NahidaDownloadState.completed(element: element));
 }
