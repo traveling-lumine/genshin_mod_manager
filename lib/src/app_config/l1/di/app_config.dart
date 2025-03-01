@@ -5,12 +5,12 @@ import 'app_config_persistent_repo.dart';
 
 part 'app_config.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class AppConfigC extends _$AppConfigC {
   @override
   Stream<AppConfig> build() {
     final appConfig = ref.watch(appConfigPersistentRepoProvider);
-    return appConfig.stream.map(AppConfig.fromJson);
+    return appConfig.stream;
   }
 
   void setData(final AppConfig appConfig) {

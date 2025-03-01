@@ -2,7 +2,6 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
@@ -50,9 +49,12 @@ class _EditorText extends HookConsumerWidget {
           _onFocusChange(event, textEditingController),
       child: TextBox(
         controller: textEditingController,
-        onSubmitted: (final value) => ref
-            .read(iniLinesProvider(iniFile).notifier)
-            .editIniFile(lineNum, value),
+        onSubmitted: (final value) async {
+          await ref.read(iniRepoProvider(iniFile).notifier).edit(
+                lineNum: lineNum,
+                value: value,
+              );
+        },
       ),
     );
   }
@@ -78,10 +80,10 @@ class _EditorText extends HookConsumerWidget {
   }
 }
 
-class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
+class _IniWidgetState extends ConsumerState<IniWidget> {
   @override
   Widget build(final BuildContext context) {
-    final iniSections = ref.watch(iniLinesProvider(widget.iniFile));
+    final iniSections = ref.watch(iniRepoProvider(widget.iniFile));
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,7 +96,10 @@ class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
               )
               .map(
                 (final e) => switch (e) {
-                  IniStatementSection(:final name) => Text(name),
+                  IniStatementSection(:final name) => Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(name),
+                    ),
                   IniStatementVariable(:final numCycles) =>
                     Text('Cycles: $numCycles'),
                   IniStatementForward(
@@ -130,24 +135,6 @@ class _IniWidgetState extends ConsumerState<IniWidget> with WindowListener {
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<IniFile>('iniFile', widget.iniFile));
-  }
-
-  @override
-  void dispose() {
-    WindowManager.instance.removeListener(this);
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WindowManager.instance.addListener(this);
-  }
-
-  @override
-  void onWindowFocus() {
-    super.onWindowFocus();
-    ref.invalidate(iniLinesProvider(widget.iniFile));
   }
 
   Widget _buildBackwardIniFieldEditor(

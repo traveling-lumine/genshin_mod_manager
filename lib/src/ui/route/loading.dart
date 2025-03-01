@@ -16,7 +16,6 @@ import '../../app_config/l1/di/app_config.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_config/l1/di/app_config_persistent_repo.dart';
 import '../../app_config/l1/impl/app_config_facade.dart';
-import '../../app_config/l1/impl/app_config_persistent_repo.dart';
 import '../../error_handler/error_handler.dart';
 import '../../legacy_storage/shared_storage.dart';
 import '../../legacy_storage/sharedpreference_storage.dart';
@@ -197,10 +196,6 @@ class _LoadingRouteState extends ConsumerState<LoadingRoute> {
     );
     if (config != null) {
       ref.read(appConfigCProvider.notifier).setData(config);
-    } else {
-      if (!AppConfigPersistentRepoImpl.settingsFile.existsSync()) {
-        await AppConfigPersistentRepoImpl.settingsFile.writeAsString('{}');
-      }
     }
   }
 }
