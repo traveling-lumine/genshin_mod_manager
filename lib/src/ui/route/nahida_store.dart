@@ -21,72 +21,77 @@ import '../widget/store_element.dart';
 import '../widget/thick_scrollbar.dart';
 import '../widget/third_party/flutter/sliver_grid_delegates/min_extent_delegate.dart';
 
-class NahidaStoreRoute extends HookConsumerWidget {
-  NahidaStoreRoute({required this.category, super.key});
+class NahidaStoreRoute extends StatefulHookConsumerWidget {
+  const NahidaStoreRoute({required this.category, super.key});
   final ModCategory category;
-  final _debouncer = Debouncer(const Duration(milliseconds: 700));
-  final PagingController<int, NahidaliveElement?> _pagingController =
-      PagingController(firstPageKey: 1);
 
   @override
-  Widget build(final BuildContext context, final WidgetRef ref) {
-    final notifier = useState<TagParseElement?>(null);
-    useEffect(
-      () {
-        _pagingController.addPageRequestListener(
-          (final pageKey) async {
-            await _requestPage(ref, pageKey, notifier);
-          },
-        );
-
-        return _pagingController.dispose;
-      },
-      [_pagingController],
-    );
-    final category = useState(this.category);
-
-    return ScaffoldPage.withPadding(
-      header: PageHeader(
-        title: Row(
-          children: [
-            ComboBox(
-              value: category.value,
-              items: ref
-                  .watch(categoriesProvider)
-                  .requireValue
-                  .map(
-                    (final e) => ComboBoxItem(value: e, child: Text(e.name)),
-                  )
-                  .toList(),
-              onChanged: (final value) {
-                if (value == null) {
-                  return;
-                }
-                category.value = value;
-              },
-            ),
-            const Text(' ← Akasha'),
-          ],
-        ),
-        leading: _buildLeading(),
-        commandBar: _buildCommandBar(notifier),
-      ),
-      content: _buildContent(category.value),
-    );
-  }
+  ConsumerState<NahidaStoreRoute> createState() => _NahidaStoreRouteState();
 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ModCategory>('category', category));
   }
+}
 
-  Widget _buildCommandBar(final ValueNotifier<TagParseElement?> notifier) =>
-      RepaintBoundary(
+class _NahidaStoreRouteState extends ConsumerState<NahidaStoreRoute> {
+  final _debouncer = Debouncer(const Duration(milliseconds: 700));
+  TagParseElement? _tagFilter;
+  late ModCategory _category = widget.category;
+  late final PagingController<int, NahidaliveElement?> _pagingController =
+      PagingController(firstPageKey: 1)..addPageRequestListener(_requestPage);
+
+  @override
+  Widget build(final BuildContext context) => ScaffoldPage.withPadding(
+        header: PageHeader(
+          title: Row(
+            children: [
+              ComboBox(
+                value: _category,
+                items: ref
+                    .watch(categoriesProvider)
+                    .requireValue
+                    .map(
+                      (final e) => ComboBoxItem(value: e, child: Text(e.name)),
+                    )
+                    .toList(),
+                onChanged: (final value) {
+                  if (value == null) {
+                    return;
+                  }
+                  setState(() {
+                    _category = value;
+                  });
+                },
+              ),
+              const Text(' ← Akasha'),
+            ],
+          ),
+          leading: _buildLeading(),
+          commandBar: _buildCommandBar(),
+        ),
+        content: _buildContent(),
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+        .add(DiagnosticsProperty<ModCategory>('category', widget.category));
+  }
+
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildCommandBar() => RepaintBoundary(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Flexible(child: _buildSearchBox(notifier)),
+            Flexible(child: _buildSearchBox()),
             const SizedBox(width: 16),
             _buildCommandBarCard(),
           ],
@@ -106,7 +111,7 @@ class NahidaStoreRoute extends HookConsumerWidget {
         ),
       );
 
-  Widget _buildContent(final ModCategory category) => ThickScrollbar(
+  Widget _buildContent() => ThickScrollbar(
         child: DynMouseScroll(
           builder: (
             final context,
@@ -134,7 +139,7 @@ class NahidaStoreRoute extends HookConsumerWidget {
                   );
                 }
                 return RevertScrollbar(
-                  child: StoreElement(element: item, category: category),
+                  child: StoreElement(element: item, category: _category),
                 );
               },
             ),
@@ -157,26 +162,24 @@ class NahidaStoreRoute extends HookConsumerWidget {
         : null;
   }
 
-  Widget _buildSearchBox(final ValueNotifier<TagParseElement?> notifier) {
+  Widget _buildSearchBox() {
     final context = useContext();
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 300),
       child: TextFormBox(
         autovalidateMode: AutovalidateMode.always,
         placeholder: AppLocalizations.of(context)!.searchTags,
-        onChanged: (final value) {
-          _onSearchChange(notifier, value);
-        },
+        onChanged: _onSearchChange,
         validator: _onValidationCheck,
       ),
     );
   }
 
   bool _dataFilter(
-    final TagParseElement? tagFilter,
     final NahidaliveElement element,
   ) {
     final tagMap = {for (final e in element.tags) e};
+    final tagFilter = _tagFilter;
     if (tagFilter == null) {
       return true;
     }
@@ -193,7 +196,6 @@ class NahidaStoreRoute extends HookConsumerWidget {
   }
 
   void _onSearchChange(
-    final ValueNotifier<TagParseElement?> notifier,
     final String value,
   ) {
     TagParseElement? filter;
@@ -203,7 +205,9 @@ class NahidaStoreRoute extends HookConsumerWidget {
       filter = null;
     }
     _debouncer(() {
-      notifier.value = filter;
+      setState(() {
+        _tagFilter = filter;
+      });
       _pagingController.refresh();
     });
   }
@@ -221,9 +225,7 @@ class NahidaStoreRoute extends HookConsumerWidget {
   }
 
   Future<void> _requestPage(
-    final WidgetRef ref,
     final int pageKey,
-    final ValueNotifier<TagParseElement?> notifier,
   ) async {
     final List<NahidaliveElement> newItems;
     try {
@@ -240,9 +242,7 @@ class NahidaStoreRoute extends HookConsumerWidget {
       return;
     }
 
-    final filteredItems = newItems
-        .where((final element) => _dataFilter(notifier.value, element))
-        .toList();
+    final filteredItems = newItems.where(_dataFilter).toList();
 
     final nextPageKey = pageKey + 1;
     if (pageKey == 1 && filteredItems.isEmpty) {
