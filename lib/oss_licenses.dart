@@ -365,13 +365,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('_fe_analyzer_shared'), PackageRef('collection'), PackageRef('convert'), PackageRef('crypto'), PackageRef('glob'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span'), PackageRef('watcher'), PackageRef('yaml')]
   );
 
-/// analyzer_plugin 0.12.0
+/// analyzer_plugin 0.13.0
 const _analyzer_plugin = Package(
     name: 'analyzer_plugin',
     description: 'A framework and support code for building plugins for the analysis server.',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/analyzer_plugin',
     authors: [],
-    version: '0.12.0',
+    version: '0.13.0',
     license: '''Copyright 2017, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -401,16 +401,16 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('collection'), PackageRef('dart_style'), PackageRef('meta'), PackageRef('pub_semver'), PackageRef('yaml'), PackageRef('path')]
+    dependencies: [PackageRef('analyzer'), PackageRef('collection'), PackageRef('dart_style'), PackageRef('pub_semver'), PackageRef('yaml'), PackageRef('path')]
   );
 
-/// archive 4.0.3
+/// archive 4.0.4
 const _archive = Package(
     name: 'archive',
     description: 'Provides encoders and decoders for various archive and compression formats such as zip, tar, bzip2, gzip, and zlib.',
     repository: 'https://github.com/brendan-duncan/archive',
     authors: [],
-    version: '4.0.3',
+    version: '4.0.4',
     license: '''The MIT License
 
 Copyright (c) 2013-2021 Brendan Duncan.
@@ -830,14 +830,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// built_value 8.9.3
+/// built_value 8.9.5
 const _built_value = Package(
     name: 'built_value',
     description: '''Value types with builders, Dart classes as enums, and serialization. This library is the runtime dependency.
 ''',
     repository: 'https://github.com/google/built_value.dart/tree/master/built_value',
     authors: [],
-    version: '8.9.3',
+    version: '8.9.5',
     license: '''Copyright 2015, Google Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -1746,13 +1746,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('typed_data')]
   );
 
-/// custom_lint 0.7.3
+/// custom_lint 0.7.5
 const _custom_lint = Package(
     name: 'custom_lint',
     description: 'Lint rules are a powerful way to improve the maintainability of a project. Custom Lint allows package authors and developers to easily write custom lint rules.',
     repository: 'https://github.com/invertase/dart_custom_lint',
     authors: [],
-    version: '0.7.3',
+    version: '0.7.5',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -1959,13 +1959,13 @@ const _custom_lint = Package(
     dependencies: [PackageRef('analyzer'), PackageRef('analyzer_plugin'), PackageRef('args'), PackageRef('async'), PackageRef('ci'), PackageRef('cli_util'), PackageRef('collection'), PackageRef('custom_lint_core'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('rxdart'), PackageRef('uuid'), PackageRef('yaml')]
   );
 
-/// custom_lint_builder 0.7.3
+/// custom_lint_builder 0.7.5
 const _custom_lint_builder = Package(
     name: 'custom_lint_builder',
     description: 'A package to help writing custom linters',
     repository: 'https://github.com/invertase/dart_custom_lint',
     authors: [],
-    version: '0.7.3',
+    version: '0.7.5',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -2172,13 +2172,13 @@ const _custom_lint_builder = Package(
     dependencies: [PackageRef('analyzer'), PackageRef('analyzer_plugin'), PackageRef('collection'), PackageRef('custom_lint'), PackageRef('custom_lint_core'), PackageRef('custom_lint_visitor'), PackageRef('glob'), PackageRef('hotreloader'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pubspec_parse'), PackageRef('rxdart')]
   );
 
-/// custom_lint_core 0.7.1
+/// custom_lint_core 0.7.5
 const _custom_lint_core = Package(
     name: 'custom_lint_core',
     description: 'A package to help writing custom linters',
     repository: 'https://github.com/invertase/dart_custom_lint',
     authors: [],
-    version: '0.7.1',
+    version: '0.7.5',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -2948,14 +2948,14 @@ SOFTWARE.''',
     dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('http_parser'), PackageRef('meta'), PackageRef('path'), PackageRef('dio_web_adapter')]
   );
 
-/// dio_web_adapter 2.1.0
+/// dio_web_adapter 2.1.1
 const _dio_web_adapter = Package(
     name: 'dio_web_adapter',
     description: 'An adapter that supports Dio on Web.',
     homepage: 'https://github.com/cfug/dio',
     repository: 'https://github.com/cfug/dio/blob/main/plugins/web_adapter',
     authors: [],
-    version: '2.1.0',
+    version: '2.1.1',
     license: '''MIT License
 
 Copyright (c) 2018 Wen Du (wendux)
@@ -3430,14 +3430,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: []
   );
 
-/// fluent_ui 4.11.1
+/// fluent_ui 4.11.2
 const _fluent_ui = Package(
     name: 'fluent_ui',
     description: 'Implements Windows UI in Flutter.',
     homepage: 'https://bdlukaa.github.io/fluent_ui/#/',
     repository: 'https://github.com/bdlukaa/fluent_ui',
     authors: [],
-    version: '4.11.1',
+    version: '4.11.2',
     license: '''Copyright 2020 Bruno D'Luka
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -3524,14 +3524,14 @@ SOFTWARE.''',
     dependencies: [PackageRef('clock'), PackageRef('collection'), PackageRef('file'), PackageRef('flutter'), PackageRef('http'), PackageRef('path'), PackageRef('path_provider'), PackageRef('rxdart'), PackageRef('sqflite'), PackageRef('uuid')]
   );
 
-/// flutter_hooks 0.20.5
+/// flutter_hooks 0.21.2
 const _flutter_hooks = Package(
     name: 'flutter_hooks',
     description: 'A flutter implementation of React hooks. It adds a new kind of widget with enhanced code reuse.',
     homepage: 'https://github.com/rrousselGit/flutter_hooks',
     repository: 'https://github.com/rrousselGit/flutter_hooks/tree/master/packages/flutter_hooks',
     authors: [],
-    version: '0.20.5',
+    version: '0.21.2',
     license: '''MIT License
 
 Copyright (c) 2018 Remi Rousselet
@@ -3730,14 +3730,14 @@ SOFTWARE.''',
     dependencies: [PackageRef('flutter')]
   );
 
-/// freezed 2.5.8
+/// freezed 3.0.3
 const _freezed = Package(
     name: 'freezed',
     description: '''Code generation for immutable classes that has a simple syntax/API without compromising on the features.
 ''',
     repository: 'https://github.com/rrousselGit/freezed',
     authors: [],
-    version: '2.5.8',
+    version: '3.0.3',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -3761,17 +3761,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('build'), PackageRef('build_config'), PackageRef('collection'), PackageRef('meta'), PackageRef('source_gen'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('dart_style')]
+    dependencies: [PackageRef('analyzer'), PackageRef('build'), PackageRef('build_config'), PackageRef('collection'), PackageRef('meta'), PackageRef('source_gen'), PackageRef('freezed_annotation'), PackageRef('json_annotation')]
   );
 
-/// freezed_annotation 2.4.4
+/// freezed_annotation 3.0.0
 const _freezed_annotation = Package(
     name: 'freezed_annotation',
     description: '''Annotations for the freezed code-generator. This package does nothing without freezed too.
 ''',
     repository: 'https://github.com/rrousselGit/freezed',
     authors: [],
-    version: '2.4.4',
+    version: '3.0.0',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -3876,13 +3876,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('file'), PackageRef('path'), PackageRef('string_scanner')]
   );
 
-/// go_router 14.8.0
+/// go_router 14.8.1
 const _go_router = Package(
     name: 'go_router',
     description: 'A declarative router for Flutter based on Navigation 2 supporting deep linking, data-driven routes and more',
     repository: 'https://github.com/flutter/packages/tree/main/packages/go_router',
     authors: [],
-    version: '14.8.0',
+    version: '14.8.1',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -5243,14 +5243,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('path')]
   );
 
-/// package_info_plus 8.2.1
+/// package_info_plus 8.3.0
 const _package_info_plus = Package(
     name: 'package_info_plus',
     description: 'Flutter plugin for querying information about the application package, such as CFBundleVersion on iOS or versionCode on Android.',
     homepage: 'https://github.com/fluttercommunity/plus_plugins',
     repository: 'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/package_info_plus/package_info_plus',
     authors: [],
-    version: '8.2.1',
+    version: '8.3.0',
     license: '''Copyright 2017 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -5283,14 +5283,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('http'), PackageRef('meta'), PackageRef('path'), PackageRef('package_info_plus_platform_interface'), PackageRef('web'), PackageRef('win32'), PackageRef('clock')]
   );
 
-/// package_info_plus_platform_interface 3.1.0
+/// package_info_plus_platform_interface 3.2.0
 const _package_info_plus_platform_interface = Package(
     name: 'package_info_plus_platform_interface',
     description: 'A common platform interface for the package_info_plus plugin.',
     homepage: 'https://github.com/fluttercommunity/plus_plugins',
     repository: 'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/',
     authors: [],
-    version: '3.1.0',
+    version: '3.2.0',
     license: '''Copyright 2017 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -5612,13 +5612,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter'), PackageRef('path_provider_android'), PackageRef('path_provider_foundation'), PackageRef('path_provider_linux'), PackageRef('path_provider_platform_interface'), PackageRef('path_provider_windows')]
   );
 
-/// path_provider_android 2.2.15
+/// path_provider_android 2.2.16
 const _path_provider_android = Package(
     name: 'path_provider_android',
     description: 'Android implementation of the path_provider plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_android',
     authors: [],
-    version: '2.2.15',
+    version: '2.2.16',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -6249,13 +6249,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('nested')]
   );
 
-/// pub_semver 2.1.5
+/// pub_semver 2.2.0
 const _pub_semver = Package(
     name: 'pub_semver',
     description: "Versions and version constraints implementing pub's versioning policy. This is very similar to vanilla semver, with a few corner cases.",
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/pub_semver',
     authors: [],
-    version: '2.1.5',
+    version: '2.2.0',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -6285,7 +6285,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('meta')]
+    dependencies: [PackageRef('collection')]
   );
 
 /// pubspec_parse 1.5.0
@@ -6451,13 +6451,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('collection'), PackageRef('meta'), PackageRef('stack_trace'), PackageRef('state_notifier')]
   );
 
-/// riverpod_analyzer_utils 0.5.9
+/// riverpod_analyzer_utils 0.5.10
 const _riverpod_analyzer_utils = Package(
     name: 'riverpod_analyzer_utils',
     description: 'A project for analyzing Riverpod code. This is internally used by riverpod_lint and riverpod_generator',
     repository: 'https://github.com/rrousselGit/river_pod',
     authors: [],
-    version: '0.5.9',
+    version: '0.5.10',
     license: '''MIT License
 
 Copyright (c) 2023 Remi Rousselet
@@ -6517,13 +6517,13 @@ SOFTWARE.''',
     dependencies: [PackageRef('meta'), PackageRef('riverpod')]
   );
 
-/// riverpod_generator 2.6.4
+/// riverpod_generator 2.6.5
 const _riverpod_generator = Package(
     name: 'riverpod_generator',
     description: 'A code generator for Riverpod. This both simplifies the syntax empowers it, such as allowing stateful hot-reload.',
     repository: 'https://github.com/rrousselGit/riverpod',
     authors: [],
-    version: '2.6.4',
+    version: '2.6.5',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -6550,14 +6550,14 @@ SOFTWARE.''',
     dependencies: [PackageRef('analyzer'), PackageRef('build'), PackageRef('build_config'), PackageRef('collection'), PackageRef('crypto'), PackageRef('meta'), PackageRef('path'), PackageRef('riverpod_analyzer_utils'), PackageRef('riverpod_annotation'), PackageRef('source_gen')]
   );
 
-/// riverpod_lint 2.6.4
+/// riverpod_lint 2.6.5
 const _riverpod_lint = Package(
     name: 'riverpod_lint',
     description: 'Riverpod_lint is a developer tool for users of Riverpod, designed to help stop common issues and simplify repetitive tasks.',
     homepage: 'https://riverpod.dev',
     repository: 'https://github.com/rrousselGit/river_pod',
     authors: [],
-    version: '2.6.4',
+    version: '2.6.5',
     license: '''MIT License
 
 Copyright (c) 2023 Remi Rousselet
@@ -7033,13 +7033,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter'), PackageRef('shared_preferences_android'), PackageRef('shared_preferences_foundation'), PackageRef('shared_preferences_linux'), PackageRef('shared_preferences_platform_interface'), PackageRef('shared_preferences_web'), PackageRef('shared_preferences_windows')]
   );
 
-/// shared_preferences_android 2.4.6
+/// shared_preferences_android 2.4.8
 const _shared_preferences_android = Package(
     name: 'shared_preferences_android',
     description: 'Android implementation of the shared_preferences plugin',
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_android',
     authors: [],
-    version: '2.4.6',
+    version: '2.4.8',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -8326,13 +8326,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('flutter'), PackageRef('url_launcher_android'), PackageRef('url_launcher_ios'), PackageRef('url_launcher_linux'), PackageRef('url_launcher_macos'), PackageRef('url_launcher_platform_interface'), PackageRef('url_launcher_web'), PackageRef('url_launcher_windows')]
   );
 
-/// url_launcher_android 6.3.14
+/// url_launcher_android 6.3.15
 const _url_launcher_android = Package(
     name: 'url_launcher_android',
     description: 'Android implementation of the url_launcher plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_android',
     authors: [],
-    version: '6.3.14',
+    version: '6.3.15',
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -8947,13 +8947,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     dependencies: [PackageRef('async'), PackageRef('path')]
   );
 
-/// web 1.1.0
+/// web 1.1.1
 const _web = Package(
     name: 'web',
     description: 'Lightweight browser API bindings built around JS interop.',
     repository: 'https://github.com/dart-lang/web',
     authors: [],
-    version: '1.1.0',
+    version: '1.1.1',
     license: '''Copyright 2023, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without

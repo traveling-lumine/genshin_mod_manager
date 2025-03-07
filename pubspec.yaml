@@ -54,7 +54,7 @@ dev_dependencies:
   flutter_oss_licenses: ^3.0.4
   flutter_test:
     sdk: flutter
-  freezed: ^3.0.2
+  freezed: ^3.0.3
   json_serializable: ^6.9.4
   plugin_platform_interface: ^2.1.8
   retrofit_generator: ^9.1.9

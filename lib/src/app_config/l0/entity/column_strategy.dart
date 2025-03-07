@@ -23,7 +23,8 @@ enum ColumnStrategyEnumType {
 }
 
 @freezed
-sealed class ColumnStrategySettingMediator with _$ColumnStrategySettingMediator {
+sealed class ColumnStrategySettingMediator
+    with _$ColumnStrategySettingMediator {
   // annotation is valid.
   // ignore: invalid_annotation_target
   @JsonSerializable(explicitToJson: true)
@@ -52,6 +53,7 @@ sealed class ColumnStrategySettingMediator with _$ColumnStrategySettingMediator 
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ColumnStrategyEnum>('strategy', strategy));
+    properties
+        .add(DiagnosticsProperty<ColumnStrategyEnum>('strategy', strategy));
   }
 }

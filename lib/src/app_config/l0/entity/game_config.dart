@@ -43,6 +43,7 @@ sealed class GameConfigMediator with _$GameConfigMediator {
   @override
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<GameConfig>('currentGameConfig', currentGameConfig));
+    properties.add(DiagnosticsProperty<GameConfig>(
+        'currentGameConfig', currentGameConfig));
   }
 }

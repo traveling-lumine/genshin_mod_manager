@@ -20,7 +20,7 @@ void main() {
         storage.setBool('key', value: true);
       });
       test('setBool and getBool', () {
-        storage.setBool('key',  value: true);
+        storage.setBool('key', value: true);
         expect(storage.getBool('key'), isTrue);
       });
     },
