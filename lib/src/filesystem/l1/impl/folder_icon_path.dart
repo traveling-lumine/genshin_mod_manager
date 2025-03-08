@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
 import 'package:rxdart/rxdart.dart';
 
+import '../../../app_config/l0/api/basic_path.dart';
 import '../../l0/api/filesystem.dart';
 import '../../l0/api/folder_icon_path.dart';
 import '../../l0/api/watcher.dart';
@@ -15,12 +15,9 @@ class FolderIconPathImpl implements FolderIconPath {
     required final String currentGame,
     required final Filesystem fs,
     required final ModCategory category,
+    required final BasicPathProvider basicPathProvider,
   }) {
-    final iconPath = p.join(
-      File(Platform.resolvedExecutable).parent.path,
-      'Resources',
-      currentGame,
-    );
+    final iconPath = basicPathProvider.getIconRoot(currentGame).path;
 
     final streamController = StreamController<String?>();
     StreamSubscription<String?>? subscription;

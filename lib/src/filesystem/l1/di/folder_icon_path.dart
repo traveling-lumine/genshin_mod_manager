@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../app_config/l0/entity/entries.dart';
 import '../../../app_config/l1/di/app_config_facade.dart';
+import '../../../app_config/l1/di/basic_path.dart';
 import '../../l0/entity/mod_category.dart';
 import '../impl/folder_icon_path.dart';
 import 'filesystem.dart';
@@ -15,6 +16,7 @@ Stream<String?> folderIconPathStream(
   final ModCategory category,
 ) {
   final repo = FolderIconPathImpl(
+    basicPathProvider: ref.watch(basicPathProvider),
     currentGame: ref.watch(
       appConfigFacadeProvider
           .select((final value) => value.obtainValue(games).current!),

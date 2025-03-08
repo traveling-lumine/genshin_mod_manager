@@ -9,6 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:rxdart/transformers.dart';
 import 'package:win32/win32.dart';
 
+import '../../../app_config/l0/api/basic_path.dart';
 import '../../../app_config/l0/entity/game_config.dart';
 import '../../l0/api/filesystem.dart';
 import '../../l0/api/watcher.dart';
@@ -154,6 +155,11 @@ String _sanitizeString(final String name) {
 }
 
 class FilesystemImpl implements Filesystem {
+  FilesystemImpl({
+    required this.basicPathProvider,
+  });
+  final BasicPathProvider basicPathProvider;
+
   var _isPaused = false;
   final Map<
       String,
@@ -205,7 +211,7 @@ class FilesystemImpl implements Filesystem {
     final modRoot = appState.modRoot;
     final migotoRoot = appState.modExecFile;
     final launcherRoot = appState.launcherFile;
-    final execRoot = File(Platform.resolvedExecutable).parent.path;
+    final execRoot = basicPathProvider.workDir.path;
     final reason = <String>[];
     if (modRoot != null && p.isWithin(execRoot, modRoot)) {
       reason.add('mods');

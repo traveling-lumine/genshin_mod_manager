@@ -5,6 +5,7 @@ import '../../app_config/l0/usecase/add_game_config.dart';
 import '../../app_config/l1/di/app_config.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_config/l1/di/app_config_persistent_repo.dart';
+import '../../app_config/l1/di/basic_path.dart';
 import '../widget/appbar.dart';
 
 class FirstRoute extends ConsumerWidget {
@@ -39,6 +40,7 @@ class FirstRoute extends ConsumerWidget {
 
   void _onGameAdd(final WidgetRef ref, final String value) {
     final newConfig = addGameConfig(
+      basicPathProvider: ref.read(basicPathProvider),
       appConfigFacade: ref.read(appConfigFacadeProvider),
       appConfigPersistentRepo: ref.read(appConfigPersistentRepoProvider),
       gameName: value,

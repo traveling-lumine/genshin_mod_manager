@@ -15,6 +15,7 @@ import '../../app_config/l0/entity/entries.dart';
 import '../../app_config/l1/di/app_config.dart';
 import '../../app_config/l1/di/app_config_facade.dart';
 import '../../app_config/l1/di/app_config_persistent_repo.dart';
+import '../../app_config/l1/di/basic_path.dart';
 import '../../app_config/l1/impl/app_config_facade.dart';
 import '../../error_handler/error_handler.dart';
 import '../../legacy_storage/shared_storage.dart';
@@ -106,13 +107,8 @@ class _LoadingRouteState extends ConsumerState<LoadingRoute> {
     if (!modRootDir.existsSync()) {
       return;
     }
-    final iconDirGame = Directory(
-      p.join(
-        File(Platform.resolvedExecutable).parent.path,
-        'Resources',
-        name,
-      ),
-    );
+    final basicPaths = ref.read(basicPathProvider);
+    final iconDirGame = basicPaths.getIconRoot(name);
     if (!iconDirGame.existsSync()) {
       return;
     }
@@ -145,28 +141,18 @@ class _LoadingRouteState extends ConsumerState<LoadingRoute> {
   }
 
   Future<void> _createIconFolders(final AppConfigFacade facade) async {
-    await Directory(
-      p.join(File(Platform.resolvedExecutable).parent.path, 'Resources'),
-    ).create(recursive: true);
+    final basicPaths = ref.read(basicPathProvider);
+    await basicPaths.resourceDir.create(recursive: true);
     final gameList = facade.obtainValue(games).gameConfig;
     final gameDirCreateFuture = Future.wait(
       gameList.keys
           .toList()
-          .map(
-            (final e) => Directory(
-              p.join(
-                File(Platform.resolvedExecutable).parent.path,
-                'Resources',
-                e,
-              ),
-            ),
-          )
+          .map(basicPaths.getIconRoot)
           .whereNot((final e) => e.existsSync())
           .map((final e) => e.create(recursive: true)),
     );
-    final listFiles = await Directory(
-      p.join(File(Platform.resolvedExecutable).parent.path, 'Resources'),
-    ).list().whereType<File>().toList();
+    final listFiles =
+        await basicPaths.resourceDir.list().whereType<File>().toList();
     try {
       await gameDirCreateFuture;
     } on FileSystemException {

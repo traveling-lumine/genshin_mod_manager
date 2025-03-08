@@ -3,9 +3,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../l0/api/app_config_persistent_repo.dart';
 import '../impl/app_config_persistent_repo.dart';
+import 'basic_path.dart';
 
 part 'app_config_persistent_repo.g.dart';
 
 @riverpod
 AppConfigPersistentRepo appConfigPersistentRepo(final Ref ref) =>
-    AppConfigPersistentRepoImpl();
+    AppConfigPersistentRepoImpl(basicPath: ref.watch(basicPathProvider));

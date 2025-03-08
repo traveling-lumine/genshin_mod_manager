@@ -44,6 +44,6 @@ sealed class GameConfigMediator with _$GameConfigMediator {
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<GameConfig>(
-        'currentGameConfig', currentGameConfig));
+        'currentGameConfig', currentGameConfig,),);
   }
 }

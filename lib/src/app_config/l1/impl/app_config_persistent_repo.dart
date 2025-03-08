@@ -6,13 +6,17 @@ import 'package:path/path.dart' as p;
 import 'package:rxdart/rxdart.dart';
 
 import '../../l0/api/app_config_persistent_repo.dart';
+import '../../l0/api/basic_path.dart';
 import '../../l0/entity/app_config.dart';
 
 class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
-  factory AppConfigPersistentRepoImpl() {
+  factory AppConfigPersistentRepoImpl({
+    required final BasicPathProvider basicPath,
+  }) {
     final controller = StreamController<AppConfig>();
     StreamSubscription<AppConfig>? subscription;
 
+    final settingsFile = basicPath.settingFile;
     final didFileExist = settingsFile.existsSync();
 
     unawaited(
@@ -21,7 +25,7 @@ class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
           if (!didFileExist) {
             await settingsFile.writeAsString('{}');
           }
-          final value = await _getValue();
+          final value = await _getValue(settingsFile);
           if (controller.isClosed) {
             return;
           }
@@ -41,7 +45,7 @@ class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
                 }
                 return false;
               })
-              .asyncMap((final _) => _getValue())
+              .asyncMap((final _) => _getValue(settingsFile))
               .distinct()
               .listen(
                 controller.add,
@@ -58,22 +62,19 @@ class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
         await controller.close();
       },
       stream: controller.stream,
+      basicPath: basicPath,
     );
   }
 
   AppConfigPersistentRepoImpl._({
     required this.stream,
     required this.onDispose,
+    required this.basicPath,
   });
 
-  static final Directory executableDir =
-      File(Platform.resolvedExecutable).parent;
-
-  static final settingsFile = File(
-    p.join(File(Platform.resolvedExecutable).parent.path, 'settings.json'),
-  );
-
   static const _encoder = JsonEncoder.withIndent('  ');
+
+  final BasicPathProvider basicPath;
   @override
   final Stream<AppConfig> stream;
 
@@ -86,10 +87,11 @@ class AppConfigPersistentRepoImpl implements AppConfigPersistentRepo {
 
   @override
   Future<void> save(final AppConfig value) async {
-    await settingsFile.writeAsString(_encoder.convert(value));
+    await basicPath.settingFile.writeAsString(_encoder.convert(value));
   }
 
-  static Future<AppConfig> _getValue() async => AppConfig.fromJson(
-        jsonDecode(await settingsFile.readAsString()) as Map<String, dynamic>,
+  static Future<AppConfig> _getValue(final File settingFile) async =>
+      AppConfig.fromJson(
+        jsonDecode(await settingFile.readAsString()) as Map<String, dynamic>,
       );
 }
